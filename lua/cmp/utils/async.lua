@@ -1,24 +1,19 @@
 local async = {}
 
 ---Return sync callback
+---@param runner fun()
 ---@param timeout number
----@param callback fun()
-async.sync = function(timeout, callback)
-  local sync = false
-  return setmetatable({
-    wait = function()
-      vim.wait(timeout, function()
-        return sync
-      end)
-    end
-  }, {
-    __call = function(_, ...)
-      if callback then
-        callback(...)
-      end
-      sync = true
-    end
-  })
+async.sync = function(runner, timeout)
+  local fin = false
+  local res
+  runner(function(...)
+    fin = true
+    res = { ... }
+  end)
+  vim.wait(timeout, function()
+    return fin
+  end)
+  return unpack(res)
 end
 
 return async

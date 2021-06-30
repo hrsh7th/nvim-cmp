@@ -179,12 +179,10 @@ end
 ---@param offset number
 ---@param callback fun()|nil
 entry.confirm = function(self, offset, callback)
-  local sync
-
   -- resolve
-  sync = async.sync(1000)
-  self:resolve(sync)
-  sync.wait()
+  async.sync(function(done)
+    self:resolve(done)
+  end, 1000)
 
   -- confirm
   vim.fn['cmp#confirm']({
@@ -194,9 +192,9 @@ entry.confirm = function(self, offset, callback)
   })
 
   -- execute
-  sync = async.sync(1000)
-  self:execute(sync)
-  sync.wait()
+  async.sync(function(done)
+    self:execute(done)
+  end, 1000)
 
   self.confirmed = true
 
