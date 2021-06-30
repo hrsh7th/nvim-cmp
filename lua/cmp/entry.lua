@@ -4,6 +4,7 @@ local char = require'cmp.utils.char'
 local misc = require'cmp.utils.misc'
 local str = require "cmp.utils.str"
 local config = require'cmp.config'
+local lsp = require "cmp.types.lsp"
 
 ---@class cmp.Entry
 ---@field public id number
@@ -16,6 +17,8 @@ local config = require'cmp.config'
 ---@field public resolved_callbacks fun()[]
 ---@field public resolving boolean
 ---@field public confirmed boolean
+---@field public insert_range vim.Range
+---@field public replace_range vim.Range
 local entry = {}
 
 ---Create new entry
@@ -35,6 +38,25 @@ entry.new = function(ctx, source, completion_item)
   self.resolved_callbacks = {}
   self.resolving = false
   self.confirmed = false
+
+  if misc.safe(self.completion_item.textEdit) then
+    if self.completion_item.textEdit.insert then
+      self.insert_range = lsp.Position.to_vim(ctx.bufnr, self.completion_item.textEdit.insert)
+    else
+      self.insert_range = lsp.Position.to_vim(ctx.bufnr, self.completion_item.textEdit.range)
+    end
+  end
+  self.insert_range = self.insert_range or ctx.insert_range
+
+  if misc.safe(self.completion_item.textEdit) then
+    if self.completion_item.textEdit.replace then
+      self.replace_range = lsp.Position.to_vim(ctx.bufnr, self.completion_item.textEdit.replace)
+    else
+      self.replace_range = lsp.Position.to_vim(ctx.bufnr, self.completion_item.textEdit.range)
+    end
+  end
+  self.replace_range = self.replace_range or ctx.replace_range
+
   return self
 end
 
@@ -165,9 +187,6 @@ entry.get_commit_characters = function(self)
   local completion_item = self:get_completion_item()
   if completion_item.commitCharacters then
     misc.merge(commit_characters, commit_characters)
-  end
-  if self.source:get_all_commit_characters() then
-    misc.merge(commit_characters, self.source:get_all_commit_characters())
   end
   misc.merge(commit_characters, config.get().commit_characters)
   return commit_characters

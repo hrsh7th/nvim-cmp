@@ -97,29 +97,42 @@ context.is_keyword_beginning = function(self)
   local prev = self.prev_context
   local curr = self
 
-  return self:is_new_context() and prev.input == '' and #curr.input == 1
+  return self:changed() and prev.input == '' and #curr.input == 1
 end
 
-context.is_not_changed = function(self)
+---Return if this context is continueing previous context.
+context.maybe_continue = function(self)
   local prev = self.prev_context
   local curr = self
-  return not self:is_new_context() and curr.cursor.col == prev.cursor.col
+
+  if curr.bufnr ~= prev.bufnr then
+    return false
+  end
+  if curr.cursor.row ~= prev.cursor.row then
+    return false
+  end
+  return true
 end
 
 ---Return if this context is changed from previous context or not.
 ---@return boolean
-context.is_new_context = function(self)
+context.changed = function(self)
   local prev = self.prev_context
   local curr = self
 
-  if vim.v.completed_item and vim.v.completed_item.word then
-    return false
+  if self.pumvisible then
+    if vim.v.completed_item and vim.v.completed_item.word then
+      return false
+    end
   end
 
   if curr.bufnr ~= prev.bufnr then
     return true
   end
   if curr.cursor.row ~= prev.cursor.row then
+    return true
+  end
+  if curr.cursor.col ~= prev.cursor.col then
     return true
   end
 

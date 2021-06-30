@@ -18,6 +18,12 @@ return function()
       source_ids[client.id] = cmp.register_source('example', source.new(client))
     end
   end
+  for _, client in ipairs(vim.lsp.buf_get_clients(0)) do
+    active_client_ids[client.id] = true
+    if not source_ids[client.id] then
+      source_ids[client.id] = cmp.register_source('example', source.new(client))
+    end
+  end
   for client_id, source_id in pairs(source_ids) do
     if not active_client_ids[client_id] then
       cmp.unregister_source(source_id)

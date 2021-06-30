@@ -43,9 +43,8 @@ keymap.listen = setmetatable({
   cache = cache.new()
 }, {
   __call = function(_, char, callback)
-    local key = keymap.to_key(char)
     local bufnr = vim.api.nvim_get_current_buf()
-
+    local key = keymap.to_key(char)
     if keymap.listen.cache:get({ bufnr, key }) then
       return
     end
@@ -64,6 +63,13 @@ keymap.listen = setmetatable({
         break
       end
     end
+    existing = existing or {
+      lhs = key,
+      rhs = key,
+      expr = false,
+      nowait = true,
+      noremap = false,
+    }
 
     keymap.listen.cache:set({ bufnr, key }, {
       existing = existing,
@@ -87,15 +93,11 @@ misc.set(_G, { 'cmp', 'utils', 'keymap', 'expr' }, function(char_or_key)
   end
 
   local existing = keymap.listen.cache:get({ bufnr, key }).existing
-  if existing then
-    vim.api.nvim_buf_set_keymap(0, 'i', '<Plug>(cmp-utils-keymap:_)', existing.rhs, {
-      expr = existing.expr == 1,
-      noremap = existing.noremap == 1,
-    })
-    vim.fn.feedkeys(keymap.t('<Plug>(cmp-utils-keymap:_)'))
-  else
-    vim.fn.feedkeys(keymap.t(key), 'n')
-  end
+  vim.api.nvim_buf_set_keymap(0, 'i', '<Plug>(cmp-utils-keymap:_)', existing.rhs, {
+    expr = existing.expr == 1,
+    noremap = existing.noremap == 1,
+  })
+  vim.fn.feedkeys(keymap.t('<Plug>(cmp-utils-keymap:_)'))
 
   return keymap.t('<Ignore>')
 end)

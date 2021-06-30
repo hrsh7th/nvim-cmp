@@ -62,13 +62,12 @@ end
 ---Check auto-completion
 core.autocomplete = function()
   local ctx = core.get_context()
-  if ctx:is_not_changed() then
-    return
+  if ctx:changed() then
+    if not ctx:maybe_continue() then
+      core.reset()
+    end
+    core.complete(ctx)
   end
-  if ctx:is_new_context() then
-    core.reset()
-  end
-  core.complete(ctx)
 end
 
 ---Invoke completion
@@ -89,6 +88,7 @@ end
 core.select = function()
   local e = menu.get_selected_item()
   if e then
+    -- Add commit character listeners.
     for _, c in ipairs(e:get_commit_characters()) do
       keymap.listen(c, (function(_)
         return function()
@@ -96,6 +96,8 @@ core.select = function()
         end
       end)(c))
     end
+
+    -- Highlight replace range.
   end
 end
 
@@ -133,12 +135,12 @@ core.confirm = function(e)
     return
   end
   e:confirm(menu.state.offset)
-  vim.fn.complete(1, {}) -- Close current menu TODO: adhoc
+  vim.fn.complete(1, {}) -- TODO: adhoc
 end
 
 ---Reset current completion state
 core.reset = function()
-  local ctx = core.get_context()
+  local ctx = context.empty()
   for _, s in pairs(core.sources) do
     s:reset(ctx)
   end

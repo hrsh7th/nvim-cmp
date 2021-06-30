@@ -57,6 +57,7 @@ end
 ---Get active item
 ---@return cmp.Entry|nil
 menu.get_active_item = function()
+  -- TODO: vim.v.completed_item would remain even after completion so it may cause bugs.
   local completed_item = vim.v.completed_item
   if not completed_item or not completed_item.word or not completed_item.user_data then
     return nil
