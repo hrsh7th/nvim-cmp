@@ -22,16 +22,18 @@ end
 ---Receive vim autocmds
 ---@param name string
 cmp._on_event = function(name)
-  if name == 'InsertLeave' then
+  if name == 'InsertEnter' then
+    core.autocomplete();
+  elseif name == 'TextChanged' then
+    core.autocomplete();
+  elseif name == 'CompleteChanged' then
+    core.select()
+  elseif name == 'InsertLeave' then
     vim.schedule(function()
       if not vim.tbl_contains({ 'i', 'ic' }, vim.api.nvim_get_mode().mode) then
         core.reset()
       end
     end)
-  elseif name == 'TextChanged' then
-    core.autocomplete();
-  elseif name == 'CompleteChanged' then
-    core.select()
   end
 end
 

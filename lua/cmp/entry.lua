@@ -40,19 +40,19 @@ entry.new = function(ctx, source, completion_item)
   self.confirmed = false
 
   if misc.safe(self.completion_item.textEdit) then
-    if self.completion_item.textEdit.insert then
-      self.insert_range = lsp.Position.to_vim(ctx.bufnr, self.completion_item.textEdit.insert)
+    if misc.safe(self.completion_item.textEdit.insert) then
+      self.insert_range = lsp.Range.to_vim(ctx.bufnr, self.completion_item.textEdit.insert)
     else
-      self.insert_range = lsp.Position.to_vim(ctx.bufnr, self.completion_item.textEdit.range)
+      self.insert_range = lsp.Range.to_vim(ctx.bufnr, self.completion_item.textEdit.range)
     end
   end
   self.insert_range = self.insert_range or ctx.insert_range
 
   if misc.safe(self.completion_item.textEdit) then
-    if self.completion_item.textEdit.replace then
-      self.replace_range = lsp.Position.to_vim(ctx.bufnr, self.completion_item.textEdit.replace)
+    if misc.safe(self.completion_item.textEdit.replace) then
+      self.replace_range = lsp.Range.to_vim(ctx.bufnr, self.completion_item.textEdit.replace)
     else
-      self.replace_range = lsp.Position.to_vim(ctx.bufnr, self.completion_item.textEdit.range)
+      self.replace_range = lsp.Range.to_vim(ctx.bufnr, self.completion_item.textEdit.range)
     end
   end
   self.replace_range = self.replace_range or ctx.replace_range
@@ -192,6 +192,30 @@ entry.get_commit_characters = function(self)
   return commit_characters
 end
 
+---Return replace range if it's different with insert range.
+---@param ctx cmp.Context
+---@return vim.Range|nil
+entry.get_replace_range = function(self, ctx)
+  local same = true
+  same = same and self.insert_range.start.row == self.replace_range.start.row
+  same = same and self.insert_range.start.col == self.replace_range.start.col
+  same = same and self.insert_range['end'].row == self.replace_range['end'].row
+  same = same and self.insert_range['end'].col == self.replace_range['end'].col
+  if same then
+    return nil
+  end
+  return self.replace_range
+end
+
+---Get resolved completion item if possible.
+---@return lsp.CompletionItem
+entry.get_completion_item = function(self)
+  if self.resolved_completion_item then
+    return self.resolved_completion_item
+  end
+  return self.completion_item
+end
+
 ---Confirm completion item
 ---@param offset number
 ---@param callback fun()|nil
@@ -242,15 +266,6 @@ entry.resolve = function(self, callback)
       end
     end)
   end
-end
-
----Get resolved completion item if possible.
----@return lsp.CompletionItem
-entry.get_completion_item = function(self)
-  if self.resolved_completion_item then
-    return self.resolved_completion_item
-  end
-  return self.completion_item
 end
 
 return entry

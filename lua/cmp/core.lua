@@ -12,6 +12,9 @@ core.sources = {}
 ---@type cmp.Context
 core.context = context.new()
 
+---@type number
+core.namespace = vim.api.nvim_create_namespace('cmp')
+
 ---Register source
 ---@param s cmp.Source
 core.register_source = function(s)
@@ -98,6 +101,18 @@ core.select = function()
     end
 
     -- Highlight replace range.
+    vim.api.nvim_buf_clear_namespace(0, core.namespace, 0, -1)
+    local replace_range = e:get_replace_range()
+    if replace_range then
+      local ctx = core.get_context()
+      vim.api.nvim_buf_set_extmark(0, core.namespace, ctx.cursor.row - 1, ctx.cursor.col - 1, {
+        end_line = ctx.cursor.row - 1,
+        end_col = ctx.cursor.col + replace_range['end'].col - e.context.cursor.col - 1,
+        hl_group = 'CmpReplaceRange',
+      })
+    end
+
+    -- Documentation
   end
 end
 
@@ -145,6 +160,7 @@ core.reset = function()
     s:reset(ctx)
   end
   menu.reset()
+  vim.api.nvim_buf_clear_namespace(0, core.namespace, 0, -1)
 end
 
 return core

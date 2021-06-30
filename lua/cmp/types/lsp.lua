@@ -25,6 +25,18 @@ lsp.Position.to_vim = function(buf, position)
   }
 end
 
+lsp.Range = {}
+
+---Convert lsp.Position to vim.Position
+---@param buf number|string
+---@param range lsp.Range
+---@return vim.Range
+lsp.Range.to_vim = function(buf, range)
+  return {
+    start = lsp.Position.to_vim(buf, range.start),
+    ['end'] = lsp.Position.to_vim(buf, range['end']),
+  }
+end
 
 ---@alias lsp.CompletionTriggerKind "1" | "2" | "3"
 lsp.CompletionTriggerKind = {}
