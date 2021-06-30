@@ -12,6 +12,7 @@ end
 ---@param key string
 ---@return any|nil
 cache.get = function(self, key)
+  key = self:key(key)
   if self.entries[key] ~= nil then
     return self.entries[key]
   end
@@ -22,6 +23,7 @@ end
 ---@param key string
 ---@param value any
 cache.set = function(self, key, value)
+  key = self:key(key)
   self.entries[key] = value
 end
 
@@ -34,6 +36,16 @@ cache.ensure = function(self, key, callback)
     self:set(key, callback())
   end
   return self:get(key)
+end
+
+---Create key
+---@param key string|table
+---@return string
+cache.key = function(_, key)
+  if type(key) == 'table' then
+    return table.concat(key, ':')
+  end
+  return key
 end
 
 return cache

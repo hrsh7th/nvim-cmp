@@ -1,4 +1,5 @@
 local global = require'cmp.utils.global'
+local cache = require'cmp.utils.cache'
 
 local keymap = {}
 
@@ -37,33 +38,41 @@ keymap.to_char = function(v)
   return v
 end
 
+
+print()
+
 ---Register keypress handler.
 keymap.listen = setmetatable({
-  cache = {}
+  cache = cache.new()
 }, {
   __call = function(_, char, callback)
     local key = keymap.to_key(char)
-    if not key then
-      return
-    end
+    local bufnr = vim.api.nvim_get_current_buf()
 
-    if keymap.listen.cache[key] then
+    if keymap.listen.cache:get({ bufnr, key }) then
       return
     end
 
     local existing = nil
+    for _, map in ipairs(vim.api.nvim_buf_get_keymap(0, 'i')) do
+      if existing then break end
+      if map.lhs == key then
+        existing = map
+      end
+    end
     for _, map in ipairs(vim.api.nvim_get_keymap('i')) do
+      if existing then break end
       if map.lhs == key then
         existing = map
         break
       end
     end
-    keymap.listen.cache[key] = {
+
+    keymap.listen.cache:set({ bufnr, key }, {
       existing = existing,
       callback = callback,
-    }
-
-    vim.api.nvim_set_keymap('i', key, ('v:lua.cmp.utils.keymap.expr("%s")'):format(key), {
+    })
+    vim.api.nvim_buf_set_keymap(0, 'i', key, ('v:lua.cmp.utils.keymap.expr("%s")'):format(key), {
       expr = true,
       nowait = true,
       noremap = true,
@@ -73,15 +82,16 @@ keymap.listen = setmetatable({
 
 global.set('cmp.utils.keymap.expr', function(char_or_key)
   local key = keymap.to_key(char_or_key)
+  local bufnr = vim.api.nvim_get_current_buf()
 
-  local callback = keymap.listen.cache[key].callback
+  local callback = keymap.listen.cache:get({ bufnr, key }).callback
   if not callback or not callback() then
     return keymap.t('<Ignore>')
   end
 
-  local existing = keymap.listen.cache[key].existing
+  local existing = keymap.listen.cache:get({ bufnr, key }).existing
   if existing then
-    vim.api.nvim_set_keymap('i', '<Plug>(cmp-utils-keymap:_)', existing.rhs, {
+    vim.api.nvim_buf_set_keymap(0, 'i', '<Plug>(cmp-utils-keymap:_)', existing.rhs, {
       expr = existing.expr == 1,
       noremap = existing.noremap == 1,
     })
