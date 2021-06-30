@@ -17,3 +17,4 @@ async.sync = function(runner, timeout)
 end
 
 return async
+

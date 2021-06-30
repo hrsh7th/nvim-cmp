@@ -118,7 +118,7 @@ menu.update = function(ctx, filter_kind)
         local a_sort_text = a:get_sort_text()
         local b_sort_text = b:get_sort_text()
         if a_sort_text ~= b_sort_text then
-          return a_sort_text > b_sort_text and 1 or -1
+          return vim.stricmp(a_sort_text, b_sort_text)
         end
 
         return 0

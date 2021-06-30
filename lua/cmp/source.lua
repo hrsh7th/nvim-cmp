@@ -42,9 +42,11 @@ source.reset = function(self, ctx)
   self.incomplete = false
   self.items = {}
   if self.state == source.SourceState.ACTIVE then
+    self.state = source.SourceState.IDLE
     self.on_change(ctx, source.ChangeKind.UPDATE)
+    return true
   end
-  self.state = source.SourceState.IDLE
+  return false
 end
 
 ---Subscribe source state changes
@@ -60,7 +62,7 @@ end
 
 ---Return if this source matches to current context or not.
 source.match = function(self, ctx)
-  if not self.source.ready then
+  if not self.source.match then
     return true
   end
   return self.source:match(ctx)
@@ -97,8 +99,7 @@ source.complete = function(self, ctx)
     }
   else
     if ctx.input == '' then
-      self:reset(ctx)
-      return true
+      return self:reset(ctx)
     end
     return false
   end

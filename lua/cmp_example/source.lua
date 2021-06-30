@@ -19,8 +19,8 @@ end
 ---@param ctx cmp.Context
 ---@return boolean
 source.match = function(self, ctx)
-  for _, client in vim.lsp.buf_get_clients(ctx.bufnr) do
-    if client == self.client then
+  for id in pairs(vim.lsp.buf_get_clients(ctx.bufnr)) do
+    if id == self.client.id then
       return true
     end
   end

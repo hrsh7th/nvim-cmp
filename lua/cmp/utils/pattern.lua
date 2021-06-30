@@ -10,11 +10,11 @@ pattern.regex = function(p)
 end
 
 pattern.offset = function(p, text)
-  local s = pattern.regex(p):match_str(text)
+  local s, e = pattern.regex(p):match_str(text)
   if s then
-    return s + 1
+    return s + 1, e + 1
   end
-  return nil
+  return nil, nil
 end
 
 return pattern

@@ -1,9 +1,7 @@
 local misc = require'cmp.utils.misc'
 local pattern = require "cmp.utils.pattern"
 
----@class cmp.Cursor
----@field public row number
----@field public col number
+local DEFAULT_PATTERN = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]]
 
 ---@class cmp.Context
 ---@field public id string
@@ -13,7 +11,7 @@ local pattern = require "cmp.utils.pattern"
 ---@field public filetype string
 ---@field public mode string
 ---@field public bufnr number
----@field public cursor cmp.Cursor
+---@field public cursor vim.Position
 ---@field public cursor_line string
 ---@field public cursor_after_line string
 ---@field public cursor_before_line string
@@ -22,6 +20,8 @@ local pattern = require "cmp.utils.pattern"
 ---@field public offset_before_line string
 ---@field public input string
 ---@field public before_char string
+---@field public insert_range vim.Range
+---@field public replace_range vim.Range
 local context = {}
 
 ---Create new empty context
@@ -57,11 +57,37 @@ context.new = function(prev_context, option)
   self.cursor_line = vim.api.nvim_get_current_line()
   self.cursor_before_line = string.sub(self.cursor_line, 1, self.cursor.col - 1)
   self.cursor_after_line = string.sub(self.cursor_line, 1, self.cursor.col - 1)
-  self.offset = pattern.offset([[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)$]], self.cursor_before_line) or self.cursor.col
+  self.offset = pattern.offset(DEFAULT_PATTERN .. '$', self.cursor_before_line) or self.cursor.col
   self.offset_before_line = string.sub(self.cursor_line, 1, self.offset - 1)
   self.offset_after_line = string.sub(self.cursor_line, self.offset)
   self.input = string.sub(self.cursor_line, self.offset, self.cursor.col - 1)
   self.before_char = string.sub(self.cursor_line, self.cursor.col - 1, self.cursor.col - 1)
+  self.insert_range = {
+    start = {
+      row = self.cursor.row,
+      col = self.offset,
+    },
+    ['end'] = {
+      row = self.cursor.row,
+      col = self.cursor.col
+    }
+  }
+  self.replace_range = {
+    start = {
+      row = self.cursor.row,
+      col = self.offset,
+    },
+    ['end'] = {
+      row = self.cursor.row,
+      col = (function()
+        local _, e = pattern.offset('^' .. DEFAULT_PATTERN, self.offset_after_line)
+        if e then
+          return self.offset + e - 1
+        end
+        return self.insert_range['end'].col
+      end)()
+    }
+  }
   return self
 end
 
@@ -72,6 +98,12 @@ context.is_keyword_beginning = function(self)
   local curr = self
 
   return self:is_new_context() and prev.input == '' and #curr.input == 1
+end
+
+context.is_not_changed = function(self)
+  local prev = self.prev_context
+  local curr = self
+  return not self:is_new_context() and curr.cursor.col == prev.cursor.col
 end
 
 ---Return if this context is changed from previous context or not.
@@ -88,9 +120,6 @@ context.is_new_context = function(self)
     return true
   end
   if curr.cursor.row ~= prev.cursor.row then
-    return true
-  end
-  if curr.cursor.col ~= prev.cursor.col then
     return true
   end
 

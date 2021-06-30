@@ -8,3 +8,11 @@
 ---@field public dup "1"|nil
 ---@field public id any
 
+---@class vim.Position
+---@field public row number
+---@field public col number
+
+---@class vim.Range
+---@field public start vim.Position
+---@field public end vim.Position
+

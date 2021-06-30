@@ -7,8 +7,7 @@ local config = require'cmp.config'
 
 ---@class cmp.Entry
 ---@field public id number
----@field public common_cache cmp.utils.Cache
----@field public offset_cache cmp.utils.Cache
+---@field public cache cmp.utils.Cache
 ---@field public score number
 ---@field public context cmp.Context
 ---@field public source cmp.Source
@@ -27,8 +26,7 @@ local entry = {}
 entry.new = function(ctx, source, completion_item)
   local self = setmetatable({}, { __index = entry })
   self.id = misc.id('entry')
-  self.common_cache = cache.new()
-  self.offset_cache = cache.new()
+  self.cache = cache.new()
   self.score = 0
   self.context = ctx
   self.source = source
@@ -43,7 +41,7 @@ end
 ---Make offset value
 ---@return number
 entry.get_offset = function(self)
-  return self.common_cache:ensure('get_offset', function()
+  return self.cache:ensure('get_offset', function()
     local offset = self.context.offset
     local word_and_abbr = self:get_word_and_abbr()
     if misc.safe(self.completion_item.textEdit) then
@@ -89,7 +87,7 @@ end
 ---Create word and abbr for vim.CompletedItem
 ---@return table<string, string>
 entry.get_word_and_abbr = function(self)
-  return self.common_cache:ensure('get_word_and_abbr', function()
+  return self.cache:ensure('get_word_and_abbr', function()
     --- create word and abbr.
     local word
     local abbr
@@ -119,7 +117,7 @@ end
 ---@param offset number
 ---@return vim.CompletedItem
 entry.get_vim_item = function(self, offset)
-  return self.offset_cache:ensure(offset, function()
+  return self.cache:ensure({ 'get_vim_item', offset }, function()
     local word_and_abbr = self:get_word_and_abbr()
     local word = word_and_abbr.word
     local abbr = word_and_abbr.abbr
@@ -141,7 +139,7 @@ end
 ---Create filter text
 ---@return string
 entry.get_filter_text = function(self)
-  return self.common_cache:ensure('get_filter_text', function()
+  return self.cache:ensure('get_filter_text', function()
     if misc.safe(self.completion_item.filterText) then
       return self.completion_item.filterText
     end
@@ -152,7 +150,7 @@ end
 ---Return sort text
 ---@return string
 entry.get_sort_text = function(self)
-  return self.common_cache:ensure('get_sort_text', function()
+  return self.cache:ensure('get_sort_text', function()
     if misc.safe(self.completion_item.sortText) then
       return self.completion_item.sortText
     end

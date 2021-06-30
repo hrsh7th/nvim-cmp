@@ -14,4 +14,3 @@ describe('utils.async', function()
 
 end)
 
-

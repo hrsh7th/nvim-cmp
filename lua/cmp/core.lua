@@ -62,9 +62,13 @@ end
 ---Check auto-completion
 core.autocomplete = function()
   local ctx = core.get_context()
-  if ctx:is_new_context() then
-    core.complete(ctx)
+  if ctx:is_not_changed() then
+    return
   end
+  if ctx:is_new_context() then
+    core.reset()
+  end
+  core.complete(ctx)
 end
 
 ---Invoke completion
@@ -135,7 +139,7 @@ end
 ---Reset current completion state
 core.reset = function()
   local ctx = core.get_context()
-  for _, s in ipairs(core.get_sources(ctx)) do
+  for _, s in pairs(core.sources) do
     s:reset(ctx)
   end
   menu.reset()

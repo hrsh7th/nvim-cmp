@@ -1,4 +1,4 @@
-local global = require'cmp.utils.global'
+local misc = require'cmp.utils.misc'
 local cache = require'cmp.utils.cache'
 
 local keymap = {}
@@ -37,9 +37,6 @@ keymap.to_char = function(v)
   end
   return v
 end
-
-
-print()
 
 ---Register keypress handler.
 keymap.listen = setmetatable({
@@ -80,7 +77,7 @@ keymap.listen = setmetatable({
   end
 })
 
-global.set('cmp.utils.keymap.expr', function(char_or_key)
+misc.set(_G, { 'cmp', 'utils', 'keymap', 'expr' }, function(char_or_key)
   local key = keymap.to_key(char_or_key)
   local bufnr = vim.api.nvim_get_current_buf()
 

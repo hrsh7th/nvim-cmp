@@ -44,4 +44,18 @@ misc.bool = function(v, def)
   return v == true or v == 1
 end
 
+---Set value to deep object
+---@param t table
+---@param keys string[]
+---@param v any
+misc.set = function(t, keys, v)
+  local c = _G
+  for i = 1, #keys - 1 do
+    local key = keys[i]
+    c[key] = c[key] or {}
+    c = c[key]
+  end
+  c[keys[#keys]] = v
+end
+
 return misc

@@ -2,6 +2,30 @@
 ---@class lsp
 local lsp = {}
 
+lsp.Position = {}
+
+---Convert lsp.Position to vim.Position
+---@param buf number|string
+---@param position lsp.Position
+---@return vim.Position
+lsp.Position.to_vim = function(buf, position)
+  if not vim.api.nvim_buf_is_loaded(buf) then
+    vim.fn.bufload(buf)
+  end
+  local lines = vim.api.nvim_buf_get_lines(buf, position.line, position.line + 1, false)
+  if #lines > 0 then
+    return {
+      row = position.line + 1,
+      col = vim.str_byteindex(lines[1], position.character),
+    }
+  end
+  return {
+    row = position.line + 1,
+    col = position.character + 1,
+  }
+end
+
+
 ---@alias lsp.CompletionTriggerKind "1" | "2" | "3"
 lsp.CompletionTriggerKind = {}
 lsp.CompletionTriggerKind.Invoked = 1
