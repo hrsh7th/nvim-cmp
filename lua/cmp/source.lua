@@ -83,7 +83,7 @@ end
 source.complete = function(self, ctx)
   local trigger_characters = self.source:get_trigger_characters()
 
-  local completion_context = nil
+  local completion_context
   if vim.tbl_contains(trigger_characters, ctx.before_char) then
     completion_context = {
       triggerKind = lsp.CompletionTriggerKind.TriggerCharacter,

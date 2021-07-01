@@ -1,6 +1,6 @@
 local spec = require'cmp.utils.spec'
 
-local source = require "cmp.source"
+-- local source = require "cmp.source"
 
 describe('source', function()
 

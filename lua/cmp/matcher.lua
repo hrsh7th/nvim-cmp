@@ -138,12 +138,12 @@ matcher.match = function(input, word)
       return 0
     end
 
-    for word_index = last_match.word_match_end + 1, #word do
+    for word_index_ = last_match.word_match_end + 1, #word do
       local word_offset = 0
       local input_index = last_match.input_match_end + 1
       local matched = false
-      while word_offset + word_index <= #word and input_index <= #input do
-        if char.match(string.byte(word, word_index + word_offset), string.byte(input, input_index)) then
+      while word_offset + word_index_ <= #word and input_index <= #input do
+        if char.match(string.byte(word, word_index_ + word_offset), string.byte(input, input_index)) then
           matched = true
           input_index = input_index + 1
         elseif matched then

@@ -197,9 +197,8 @@ entry.get_commit_characters = function(self)
 end
 
 ---Return replace range if it's different with insert range.
----@param ctx cmp.Context
 ---@return vim.Range|nil
-entry.get_replace_range = function(self, ctx)
+entry.get_replace_range = function(self)
   local same = true
   same = same and self.insert_range.start.row == self.replace_range.start.row
   same = same and self.insert_range.start.col == self.replace_range.start.col
