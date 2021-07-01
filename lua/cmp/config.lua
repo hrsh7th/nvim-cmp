@@ -8,6 +8,8 @@ local config = {}
 
 ---@type cmp.Config
 config.global = {
+  default_insert_mode = 'replace',
+
   commit_characters = function(e)
     local chars = { '\n', '\t' }
     if not string.find(e:get_word_and_abbr().word, '.', 1, true) then
@@ -22,13 +24,12 @@ config.global = {
     end
     return chars
   end,
-  default_insert_mode = 'replace',
+
   format = function(entry, word, abbr)
     return {
       word = word,
       abbr = abbr,
-      kind = vim.lsp.protocol.CompletionItemKind[misc.safe(entry.completion_item.kind) or 1]
-        or vim.lsp.protocol.CompletionItemKind[1],
+      kind = vim.lsp.protocol.CompletionItemKind[misc.safe(entry.completion_item.kind) or 1] or vim.lsp.protocol.CompletionItemKind[1],
       equal = 1,
       empty = 1,
       dup = 1,

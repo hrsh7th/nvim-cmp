@@ -9,16 +9,28 @@ describe('types.lsp', function ()
       'かきくけこ',
       'さしすせそ',
     })
-    local vim_position = lsp.Position.to_vim('%', {
-      line = 1,
-      character = 3,
-    })
+    local vim_position, lsp_position
+
+    vim_position = lsp.Position.to_vim('%', { line = 1, character = 3 })
     assert.are.equal(vim_position.row, 2)
     assert.are.equal(vim_position.col, 10)
-
-    local lsp_position = lsp.Position.from_vim('%', vim_position)
+    lsp_position = lsp.Position.from_vim('%', vim_position)
     assert.are.equal(lsp_position.line, 1)
     assert.are.equal(lsp_position.character, 3)
+
+    vim_position = lsp.Position.to_vim('%', { line = 1, character = 0 })
+    assert.are.equal(vim_position.row, 2)
+    assert.are.equal(vim_position.col, 1)
+    lsp_position = lsp.Position.from_vim('%', vim_position)
+    assert.are.equal(lsp_position.line, 1)
+    assert.are.equal(lsp_position.character, 0)
+
+    vim_position = lsp.Position.to_vim('%', { line = 1, character = 5 })
+    assert.are.equal(vim_position.row, 2)
+    assert.are.equal(vim_position.col, 16)
+    lsp_position = lsp.Position.from_vim('%', vim_position)
+    assert.are.equal(lsp_position.line, 1)
+    assert.are.equal(lsp_position.character, 5)
   end)
 end)
 
