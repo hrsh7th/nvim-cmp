@@ -92,12 +92,12 @@ core.select = function()
   local e = menu.get_selected_item()
   if e then
     -- Add commit character listeners.
-    for _, c in ipairs(e:get_commit_characters()) do
-      keymap.listen(c, (function(_)
-        return function()
-          return core.on_commit_char(_)
+    for _, key in ipairs(e:get_commit_characters()) do
+      keymap.listen(key, (function(k)
+        return function(fallback)
+          return core.on_commit_char(k, fallback)
         end
-      end)(c))
+      end)(key))
     end
 
     -- Highlight replace range.
@@ -118,14 +118,15 @@ end
 
 ---On commit character typed
 ---@param c string
-core.on_commit_char = function(c)
+---@param fallback fun()
+core.on_commit_char = function(c, fallback)
   local e = menu.get_selected_item()
   if not (e and not e.confirmed) then
-    return true
+    return fallback()
   end
 
   if not vim.tbl_contains(e:get_commit_characters(), c) then
-    return true
+    return fallback()
   end
 
   vim.schedule(function()
@@ -137,7 +138,7 @@ core.on_commit_char = function(c)
     if string.sub(ctx.cursor_before_line, -#word, ctx.cursor.col - 1) == word then
       local key = keymap.t(keymap.to_key(c))
       if char.is_printable(string.byte(key)) then
-        vim.fn.feedkeys(key, 'ni')
+        fallback()
       end
     end
   end)

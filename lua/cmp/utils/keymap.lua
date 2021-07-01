@@ -88,17 +88,15 @@ misc.set(_G, { 'cmp', 'utils', 'keymap', 'expr' }, function(char_or_key)
   local bufnr = vim.api.nvim_get_current_buf()
 
   local callback = keymap.listen.cache:get({ bufnr, key }).callback
-  if not callback or not callback() then
-    return keymap.t('<Ignore>')
-  end
-
   local existing = keymap.listen.cache:get({ bufnr, key }).existing
-  vim.api.nvim_buf_set_keymap(0, 'i', '<Plug>(cmp-utils-keymap:_)', existing.rhs, {
-    expr = existing.expr == 1,
-    noremap = existing.noremap == 1,
-  })
-  vim.fn.feedkeys(keymap.t('<Plug>(cmp-utils-keymap:_)'))
-
+  local fallback = function()
+    vim.api.nvim_buf_set_keymap(0, 'i', '<Plug>(cmp-utils-keymap:_)', existing.rhs, {
+      expr = existing.expr == 1,
+      noremap = existing.noremap == 1,
+    })
+    vim.fn.feedkeys(keymap.t('<Plug>(cmp-utils-keymap:_)'), 'i')
+  end
+  callback(fallback)
   return keymap.t('<Ignore>')
 end)
 
