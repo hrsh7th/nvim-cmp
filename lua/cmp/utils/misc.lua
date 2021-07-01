@@ -49,13 +49,37 @@ end
 ---@param keys string[]
 ---@param v any
 misc.set = function(t, keys, v)
-  local c = _G
+  local c = t
   for i = 1, #keys - 1 do
     local key = keys[i]
     c[key] = c[key] or {}
     c = c[key]
   end
   c[keys[#keys]] = v
+end
+
+---Copy table
+---@generic T
+---@param tbl T
+---@return T
+misc.copy = function(tbl)
+  if type(tbl) ~= 'table' then
+    return tbl
+  end
+
+  if vim.tbl_islist(tbl) then
+    local copy = {}
+    for i, value in ipairs(tbl) do
+      copy[i] = misc.copy(value)
+    end
+    return copy
+  end
+
+  local copy = {}
+  for key, value in pairs(tbl) do
+    copy[key] = misc.copy(value)
+  end
+  return copy
 end
 
 return misc

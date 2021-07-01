@@ -66,7 +66,7 @@ end
 core.autocomplete = function()
   local ctx = core.get_context()
   if ctx:changed() then
-    if not ctx:maybe_continue() then
+    if not ctx:maybe_continue(menu.state.offset) then
       core.reset()
     end
     core.complete(ctx)
@@ -150,7 +150,7 @@ core.confirm = function(e)
     return
   end
   e:confirm(menu.state.offset)
-  vim.fn.complete(1, {}) -- TODO: adhoc
+  core.reset()
 end
 
 ---Reset current completion state

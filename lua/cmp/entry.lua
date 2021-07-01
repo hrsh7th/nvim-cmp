@@ -188,7 +188,11 @@ entry.get_commit_characters = function(self)
   if completion_item.commitCharacters then
     misc.merge(commit_characters, commit_characters)
   end
-  misc.merge(commit_characters, config.get().commit_characters)
+  if type(config.get().commit_characters) =='function' then
+    misc.merge(commit_characters, config.get().commit_characters(self))
+  else
+    misc.merge(commit_characters, config.get().commit_characters)
+  end
   return commit_characters
 end
 
@@ -226,10 +230,20 @@ entry.confirm = function(self, offset, callback)
   end, 1000)
 
   -- confirm
+  local completion_item = misc.copy(self:get_completion_item())
+  if not misc.safe(completion_item.textEdit) then
+    completion_item.textEdit = {}
+    completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.label
+  end
+  if config.get().default_insert_mode == 'replace' then
+    completion_item.textEdit.range = lsp.Range.from_vim('%', self.replace_range)
+  else
+    completion_item.textEdit.range = lsp.Range.from_vim('%', self.insert_range)
+  end
   vim.fn['cmp#confirm']({
     request_offset = self.context.cursor.col,
     suggest_offset = offset,
-    completion_item = self:get_completion_item(),
+    completion_item = completion_item,
   })
 
   -- execute

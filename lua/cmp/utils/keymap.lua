@@ -66,9 +66,9 @@ keymap.listen = setmetatable({
     existing = existing or {
       lhs = key,
       rhs = key,
-      expr = false,
-      nowait = true,
-      noremap = false,
+      expr = 0,
+      nowait = 0,
+      noremap = 1,
     }
 
     keymap.listen.cache:set({ bufnr, key }, {

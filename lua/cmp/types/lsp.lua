@@ -16,12 +16,33 @@ lsp.Position.to_vim = function(buf, position)
   if #lines > 0 then
     return {
       row = position.line + 1,
-      col = vim.str_byteindex(lines[1], position.character),
+      col = vim.str_byteindex(lines[1], position.character) + 1,
     }
   end
   return {
     row = position.line + 1,
     col = position.character + 1,
+  }
+end
+
+---Convert lsp.Position to vim.Position
+---@param buf number|string
+---@param position vim.Position
+---@return lsp.Position
+lsp.Position.from_vim = function(buf, position)
+  if not vim.api.nvim_buf_is_loaded(buf) then
+    vim.fn.bufload(buf)
+  end
+  local lines = vim.api.nvim_buf_get_lines(buf, position.row - 1, position.row, false)
+  if #lines > 0 then
+    return {
+      line = position.row - 1,
+      character = vim.str_utfindex(lines[1], position.col) - 1,
+    }
+  end
+  return {
+    line = position.row - 1,
+    character = position.col - 1,
   }
 end
 
@@ -35,6 +56,17 @@ lsp.Range.to_vim = function(buf, range)
   return {
     start = lsp.Position.to_vim(buf, range.start),
     ['end'] = lsp.Position.to_vim(buf, range['end']),
+  }
+end
+
+---Convert lsp.Position to vim.Position
+---@param buf number|string
+---@param range vim.Range
+---@return lsp.Range
+lsp.Range.from_vim = function(buf, range)
+  return {
+    start = lsp.Position.from_vim(buf, range.start),
+    ['end'] = lsp.Position.from_vim(buf, range['end']),
   }
 end
 

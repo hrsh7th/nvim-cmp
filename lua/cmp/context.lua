@@ -101,7 +101,7 @@ context.is_keyword_beginning = function(self)
 end
 
 ---Return if this context is continueing previous context.
-context.maybe_continue = function(self)
+context.maybe_continue = function(self, suggest_offset)
   local prev = self.prev_context
   local curr = self
 
@@ -110,6 +110,11 @@ context.maybe_continue = function(self)
   end
   if curr.cursor.row ~= prev.cursor.row then
     return false
+  end
+  if suggest_offset then
+    if curr.cursor.col < suggest_offset then
+      return false
+    end
   end
   return true
 end
