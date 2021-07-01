@@ -27,14 +27,15 @@ menu.set = function(ctx, source)
   menu.state.offset = ctx.offset
 
   local i = 1
+  local j = 1
   while i <= #menu.state.entries do
     if menu.state.entries[i].source == source then
-      if i < #source.items then
-        local e = entry.new(ctx, source, source.items[i])
+      if j <= #source.items then
+        local e = entry.new(ctx, source, source.items[j])
         menu.state.entries[i] = e
         menu.state.offset = math.min(menu.state.offset, e:get_offset())
       else
-        if i < #menu.state.entries then
+        if i <= #menu.state.entries then
           menu.state.entries[i] = menu.state.entries[#menu.state.entries]
           menu.state.entries[#menu.state.entries] = nil
           i = i - 1
@@ -43,13 +44,15 @@ menu.set = function(ctx, source)
           break
         end
       end
+      j = j + 1
     end
     i = i + 1
   end
-  while i <= #source.items do
-    local e = entry.new(ctx, source, source.items[i])
+  while j <= #source.items do
+    local e = entry.new(ctx, source, source.items[j])
     menu.state.entries[i] = e
     menu.state.offset = math.min(menu.state.offset, e:get_offset())
+    j = j + 1
     i = i + 1
   end
 end

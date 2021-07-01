@@ -81,7 +81,7 @@ end
 ---@param ctx cmp.Context
 ---@return boolean
 source.complete = function(self, ctx)
-  local trigger_characters = self.source:get_trigger_characters()
+  local trigger_characters = self.source.get_trigger_characters and self.source:get_trigger_characters() or {}
 
   local completion_context
   if vim.tbl_contains(trigger_characters, ctx.before_char) then
@@ -116,6 +116,7 @@ source.complete = function(self, ctx)
       self.state = source.SourceState.ACTIVE
       self.incomplete = response.isIncomplete or false
       self.items = response.items or response
+      print(self.name, #self.items)
       self.on_change(ctx, source.ChangeKind.UPDATE)
     elseif self.state == source.SourceState.ACTIVE then
       self.on_change(ctx, source.ChangeKind.FILTER)
@@ -136,6 +137,9 @@ end
 
 ---Execute command
 source.execute = function(self, item, callback)
+  if not self.source.execute then
+    return callback()
+  end
   self.source:execute(item, function()
     callback()
   end)
