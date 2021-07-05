@@ -97,7 +97,16 @@ context.is_keyword_beginning = function(self)
   local prev = self.prev_context
   local curr = self
 
-  return self:changed() and prev.input == '' and #curr.input == 1
+  return (prev.offset ~= curr.offset or prev.input == '') and curr.input ~= ''
+end
+
+---if cursor moves from left to right.
+---@param self cmp.Context
+context.is_forwarding = function(self)
+  local prev = self.prev_context
+  local curr = self
+
+  return prev.cursor.col < curr.cursor.col
 end
 
 ---Return if this context is continueing previous context.
