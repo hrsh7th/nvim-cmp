@@ -1,5 +1,6 @@
 local core = require "cmp.core"
 local source = require'cmp.source'
+local debug = require'cmp.utils.debug'
 
 local cmp = {}
 
@@ -22,6 +23,11 @@ end
 ---Receive vim autocmds
 ---@param name string
 cmp._on_event = function(name)
+  if vim.fn.getchar(1) ~= 0 then
+    return debug.log('>>> ignore event: ' .. name)
+  end
+
+  debug.log('>>> ' .. name)
   if name == 'InsertEnter' then
     core.autocomplete();
   elseif name == 'TextChanged' then
@@ -29,11 +35,7 @@ cmp._on_event = function(name)
   elseif name == 'CompleteChanged' then
     core.select()
   elseif name == 'InsertLeave' then
-    vim.schedule(function()
-      if not vim.tbl_contains({ 'i', 'ic' }, vim.api.nvim_get_mode().mode) then
-        core.reset()
-      end
-    end)
+    core.reset()
   end
 end
 

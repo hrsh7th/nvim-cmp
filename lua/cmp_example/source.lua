@@ -12,7 +12,7 @@ end
 ---Return trigger characters
 ---@return string[]
 source.get_trigger_characters = function(self)
-  return self:_get(self.client.server_capabilities, { 'completionProvider', 'triggerCharacters' }) or {};
+  return self:_get(self.client.server_capabilities, { 'completionProvider', 'triggerCharacters' }) or {}
 end
 
 ---Return should completion or not.

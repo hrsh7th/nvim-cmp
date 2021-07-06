@@ -1,5 +1,7 @@
 local keymap = require'cmp.utils.keymap'
+local debug = require'cmp.utils.debug'
 local char = require'cmp.utils.char'
+local async = require'cmp.utils.async'
 local context = require'cmp.context'
 local source = require'cmp.source'
 local menu = require'cmp.menu'
@@ -19,24 +21,11 @@ core.namespace = vim.api.nvim_create_namespace('cmp')
 ---@param s cmp.Source
 core.register_source = function(s)
   core.sources[s.id] = s
-  s:subscribe(function(req_ctx, change_kind)
-    if change_kind == source.ChangeKind.UPDATE then
-      menu.set(req_ctx, s)
-      menu.update(core.get_context(), menu.FilterKind.REFRESH)
-    else
-      menu.update(core.get_context(), menu.FilterKind.INCREMENTAL)
-    end
-  end)
 end
 
 ---Unregister source
 ---@param source_id string
 core.unregister_source = function(source_id)
-  local s = core.sources[source_id]
-  if s then
-    s:reset()
-    s:unsubscribe()
-  end
   core.sources[source_id] = nil
 end
 
@@ -51,11 +40,12 @@ end
 
 ---Get sources that sorted by priority
 ---@param ctx cmp.Context
+---@param statuses cmp.SourceStatus[]
 ---@return cmp.Source[]
-core.get_sources = function(ctx)
+core.get_sources = function(ctx, statuses)
   local sources = {}
   for _, s in pairs(core.sources) do
-    if s:match(ctx) then
+    if s:match(ctx) and (not statuses or vim.tbl_contains(statuses, s.status)) then
       table.insert(sources, s)
     end
   end
@@ -64,28 +54,45 @@ end
 
 ---Check auto-completion
 core.autocomplete = function()
+  debug.log('')
+  debug.log('----------------------------------------------------------------------------------------------------')
   local ctx = core.get_context()
+  debug.log(('ctx: `%s`'):format(ctx.cursor_before_line))
   if ctx:changed() then
-    if not ctx:maybe_continue(menu.state.offset) then
-      core.reset()
-    end
+    debug.log('changed')
     core.complete(ctx)
+  else
+    debug.log('unchanged')
   end
 end
 
 ---Invoke completion
 ---@param ctx cmp.Context
 core.complete = function(ctx)
-  local completion = false
+  menu.restore(ctx)
+
+  local triggered = false
   for _, s in ipairs(core.get_sources(ctx)) do
-    completion = s:complete(ctx) or completion
+    triggered = s:complete(ctx, function()
+      if #core.get_sources(ctx, { source.SourceStatus.FETCHING }) > 0 then
+        core.update.timeout = 100
+      else
+        core.update.timeout = 0
+      end
+      core.update()
+    end) or triggered
   end
-  if not completion then
-    menu.update(ctx)
-  else
-    menu.restore(ctx)
+  if not triggered then
+    core.update.timeout = 0
+    core.update()
   end
 end
+
+---Update completion menu
+core.update = async.debounce(function()
+  local ctx = core.get_context()
+  menu.update(ctx, core.get_sources(ctx, { source.SourceStatus.COMPLETED }))
+end, 200)
 
 ---Select completion item
 core.select = function()
@@ -156,9 +163,8 @@ end
 
 ---Reset current completion state
 core.reset = function()
-  local ctx = context.empty()
   for _, s in pairs(core.sources) do
-    s:reset(ctx)
+    s:reset()
   end
   menu.reset()
   vim.api.nvim_buf_clear_namespace(0, core.namespace, 0, -1)

@@ -1,63 +1,54 @@
 local context = require'cmp.context'
+local entry = require'cmp.entry'
+local debug = require'cmp.utils.debug'
 local misc = require'cmp.utils.misc'
 local lsp = require'cmp.types.lsp'
+local cache = require "cmp.utils.cache"
 
 ---@class cmp.Source
 ---@field public id number
 ---@field public name string
 ---@field public source any
----@field public state cmp.SourceState
----@field public on_change fun(ctx: cmp.Context)
+---@field public revision number
 ---@field public context cmp.Context
 ---@field public incomplete boolean
----@field public items lsp.CompletionItem[]
+---@field public entries cmp.Entry[]
+---@field public offset number|nil
+---@field public status cmp.SourceStatus
 local source = {}
 
----@class cmp.ChangeKind
-source.ChangeKind = {}
-source.ChangeKind.UPDATE = 1
-source.ChangeKind.FILTER = 2
+---@alias cmp.SourceStatus "1" | "2" | "3"
+source.SourceStatus = {}
+source.SourceStatus.WAITING = 1
+source.SourceStatus.FETCHING = 2
+source.SourceStatus.COMPLETED = 3
 
----@class cmp.SourceState
-source.SourceState = {}
-source.SourceState.IDLE = 1
-source.SourceState.ACTIVE = 2
+---@alias cmp.SourceChangeKind "1" | "2" | "3"
+source.SourceChangeKind = {}
+source.SourceChangeKind.RETRIEVE = 1
+source.SourceChangeKind.CONTINUE = 2
 
 ---@return cmp.Source
 source.new = function(name, s)
   local self = setmetatable({}, { __index = source })
   self.id = misc.id('source')
   self.name = name
+  self.cache = cache.new()
   self.source = s
-  self.on_change = function() end
-  self:reset(context.empty())
+  self.revision = 0
+  self:reset()
   return self
 end
 
 ---Reset current completion state
----@param ctx cmp.Context
 ---@return boolean
-source.reset = function(self, ctx)
+source.reset = function(self)
   self.context = context.empty()
+  self.revision = self.revision + 1
   self.incomplete = false
-  self.items = {}
-  if self.state == source.SourceState.ACTIVE then
-    self.state = source.SourceState.IDLE
-    self.on_change(ctx, source.ChangeKind.UPDATE)
-    return true
-  end
-  return false
-end
-
----Subscribe source state changes
----@param on_change fun(ctx: cmp.Context)
-source.subscribe = function(self, on_change)
-  self.on_change = on_change
-end
-
----Unsubscribe source state changes
-source.unsubscribe = function(self)
-  self.on_change = function() end
+  self.offest = nil
+  self.entries = {}
+  self.status = source.SourceStatus.WAITING
 end
 
 ---Return if this source matches to current context or not.
@@ -68,23 +59,19 @@ source.match = function(self, ctx)
   return self.source:match(ctx)
 end
 
----Get all commit characters
----@return string[]
-source.get_all_commit_characters = function(self)
-  if self.source.get_all_commit_characters then
-    return self.source:get_all_commit_characters() or {}
-  end
-  return {}
-end
-
 ---Invoke completion
 ---@param ctx cmp.Context
----@return boolean
-source.complete = function(self, ctx)
-  local trigger_characters = self.source.get_trigger_characters and self.source:get_trigger_characters() or {}
+---@param callback function
+---@return boolean Return true if not trigger completion.
+source.complete = function(self, ctx, callback)
+  if self.offset then
+    if ctx.cursor.col < self.offset then
+      self:reset()
+    end
+  end
 
   local completion_context
-  if vim.tbl_contains(trigger_characters, ctx.before_char) then
+  if vim.tbl_contains(self:get_trigger_characters(), ctx.before_char) then
     completion_context = {
       triggerKind = lsp.CompletionTriggerKind.TriggerCharacter,
       triggerCharacter = ctx.before_char,
@@ -97,13 +84,15 @@ source.complete = function(self, ctx)
     completion_context = {
       triggerKind = lsp.CompletionTriggerKind.TriggerForIncompleteCompletions
     }
-  else
-    if ctx.input == '' then
-      return self:reset(ctx)
-    end
-    return false
+  end
+  if not completion_context then
+    debug.log('skip', self.name, self.id)
+    return
   end
 
+  debug.log('request', self.name, self.id, vim.inspect(completion_context))
+  local prev_status = self.status
+  self.status = source.SourceStatus.FETCHING
   self.context = ctx
   self.source:complete({
     context = ctx,
@@ -112,20 +101,38 @@ source.complete = function(self, ctx)
     if self.context.id ~= ctx.id then
       return
     end
-    if response and #(response.items or response) > 0 then
-      self.state = source.SourceState.ACTIVE
+    if response ~= nil then
+      debug.log('retrieve', self.name, self.id, #(response.items or response))
+      self.status = source.SourceStatus.COMPLETED
+      self.revision = self.revision + 1
       self.incomplete = response.isIncomplete or false
-      self.items = response.items or response
-      print(self.name, #self.items)
-      self.on_change(ctx, source.ChangeKind.UPDATE)
-    elseif self.state == source.SourceState.ACTIVE then
-      self.on_change(ctx, source.ChangeKind.FILTER)
+      self.entries = {}
+      self.offset = ctx.offset
+      for i, item in ipairs(response.items or response) do
+        self.entries[i] = entry.new(ctx, self, item)
+        self.offset = math.min(self.offset, self.entries[i]:get_offset())
+      end
+    else
+      debug.log('continue', self.name, self.id, 'nil')
+      self.status = prev_status
     end
+    callback()
   end)
   return true
 end
 
+---Get trigger_characters
+---@return string[]
+source.get_trigger_characters = function(self)
+  if self.source.get_trigger_characters then
+    return self.source:get_trigger_characters() or {}
+  end
+  return {}
+end
+
 ---Resolve CompletionItem
+---@param item lsp.CompletionItem
+---@param callback fun(item: lsp.CompletionItem)
 source.resolve = function(self, item, callback)
   if not self.source.resolve then
     return callback(item)
@@ -136,6 +143,8 @@ source.resolve = function(self, item, callback)
 end
 
 ---Execute command
+---@param item lsp.CompletionItem
+---@param callback fun()
 source.execute = function(self, item, callback)
   if not self.source.execute then
     return callback()

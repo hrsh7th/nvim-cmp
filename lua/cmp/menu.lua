@@ -1,14 +1,15 @@
-local entry = require'cmp.entry'
 local binary = require'cmp.utils.binary'
+local debug = require'cmp.utils.debug'
 local matcher = require'cmp.matcher'
 
 local menu = {}
 
+---@alias cmp.FilterKind "1" | "2"
 menu.FilterKind = {}
-menu.FilterKind.REFRESH = 1
-menu.FilterKind.INCREMENTAL = 2
+menu.FilterKind.CONTINUE = 1
+menu.FilterKind.REFRESH = 2
 
----@class cmp.menu.State
+---@class cmp.State
 ---@field public offset number|nil
 ---@field public entries cmp.Entry[]
 ---@field public filtered_entries cmp.Entry[]
@@ -20,43 +21,6 @@ menu.state.filtered_entries = {}
 menu.state.filtered_items = {}
 menu.state.context = nil
 
----Set source
----@param ctx cmp.Context
----@param source cmp.Source
-menu.set = function(ctx, source)
-  menu.state.offset = ctx.offset
-
-  local i = 1
-  local j = 1
-  while i <= #menu.state.entries do
-    if menu.state.entries[i].source == source then
-      if j <= #source.items then
-        local e = entry.new(ctx, source, source.items[j])
-        menu.state.entries[i] = e
-        menu.state.offset = math.min(menu.state.offset, e:get_offset())
-      else
-        if i <= #menu.state.entries then
-          menu.state.entries[i] = menu.state.entries[#menu.state.entries]
-          menu.state.entries[#menu.state.entries] = nil
-          i = i - 1
-        else
-          menu.state.entries[#menu.state.entries] = nil
-          break
-        end
-      end
-      j = j + 1
-    end
-    i = i + 1
-  end
-  while j <= #source.items do
-    local e = entry.new(ctx, source, source.items[j])
-    menu.state.entries[i] = e
-    menu.state.offset = math.min(menu.state.offset, e:get_offset())
-    j = j + 1
-    i = i + 1
-  end
-end
-
 ---Get active item
 ---@return cmp.Entry|nil
 menu.get_active_item = function()
@@ -67,7 +31,7 @@ menu.get_active_item = function()
   end
 
   local id = completed_item.user_data.cmp
-  for _, e in ipairs(menu.state.entries) do
+  for _, e in ipairs(menu.state.filtered_entries) do
     if e.id == id then
       return e
     end
@@ -89,7 +53,7 @@ menu.get_selected_item = function()
   end
 
   local id = completed_item.user_data.cmp
-  for _, e in ipairs(menu.state.entries) do
+  for _, e in ipairs(menu.state.filtered_entries) do
     if e.id == id then
       return e
     end
@@ -99,51 +63,53 @@ end
 
 ---Show completion menu
 ---@param ctx cmp.Context
-menu.update = function(ctx, filter_kind)
+menu.update = function(ctx, sources)
   if not (ctx.mode == 'i' or ctx.mode == 'ic') then
     return
   end
 
   local filtered_entries = {}
   local filtered_items = {}
-  local input = string.sub(ctx.cursor_line, menu.state.offset or 1, ctx.cursor.col - 1)
-  local entries = filter_kind == menu.FilterKind.INCREMENTAL and menu.state.filtered_entries or menu.state.entries
-  local preselect = 2
-  for _, e in ipairs(entries) do
-    e.score = matcher.match(input, e:get_filter_text())
-    if e.score >= 1 then
-      local idx = binary.search(filtered_entries, e, function(a, b)
-        -- score
-        if a.score ~= b.score then
-          return b.score - a.score
-        end
+  local offset = ctx.offset
+  for _, s in ipairs(sources) do
+    if s.offset ~= nil then
+      local input = string.sub(ctx.cursor_line, s.offset, ctx.cursor.col - 1)
+      for _, e in ipairs(s.entries) do
+        e.score = matcher.match(input, e:get_filter_text())
+        if e.score >= 1 then
+          offset = math.min(offset, e:get_offset())
+          local idx = binary.search(filtered_entries, e, function(a, b)
+            -- score
+            if a.score ~= b.score then
+              return b.score - a.score
+            end
 
-        -- sortText
-        local a_sort_text = a:get_sort_text()
-        local b_sort_text = b:get_sort_text()
-        if a_sort_text ~= b_sort_text then
-          return vim.stricmp(a_sort_text, b_sort_text)
-        end
+            -- sortText
+            local a_sort_text = a:get_sort_text()
+            local b_sort_text = b:get_sort_text()
+            if a_sort_text ~= b_sort_text then
+              return vim.stricmp(a_sort_text, b_sort_text)
+            end
 
-        return 0
-      end)
-      if preselect > idx then
-        preselect = preselect + 1
+            return a.id - b.id
+          end)
+          table.insert(filtered_entries, idx, e)
+          table.insert(filtered_items, idx, e:get_vim_item(menu.state.offset))
+        end
       end
-      if e.completion_item.preselect then
-        preselect = math.min(idx, preselect)
-      end
-      table.insert(filtered_entries, idx, e)
-      table.insert(filtered_items, idx, e:get_vim_item(menu.state.offset))
     end
   end
-  menu.state.filtered_entires = filtered_entries
+  menu.state.offset = offset
+  menu.state.filtered_entries = filtered_entries
   menu.state.filtered_items = filtered_items
   menu.state.context = ctx
-  vim.fn.complete(menu.state.offset, menu.state.filtered_items)
-  if preselect <= #entries then
-    vim.api.nvim_select_popupmenu_item(preselect - 1, false, false, {})
+
+  if vim.fn.pumvisible() == 0 and #filtered_entries == 0 then
+    debug.log('menu/not-show')
+    return
   end
+  debug.log('menu/show', offset, #menu.state.filtered_items)
+  vim.fn.complete(offset, menu.state.filtered_items)
 end
 
 ---Reset current state
@@ -168,6 +134,7 @@ menu.restore = function(ctx)
   if not ctx.pumvisible then
     if #menu.state.filtered_items > 0 then
       if menu.state.offset <= ctx.cursor.col then
+        debug.log('menu/restore')
         vim.fn.complete(menu.state.offset, menu.state.filtered_items)
       end
     end
