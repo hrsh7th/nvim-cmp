@@ -1,5 +1,8 @@
 local context = require'cmp.context'
+local matcher = require'cmp.matcher'
+local config = require'cmp.config'
 local entry = require'cmp.entry'
+local binary = require'cmp.utils.binary'
 local debug = require'cmp.utils.debug'
 local misc = require'cmp.utils.misc'
 local cache = require "cmp.utils.cache"
@@ -76,8 +79,29 @@ source.get_entries = function(self, ctx)
   end
 
   local input = string.sub(ctx.cursor_before_line, self.offset)
-  return self.cache:ensure({ 'get_entries', input, self.revision }, function()
 
+  local prev_entries = (function()
+    local key = { 'get_entries', self.revision }
+    for i = ctx.cursor.col, self.offset + 1, -1 do
+      key[3] = string.sub(ctx.cursor_before_line, self.offset, i)
+      local prev_entries = self.cache:get(key)
+      if prev_entries then
+        return prev_entries
+      end
+    end
+    return nil
+  end)()
+
+  return self.cache:ensure({ 'get_entries', self.revision, input }, function()
+    local entries = {}
+    for _, e in ipairs(prev_entries or self.entries) do
+      e.score = matcher.match(input, e:get_filter_text(self.offset))
+      if e.score >= 1 then
+        local idx = binary.search(entries, e, config.get().compare)
+        table.insert(entries, idx, e)
+      end
+    end
+    return entries
   end)
 end
 

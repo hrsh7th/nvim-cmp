@@ -7,7 +7,7 @@ local lsp = require "cmp.types.lsp"
 ---@field public default_insert_mode "'replace'" | "'insert'"
 ---@field public commit_characters fun(e:cmp.Entry):string[]
 ---@field public format fun(entry: cmp.Entry, word: string, abbr: string, menu: string): vim.CompletedItem
----@field public sort fun(entry1: cmp.Entry, entry2: cmp.Entry): number
+---@field public compare fun(entry1: cmp.Entry, entry2: cmp.Entry): number
 
 local default = {
   revision = 1,
@@ -35,7 +35,7 @@ local default = {
   ---@param entry1 cmp.Entry
   ---@param entry2 cmp.Entry
   ---@return number
-  sort = function(entry1, entry2)
+  compare = function(entry1, entry2)
     -- score
     if entry1.score ~= entry2.score then
       return entry2.score - entry1.score

@@ -216,8 +216,8 @@ end
 entry.get_commit_characters = function(self)
   local commit_characters = {}
   local completion_item = self:get_completion_item()
-  misc.merge(commit_characters, misc.safe(completion_item.commitCharacters) or {})
-  misc.merge(commit_characters, config.get().commit_characters(self))
+  misc.concat(commit_characters, misc.safe(completion_item.commitCharacters) or {})
+  misc.concat(commit_characters, config.get().commit_characters(self))
   return commit_characters
 end
 

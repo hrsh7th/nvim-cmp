@@ -1,7 +1,5 @@
 local config = require'cmp.config'
-local binary = require'cmp.utils.binary'
 local debug = require'cmp.utils.debug'
-local matcher = require'cmp.matcher'
 
 local menu = {}
 
@@ -73,17 +71,25 @@ menu.update = function(ctx, sources)
   local filtered_items = {}
   local offset = ctx.offset
   for _, s in ipairs(sources) do
-    if s.offset ~= nil then
-      local input = string.sub(ctx.cursor_before_line, s.offset)
-      for _, e in ipairs(s.entries) do
-        e.score = matcher.match(input, e:get_filter_text(s.offset))
-        if e.score >= 1 then
-          offset = math.min(offset, e:get_offset())
-          local idx = binary.search(filtered_entries, e, config.get().sort)
-          table.insert(filtered_entries, idx, e)
-          table.insert(filtered_items, idx, e:get_vim_item(s.offset))
+    local i = 1
+    for _, e in ipairs(s:get_entries(ctx)) do
+      local j = i
+      while j <= #filtered_entries do
+        local cmp = config.get().compare(e, filtered_entries[j])
+        if cmp <= 0 then
+          table.insert(filtered_entries, j, e)
+          table.insert(filtered_items, j, e:get_vim_item(s.offset))
+          i = j + 1
+          break
         end
+        j = j + 1
       end
+      if j > #filtered_entries then
+        table.insert(filtered_entries, e)
+        table.insert(filtered_items, e:get_vim_item(s.offset))
+        i = j + 1
+      end
+      offset = math.min(offset, e:get_offset())
     end
   end
   menu.state.offset = offset

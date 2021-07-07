@@ -4,7 +4,7 @@ local misc = {}
 ---@param list1 any[]
 ---@param list2 any[]
 ---@return any[]
-misc.merge = function(list1, list2)
+misc.concat = function(list1, list2)
   for _, v in ipairs(list2) do
     table.insert(list1, v)
   end
