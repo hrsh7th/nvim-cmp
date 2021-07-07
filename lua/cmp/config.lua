@@ -6,7 +6,7 @@ local lsp = require "cmp.types.lsp"
 ---@field private revision number
 ---@field public default_insert_mode "'replace'" | "'insert'"
 ---@field public commit_characters fun(e:cmp.Entry):string[]
----@field public format fun(entry: cmp.Entry, word: string, abbr: string): vim.CompletedItem
+---@field public format fun(entry: cmp.Entry, word: string, abbr: string, menu: string): vim.CompletedItem
 ---@field public sort fun(entry1: cmp.Entry, entry2: cmp.Entry): number
 
 local default = {
@@ -74,12 +74,14 @@ local default = {
   ---@param entry cmp.Entry
   ---@param word string
   ---@param abbr string
+  ---@param menu string
   ---@return vim.CompletedItem
-  format = function(entry, word, abbr)
+  format = function(entry, word, abbr, menu)
     return {
       word = word,
       abbr = abbr,
       kind = vim.lsp.protocol.CompletionItemKind[misc.safe(entry.completion_item.kind) or 1] or vim.lsp.protocol.CompletionItemKind[1],
+      menu = menu,
       equal = 1,
       empty = 1,
       dup = 1,

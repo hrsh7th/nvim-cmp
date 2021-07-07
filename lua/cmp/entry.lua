@@ -147,6 +147,7 @@ end
 ---@return vim.CompletedItem
 entry.get_vim_item = function(self, offset)
   return self.cache:ensure({ 'get_vim_item', offset }, function()
+    local item = self:get_completion_item()
     local word = self:get_word()
     local abbr = str.trim(self.completion_item.label)
 
@@ -157,14 +158,28 @@ entry.get_vim_item = function(self, offset)
       end
     end
 
-    if self.completion_item.insertTextFormat == 2 then
+    if item.insertTextFormat == lsp.InsertTextFormat.Snippet then
       local insert_text = self:get_insert_text()
       if not (word == insert_text or (word .. '$0') == insert_text or (word .. '${0}') == insert_text) then
         abbr = abbr .. '~'
       end
     end
 
-    return config.get().format(self, word, abbr)
+    local menu = nil
+    if misc.safe(item.labelDetails) then
+      menu = ''
+      if misc.safe(item.labelDetails.parameters) then
+        menu = menu .. item.labelDetails.parameters
+      end
+      if misc.safe(item.labelDetails.type) then
+        menu = menu .. item.labelDetails.type
+      end
+      if misc.safe(item.labelDetails.qualifier) then
+        menu = menu .. item.labelDetails.qualifier
+      end
+    end
+
+    return config.get().format(self, word, abbr, menu)
   end)
 end
 
