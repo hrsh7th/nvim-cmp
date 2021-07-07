@@ -180,10 +180,16 @@ entry.get_filter_text = function(self, offset)
     else
       text = str.trim(self.completion_item.label)
     end
+    if self:get_offset() ~= self.context.offset  then
+      local diff = string.sub(self.context.cursor_before_line, self:get_offset(), self.context.offset - 1)
+      if string.find(text, diff, 1, true) ~= 1 then
+        text = diff .. text
+      end
+    end
     if offset ~= self:get_offset() then
       local diff = string.sub(self.context.cursor_before_line, offset, self:get_offset() - 1)
       if string.find(text, diff, 1, true) ~= 1 then
-        return diff .. text
+        text = diff .. text
       end
     end
     return text

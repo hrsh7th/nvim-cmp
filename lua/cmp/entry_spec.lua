@@ -51,7 +51,7 @@ describe('entry', function()
       assert.are.equal(e:get_vim_item(e:get_offset()).word, '</div')
     end)
 
-    it('clangd dot notation', function()
+    it('[clangd] 1', function()
       local state = spec.state("foo", 1, 4)
       local e = entry.new(state.press('.'), {}, {
         insertText = "->foo",
@@ -70,9 +70,41 @@ describe('entry', function()
           }
         }
       })
-      assert.are.equal(e:get_offset(), 4)
-      assert.are.equal(e:get_vim_item(e:get_offset()).word, '->foo')
-      assert.are.equal(e:get_filter_text(4, '.'), '.->foo')
+      assert.are.equal(e:get_vim_item(4).word, '->foo')
+      assert.are.equal(e:get_filter_text(4), '.foo')
+    end)
+
+    it('[typescript-language-server] 1', function()
+      local state = spec.state("Promise.resolve()", 1, 18)
+      local e = entry.new(state.press('.'), {}, {
+        label = "catch",
+      })
+      -- The offset will be 18 in this situation because the server returns `[Symbol]` as candidate.
+      assert.are.equal(e:get_vim_item(18).word, '.catch')
+      assert.are.equal(e:get_filter_text(18), '.catch')
+    end)
+
+    it('[typescript-language-server] 2', function()
+      local state = spec.state("Promise.resolve()", 1, 18)
+      local e = entry.new(state.press('.'), {}, {
+        filterText = ".Symbol",
+        label = "Symbol",
+        textEdit = {
+          newText = "[Symbol]",
+          range = {
+            ['end'] = {
+              character = 18,
+              line = 0
+            },
+            start = {
+              character = 17,
+              line = 0
+            }
+          }
+        }
+      })
+      assert.are.equal(e:get_vim_item(18).word, '[Symbol]')
+      assert.are.equal(e:get_filter_text(18), '.Symbol')
     end)
   end)
 
