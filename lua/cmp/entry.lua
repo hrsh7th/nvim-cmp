@@ -129,7 +129,7 @@ entry.get_word = function(self)
   end)
 end
 
----Get insert text
+---Get LSP's insert text
 ---@return string
 entry.get_insert_text = function(self)
   return self.cache:ensure('get_insert_text', function()
@@ -150,9 +150,11 @@ entry.get_vim_item = function(self, offset)
     local word = self:get_word()
     local abbr = str.trim(self.completion_item.label)
 
-    local own_offset = self:get_offset()
-    if misc.safe(self.completion_item.textEdit) and offset ~= own_offset then
-      word = string.sub(self.context.offset_before_line, offset, own_offset - 1) .. word
+    if offset ~= self:get_offset() then
+      local diff = string.sub(self.context.cursor_before_line, offset, self:get_offset() - 1)
+      if string.find(word, diff, 1, true) ~= 1 then
+        word = diff .. word
+      end
     end
 
     if self.completion_item.insertTextFormat == 2 then
@@ -167,22 +169,24 @@ entry.get_vim_item = function(self, offset)
 end
 
 ---Create filter text
+---TODO: Consider to use word that match prefixes.
+---@param offset number
 ---@return string
-entry.get_filter_text = function(self, offset, input)
-  return self.cache:ensure({ 'get_filter_text', offset, input }, function()
-    local diff = ''
-    if misc.safe(self.completion_item.textEdit) then
-      if self:get_offset() ~= self.context.offset then
-        diff = string.sub(self.context.offset_before_line, self:get_offset(), offset)
+entry.get_filter_text = function(self, offset)
+  return self.cache:ensure({ 'get_filter_text', offset }, function()
+    local text
+    if misc.safe(self.completion_item.filterText) then
+      text = self.completion_item.filterText
+    else
+      text = str.trim(self.completion_item.label)
+    end
+    if offset ~= self:get_offset() then
+      local diff = string.sub(self.context.cursor_before_line, offset, self:get_offset() - 1)
+      if string.find(text, diff, 1, true) ~= 1 then
+        return diff .. text
       end
     end
-    if misc.safe(self.completion_item.filterText) then
-      return diff .. self.completion_item.filterText
-    end
-    if str.has_prefix(diff .. self:get_word(), input) then
-      return diff .. self:get_word()
-    end
-    return diff .. str.trim(self.completion_item.label)
+    return text
   end)
 end
 
@@ -191,14 +195,8 @@ end
 entry.get_commit_characters = function(self)
   local commit_characters = {}
   local completion_item = self:get_completion_item()
-  if completion_item.commitCharacters then
-    misc.merge(commit_characters, commit_characters)
-  end
-  if type(config.get().commit_characters) =='function' then
-    misc.merge(commit_characters, config.get().commit_characters(self))
-  else
-    misc.merge(commit_characters, config.get().commit_characters)
-  end
+  misc.merge(commit_characters, misc.safe(completion_item.commitCharacters) or {})
+  misc.merge(commit_characters, config.get().commit_characters(self))
   return commit_characters
 end
 
@@ -229,7 +227,6 @@ end
 ---@param offset number
 ---@param callback fun()|nil
 entry.confirm = function(self, offset, callback)
-
   -- resolve
   async.sync(function(done)
     self:resolve(done)
@@ -279,6 +276,7 @@ entry.resolve = function(self, callback)
     return callback()
   end
   table.insert(self.resolved_callbacks, callback)
+
   if not self.resolving then
     self.resolving = true
     self.source:resolve(self.completion_item, function(completion_item)

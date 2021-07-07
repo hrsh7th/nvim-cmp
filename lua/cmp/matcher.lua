@@ -6,7 +6,6 @@ matcher.WORD_BOUNDALY_ORDER_FACTOR = 5
 
 matcher.PREFIX_FACTOR = 8
 matcher.NOT_FUZZY_FACTOR = 6
-matcher.EXACT_FACTOR = 0
 
 --- score
 --
@@ -82,7 +81,7 @@ matcher.match = function(input, word)
 
   --- Gather matched regions
   local matches = {}
-  local input_start_index = 0
+  local input_start_index = 1
   local input_end_index = 1
   local word_index = 1
   local word_bound_index = 1
@@ -159,7 +158,7 @@ end
 --- find_match_region
 matcher.find_match_region = function(input, input_start_index, input_end_index, word, word_index)
   -- determine input position ( woroff -> word_offset )
-  while input_start_index < input_end_index do
+  while input_start_index - 1 < input_end_index do
     if char.match(string.byte(input, input_end_index), string.byte(word, word_index)) then
       break
     end
@@ -167,7 +166,7 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
   end
 
   -- Can't determine input position
-  if input_start_index == input_end_index then
+  if input_start_index - 1 == input_end_index then
     return nil
   end
 

@@ -25,9 +25,8 @@ menu.state.context = nil
 ---Get active item
 ---@return cmp.Entry|nil
 menu.get_active_item = function()
-  -- TODO: vim.v.completed_item would remain even after completion so it may cause bugs.
-  local completed_item = vim.v.completed_item
-  if not completed_item or not completed_item.word or not completed_item.user_data then
+  local completed_item = vim.v.completed_item or {}
+  if vim.fn.pumvisible() == 0 or not completed_item.user_data then
     return nil
   end
 
@@ -64,29 +63,28 @@ end
 
 ---Show completion menu
 ---@param ctx cmp.Context
+---@param sources cmp.Source[]
 menu.update = function(ctx, sources)
   if not (ctx.mode == 'i' or ctx.mode == 'ic') then
     return
   end
 
   local filtered_entries = {}
+  local filtered_items = {}
   local offset = ctx.offset
   for _, s in ipairs(sources) do
     if s.offset ~= nil then
-      local input = string.sub(ctx.cursor_line, s.offset, ctx.cursor.col - 1)
+      local input = string.sub(ctx.cursor_before_line, s.offset)
       for _, e in ipairs(s.entries) do
-        e.score = matcher.match(input, e:get_filter_text(s.offset, input))
+        e.score = matcher.match(input, e:get_filter_text(s.offset))
         if e.score >= 1 then
           offset = math.min(offset, e:get_offset())
           local idx = binary.search(filtered_entries, e, config.get().sort)
           table.insert(filtered_entries, idx, e)
+          table.insert(filtered_items, idx, e:get_vim_item(s.offset))
         end
       end
     end
-  end
-  local filtered_items = {}
-  for _, e in ipairs(filtered_entries) do
-    table.insert(filtered_items, e:get_vim_item(offset))
   end
   menu.state.offset = offset
   menu.state.filtered_entries = filtered_entries

@@ -54,6 +54,10 @@ end
 
 ---Check auto-completion
 core.autocomplete = function()
+  if menu.get_active_item() then
+    return
+  end
+
   local ctx = core.get_context()
   debug.log(('ctx: `%s`'):format(ctx.cursor_before_line))
   if ctx:changed() then
@@ -73,21 +77,21 @@ core.complete = function(ctx)
   for _, s in ipairs(core.get_sources(ctx)) do
     triggered = s:complete(ctx, function()
       if #core.get_sources(ctx, { source.SourceStatus.FETCHING }) > 0 then
-        core.update.timeout = 200
+        core.filter.timeout = 200
       else
-        core.update.timeout = 0
+        core.filter.timeout = 0
       end
-      core.update()
+      core.filter()
     end) or triggered
   end
   if not triggered then
-    core.update.timeout = 0
-    core.update()
+    core.filter.timeout = 0
+    core.filter()
   end
 end
 
 ---Update completion menu
-core.update = async.debounce(function()
+core.filter = async.debounce(function()
   local ctx = core.get_context()
   menu.update(ctx, core.get_sources(ctx, { source.SourceStatus.FETCHING, source.SourceStatus.COMPLETED }))
 end, 200)
