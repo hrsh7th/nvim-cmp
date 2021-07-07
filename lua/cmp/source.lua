@@ -147,7 +147,6 @@ source.complete = function(self, ctx, callback)
       debug.log('continue', self.name, self.id, 'nil')
       self.status = prev_status
     end
-    print(vim.inspect(response))
     callback()
   end)
   return true
