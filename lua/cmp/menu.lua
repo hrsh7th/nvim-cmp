@@ -1,134 +1,85 @@
 local config = require'cmp.config'
 local debug = require'cmp.utils.debug'
 
+---@class cmp.Menu
+---@field public offset number
+---@field public items vim.CompletedItem
+---@field public context cmp.Context
 local menu = {}
 
----@alias cmp.FilterKind "1" | "2"
-menu.FilterKind = {}
-menu.FilterKind.CONTINUE = 1
-menu.FilterKind.REFRESH = 2
-
----@class cmp.State
----@field public offset number|nil
----@field public entries cmp.Entry[]
----@field public filtered_entries cmp.Entry[]
----@field public context cmp.Context
-menu.state = {}
-menu.state.offset = nil
-menu.state.entries = {}
-menu.state.filtered_entries = {}
-menu.state.filtered_items = {}
-menu.state.context = nil
-
----Get active item
----@return cmp.Entry|nil
-menu.get_active_item = function()
-  local completed_item = vim.v.completed_item or {}
-  if vim.fn.pumvisible() == 0 or not completed_item.user_data then
-    return nil
-  end
-
-  local id = completed_item.user_data.cmp
-  for _, e in ipairs(menu.state.filtered_entries) do
-    if e.id == id then
-      return e
-    end
-  end
-  return nil
+---Create menu
+---@return cmp.Menu
+menu.new = function()
+  local self = setmetatable({}, { __index = menu })
+  self:reset()
+  return self
 end
 
----Get selected item
----@return cmp.Entry|nil
-menu.get_selected_item = function()
-  local info = vim.fn.complete_info({ 'items', 'selected' })
-  if info.selected == -1 then
-    return nil
-  end
-
-  local completed_item = info.items[math.max(info.selected, 0) + 1]
-  if not completed_item or not completed_item.word or not completed_item.user_data then
-    return nil
-  end
-
-  local id = completed_item.user_data.cmp
-  for _, e in ipairs(menu.state.filtered_entries) do
-    if e.id == id then
-      return e
-    end
-  end
-  return nil
+---Reset menu
+menu.reset = function(self)
+  self.offset = nil
+  self.items = {}
+  self.context = nil
 end
 
----Show completion menu
+---Update menu
 ---@param ctx cmp.Context
 ---@param sources cmp.Source[]
-menu.update = function(ctx, sources)
+---@return cmp.Menu
+menu.update = function(self, ctx, sources)
   if not (ctx.mode == 'i' or ctx.mode == 'ic') then
     return
   end
 
-  local filtered_entries = {}
-  local filtered_items = {}
+  local entries = {}
+  local items = {}
   local offset = ctx.offset
   for _, s in ipairs(sources) do
     local i = 1
     for _, e in ipairs(s:get_entries(ctx)) do
       local j = i
-      while j <= #filtered_entries do
-        local cmp = config.get().compare(e, filtered_entries[j])
+      while j <= #entries do
+        local cmp = config.get().compare(e, entries[j])
         if cmp <= 0 then
-          table.insert(filtered_entries, j, e)
-          table.insert(filtered_items, j, e:get_vim_item(s.offset))
+          table.insert(entries, j, e)
+          table.insert(items, j, e:get_vim_item(s.offset))
           i = j + 1
           break
         end
         j = j + 1
       end
-      if j > #filtered_entries then
-        table.insert(filtered_entries, e)
-        table.insert(filtered_items, e:get_vim_item(s.offset))
+      if j > #entries then
+        table.insert(entries, e)
+        table.insert(items, e:get_vim_item(s.offset))
         i = j + 1
       end
       offset = math.min(offset, e:get_offset())
     end
   end
-  menu.state.offset = offset
-  menu.state.filtered_entries = filtered_entries
-  menu.state.filtered_items = filtered_items
-  menu.state.context = ctx
+  self.offset = offset
+  self.items = items
+  self.context = ctx
 
-  if vim.fn.pumvisible() == 0 and #filtered_entries == 0 then
+  if vim.fn.pumvisible() == 0 and #items == 0 then
     debug.log('menu/not-show')
     return
   end
-  debug.log('menu/show', offset, #menu.state.filtered_items)
-  vim.fn.complete(offset, menu.state.filtered_items)
-end
-
----Reset current state
-menu.reset = function()
-  menu.state = {}
-  menu.state.offset = nil
-  menu.state.entries = {}
-  menu.state.filtered_entries = {}
-  menu.state.filtered_items = {}
-  menu.state.context = nil
-  if vim.fn.pumvisible() == 1 then
-    vim.fn.complete(1, {})
-  end
+  debug.log('menu/show', offset, #self.items)
+  vim.fn.complete(offset, self.items)
 end
 
 ---Restore previous menu
-menu.restore = function(ctx)
+---@param ctx cmp.Context
+menu.restore = function(self, ctx)
   if not (ctx.mode == 'i' or ctx.mode == 'ic') then
     return
   end
 
   if not ctx.pumvisible then
-    if #menu.state.filtered_items > 0 then
-      if menu.state.offset <= ctx.cursor.col then
+    if #self.items > 0 then
+      if self.offset <= ctx.cursor.col then
         debug.log('menu/restore')
-        vim.fn.complete(menu.state.offset, menu.state.filtered_items)
+        vim.fn.complete(self.offset, self.items)
       end
     end
   end

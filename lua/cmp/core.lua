@@ -17,6 +17,9 @@ core.context = context.new()
 ---@type number
 core.namespace = vim.api.nvim_create_namespace('cmp')
 
+---@type cmp.Menu
+core.menu = menu.new()
+
 ---Register source
 ---@param s cmp.Source
 core.register_source = function(s)
@@ -54,7 +57,7 @@ end
 
 ---Check auto-completion
 core.autocomplete = function()
-  if menu.get_active_item() then
+  if core.get_active_entry() then
     return
   end
 
@@ -71,7 +74,7 @@ end
 ---Invoke completion
 ---@param ctx cmp.Context
 core.complete = function(ctx)
-  menu.restore(ctx)
+  core.menu:restore(ctx)
 
   local triggered = false
   for _, s in ipairs(core.get_sources(ctx)) do
@@ -93,12 +96,12 @@ end
 ---Update completion menu
 core.filter = async.debounce(function()
   local ctx = core.get_context()
-  menu.update(ctx, core.get_sources(ctx, { source.SourceStatus.FETCHING, source.SourceStatus.COMPLETED }))
+  core.menu:update(ctx, core.get_sources(ctx, { source.SourceStatus.FETCHING, source.SourceStatus.COMPLETED }))
 end, 200)
 
 ---Select completion item
 core.select = function()
-  local e = menu.get_selected_item()
+  local e = core.get_selected_entry()
   if e then
     -- Add commit character listeners.
     for _, key in ipairs(e:get_commit_characters()) do
@@ -129,7 +132,7 @@ end
 ---@param c string
 ---@param fallback fun()
 core.on_commit_char = function(c, fallback)
-  local e = menu.get_selected_item()
+  local e = core.get_selected_entry()
   if not (e and not e.confirmed) then
     return fallback()
   end
@@ -153,23 +156,64 @@ core.on_commit_char = function(c, fallback)
   end)
 end
 
+---Get current active entry
+---@return nil
+core.get_active_entry = function()
+  local completed_item = vim.v.completed_item or {}
+  if vim.fn.pumvisible() == 0 or not completed_item.user_data then
+    return nil
+  end
+
+  local id = completed_item.user_data.cmp
+  for _, s in ipairs(core.sources) do
+    local e = s:find_entry_by_id(id)
+    if e then
+      return e
+    end
+  end
+  return nil
+end
+
+---Get current selected entry
+---@return nil
+core.get_selected_entry = function()
+  local info = vim.fn.complete_info({ 'items', 'selected' })
+  if info.selected == -1 then
+    return nil
+  end
+
+  local completed_item = info.items[math.max(info.selected, 0) + 1]
+  if not completed_item or not completed_item.word or not completed_item.user_data then
+    return nil
+  end
+
+  local id = completed_item.user_data.cmp
+  for _, s in ipairs(core.sources) do
+    local e = s:find_entry_by_id(id)
+    if e then
+      return e
+    end
+  end
+  return nil
+end
+
 ---Confirm completion.
 ---@param e cmp.Entry
 core.confirm = function(e)
   if not (e and not e.confirmed) then
     return
   end
-  e:confirm(menu.state.offset)
+  e:confirm(core.menu.offset)
   core.reset()
 end
 
 ---Reset current completion state
 core.reset = function()
   core.get_context() -- reset for new context
-  menu.reset()
   for _, s in pairs(core.sources) do
     s:reset()
   end
+  core.menu:reset()
   vim.api.nvim_buf_clear_namespace(0, core.namespace, 0, -1)
 end
 

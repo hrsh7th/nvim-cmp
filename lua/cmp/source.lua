@@ -105,6 +105,18 @@ source.get_entries = function(self, ctx)
   end)
 end
 
+---Find entry by id
+---@param id number
+---@return cmp.Entry|nil
+source.find_entry_by_id = function(self, id)
+  for _, e in ipairs(self.entries) do
+    if e.id == id then
+      return e
+    end
+  end
+  return nil
+end
+
 ---Get trigger_characters
 ---@return string[]
 source.get_trigger_characters = function(self)
