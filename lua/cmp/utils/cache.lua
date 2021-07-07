@@ -38,6 +38,11 @@ cache.ensure = function(self, key, callback)
   return self:get(key)
 end
 
+---Clear all cache entries
+cache.clear = function(self)
+  self.entries = {}
+end
+
 ---Create key
 ---@param key string|table
 ---@return string

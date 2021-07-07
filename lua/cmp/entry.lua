@@ -1,5 +1,6 @@
 local async = require'cmp.utils.async'
 local cache = require'cmp.utils.cache'
+local debug = require'cmp.utils.debug'
 local char = require'cmp.utils.char'
 local misc = require'cmp.utils.misc'
 local str = require "cmp.utils.str"
@@ -45,8 +46,15 @@ entry.new = function(ctx, source, completion_item)
     else
       self.insert_range = lsp.Range.to_vim(ctx.bufnr, self.completion_item.textEdit.range)
     end
+  else
+    self.insert_range = {
+      start = {
+        row = ctx.insert_range.start.row,
+        col = math.min(ctx.insert_range.start.col, self:get_offset())
+      },
+      ['end'] = ctx.insert_range['end']
+    }
   end
-  self.insert_range = self.insert_range or ctx.insert_range
 
   if misc.safe(self.completion_item.textEdit) then
     if misc.safe(self.completion_item.textEdit.replace) then
@@ -54,8 +62,15 @@ entry.new = function(ctx, source, completion_item)
     else
       self.replace_range = lsp.Range.to_vim(ctx.bufnr, self.completion_item.textEdit.range)
     end
+  else
+    self.replace_range = {
+      start = {
+        row = ctx.replace_range.start.row,
+        col = math.min(ctx.replace_range.start.col, self:get_offset())
+      },
+      ['end'] = ctx.replace_range['end']
+    }
   end
-  self.replace_range = self.replace_range or ctx.replace_range
 
   return self
 end
@@ -65,14 +80,14 @@ end
 entry.get_offset = function(self)
   return self.cache:ensure('get_offset', function()
     local offset = self.context.offset
-    local word_and_abbr = self:get_word_and_abbr()
+    local word = self:get_word()
     if misc.safe(self.completion_item.textEdit) then
-      local c = string.byte(word_and_abbr.word, 1)
       for _, range in ipairs({ self.completion_item.textEdit.insert or vim.NIL, self.completion_item.textEdit.range or vim.NIL }) do
         if misc.safe(range) then
           for idx = range.start.character + 1, self.context.offset do
-            if c == string.byte(self.context.cursor_line, idx) then
+            if not char.is_white(string.byte(self.context.cursor_line, idx)) then
               offset = math.min(offset, idx)
+              break
             end
           end
         end
@@ -81,7 +96,7 @@ entry.get_offset = function(self)
       -- NOTE
       -- The VSCode does not implement this but it's useful if the server does not care about word patterns.
       -- We should care about this performance.
-      for idx = #self.context.offset_before_line, #self.context.offset_before_line - #word_and_abbr.word + 1, -1 do
+      for idx = #self.context.offset_before_line, #self.context.offset_before_line - #word, -1 do
         local c = string.byte(self.context.offset_before_line, idx)
         if char.is_white(c) then
           break
@@ -89,7 +104,7 @@ entry.get_offset = function(self)
         if char.is_semantic_index(self.context.offset_before_line, idx) then
           local match = true
           for i = 1, #self.context.offset_before_line - idx + 1  do
-            local c1 = string.byte(word_and_abbr.word, i)
+            local c1 = string.byte(word, i)
             local c2 = string.byte(self.context.offset_before_line, idx + i - 1)
             if not c1 or not c2 or c1 ~= c2 then
               match = false
@@ -106,32 +121,24 @@ entry.get_offset = function(self)
   end)
 end
 
----Create word and abbr for vim.CompletedItem
----@return table<string, string>
-entry.get_word_and_abbr = function(self)
-  return self.cache:ensure('get_word_and_abbr', function()
-    --- create word and abbr.
-    local word
-    local abbr
-    local expandable = false
-    if self.completion_item.insertTextFormat == 2 then
-      abbr = str.trim(self.completion_item.label)
-      if misc.safe(self.completion_item.textEdit) then
-        word = str.trim(self.completion_item.textEdit.newText)
-        word = str.get_word(word)
-        expandable = true
-      elseif misc.safe(self.completion_item.insertText) then
-        word = str.trim(self.completion_item.insertText)
-        word = str.get_word(word)
-        expandable = true
-      else
-        word = str.trim(self.completion_item.label)
-      end
-    else
-      word = str.trim(self.completion_item.insertText or self.completion_item.label)
-      abbr = str.trim(self.completion_item.label)
+---Create word for vim.CompletedItem
+---@return string
+entry.get_word = function(self)
+  return self.cache:ensure('get_word', function()
+    return str.get_word(self:get_insert_text())
+  end)
+end
+
+---Get insert text
+---@return string
+entry.get_insert_text = function(self)
+  return self.cache:ensure('get_insert_text', function()
+    if misc.safe(self.completion_item.insertText) then
+      return str.trim(self.completion_item.insertText)
+    elseif misc.safe(self.completion_item.textEdit) then
+      return str.trim(self.completion_item.textEdit.newText)
     end
-    return { word = word or '', abbr = abbr or '', expandable = expandable, }
+    return str.trim(self.completion_item.label)
   end)
 end
 
@@ -140,18 +147,19 @@ end
 ---@return vim.CompletedItem
 entry.get_vim_item = function(self, offset)
   return self.cache:ensure({ 'get_vim_item', offset }, function()
-    local word_and_abbr = self:get_word_and_abbr()
-    local word = word_and_abbr.word
-    local abbr = word_and_abbr.abbr
-    local expandable = word_and_abbr.expandable
+    local word = self:get_word()
+    local abbr = str.trim(self.completion_item.label)
 
     local own_offset = self:get_offset()
     if misc.safe(self.completion_item.textEdit) and offset ~= own_offset then
       word = string.sub(self.context.offset_before_line, offset, own_offset - 1) .. word
     end
 
-    if expandable then
-      abbr = abbr .. '~'
+    if self.completion_item.insertTextFormat == 2 then
+      local insert_text = self:get_insert_text()
+      if not (word == insert_text or (word .. '$0') == insert_text or (word .. '${0}') == insert_text) then
+        abbr = abbr .. '~'
+      end
     end
 
     return config.get().format(self, word, abbr)
@@ -160,23 +168,21 @@ end
 
 ---Create filter text
 ---@return string
-entry.get_filter_text = function(self)
-  return self.cache:ensure('get_filter_text', function()
+entry.get_filter_text = function(self, offset, input)
+  return self.cache:ensure({ 'get_filter_text', offset, input }, function()
+    local diff = ''
+    if misc.safe(self.completion_item.textEdit) then
+      if self:get_offset() ~= self.context.offset then
+        diff = string.sub(self.context.offset_before_line, self:get_offset(), offset)
+      end
+    end
     if misc.safe(self.completion_item.filterText) then
-      return self.completion_item.filterText
+      return diff .. self.completion_item.filterText
     end
-    return self.completion_item.label
-  end)
-end
-
----Return sort text
----@return string
-entry.get_sort_text = function(self)
-  return self.cache:ensure('get_sort_text', function()
-    if misc.safe(self.completion_item.sortText) then
-      return self.completion_item.sortText
+    if str.has_prefix(diff .. self:get_word(), input) then
+      return diff .. self:get_word()
     end
-    return self.completion_item.label
+    return diff .. str.trim(self.completion_item.label)
   end)
 end
 
@@ -223,10 +229,13 @@ end
 ---@param offset number
 ---@param callback fun()|nil
 entry.confirm = function(self, offset, callback)
+
   -- resolve
   async.sync(function(done)
     self:resolve(done)
   end, 1000)
+
+  debug.log('entry.confirm', self:get_completion_item())
 
   -- confirm
   local completion_item = misc.copy(self:get_completion_item())

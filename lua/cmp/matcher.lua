@@ -6,7 +6,7 @@ matcher.WORD_BOUNDALY_ORDER_FACTOR = 5
 
 matcher.PREFIX_FACTOR = 8
 matcher.NOT_FUZZY_FACTOR = 6
-matcher.EXACT_FACTOR = 12
+matcher.EXACT_FACTOR = 0
 
 --- score
 --
@@ -70,11 +70,6 @@ matcher.EXACT_FACTOR = 12
 ---@param word string
 ---@return number
 matcher.match = function(input, word)
-  -- Exact
-  if input == word then
-    return matcher.PREFIX_FACTOR + matcher.NOT_FUZZY_FACTOR + matcher.EXACT_FACTOR
-  end
-
   -- Empty input
   if #input == 0 then
     return matcher.PREFIX_FACTOR + matcher.NOT_FUZZY_FACTOR
@@ -158,7 +153,7 @@ matcher.match = function(input, word)
     return 0
   end
 
-  return score
+  return score + matcher.NOT_FUZZY_FACTOR
 end
 
 --- find_match_region

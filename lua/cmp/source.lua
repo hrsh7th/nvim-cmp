@@ -2,13 +2,14 @@ local context = require'cmp.context'
 local entry = require'cmp.entry'
 local debug = require'cmp.utils.debug'
 local misc = require'cmp.utils.misc'
-local lsp = require'cmp.types.lsp'
 local cache = require "cmp.utils.cache"
+local lsp = require'cmp.types.lsp'
 
 ---@class cmp.Source
 ---@field public id number
 ---@field public name string
 ---@field public source any
+---@field public cache cmp.utils.Cache
 ---@field public revision number
 ---@field public context cmp.Context
 ---@field public incomplete boolean
@@ -33,8 +34,8 @@ source.new = function(name, s)
   local self = setmetatable({}, { __index = source })
   self.id = misc.id('source')
   self.name = name
-  self.cache = cache.new()
   self.source = s
+  self.cache = cache.new()
   self.revision = 0
   self:reset()
   return self
@@ -43,11 +44,12 @@ end
 ---Reset current completion state
 ---@return boolean
 source.reset = function(self)
-  self.context = context.empty()
+  self.cache:clear()
   self.revision = self.revision + 1
+  self.context = context.empty()
   self.incomplete = false
-  self.offest = nil
   self.entries = {}
+  self.offest = nil
   self.status = source.SourceStatus.WAITING
 end
 
@@ -59,14 +61,43 @@ source.match = function(self, ctx)
   return self.source:match(ctx)
 end
 
+---Return the source has items or not.
+---@return boolean
+source.has_items = function(self)
+  return self.offset ~= nil
+end
+
+---Return filtered entries
+---@param ctx cmp.Context
+---@return cmp.Entry[]
+source.get_entries = function(self, ctx)
+  if not self:has_items() then
+    return {}
+  end
+
+  local input = string.sub(ctx.cursor_before_line, self.offset)
+  return self.cache:ensure({ 'get_entries', input, self.revision }, function()
+
+  end)
+end
+
+---Get trigger_characters
+---@return string[]
+source.get_trigger_characters = function(self)
+  if self.source.get_trigger_characters then
+    return self.source:get_trigger_characters() or {}
+  end
+  return {}
+end
+
 ---Invoke completion
 ---@param ctx cmp.Context
 ---@param callback function
 ---@return boolean Return true if not trigger completion.
 source.complete = function(self, ctx, callback)
   if self.offset then
-    if ctx.cursor.col < self.offset then
-      self:reset()
+    if not ctx:maybe_continue(self.offset) then
+        self:reset()
     end
   end
 
@@ -119,15 +150,6 @@ source.complete = function(self, ctx, callback)
     callback()
   end)
   return true
-end
-
----Get trigger_characters
----@return string[]
-source.get_trigger_characters = function(self)
-  if self.source.get_trigger_characters then
-    return self.source:get_trigger_characters() or {}
-  end
-  return {}
 end
 
 ---Resolve CompletionItem

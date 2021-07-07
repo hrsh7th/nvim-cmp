@@ -23,8 +23,10 @@ end
 ---Receive vim autocmds
 ---@param name string
 cmp._on_event = function(name)
+  debug.log('')
+  debug.log('----------------------------------------------------------------------------------------------------')
   if vim.fn.getchar(1) ~= 0 then
-    return debug.log('>>> ignore event: ' .. name)
+    return debug.log('!!! ignore event: ' .. name)
   end
 
   debug.log('>>> ' .. name)

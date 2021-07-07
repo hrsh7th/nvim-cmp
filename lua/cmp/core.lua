@@ -54,8 +54,6 @@ end
 
 ---Check auto-completion
 core.autocomplete = function()
-  debug.log('')
-  debug.log('----------------------------------------------------------------------------------------------------')
   local ctx = core.get_context()
   debug.log(('ctx: `%s`'):format(ctx.cursor_before_line))
   if ctx:changed() then
@@ -75,7 +73,7 @@ core.complete = function(ctx)
   for _, s in ipairs(core.get_sources(ctx)) do
     triggered = s:complete(ctx, function()
       if #core.get_sources(ctx, { source.SourceStatus.FETCHING }) > 0 then
-        core.update.timeout = 100
+        core.update.timeout = 200
       else
         core.update.timeout = 0
       end
@@ -91,7 +89,7 @@ end
 ---Update completion menu
 core.update = async.debounce(function()
   local ctx = core.get_context()
-  menu.update(ctx, core.get_sources(ctx, { source.SourceStatus.COMPLETED }))
+  menu.update(ctx, core.get_sources(ctx, { source.SourceStatus.FETCHING, source.SourceStatus.COMPLETED }))
 end, 200)
 
 ---Select completion item
@@ -141,7 +139,7 @@ core.on_commit_char = function(c, fallback)
 
     -- NOTE: This is cmp specific implementation to support commitCharacters more user friendly.
     local ctx = core.get_context()
-    local word = e:get_word_and_abbr().word
+    local word = e:get_word()
     if string.sub(ctx.cursor_before_line, -#word, ctx.cursor.col - 1) == word then
       local key = keymap.t(keymap.to_key(c))
       if char.is_printable(string.byte(key)) then
@@ -163,10 +161,11 @@ end
 
 ---Reset current completion state
 core.reset = function()
+  core.get_context() -- reset for new context
+  menu.reset()
   for _, s in pairs(core.sources) do
     s:reset()
   end
-  menu.reset()
   vim.api.nvim_buf_clear_namespace(0, core.namespace, 0, -1)
 end
 

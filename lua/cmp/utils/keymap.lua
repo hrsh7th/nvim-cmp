@@ -84,8 +84,8 @@ keymap.listen = setmetatable({
 })
 
 misc.set(_G, { 'cmp', 'utils', 'keymap', 'expr' }, function(char_or_key)
-  local key = keymap.to_key(char_or_key)
   local bufnr = vim.api.nvim_get_current_buf()
+  local key = keymap.to_key(char_or_key)
 
   local callback = keymap.listen.cache:get({ bufnr, key }).callback
   local existing = keymap.listen.cache:get({ bufnr, key }).existing
