@@ -63,11 +63,11 @@ entry.get_offset = function(self)
       -- We should care about this performance.
       local word = self:get_word()
       for idx = #self.context.offset_before_line, #self.context.offset_before_line - #word, -1 do
-        local c = string.byte(self.context.offset_before_line, idx)
-        if char.is_white(c) then
-          break
-        end
         if char.is_semantic_index(self.context.offset_before_line, idx) then
+          local c = string.byte(self.context.offset_before_line, idx)
+          if char.is_white(c) then
+            break
+          end
           local match = true
           for i = 1, #self.context.offset_before_line - idx + 1  do
             local c1 = string.byte(word, i)
@@ -94,12 +94,16 @@ entry.get_word = function(self)
     local word
     if misc.safe(self.completion_item.textEdit) then
       word = str.trim(self.completion_item.textEdit.newText)
+      word = str.get_word(word, string.byte(self.context.cursor_after_line, 1))
     elseif misc.safe(self.completion_item.insertText) then
       word = str.trim(self.completion_item.insertText)
+      if self.completion_item.insertTextFormat == lsp.InsertTextFormat.Snippet then
+        word = str.get_word(word, string.byte(self.context.cursor_after_line, 1))
+      end
     else
       word = str.trim(self.completion_item.label)
     end
-    return str.get_word(word, string.byte(self.context.cursor_after_line, 1))
+    return word
   end)
 end
 

@@ -13,6 +13,11 @@ INVALID_CHARS[string.byte("'")] = true
 INVALID_CHARS[string.byte("\n")] = true
 INVALID_CHARS[string.byte("\t")] = true
 
+local PAIR_CHARS = {}
+PAIR_CHARS[string.byte('[')] = string.byte(']')
+PAIR_CHARS[string.byte('(')] = string.byte(')')
+PAIR_CHARS[string.byte('<')] = string.byte('>')
+
 ---Return if specified text has prefix or not
 ---@param text string
 ---@param prefix string
@@ -85,6 +90,9 @@ str.get_word = function(text, stop_char)
       return string.sub(text, 1, idx - 1)
     end
     valids[c] = true
+    if PAIR_CHARS[c] then
+      valids[PAIR_CHARS[c]] = true
+    end
     has_valid = has_valid or not invalid
   end
   return text
