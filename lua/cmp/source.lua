@@ -80,12 +80,10 @@ source.get_entries = function(self, ctx)
     return {}
   end
 
-  local input = string.sub(ctx.cursor_before_line, self.offset)
-
   local prev_entries = (function()
     local key = { 'get_entries', self.revision }
     for i = ctx.cursor.col, self.offset + 1, -1 do
-      key[3] = string.sub(ctx.cursor_before_line, self.offset, i)
+      key[3] = string.sub(ctx.cursor_before_line, 1, i)
       local prev_entries = self.cache:get(key)
       if prev_entries then
         return prev_entries
@@ -94,14 +92,19 @@ source.get_entries = function(self, ctx)
     return nil
   end)()
 
-  return self.cache:ensure({ 'get_entries', self.revision, input }, function()
+  return self.cache:ensure({ 'get_entries', self.revision, ctx.cursor_before_line }, function()
+    local inputs = {}
     local entries = {}
     debug.log('filter', self.name, self.id, #(prev_entries or self.entries))
     for _, e in ipairs(prev_entries or self.entries) do
-      -- TODO: cache prefix_offset
-      local filter_text = e:get_filter_text(self.offset)
-      local prefix_offset = string.find(filter_text, e:get_word()) or 1
-      e.score = matcher.match(input, filter_text, prefix_offset)
+      if not inputs[e:get_offset()] then
+        inputs[e:get_offset()] = string.sub(ctx.cursor_before_line, e:get_offset())
+      end
+      e.score = matcher.match(
+        inputs[e:get_offset()],
+        e:get_filter_text(self.offset),
+        e:get_word_start_offset()
+      )
       if e.score >= 1 then
         binary.insort(entries, e, config.get().compare)
       end

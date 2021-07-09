@@ -53,7 +53,7 @@ menu.update = function(self, ctx, sources)
         table.insert(entries, e)
         i = j + 1
       end
-      offset = math.min(offset, e:get_offset())
+      offset = math.min(offset, s.offset)
     end
   end
 

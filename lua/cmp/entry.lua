@@ -94,17 +94,33 @@ entry.get_word = function(self)
     local word
     if misc.safe(self.completion_item.textEdit) then
       word = str.trim(self.completion_item.textEdit.newText)
-      local range = misc.safe(self.completion_item.textEdit.insert) or misc.safe(self.completion_item.textEdit.range)
-      local c = vim.str_byteindex(self.context.cursor_line, range['end'].character) + 1
-      if self.context.cursor.col < c then
-        word = string.sub(word, 1, #word - (c - self.context.cursor.col))
-      end
     elseif misc.safe(self.completion_item.insertText) then
       word = str.trim(self.completion_item.insertText)
     else
       word = str.trim(self.completion_item.label)
     end
     return str.get_word(word, string.byte(self.context.cursor_after_line, 1))
+  end)
+end
+
+---Get word start position in filter_text
+entry.get_word_start_offset = function(self)
+  return self.cache:ensure('get_word_start_offset', function()
+    return string.find(self:get_filter_text(), self:get_word(), 1, true) or 1
+  end)
+end
+
+---Create filter text
+---@return string
+entry.get_filter_text = function(self)
+  return self.cache:ensure({ 'get_filter_text' }, function()
+    local word
+    if misc.safe(self.completion_item.filterText) then
+      word = self.completion_item.filterText
+    else
+      word = str.trim(self.completion_item.label)
+    end
+    return word
   end)
 end
 
@@ -159,42 +175,6 @@ entry.get_vim_item = function(self, offset)
     end
 
     return config.get().format(self, word, abbr, menu)
-  end)
-end
-
----Create filter text
----TODO: Consider to use word that match prefixes.
----@param offset number
----@return string
-entry.get_filter_text = function(self, offset)
-  return self.cache:ensure({ 'get_filter_text', offset }, function()
-    local word
-    if misc.safe(self.completion_item.filterText) then
-      word = self.completion_item.filterText
-    else
-      word = str.trim(self.completion_item.label)
-    end
-    if misc.safe(self.completion_item.textEdit) then
-      if self:get_offset() < self.context.offset  then
-        local range = misc.safe(self.completion_item.textEdit.insert) or misc.safe(self.completion_item.textEdit.range)
-        local c = vim.str_byteindex(self.context.cursor_line, range['end'].character) + 1
-        if self.context.offset <= c then
-          local diff = string.sub(self.context.cursor_before_line, self:get_offset(), self.context.offset - 1)
-          if #word > #diff then
-            if string.find(word, diff, 1, true) == nil then
-              word = diff .. word
-            end
-          end
-        end
-      end
-    end
-    if offset < self:get_offset() then
-      local diff = string.sub(self.context.cursor_before_line, offset, self:get_offset() - 1)
-      if string.find(word, diff, 1, true) == nil then
-        word = diff .. word
-      end
-    end
-    return word
   end)
 end
 

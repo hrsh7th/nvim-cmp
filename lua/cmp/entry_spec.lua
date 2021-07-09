@@ -74,10 +74,12 @@ describe('entry', function()
   end)
 
   it('[clangd] 1', function()
+    --@see https://github.com/clangd/clangd/issues/815
     local state = spec.state("foo", 1, 4)
     local e = entry.new(state.press('.'), {}, {
       insertText = "->foo",
       label = " foo",
+      filterText = '.foo',
       textEdit = {
         newText = "->foo",
         range = {
@@ -93,7 +95,7 @@ describe('entry', function()
       }
     })
     assert.are.equal(e:get_vim_item(4).word, '->foo')
-    assert.are.equal(e:get_filter_text(4), '.foo')
+    assert.are.equal(e:get_filter_text(), '.foo')
   end)
 
   it('[typescript-language-server] 1', function()
@@ -103,7 +105,7 @@ describe('entry', function()
     })
     -- The offset will be 18 in this situation because the server returns `[Symbol]` as candidate.
     assert.are.equal(e:get_vim_item(18).word, '.catch')
-    assert.are.equal(e:get_filter_text(18), '.catch')
+    assert.are.equal(e:get_filter_text(), 'catch')
   end)
 
   it('[typescript-language-server] 2', function()
@@ -126,7 +128,7 @@ describe('entry', function()
       }
     })
     assert.are.equal(e:get_vim_item(18).word, '[Symbol]')
-    assert.are.equal(e:get_filter_text(18), '.Symbol')
+    assert.are.equal(e:get_filter_text(), '.Symbol')
   end)
 
   it('[lua-language-server] 1', function()
@@ -152,7 +154,7 @@ describe('entry', function()
       }
     })
     assert.are.equal(e:get_vim_item(19).word, 'cmp.config')
-    assert.are.equal(e:get_filter_text(19), 'cmp.config')
+    assert.are.equal(e:get_filter_text(), 'cmp.config')
 
     -- press '
     e = entry.new(state.press("'"), {}, {
@@ -173,7 +175,7 @@ describe('entry', function()
       }
     })
     assert.are.equal(e:get_vim_item(19).word, 'cmp.config')
-    assert.are.equal(e:get_filter_text(19), 'cmp.config')
+    assert.are.equal(e:get_filter_text(), 'cmp.config')
   end)
 
   it('[lua-language-server] 2', function()
@@ -199,7 +201,7 @@ describe('entry', function()
       }
     })
     assert.are.equal(e:get_vim_item(19).word, 'lua.cmp.config')
-    assert.are.equal(e:get_filter_text(19), 'lua.cmp.config')
+    assert.are.equal(e:get_filter_text(), 'lua.cmp.config')
 
     -- press '
     e = entry.new(state.press("'"), {}, {
@@ -220,7 +222,7 @@ describe('entry', function()
       }
     })
     assert.are.equal(e:get_vim_item(19).word, 'lua.cmp.config')
-    assert.are.equal(e:get_filter_text(19), 'lua.cmp.config')
+    assert.are.equal(e:get_filter_text(), 'lua.cmp.config')
   end)
 
 end)
