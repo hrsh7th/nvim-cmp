@@ -102,7 +102,7 @@ source.get_entries = function(self, ctx)
       end
       e.score = matcher.match(
         inputs[e:get_offset()],
-        e:get_filter_text(self.offset),
+        e:get_filter_text(),
         e:get_word_start_offset()
       )
       if e.score >= 1 then

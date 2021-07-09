@@ -124,6 +124,20 @@ entry.get_filter_text = function(self)
     else
       word = str.trim(self.completion_item.label)
     end
+
+    -- @see https://github.com/clangd/clangd/issues/815
+    if misc.safe(self.completion_item.textEdit) then
+      local cmp = self.context.offset - self:get_offset()
+      if cmp > 0 then
+        if char.is_symbol(string.byte(self.context.cursor_line, self:get_offset())) then
+          local diff = string.sub(self.context.cursor_line, self:get_offset(), self:get_offset() + cmp)
+          if string.find(word, diff, 1, true) ~= 1 then
+            word = diff .. word
+          end
+        end
+      end
+    end
+
     return word
   end)
 end
@@ -151,10 +165,7 @@ entry.get_vim_item = function(self, offset)
     local abbr = str.trim(self.completion_item.label)
 
     if offset ~= self:get_offset() then
-      local diff = string.sub(self.context.cursor_before_line, offset, self:get_offset() - 1)
-      if string.find(word, diff, 1, true) ~= 1 then
-        word = diff .. word
-      end
+      word = string.sub(self.context.cursor_before_line, offset, self:get_offset() - 1) .. word
     end
 
     if item.insertTextFormat == lsp.InsertTextFormat.Snippet then

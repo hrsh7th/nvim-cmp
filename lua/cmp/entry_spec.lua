@@ -74,12 +74,12 @@ describe('entry', function()
   end)
 
   it('[clangd] 1', function()
-    --@see https://github.com/clangd/clangd/issues/815
+    --NOTE: clangd does not return `.foo` as filterText but we should care about it.
+    --nvim-cmp does care it by special handling in entry.lua.
     local state = spec.state("foo", 1, 4)
     local e = entry.new(state.press('.'), {}, {
       insertText = "->foo",
       label = " foo",
-      filterText = '.foo',
       textEdit = {
         newText = "->foo",
         range = {
