@@ -87,10 +87,12 @@ core.complete = function(ctx)
       core.filter()
     end) or triggered
   end
-  if not triggered then
+  if triggered then
+    core.filter.timeout = 200
+  else
     core.filter.timeout = 0
-    core.filter()
   end
+  core.filter()
 end
 
 ---Update completion menu

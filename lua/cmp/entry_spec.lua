@@ -63,7 +63,7 @@ describe('entry', function()
           },
           ['end'] = {
             line = 0,
-            character = 7,
+            character = 6,
           }
         },
         newText = '  </div'
@@ -127,6 +127,100 @@ describe('entry', function()
     })
     assert.are.equal(e:get_vim_item(18).word, '[Symbol]')
     assert.are.equal(e:get_filter_text(18), '.Symbol')
+  end)
+
+  it('[lua-language-server] 1', function()
+    local state = spec.state("local m = require'cmp.confi", 1, 28)
+    local e
+
+    -- press g
+    e = entry.new(state.press('g'), {}, {
+      insertTextFormat = 2,
+      label = "cmp.config",
+      textEdit = {
+        newText = "cmp.config",
+        range = {
+          ['end'] = {
+            character = 27,
+            line = 1
+          },
+          start = {
+            character = 18,
+            line = 1
+          }
+        }
+      }
+    })
+    assert.are.equal(e:get_vim_item(19).word, 'cmp.config')
+    assert.are.equal(e:get_filter_text(19), 'cmp.config')
+
+    -- press '
+    e = entry.new(state.press("'"), {}, {
+      insertTextFormat = 2,
+      label = "cmp.config",
+      textEdit = {
+        newText = "cmp.config",
+        range = {
+          ['end'] = {
+            character = 27,
+            line = 1
+          },
+          start = {
+            character = 18,
+            line = 1
+          }
+        }
+      }
+    })
+    assert.are.equal(e:get_vim_item(19).word, 'cmp.config')
+    assert.are.equal(e:get_filter_text(19), 'cmp.config')
+  end)
+
+  it('[lua-language-server] 2', function()
+    local state = spec.state("local m = require'cmp.confi", 1, 28)
+    local e
+
+    -- press g
+    e = entry.new(state.press('g'), {}, {
+      insertTextFormat = 2,
+      label = "lua.cmp.config",
+      textEdit = {
+        newText = "lua.cmp.config",
+        range = {
+          ['end'] = {
+            character = 27,
+            line = 1
+          },
+          start = {
+            character = 18,
+            line = 1
+          }
+        }
+      }
+    })
+    assert.are.equal(e:get_vim_item(19).word, 'lua.cmp.config')
+    assert.are.equal(e:get_filter_text(19), 'lua.cmp.config')
+
+    -- press '
+    e = entry.new(state.press("'"), {}, {
+      insertTextFormat = 2,
+      label = "lua.cmp.config",
+      textEdit = {
+        newText = "lua.cmp.config",
+        range = {
+          ['end'] = {
+            character = 27,
+            line = 1
+          },
+          start = {
+            character = 18,
+            line = 1
+          }
+        }
+      }
+    })
+    assert.are.equal(e:get_vim_item(19).word, 'lua.cmp.config')
+    assert.are.equal(e:get_filter_text(19), 'lua.cmp.config')
   end)
 
 end)

@@ -7,6 +7,7 @@ INVALID_CHARS[string.byte(' ')] = true
 INVALID_CHARS[string.byte('=')] = true
 INVALID_CHARS[string.byte('$')] = true
 INVALID_CHARS[string.byte('(')] = true
+INVALID_CHARS[string.byte('[')] = true
 INVALID_CHARS[string.byte('"')] = true
 INVALID_CHARS[string.byte("'")] = true
 INVALID_CHARS[string.byte("\n")] = true
@@ -74,30 +75,19 @@ end
 ---get_word
 ---@param text string
 ---@return string
-str.get_word = function(text)
+str.get_word = function(text, stop_char)
+  local valids = {}
   local has_valid = false
   for idx = 1, #text do
-    local invalid = INVALID_CHARS[string.byte(text, idx)]
+    local c = string.byte(text, idx)
+    local invalid = INVALID_CHARS[c] and not (valids[c] and stop_char ~= c)
     if has_valid and invalid then
       return string.sub(text, 1, idx - 1)
     end
+    valids[c] = true
     has_valid = has_valid or not invalid
   end
   return text
-end
-
----make_byte_map
----@param text string
----@return table<number, boolean>
-str.make_byte_map = function(text)
-  local has_symbol = false
-  local map = {}
-  for i = 1, #text do
-    local byte = string.byte(text, i)
-    map[byte] = true
-    has_symbol = has_symbol or char.is_symbol(byte)
-  end
-  return map, has_symbol
 end
 
 return str

@@ -1,10 +1,10 @@
 local binary = {}
 
----Insert item to list to suitable index
+---Insert item to list to ordered index
 ---@param list any[]
 ---@param item any
 ---@param func fun(a: any, b: any): "1"|"-1"|"0"
-binary.insert = function(list, item, func)
+binary.insort = function(list, item, func)
   table.insert(list, binary.search(list, item, func), item)
 end
 

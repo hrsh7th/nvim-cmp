@@ -20,6 +20,9 @@ menu.reset = function(self)
   self.offset = nil
   self.items = {}
   self.context = nil
+  if vim.tbl_contains({ 'i', 'ic' }, vim.api.nvim_get_mode().mode) then
+    vim.fn.complete(1, {})
+  end
 end
 
 ---Update menu
@@ -32,7 +35,6 @@ menu.update = function(self, ctx, sources)
   end
 
   local entries = {}
-  local items = {}
   local offset = ctx.offset
   for _, s in ipairs(sources) do
     local i = 1
@@ -42,7 +44,6 @@ menu.update = function(self, ctx, sources)
         local cmp = config.get().compare(e, entries[j])
         if cmp <= 0 then
           table.insert(entries, j, e)
-          table.insert(items, j, e:get_vim_item(s.offset))
           i = j + 1
           break
         end
@@ -50,12 +51,22 @@ menu.update = function(self, ctx, sources)
       end
       if j > #entries then
         table.insert(entries, e)
-        table.insert(items, e:get_vim_item(s.offset))
         i = j + 1
       end
       offset = math.min(offset, e:get_offset())
     end
   end
+
+  local items = {}
+  local abbrs = {}
+  for _, e in ipairs(entries) do
+    local item = e:get_vim_item(offset)
+    if not abbrs[item.abbr] then
+      table.insert(items, item)
+      abbrs[item.abbr] = true
+    end
+  end
+
   self.offset = offset
   self.items = items
   self.context = ctx

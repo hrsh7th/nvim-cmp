@@ -13,6 +13,7 @@ describe('matcher', function()
 
     assert.is.truthy(matcher.match('ab', 'ab') > matcher.match('ab', 'a_b'))
     assert.is.truthy(matcher.match('ab', 'a_b_c') > matcher.match('ac', 'a_b_c'))
+    assert.is.truthy(matcher.match('abc', 'ab') == 0)
   end)
 
 end)

@@ -15,6 +15,7 @@ local lsp = require'cmp.types.lsp'
 ---@field public cache cmp.utils.Cache
 ---@field public revision number
 ---@field public context cmp.Context
+---@field public trigger_kind lsp.CompletionTriggerKind|nil
 ---@field public incomplete boolean
 ---@field public entries cmp.Entry[]
 ---@field public offset number|nil
@@ -50,9 +51,10 @@ source.reset = function(self)
   self.cache:clear()
   self.revision = self.revision + 1
   self.context = context.empty()
+  self.trigger_kind = nil
   self.incomplete = false
   self.entries = {}
-  self.offest = nil
+  self.offset = nil
   self.status = source.SourceStatus.WAITING
 end
 
@@ -94,11 +96,14 @@ source.get_entries = function(self, ctx)
 
   return self.cache:ensure({ 'get_entries', self.revision, input }, function()
     local entries = {}
+    debug.log('filter', self.name, self.id, #(prev_entries or self.entries))
     for _, e in ipairs(prev_entries or self.entries) do
-      e.score = matcher.match(input, e:get_filter_text(self.offset))
+      -- TODO: cache prefix_offset
+      local filter_text = e:get_filter_text(self.offset)
+      local prefix_offset = string.find(filter_text, e:get_word()) or 1
+      e.score = matcher.match(input, filter_text, prefix_offset)
       if e.score >= 1 then
-        local idx = binary.search(entries, e, config.get().compare)
-        table.insert(entries, idx, e)
+        binary.insort(entries, e, config.get().compare)
       end
     end
     return entries
@@ -133,7 +138,8 @@ end
 source.complete = function(self, ctx, callback)
   if self.offset then
     if not ctx:maybe_continue(self.offset) then
-        self:reset()
+      debug.log('not continue', self.name, self.id)
+      self:reset()
     end
   end
 
@@ -164,27 +170,30 @@ source.complete = function(self, ctx, callback)
   self.source:complete({
     context = ctx,
     completion_context = completion_context,
-  }, function(response)
+  }, vim.schedule_wrap(function(response)
     if self.context.id ~= ctx.id then
+      debug.log('ignore', self.name, self.id)
       return
     end
     if response ~= nil then
       debug.log('retrieve', self.name, self.id, #(response.items or response))
       self.status = source.SourceStatus.COMPLETED
       self.revision = self.revision + 1
+      self.trigger_kind = completion_context.triggerKind
       self.incomplete = response.isIncomplete or false
       self.entries = {}
       self.offset = ctx.offset
       for i, item in ipairs(response.items or response) do
-        self.entries[i] = entry.new(ctx, self, item)
-        self.offset = math.min(self.offset, self.entries[i]:get_offset())
+        local e = entry.new(ctx, self, item)
+        self.entries[i] = e
+        self.offset = math.min(self.offset, e:get_offset())
       end
     else
       debug.log('continue', self.name, self.id, 'nil')
       self.status = prev_status
     end
     callback()
-  end)
+  end))
   return true
 end
 

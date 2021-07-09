@@ -67,8 +67,9 @@ matcher.NOT_FUZZY_FACTOR = 6
 ---Match entry
 ---@param input string
 ---@param word string
+---@param prefix_offset number
 ---@return number
-matcher.match = function(input, word)
+matcher.match = function(input, word, prefix_offset)
   -- Empty input
   if #input == 0 then
     return matcher.PREFIX_FACTOR + matcher.NOT_FUZZY_FACTOR
@@ -96,7 +97,9 @@ matcher.match = function(input, word)
     else
       word_index = char.get_next_semantic_index(word, word_index)
     end
-    word_bound_index = word_bound_index + 1
+    if word_index > prefix_offset then
+      word_bound_index = word_bound_index + 1
+    end
   end
 
   if #matches == 0 then
@@ -121,7 +124,7 @@ matcher.match = function(input, word)
   end
 
   -- Add prefix bonus
-  score = score + ((matches[1].input_match_start == 1 and matches[1].word_match_start == 1) and matcher.PREFIX_FACTOR or 0)
+  score = score + ((matches[1].input_match_start == 1 and matches[1].word_match_start <= prefix_offset) and matcher.PREFIX_FACTOR or 0)
 
   -- Check the word contains the remaining input. if not, it does not match.
   local last_match = matches[#matches]
@@ -145,7 +148,7 @@ matcher.match = function(input, word)
         end
         word_offset = word_offset + 1
       end
-      if input_index - 1 == #input then
+      if input_index > #input then
         return score
       end
     end

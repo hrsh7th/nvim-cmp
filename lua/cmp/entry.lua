@@ -18,8 +18,6 @@ local lsp = require "cmp.types.lsp"
 ---@field public resolved_callbacks fun()[]
 ---@field public resolving boolean
 ---@field public confirmed boolean
----@field public insert_range vim.Range
----@field public replace_range vim.Range
 local entry = {}
 
 ---Create new entry
@@ -40,38 +38,6 @@ entry.new = function(ctx, source, completion_item)
   self.resolving = false
   self.confirmed = false
 
-  if misc.safe(self.completion_item.textEdit) then
-    if misc.safe(self.completion_item.textEdit.insert) then
-      self.insert_range = lsp.Range.to_vim(ctx.bufnr, self.completion_item.textEdit.insert)
-    else
-      self.insert_range = lsp.Range.to_vim(ctx.bufnr, self.completion_item.textEdit.range)
-    end
-  else
-    self.insert_range = {
-      start = {
-        row = ctx.insert_range.start.row,
-        col = math.min(ctx.insert_range.start.col, self:get_offset())
-      },
-      ['end'] = ctx.insert_range['end']
-    }
-  end
-
-  if misc.safe(self.completion_item.textEdit) then
-    if misc.safe(self.completion_item.textEdit.replace) then
-      self.replace_range = lsp.Range.to_vim(ctx.bufnr, self.completion_item.textEdit.replace)
-    else
-      self.replace_range = lsp.Range.to_vim(ctx.bufnr, self.completion_item.textEdit.range)
-    end
-  else
-    self.replace_range = {
-      start = {
-        row = ctx.replace_range.start.row,
-        col = math.min(ctx.replace_range.start.col, self:get_offset())
-      },
-      ['end'] = ctx.replace_range['end']
-    }
-  end
-
   return self
 end
 
@@ -80,15 +46,14 @@ end
 entry.get_offset = function(self)
   return self.cache:ensure('get_offset', function()
     local offset = self.context.offset
-    local word = self:get_word()
     if misc.safe(self.completion_item.textEdit) then
-      for _, range in ipairs({ self.completion_item.textEdit.insert or vim.NIL, self.completion_item.textEdit.range or vim.NIL }) do
-        if misc.safe(range) then
-          for idx = range.start.character + 1, self.context.offset do
-            if not char.is_white(string.byte(self.context.cursor_line, idx)) then
-              offset = math.min(offset, idx)
-              break
-            end
+      local range = misc.safe(self.completion_item.textEdit.insert) or misc.safe(self.completion_item.textEdit.range)
+      if range then
+        local c = vim.str_byteindex(self.context.cursor_line, range.start.character) + 1
+        for idx = c, self.context.offset do
+          if not char.is_white(string.byte(self.context.cursor_line, idx)) then
+            offset = math.min(offset, idx)
+            break
           end
         end
       end
@@ -96,6 +61,7 @@ entry.get_offset = function(self)
       -- NOTE
       -- The VSCode does not implement this but it's useful if the server does not care about word patterns.
       -- We should care about this performance.
+      local word = self:get_word()
       for idx = #self.context.offset_before_line, #self.context.offset_before_line - #word, -1 do
         local c = string.byte(self.context.offset_before_line, idx)
         if char.is_white(c) then
@@ -125,7 +91,20 @@ end
 ---@return string
 entry.get_word = function(self)
   return self.cache:ensure('get_word', function()
-    return str.get_word(self:get_insert_text())
+    local word
+    if misc.safe(self.completion_item.textEdit) then
+      word = str.trim(self.completion_item.textEdit.newText)
+      local range = misc.safe(self.completion_item.textEdit.insert) or misc.safe(self.completion_item.textEdit.range)
+      local c = vim.str_byteindex(self.context.cursor_line, range['end'].character) + 1
+      if self.context.cursor.col < c then
+        word = string.sub(word, 1, #word - (c - self.context.cursor.col))
+      end
+    elseif misc.safe(self.completion_item.insertText) then
+      word = str.trim(self.completion_item.insertText)
+    else
+      word = str.trim(self.completion_item.label)
+    end
+    return str.get_word(word, string.byte(self.context.cursor_after_line, 1))
   end)
 end
 
@@ -133,10 +112,10 @@ end
 ---@return string
 entry.get_insert_text = function(self)
   return self.cache:ensure('get_insert_text', function()
-    if misc.safe(self.completion_item.insertText) then
-      return str.trim(self.completion_item.insertText)
-    elseif misc.safe(self.completion_item.textEdit) then
+    if misc.safe(self.completion_item.textEdit) then
       return str.trim(self.completion_item.textEdit.newText)
+    elseif misc.safe(self.completion_item.insertText) then
+      return str.trim(self.completion_item.insertText)
     end
     return str.trim(self.completion_item.label)
   end)
@@ -189,25 +168,33 @@ end
 ---@return string
 entry.get_filter_text = function(self, offset)
   return self.cache:ensure({ 'get_filter_text', offset }, function()
-    local text
+    local word
     if misc.safe(self.completion_item.filterText) then
-      text = self.completion_item.filterText
+      word = self.completion_item.filterText
     else
-      text = str.trim(self.completion_item.label)
+      word = str.trim(self.completion_item.label)
     end
-    if self:get_offset() ~= self.context.offset  then
-      local diff = string.sub(self.context.cursor_before_line, self:get_offset(), self.context.offset - 1)
-      if string.find(text, diff, 1, true) ~= 1 then
-        text = diff .. text
+    if misc.safe(self.completion_item.textEdit) then
+      if self:get_offset() < self.context.offset  then
+        local range = misc.safe(self.completion_item.textEdit.insert) or misc.safe(self.completion_item.textEdit.range)
+        local c = vim.str_byteindex(self.context.cursor_line, range['end'].character) + 1
+        if self.context.offset <= c then
+          local diff = string.sub(self.context.cursor_before_line, self:get_offset(), self.context.offset - 1)
+          if #word > #diff then
+            if string.find(word, diff, 1, true) == nil then
+              word = diff .. word
+            end
+          end
+        end
       end
     end
-    if offset ~= self:get_offset() then
+    if offset < self:get_offset() then
       local diff = string.sub(self.context.cursor_before_line, offset, self:get_offset() - 1)
-      if string.find(text, diff, 1, true) ~= 1 then
-        text = diff .. text
+      if string.find(word, diff, 1, true) == nil then
+        word = diff .. word
       end
     end
-    return text
+    return word
   end)
 end
 
@@ -221,18 +208,50 @@ entry.get_commit_characters = function(self)
   return commit_characters
 end
 
----Return replace range if it's different with insert range.
+---Return insert range
+---@return vim.Range|nil
+entry.get_insert_range = function(self)
+  local insert_range
+  if misc.safe(self.completion_item.textEdit) then
+    if misc.safe(self.completion_item.textEdit.insert) then
+      insert_range = lsp.Range.to_vim(self.context.bufnr, self.completion_item.textEdit.insert)
+    else
+      insert_range = lsp.Range.to_vim(self.context.bufnr, self.completion_item.textEdit.range)
+    end
+  else
+    insert_range = {
+      start = {
+        row = self.context.insert_range.start.row,
+        col = math.min(self.context.insert_range.start.col, self:get_offset())
+      },
+      ['end'] = self.context.insert_range['end']
+    }
+  end
+  return insert_range
+end
+
+---Return replace range
 ---@return vim.Range|nil
 entry.get_replace_range = function(self)
-  local same = true
-  same = same and self.insert_range.start.row == self.replace_range.start.row
-  same = same and self.insert_range.start.col == self.replace_range.start.col
-  same = same and self.insert_range['end'].row == self.replace_range['end'].row
-  same = same and self.insert_range['end'].col == self.replace_range['end'].col
-  if same then
-    return nil
-  end
-  return self.replace_range
+  return self.cache:ensure('get_replace_range', function()
+    local replace_range
+    if misc.safe(self.completion_item.textEdit) then
+      if misc.safe(self.completion_item.textEdit.replace) then
+        replace_range = lsp.Range.to_vim(self.context.bufnr, self.completion_item.textEdit.replace)
+      else
+        replace_range = lsp.Range.to_vim(self.context.bufnr, self.completion_item.textEdit.range)
+      end
+    else
+      replace_range = {
+        start = {
+          row = self.context.replace_range.start.row,
+          col = math.min(self.context.replace_range.start.col, self:get_offset())
+        },
+        ['end'] = self.context.replace_range['end']
+      }
+    end
+    return replace_range
+  end)
 end
 
 ---Get resolved completion item if possible.
@@ -246,8 +265,7 @@ end
 
 ---Confirm completion item
 ---@param offset number
----@param callback fun()|nil
-entry.confirm = function(self, offset, callback)
+entry.confirm = function(self, offset)
   -- resolve
   async.sync(function(done)
     self:resolve(done)
@@ -262,9 +280,9 @@ entry.confirm = function(self, offset, callback)
     completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.label
   end
   if config.get().default_insert_mode == 'replace' then
-    completion_item.textEdit.range = lsp.Range.from_vim('%', self.replace_range)
+    completion_item.textEdit.range = lsp.Range.from_vim('%', self:get_replace_range())
   else
-    completion_item.textEdit.range = lsp.Range.from_vim('%', self.insert_range)
+    completion_item.textEdit.range = lsp.Range.from_vim('%', self:get_insert_range())
   end
   vim.fn['cmp#confirm']({
     request_offset = self.context.cursor.col,
@@ -278,10 +296,6 @@ entry.confirm = function(self, offset, callback)
   end, 1000)
 
   self.confirmed = true
-
-  if callback then
-    callback()
-  end
 end
 
 ---Execute completion item's command.
