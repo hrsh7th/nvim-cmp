@@ -62,11 +62,12 @@ end
 
 ---Check auto-completion
 core.autocomplete = function()
+  local ctx = core.get_context()
+
   if core.get_active_entry() then
     return
   end
 
-  local ctx = core.get_context()
   debug.log(('ctx: `%s`'):format(ctx.cursor_before_line))
   if ctx:changed() then
     debug.log('changed')

@@ -131,7 +131,7 @@ entry.get_filter_text = function(self)
       local diff = self.context.offset - self:get_offset()
       if diff > 0 then
         if char.is_symbol(string.byte(self.context.cursor_line, self:get_offset())) then
-          local prefix = string.sub(self.context.cursor_line, self:get_offset(), self:get_offset() + cmp)
+          local prefix = string.sub(self.context.cursor_line, self:get_offset(), self:get_offset() + diff)
           if string.find(word, prefix, 1, true) ~= 1 then
             word = prefix .. word
           end
