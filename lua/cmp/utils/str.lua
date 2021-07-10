@@ -1,4 +1,5 @@
 local char = require'cmp.utils.char'
+local pattern = require 'cmp.utils.pattern'
 
 local str = {}
 
@@ -32,6 +33,23 @@ str.has_prefix = function(text, prefix)
     end
   end
   return true
+end
+
+---strikethrough
+---@param text string
+---@return string
+str.strikethrough = function(text)
+  local r = pattern.regex('.')
+  local buffer = ''
+  while text ~= '' do
+    local s, e = r:match_str(text)
+    if not s then
+      break
+    end
+    buffer = buffer .. string.sub(text, s, e) .. '̶'
+    text = string.sub(text, e + 1)
+  end
+  return buffer
 end
 
 ---omit

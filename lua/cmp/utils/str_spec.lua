@@ -10,6 +10,10 @@ describe('utils.str', function()
     assert.are.equal(str.get_word('"devDependencies":', string.byte('"')), '"devDependencies')
   end)
 
+  it('strikethrough', function()
+    assert.are.equal(str.strikethrough('あいうえお'), 'あ̶い̶う̶え̶お̶')
+  end)
+
 end)
 
 

@@ -2,6 +2,7 @@ local misc = require'cmp.utils.misc'
 local cache = require "cmp.utils.cache"
 local lsp = require "cmp.types.lsp"
 local cmp = require "cmp.types.cmp"
+local str = require "cmp.utils.str"
 
 ---@type cmp.ConfigSchema
 local default = {
@@ -66,22 +67,25 @@ local default = {
     return #entry1:get_word() - #entry2:get_word()
   end,
 
-  ---@param entry cmp.Entry
+  ---@param e cmp.Entry
   ---@param word string
   ---@param abbr string
   ---@param menu string
   ---@return vim.CompletedItem
-  format = function(entry, word, abbr, menu)
+  format = function(e, word, abbr, menu)
+    if e.completion_item.deprecated or vim.tbl_contains(e.completion_item.tags or {}, lsp.CompletionItemTag.Deprecated) then
+      abbr = str.strikethrough(abbr)
+    end
     return {
       word = word,
       abbr = abbr,
-      kind = vim.lsp.protocol.CompletionItemKind[misc.safe(entry.completion_item.kind) or 1] or vim.lsp.protocol.CompletionItemKind[1],
+      kind = lsp.CompletionItemKind[misc.safe(e.completion_item.kind) or 1] or lsp.CompletionItemKind[1],
       menu = menu,
       equal = 1,
       empty = 1,
       dup = 1,
       user_data = {
-        cmp = entry.id
+        cmp = e.id
       }
     }
   end

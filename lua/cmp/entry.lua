@@ -176,15 +176,6 @@ entry.get_vim_item = function(self, offset)
       end
     end
 
-    if vim.tbl_contains(self.completion_item.tags or {}, lsp.CompletionItemTag.Deprecated) then
-      local fixed = ''
-      for i = 1, #abbr do
-        -- inspired by vim-lsc
-        fixed = fixed .. string.sub(abbr, i, i) .. '̶'
-      end
-      abbr = fixed
-    end
-
     local menu = nil
     if misc.safe(item.labelDetails) then
       menu = ''
