@@ -1,5 +1,22 @@
 local async = {}
 
+---Return guarded callback
+---@return fun(fun: function): function
+async.guard = function()
+  local id = 0
+  return function(callback)
+    id = id + 1
+
+    local own_id = id
+    return function()
+      if own_id ~= id then
+        return
+      end
+      callback()
+    end
+  end
+end
+
 ---Return sync callback
 ---@param runner fun()
 ---@param timeout number
@@ -13,7 +30,7 @@ async.sync = function(runner, timeout)
   vim.wait(timeout, function()
     return fin
   end)
-  return unpack(res)
+  return unpack(res or {})
 end
 
 ---@class cmp.AsyncThrottle

@@ -1,18 +1,18 @@
 local misc = require'cmp.utils.misc'
 local cache = require "cmp.utils.cache"
 local lsp = require "cmp.types.lsp"
+local cmp = require "cmp.types.cmp"
 
----@class cmp.ConfigSchema
----@field private revision number
----@field public default_insert_mode "'replace'" | "'insert'"
----@field public commit_characters fun(e:cmp.Entry):string[]
----@field public format fun(entry: cmp.Entry, word: string, abbr: string, menu: string): vim.CompletedItem
----@field public compare fun(entry1: cmp.Entry, entry2: cmp.Entry): number
-
+---@type cmp.ConfigSchema
 local default = {
   revision = 1,
 
-  default_insert_mode = 'replace',
+  default_confirm_behavior = cmp.ConfirmBehavior.Replace,
+
+  documentation = {
+    border = { '', '' ,'', ' ', '', '', '', ' ' },
+    winhighlight = 'FloatBorder:PmenuSbar,NormalFloat:PmenuSbar'
+  },
 
   ---@param e cmp.Entry
   ---@return string[]
@@ -59,6 +59,11 @@ local default = {
       kind2 = 100
     end
     if kind1 ~= kind2 then
+      if kind1 == lsp.CompletionItemKind.Snippet then
+        return -1
+      elseif kind2 == lsp.CompletionItemKind.Snippet then
+        return 1
+      end
       return kind1 - kind2
     end
 
@@ -69,14 +74,7 @@ local default = {
         return diff
       end
     end
-
-    -- label
-    local diff = vim.stricmp(entry1.completion_item.label, entry2.completion_item.label)
-    if diff ~= 0 then
-      return diff
-    end
-
-    return 0
+    return #entry1:get_word() - #entry2:get_word()
   end,
 
   ---@param entry cmp.Entry
@@ -104,7 +102,7 @@ local default = {
 ---@field public g cmp.ConfigSchema
 local config = {}
 
----@type cmp.utils.Cache
+---@type cmp.Cache
 config.cache = cache.new()
 
 ---@type table<number, cmp.ConfigSchema>

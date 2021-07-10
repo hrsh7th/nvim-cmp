@@ -1,4 +1,4 @@
----@class cmp.utils.Cache
+---@class cmp.Cache
 ---@field public entries any
 local cache = {}
 

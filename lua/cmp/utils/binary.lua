@@ -18,10 +18,10 @@ binary.search = function(list, item, func)
   local e = #list
   while s <= e do
     local idx = math.floor((e + s) / 2)
-    local cmp = func(item, list[idx])
-    if cmp > 0 then
+    local diff = func(item, list[idx])
+    if diff > 0 then
       s = idx + 1
-    elseif cmp < 0 then
+    elseif diff < 0 then
       e = idx - 1
     else
       return idx + 1

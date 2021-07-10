@@ -12,7 +12,7 @@ local lsp = require'cmp.types.lsp'
 ---@field public id number
 ---@field public name string
 ---@field public source any
----@field public cache cmp.utils.Cache
+---@field public cache cmp.Cache
 ---@field public revision number
 ---@field public context cmp.Context
 ---@field public trigger_kind lsp.CompletionTriggerKind|nil

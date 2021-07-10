@@ -41,8 +41,8 @@ menu.update = function(self, ctx, sources)
     for _, e in ipairs(s:get_entries(ctx)) do
       local j = i
       while j <= #entries do
-        local cmp = config.get().compare(e, entries[j])
-        if cmp <= 0 then
+        local diff = config.get().compare(e, entries[j])
+        if diff <= 0 then
           table.insert(entries, j, e)
           i = j + 1
           break

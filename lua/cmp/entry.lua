@@ -6,10 +6,11 @@ local misc = require'cmp.utils.misc'
 local str = require "cmp.utils.str"
 local config = require'cmp.config'
 local lsp = require "cmp.types.lsp"
+local cmp = require "cmp.types.cmp"
 
 ---@class cmp.Entry
 ---@field public id number
----@field public cache cmp.utils.Cache
+---@field public cache cmp.Cache
 ---@field public score number
 ---@field public context cmp.Context
 ---@field public source cmp.Source
@@ -127,12 +128,12 @@ entry.get_filter_text = function(self)
 
     -- @see https://github.com/clangd/clangd/issues/815
     if misc.safe(self.completion_item.textEdit) then
-      local cmp = self.context.offset - self:get_offset()
-      if cmp > 0 then
+      local diff = self.context.offset - self:get_offset()
+      if diff > 0 then
         if char.is_symbol(string.byte(self.context.cursor_line, self:get_offset())) then
-          local diff = string.sub(self.context.cursor_line, self:get_offset(), self:get_offset() + cmp)
-          if string.find(word, diff, 1, true) ~= 1 then
-            word = diff .. word
+          local prefix = string.sub(self.context.cursor_line, self:get_offset(), self:get_offset() + cmp)
+          if string.find(word, prefix, 1, true) ~= 1 then
+            word = prefix .. word
           end
         end
       end
@@ -258,9 +259,26 @@ entry.get_completion_item = function(self)
   return self.completion_item
 end
 
+---Create documentation
+---@return lsp.MarkupContent
+entry.get_documentation = function(self)
+  local item = self:get_completion_item()
+  if not item.documentation then
+    return nil
+  end
+  if type(item.documentation) == "string" then
+    return {
+      kind = 'plaintext',
+      value = item.documentation,
+    }
+  end
+  return item.documentation
+end
+
 ---Confirm completion item
----@param offset number
-entry.confirm = function(self, offset)
+---@param option cmp.ConfirmOption
+---@param callback function
+entry.confirm = function(self, option, callback)
   -- resolve
   async.sync(function(done)
     self:resolve(done)
@@ -274,23 +292,23 @@ entry.confirm = function(self, offset)
     completion_item.textEdit = {}
     completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.label
   end
-  if config.get().default_insert_mode == 'replace' then
+  local behavior = option.behavior or config.get().default_confirm_behavior
+  if behavior == cmp.ConfirmBehavior.Replace then
     completion_item.textEdit.range = lsp.Range.from_vim('%', self:get_replace_range())
   else
     completion_item.textEdit.range = lsp.Range.from_vim('%', self:get_insert_range())
   end
   vim.fn['cmp#confirm']({
     request_offset = self.context.cursor.col,
-    suggest_offset = offset,
+    suggest_offset = self:get_offset(),
     completion_item = completion_item,
   })
 
   -- execute
-  async.sync(function(done)
-    self:execute(done)
-  end, 1000)
-
-  self.confirmed = true
+  self:execute(function()
+    self.confirmed = true
+    callback()
+  end)
 end
 
 ---Execute completion item's command.
