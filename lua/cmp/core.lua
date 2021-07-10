@@ -80,14 +80,14 @@ core.complete = function(ctx)
   for _, s in ipairs(core.get_sources(ctx)) do
     triggered = s:complete(ctx, function()
       if #core.get_sources(ctx, { source.SourceStatus.FETCHING }) > 0 then
-        core.filter.timeout = 200
+        core.filter.timeout = 500
       else
         core.filter.timeout = 0
       end
       core.filter()
     end) or triggered
   end
-  if triggered then
+  if #core.get_sources(ctx, { source.SourceStatus.FETCHING }) > 0 then
     core.filter.timeout = 200
   else
     core.filter.timeout = 0
@@ -96,7 +96,7 @@ core.complete = function(ctx)
 end
 
 ---Update completion menu
-core.filter = async.debounce(function()
+core.filter = async.throttle(function()
   local ctx = core.get_context()
   core.menu:update(ctx, core.get_sources(ctx, { source.SourceStatus.FETCHING, source.SourceStatus.COMPLETED }))
 end, 200)
