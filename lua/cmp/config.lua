@@ -14,21 +14,10 @@ local default = {
     winhighlight = 'FloatBorder:PmenuSbar,NormalFloat:PmenuSbar'
   },
 
-  ---@param e cmp.Entry
+  ---@param _ cmp.Entry
   ---@return string[]
-  commit_characters = function(e)
-    local chars = { '\n' }
-    if not string.find(e:get_word(), '.', 1, true) then
-      table.insert(chars, '.')
-    end
-    if vim.tbl_contains({
-      vim.lsp.protocol.CompletionItemKind.Snippet,
-      vim.lsp.protocol.CompletionItemKind.Method,
-      vim.lsp.protocol.CompletionItemKind.Function
-    }, e:get_completion_item().kind) then
-      table.insert(chars, '(')
-    end
-    return chars
+  commit_characters = function(_)
+    return { '\n' }
   end,
 
   ---@see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/suggest.ts#L302
