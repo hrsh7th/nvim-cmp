@@ -4,6 +4,8 @@ local lsp = require "cmp.types.lsp"
 local cmp = require "cmp.types.cmp"
 local str = require "cmp.utils.str"
 
+local WIDE_HEIGHT = 40
+
 ---@type cmp.ConfigSchema
 local default = {
   revision = 1,
@@ -12,7 +14,9 @@ local default = {
 
   documentation = {
     border = { '', '' ,'', ' ', '', '', '', ' ' },
-    winhighlight = 'FloatBorder:PmenuSbar,NormalFloat:PmenuSbar'
+    winhighlight = 'FloatBorder:PmenuSbar,NormalFloat:PmenuSbar',
+    maxwidth = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
+    maxheight = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
   },
 
   ---@param _ cmp.Entry

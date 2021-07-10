@@ -11,6 +11,8 @@ cmp.ConfirmBehavior.Replace = 'replace'
 ---@class cmp.DocumentationConfig
 ---@field border string[]
 ---@field winhighlight string
+---@field maxwidth number|nil
+---@field maxheight number|nil
 
 ---@class cmp.ConfigSchema
 ---@field private revision number

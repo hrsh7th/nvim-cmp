@@ -18,10 +18,11 @@ end
 ---Show floating window
 ---@param e cmp.Entry
 float.show = function (self, e)
+  local documentation = config.get().documentation
   if not self.entry or e.id ~= self.entry.id then
     self.entry = e
-    self.buf = vim.api.nvim_create_buf(true, false)
-    vim.api.nvim_buf_set_option(self, "bufhidden", "wipe")
+    self.buf = vim.api.nvim_create_buf(true, true)
+    vim.api.nvim_buf_set_option(self.buf, 'bufhidden', 'wipe')
 
     local doc = e:get_documentation()
     if not doc then
@@ -35,8 +36,8 @@ float.show = function (self, e)
   end
 
   local width, height = vim.lsp.util._make_floating_popup_size(vim.api.nvim_buf_get_lines(self.buf, 0, -1, false), {
-    max_width = 200,
-    max_height = 200,
+    max_width = documentation.maxwidth,
+    max_height = documentation.maxheight,
   })
 
   if width <= 0 or height <= 0 then
@@ -44,14 +45,14 @@ float.show = function (self, e)
   end
 
   local border = config.get().documentation.border
-  width = width + (#border[4] + #border[8])
-  height = height + (#border[2] + #border[6])
+  width = width + #border[4] + #border[8]
+  height = height + #border[2] + #border[6]
 
   local pum = vim.fn.pum_getpos()
   local right_col = pum.col + pum.width + (pum.scrollbar and 1 or 0)
-  local right_space = vim.o.columns - right_col
-  local left_col = pum.col - width
-  local left_space = pum.col - 1
+  local right_space = vim.o.columns - right_col - 2
+  local left_col = pum.col - width - 3
+  local left_space = pum.col - 2
 
   local col
   if right_space >= width then
@@ -77,15 +78,13 @@ float.show = function (self, e)
     vim.api.nvim_win_set_config(self.win, style)
   else
     self.win = vim.api.nvim_open_win(self.buf, false, style)
+    vim.api.nvim_win_set_option(self.win, "conceallevel", 2)
+    vim.api.nvim_win_set_option(self.win, "concealcursor", "n")
+    vim.api.nvim_win_set_option(self.win, "winhighlight", config.get().documentation.winhighlight)
+    vim.api.nvim_win_set_option(self.win, "foldenable", false)
+    vim.api.nvim_win_set_option(self.win, "wrap", true)
+    vim.api.nvim_win_set_option(self.win, "scrolloff", 0)
   end
-
-  -- conceal
-  vim.api.nvim_win_set_option(self.win, "conceallevel", 2)
-  vim.api.nvim_win_set_option(self.win, "concealcursor", "n")
-  vim.api.nvim_win_set_option(self.win, "winhighlight", config.get().documentation.winhighlight)
-  vim.api.nvim_win_set_option(self.win, "foldenable", false)
-  vim.api.nvim_win_set_option(self.win, "wrap", true)
-  vim.api.nvim_win_set_option(self.win, "scrolloff", 0)
 end
 
 ---Close floating window
@@ -93,6 +92,8 @@ float.close = function(self)
   if self.win and vim.api.nvim_win_is_valid(self.win) then
     vim.api.nvim_win_close(self.win, true)
   end
+  self.entry = nil
+  self.buf = nil
   self.win = nil
 end
 
