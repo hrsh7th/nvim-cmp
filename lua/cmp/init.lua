@@ -25,7 +25,12 @@ end
 cmp._on_event = function(name)
   debug.log('')
   debug.log('----------------------------------------------------------------------------------------------------')
-  debug.log('>>> ' .. name)
+  if vim.fn.getchar(1) ~= 0 then
+    debug.log('ignore' .. name)
+    return
+  else
+    debug.log('adopt' .. name)
+  end
   if name == 'InsertEnter' then
     core.autocomplete();
   elseif name == 'TextChanged' then

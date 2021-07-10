@@ -1,6 +1,5 @@
 local keymap = require'cmp.utils.keymap'
 local debug = require'cmp.utils.debug'
-local float = require'cmp.float'
 local char = require'cmp.utils.char'
 local async = require'cmp.utils.async'
 local context = require'cmp.context'
@@ -9,21 +8,16 @@ local menu = require'cmp.menu'
 
 local core = {}
 
+---@type cmp.Menu
+core.menu = menu.new(function(c, fallback)
+  core.on_commit_character(c, fallback)
+end)
+
 ---@type table<number, cmp.Source>
 core.sources = {}
 
 ---@type cmp.Context
 core.context = context.new()
-
----@type number
-core.namespace = vim.api.nvim_create_namespace('cmp')
-
-core.float = float.new()
-
----@type cmp.Menu
-core.menu = menu.new()
-
-core.float_guard = async.guard()
 
 ---Register source
 ---@param s cmp.Source
@@ -109,48 +103,14 @@ end, 200)
 
 ---Select completion item
 core.select = function()
-  local e = core.get_selected_entry()
-
-  -- Cleanup
-  if not e then
-    vim.api.nvim_buf_clear_namespace(0, core.namespace, 0, -1)
-    vim.schedule(core.float_guard(function()
-      core.float:close()
-    end))
-    return
-  end
-
-  -- Add commit character listeners.
-  for _, key in ipairs(e:get_commit_characters()) do
-    keymap.listen(key, (function(k)
-      return function(fallback)
-        return core.on_commit_char(k, fallback)
-      end
-    end)(key))
-  end
-
-  -- Highlight replace range.
-  local replace_range = e:get_replace_range()
-  if replace_range then
-    local ctx = context.new({})
-    vim.api.nvim_buf_set_extmark(0, core.namespace, ctx.cursor.row - 1, ctx.cursor.col - 1, {
-      end_line = ctx.cursor.row - 1,
-      end_col = ctx.cursor.col + replace_range['end'].col - e.context.cursor.col - 1,
-      hl_group = 'CmpReplaceRange',
-    })
-  end
-
-  -- Documentation
-  e:resolve(core.float_guard(vim.schedule_wrap(function()
-    core.float:show(e)
-  end)))
+  core.menu:select(context.new())
 end
 
 ---On commit character typed
 ---@param c string
 ---@param fallback fun()
-core.on_commit_char = function(c, fallback)
-  local e = core.get_selected_entry()
+core.on_commit_character = function(c, fallback)
+  local e = core.menu:get_selected_entry()
   if not (e and not e.confirmed) then
     return fallback()
   end
@@ -210,38 +170,14 @@ core.get_active_entry = function()
   return nil
 end
 
----Get current selected entry
----@return cmp.Entry|nil
-core.get_selected_entry = function()
-  local info = vim.fn.complete_info({ 'items', 'selected' })
-  if info.selected == -1 then
-    return nil
-  end
-
-  local completed_item = info.items[math.max(info.selected, 0) + 1]
-  if not completed_item or not completed_item.word or not completed_item.user_data then
-    return nil
-  end
-
-  local id = completed_item.user_data.cmp
-  for _, s in ipairs(core.sources) do
-    local e = s:find_entry_by_id(id)
-    if e then
-      return e
-    end
-  end
-  return nil
-end
-
 ---Reset current completion state
 core.reset = function()
-  core.get_context() -- reset for new context
   for _, s in pairs(core.sources) do
     s:reset()
   end
   core.menu:reset()
-  core.select()
-  vim.api.nvim_buf_clear_namespace(0, core.namespace, 0, -1)
+
+  core.get_context()
 end
 
 return core
