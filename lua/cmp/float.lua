@@ -24,15 +24,11 @@ float.show = function(self, e)
     self.buf = vim.api.nvim_create_buf(true, true)
     vim.api.nvim_buf_set_option(self.buf, 'bufhidden', 'wipe')
 
-    local doc = e:get_documentation()
-    if not doc then
+    local documents = e:get_documentation()
+    if #documents == 0 then
       return self:close()
     end
-    local contents = doc.value
-    contents = vim.split(contents, '\n', true)
-    contents = vim.lsp.util.convert_input_to_markdown_lines(contents) -- TODO: check doc.kind
-    contents = vim.lsp.util._trim(contents, {})
-    vim.lsp.util.stylize_markdown(self.buf, contents, {
+    vim.lsp.util.stylize_markdown(self.buf, documents, {
       max_width = documentation.maxwidth,
       max_height = documentation.maxheight,
     })

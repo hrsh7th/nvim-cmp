@@ -14,7 +14,7 @@ string.gsub('1234567890', '.', function(char)
 end)
 
 local white = {}
-string.gsub(' \t', '.', function(char)
+string.gsub(' \t\n', '.', function(char)
   white[string.byte(char)] = true
 end)
 

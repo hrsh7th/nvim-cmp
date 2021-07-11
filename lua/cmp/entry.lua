@@ -256,19 +256,30 @@ entry.get_completion_item = function(self)
 end
 
 ---Create documentation
----@return lsp.MarkupContent
+---@return string
 entry.get_documentation = function(self)
   local item = self:get_completion_item()
-  if not item.documentation then
-    return nil
+
+  local documents = {}
+
+  -- detail
+  if misc.safe(item.detail) and item.detail ~= '' then
+    table.insert(documents, {
+      kind = lsp.MarkupKind.Markdown,
+      value = ('```%s\n%s\n```'):format(self.context.filetype, str.trim(item.detail)),
+    })
   end
-  if type(item.documentation) == 'string' then
-    return {
-      kind = 'plaintext',
-      value = item.documentation,
-    }
+
+  if type(item.documentation) == 'string' and item.documentation ~= '' then
+    table.insert(documents, {
+      kind = lsp.MarkupKind.PlainText,
+      value = str.trim(item.documentation),
+    })
+  elseif type(item.documentation) == 'table' and item.documentation.value ~= '' then
+    table.insert(documents, item.documentation)
   end
-  return item.documentation
+
+  return vim.lsp.util.convert_input_to_markdown_lines(documents)
 end
 
 ---Execute completion item's command.
