@@ -35,7 +35,6 @@ entry.new = function(ctx, source, completion_item)
   self.resolved_callbacks = {}
   self.resolving = false
   self.confirmed = false
-
   return self
 end
 
@@ -96,7 +95,7 @@ entry.get_word = function(self)
     elseif misc.safe(self.completion_item.insertText) then
       word = str.trim(self.completion_item.insertText)
       if self.completion_item.insertTextFormat == lsp.InsertTextFormat.Snippet then
-        word = str.get_word(word, string.byte(self.context.cursor_after_line, 1))
+        word = str.get_word(word)
       end
     else
       word = str.trim(self.completion_item.label)

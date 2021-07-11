@@ -130,7 +130,6 @@ core.on_commit_character = function(c, fallback)
     local key = keymap.t(keymap.to_key(c))
 
     -- It's annoying that if invoke 'replace' when the user type '.' so we prevent it.
-    core.reset()
     core.confirm(e, {
       behavior = char.is_printable(string.byte(key)) and 'insert' or 'replace',
     }, function()
@@ -139,6 +138,8 @@ core.on_commit_character = function(c, fallback)
       if string.sub(ctx.cursor_before_line, -#word, ctx.cursor.col - 1) == word and char.is_printable(string.byte(key)) then
         -- Don't reset current completion because reset/filter will occur by the fallback chars.
         fallback()
+      else
+        core.reset()
       end
     end)
   end)

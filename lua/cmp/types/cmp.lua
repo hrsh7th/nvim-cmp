@@ -5,6 +5,10 @@ cmp.ConfirmBehavior = {}
 cmp.ConfirmBehavior.Insert = 'insert'
 cmp.ConfirmBehavior.Replace = 'replace'
 
+---@class cmp.MatcherConfig
+---@field max_word_bound number
+---@field prefix_start_offset number
+
 ---@class cmp.ConfirmOption
 ---@field public behavior cmp.ConfirmBehavior
 

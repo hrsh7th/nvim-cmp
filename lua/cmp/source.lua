@@ -96,11 +96,15 @@ source.get_entries = function(self, ctx)
     local inputs = {}
     local entries = {}
     debug.log('filter', self.name, self.id, #(prev_entries or self.entries))
-    for _, e in ipairs(prev_entries or self.entries) do
+    local targets = prev_entries or self.entries
+    for _, e in ipairs(targets) do
       if not inputs[e:get_offset()] then
         inputs[e:get_offset()] = string.sub(ctx.cursor_before_line, e:get_offset())
       end
-      e.score = matcher.match(inputs[e:get_offset()], e:get_filter_text(), e:get_word_start_offset())
+      e.score = matcher.match(inputs[e:get_offset()], e:get_filter_text(), {
+        max_word_bound = #targets > 2000 and 1 or 100,
+        prefix_start_offset = e:get_word_start_offset(),
+      })
       if e.score >= 1 then
         binary.insort(entries, e, config.get().compare)
       end
