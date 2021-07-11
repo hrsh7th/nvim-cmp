@@ -30,6 +30,7 @@ local default = {
   ---@param entry2 cmp.Entry
   ---@return number
   compare = function(entry1, entry2)
+    -- preselect
     if entry1.completion_item.preselect ~= entry2.completion_item.preselect then
       if entry1.completion_item.preselect then
         return -1

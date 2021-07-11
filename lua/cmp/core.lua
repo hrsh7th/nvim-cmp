@@ -83,9 +83,8 @@ core.complete = function(ctx)
   local triggered = false
   for _, s in ipairs(core.get_sources(ctx)) do
     triggered = s:complete(ctx, function()
-      core.filter.stop()
       if #core.get_sources(ctx, { source.SourceStatus.FETCHING }) > 0 then
-        core.filter.timeout = 200
+        core.filter.timeout = 500
       else
         core.filter.timeout = 100
       end
