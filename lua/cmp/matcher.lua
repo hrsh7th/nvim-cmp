@@ -177,27 +177,33 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
   local input_index = input_end_index
   local word_offset = 0
   while input_index <= #input and word_index + word_offset <= #word do
-    if char.match(string.byte(input, input_index), string.byte(word, word_index + word_offset)) then
+    local c1 = string.byte(input, input_index)
+    local c2 = string.byte(word, word_index + word_offset)
+    if char.match(c1, c2) then
       -- Match start.
       if input_match_start == -1 then
         input_match_start = input_index
       end
 
       -- Increase strict_match_count
-      if string.byte(input, input_index) == string.byte(word, word_index + word_offset) then
+      if c1 == c2 then
         strict_match_count = strict_match_count + 1
       end
 
       word_offset = word_offset + 1
-    elseif input_match_start ~= -1 then
+    else
       -- Match end (partial region)
-      return {
-        input_match_start = input_match_start,
-        input_match_end = input_index - 1,
-        word_match_start = word_index,
-        word_match_end = word_index + word_offset - 1,
-        strict_match = strict_match_count == input_index - input_match_start,
-      }
+      if input_match_start ~= -1 then
+        return {
+          input_match_start = input_match_start,
+          input_match_end = input_index - 1,
+          word_match_start = word_index,
+          word_match_end = word_index + word_offset - 1,
+          strict_match = strict_match_count == input_index - input_match_start,
+        }
+      else
+        return nil
+      end
     end
     input_index = input_index + 1
   end

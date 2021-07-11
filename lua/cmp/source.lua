@@ -148,7 +148,7 @@ source.complete = function(self, ctx, callback)
       triggerKind = lsp.CompletionTriggerKind.TriggerCharacter,
       triggerCharacter = ctx.before_char,
     }
-  elseif ctx:is_keyword_beginning() then
+  elseif ctx:is_keyword_beginning() and (not self.context or self.context.offset ~= ctx.offset) then
     completion_context = {
       triggerKind = lsp.CompletionTriggerKind.Invoked,
     }
