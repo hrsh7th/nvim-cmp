@@ -62,7 +62,7 @@ end
 core.autocomplete = function()
   local ctx = core.get_context()
 
-  if core.get_active_entry() then
+  if core.has_active_entry() then
     return
   end
 
@@ -214,21 +214,13 @@ core.confirm = function(e, option, callback)
 end
 
 ---Get current active entry
----@return cmp.Entry|nil
-core.get_active_entry = function()
+---@return boolean
+core.has_active_entry = function()
   local completed_item = vim.v.completed_item or {}
   if vim.fn.pumvisible() == 0 or not completed_item.user_data then
-    return nil
+    return false
   end
-
-  local id = completed_item.user_data.cmp
-  for _, s in ipairs(core.sources) do
-    local e = s:find_entry_by_id(id)
-    if e then
-      return e
-    end
-  end
-  return nil
+  return completed_item.user_data.cmp ~= nil
 end
 
 ---Reset current completion state

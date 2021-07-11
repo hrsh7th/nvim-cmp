@@ -38,7 +38,6 @@ float.show = function(self, e)
     max_width = documentation.maxwidth,
     max_height = documentation.maxheight,
   })
-
   if width <= 0 or height <= 0 then
     return self:close()
   end
@@ -47,6 +46,7 @@ float.show = function(self, e)
   if not pum.col then
     return self:close()
   end
+
   local right_col = pum.col + pum.width + (pum.scrollbar and 1 or 0)
   local right_space = vim.o.columns - right_col - 1
   local left_col = pum.col - width - 3

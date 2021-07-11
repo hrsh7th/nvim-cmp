@@ -82,7 +82,7 @@ source.get_entries = function(self, ctx)
 
   local prev_entries = (function()
     local key = { 'get_entries', self.revision }
-    for i = ctx.cursor.col, self.offset + 1, -1 do
+    for i = ctx.cursor.col - 1, self.offset, -1 do
       key[3] = string.sub(ctx.cursor_before_line, 1, i)
       local prev_entries = self.cache:get(key)
       if prev_entries then
@@ -111,18 +111,6 @@ source.get_entries = function(self, ctx)
     end
     return entries
   end)
-end
-
----Find entry by id
----@param id number
----@return cmp.Entry|nil
-source.find_entry_by_id = function(self, id)
-  for _, e in ipairs(self.entries) do
-    if e.id == id then
-      return e
-    end
-  end
-  return nil
 end
 
 ---Get trigger_characters

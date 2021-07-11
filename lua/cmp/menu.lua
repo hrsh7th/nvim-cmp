@@ -52,6 +52,8 @@ menu.update = function(self, ctx, sources)
   end
 
   local entries = {}
+
+  -- merge two sorted list.
   local offset = ctx.offset
   for _, s in ipairs(sources) do
     local i = 1
