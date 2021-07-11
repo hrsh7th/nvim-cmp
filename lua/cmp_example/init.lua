@@ -1,12 +1,12 @@
-local cmp = require'cmp'
-local source = require'cmp_example.source'
+local cmp = require('cmp')
+local source = require('cmp_example.source')
 
-vim.cmd [[
+vim.cmd([[
   augroup cmp_example
     autocmd!
     autocmd InsertEnter * lua require'cmp_example'()
   augroup END
-]]
+]])
 
 local source_ids = {}
 
@@ -30,4 +30,3 @@ return function()
     end
   end
 end
-

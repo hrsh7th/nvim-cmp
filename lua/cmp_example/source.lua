@@ -1,6 +1,6 @@
 local source = {}
 
-source.new = function (client)
+source.new = function(client)
   local self = setmetatable({}, { __index = source })
   self.client = client
   self.request_id = nil
@@ -30,7 +30,7 @@ end
 ---Invoke completion
 ---@param request any
 ---@param callback fun(response: any)
-source.complete = function (self, request, callback)
+source.complete = function(self, request, callback)
   if self.client.is_stopped() then
     return callback()
   end
@@ -53,7 +53,7 @@ end
 ---Resolve completion item
 ---@param completion_item lsp.CompletionItem
 ---@param callback fun(response: any)
-source.resolve = function (self, completion_item, callback)
+source.resolve = function(self, completion_item, callback)
   if self.resolve_request_id ~= nil then
     self.client.cancel_request(self.resolve_request_id)
   end
@@ -66,7 +66,7 @@ end
 ---Execute command
 ---@param completion_item  lsp.CompletionItem
 ---@param callback  fun()
-source.execute = function (self, completion_item, callback)
+source.execute = function(self, completion_item, callback)
   if self.execute_request_id ~= nil then
     self.client.cancel_request(self.execute_request_id)
   end
@@ -97,4 +97,3 @@ source._get = function(_, root, paths)
 end
 
 return source
-

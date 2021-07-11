@@ -1,9 +1,8 @@
-local spec = require'cmp.utils.spec'
+local spec = require('cmp.utils.spec')
 
-local matcher = require "cmp.matcher"
+local matcher = require('cmp.matcher')
 
 describe('matcher', function()
-
   before_each(spec.before)
 
   it('match', function()
@@ -15,5 +14,4 @@ describe('matcher', function()
     assert.is.truthy(matcher.match('ab', 'a_b_c', 1) > matcher.match('ac', 'a_b_c', 1))
     assert.is.truthy(matcher.match('abc', 'ab', 1) == 0)
   end)
-
 end)

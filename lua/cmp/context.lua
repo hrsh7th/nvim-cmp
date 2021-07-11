@@ -1,5 +1,5 @@
-local misc = require'cmp.utils.misc'
-local pattern = require "cmp.utils.pattern"
+local misc = require('cmp.utils.misc')
+local pattern = require('cmp.utils.pattern')
 
 local DEFAULT_PATTERN = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]]
 
@@ -69,8 +69,8 @@ context.new = function(prev_context, option)
     },
     ['end'] = {
       row = self.cursor.row,
-      col = self.cursor.col
-    }
+      col = self.cursor.col,
+    },
   }
   self.replace_range = {
     start = {
@@ -85,8 +85,8 @@ context.new = function(prev_context, option)
           return self.offset + e - 1
         end
         return self.insert_range['end'].col
-      end)()
-    }
+      end)(),
+    },
   }
   return self
 end
@@ -163,4 +163,3 @@ context.clone = function(self)
 end
 
 return context
-

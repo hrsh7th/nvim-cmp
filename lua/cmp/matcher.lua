@@ -1,4 +1,4 @@
-local char = require'cmp.utils.char'
+local char = require('cmp.utils.char')
 
 local matcher = {}
 
@@ -129,7 +129,6 @@ matcher.match = function(input, word, word_start_offset)
   -- Check the word contains the remaining input. if not, it does not match.
   local last_match = matches[#matches]
   if last_match.input_match_end < #input then
-
     -- If input is remaining but all word consumed, it does not match.
     if last_match.word_match_end >= #word then
       return 0
@@ -193,11 +192,11 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
     elseif input_match_start ~= -1 then
       -- Match end (partial region)
       return {
-        input_match_start = input_match_start;
-        input_match_end = input_index - 1;
-        word_match_start = word_index;
-        word_match_end = word_index + word_offset - 1;
-        strict_match = strict_match_count == input_index - input_match_start;
+        input_match_start = input_match_start,
+        input_match_end = input_index - 1,
+        word_match_start = word_index,
+        word_match_end = word_index + word_offset - 1,
+        strict_match = strict_match_count == input_index - input_match_start,
       }
     end
     input_index = input_index + 1
@@ -206,11 +205,11 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
   -- Match end (whole region)
   if input_match_start ~= -1 then
     return {
-      input_match_start = input_match_start;
-      input_match_end = input_index - 1;
-      word_match_start = word_index;
-      word_match_end = word_index + word_offset - 1;
-      strict_match = strict_match_count == input_index - input_match_start;
+      input_match_start = input_match_start,
+      input_match_end = input_index - 1,
+      word_match_start = word_index,
+      word_match_end = word_index + word_offset - 1,
+      strict_match = strict_match_count == input_index - input_match_start,
     }
   end
 
@@ -218,4 +217,3 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
 end
 
 return matcher
-

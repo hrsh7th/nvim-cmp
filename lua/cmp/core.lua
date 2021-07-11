@@ -1,14 +1,14 @@
-local keymap = require'cmp.utils.keymap'
-local debug = require'cmp.utils.debug'
-local char = require'cmp.utils.char'
-local async = require'cmp.utils.async'
-local context = require'cmp.context'
-local source = require'cmp.source'
-local menu = require'cmp.menu'
-local misc = require 'cmp.utils.misc'
-local config = require 'cmp.config'
-local cmp    = require 'cmp.types.cmp'
-local lsp    = require 'cmp.types.lsp'
+local keymap = require('cmp.utils.keymap')
+local debug = require('cmp.utils.debug')
+local char = require('cmp.utils.char')
+local async = require('cmp.utils.async')
+local context = require('cmp.context')
+local source = require('cmp.source')
+local menu = require('cmp.menu')
+local misc = require('cmp.utils.misc')
+local config = require('cmp.config')
+local cmp = require('cmp.types.cmp')
+local lsp = require('cmp.types.lsp')
 
 local core = {}
 
@@ -244,4 +244,3 @@ core.reset = function()
 end
 
 return core
-

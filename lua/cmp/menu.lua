@@ -1,8 +1,8 @@
-local config = require'cmp.config'
-local debug = require'cmp.utils.debug'
-local keymap = require 'cmp.utils.keymap'
-local float = require 'cmp.float'
-local cache = require 'cmp.utils.cache'
+local config = require('cmp.config')
+local debug = require('cmp.utils.debug')
+local keymap = require('cmp.utils.keymap')
+local float = require('cmp.float')
+local cache = require('cmp.utils.cache')
 
 ---@class cmp.Menu
 ---@field public on_commit_character fun(c: string, fallback: function)
@@ -139,11 +139,14 @@ menu.select = function(self, ctx)
 
   -- Add commit character listeners.
   for _, key in ipairs(e:get_commit_characters()) do
-    keymap.listen(key, (function(k)
-      return function(fallback)
-        return self.on_commit_character(k, fallback)
-      end
-    end)(key))
+    keymap.listen(
+      key,
+      (function(k)
+        return function(fallback)
+          return self.on_commit_character(k, fallback)
+        end
+      end)(key)
+    )
   end
 
   -- Highlight replace range.
@@ -192,4 +195,3 @@ menu.get_selected_entry = function(self)
 end
 
 return menu
-

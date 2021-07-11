@@ -1,9 +1,8 @@
-local spec = require'cmp.utils.spec'
+local spec = require('cmp.utils.spec')
 
-local context = require "cmp.context"
+local context = require('cmp.context')
 
 describe('context', function()
-
   before_each(spec.before)
 
   it('create', function()
@@ -23,6 +22,4 @@ describe('context', function()
     assert.are.equal(ctx.replace_range.start.col, 13)
     assert.are.equal(ctx.replace_range['end'].col, 17)
   end)
-
 end)
-

@@ -1,4 +1,4 @@
-local buffer = require'cmp_buffer.buffer'
+local buffer = require('cmp_buffer.buffer')
 
 local source = {}
 
@@ -16,12 +16,16 @@ source.complete = function(self, request, callback)
 
   if processing then
     local timer = vim.loop.new_timer()
-    timer:start(100, 0, vim.schedule_wrap(function()
-      timer:stop()
-      timer:close()
-      timer = nil
-      self:_do_complete(request, callback)
-    end))
+    timer:start(
+      100,
+      0,
+      vim.schedule_wrap(function()
+        timer:stop()
+        timer:close()
+        timer = nil
+        self:_do_complete(request, callback)
+      end)
+    )
   else
     self:_do_complete(request, callback)
   end
@@ -43,8 +47,8 @@ source._do_complete = function(self, request, callback)
   end
 
   callback({
-    items = words;
-    isIncomplete = processing;
+    items = words,
+    isIncomplete = processing,
   })
 end
 

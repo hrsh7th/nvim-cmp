@@ -41,22 +41,26 @@ function buffer.index(self)
   local index = 1
   local lines = vim.api.nvim_buf_get_lines(self.bufnr, 0, -1, false)
   self.timer = vim.loop.new_timer()
-  self.timer:start(0, 200, vim.schedule_wrap(function()
-    local chunk = math.min(index + 1000, #lines)
-    for i = index, chunk do
-      self:index_line(i, lines[i] or '')
-    end
-    index = chunk + 1
-
-    if chunk >= #lines then
-      if self.timer then
-        self.timer:stop()
-        self.timer:close()
-        self.timer = nil
+  self.timer:start(
+    0,
+    200,
+    vim.schedule_wrap(function()
+      local chunk = math.min(index + 1000, #lines)
+      for i = index, chunk do
+        self:index_line(i, lines[i] or '')
       end
-      self.processing = false
-    end
-  end))
+      index = chunk + 1
+
+      if chunk >= #lines then
+        if self.timer then
+          self.timer:stop()
+          self.timer:close()
+          self.timer = nil
+        end
+        self.processing = false
+      end
+    end)
+  )
 end
 
 --- watch
@@ -85,7 +89,7 @@ function buffer.watch(self)
           self:index_line(firstline + i, line or '')
         end
       end
-    end)
+    end),
   })
 end
 
@@ -135,7 +139,7 @@ function buffer.get_words(self, lnum)
     offset = offset + 1
   end
   return words
- end
+end
 
 --- matchstrpos
 function buffer.matchstrpos(self, text)
@@ -189,4 +193,3 @@ function buffer.regex(self, pattern)
 end
 
 return buffer
-

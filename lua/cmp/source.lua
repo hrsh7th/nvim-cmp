@@ -1,12 +1,12 @@
-local context = require'cmp.context'
-local matcher = require'cmp.matcher'
-local config = require'cmp.config'
-local entry = require'cmp.entry'
-local binary = require'cmp.utils.binary'
-local debug = require'cmp.utils.debug'
-local misc = require'cmp.utils.misc'
-local cache = require "cmp.utils.cache"
-local lsp = require'cmp.types.lsp'
+local context = require('cmp.context')
+local matcher = require('cmp.matcher')
+local config = require('cmp.config')
+local entry = require('cmp.entry')
+local binary = require('cmp.utils.binary')
+local debug = require('cmp.utils.debug')
+local misc = require('cmp.utils.misc')
+local cache = require('cmp.utils.cache')
+local lsp = require('cmp.types.lsp')
 
 ---@class cmp.Source
 ---@field public id number
@@ -100,11 +100,7 @@ source.get_entries = function(self, ctx)
       if not inputs[e:get_offset()] then
         inputs[e:get_offset()] = string.sub(ctx.cursor_before_line, e:get_offset())
       end
-      e.score = matcher.match(
-        inputs[e:get_offset()],
-        e:get_filter_text(),
-        e:get_word_start_offset()
-      )
+      e.score = matcher.match(inputs[e:get_offset()], e:get_filter_text(), e:get_word_start_offset())
       if e.score >= 1 then
         binary.insort(entries, e, config.get().compare)
       end
@@ -158,7 +154,7 @@ source.complete = function(self, ctx, callback)
     }
   elseif self.incomplete and ctx.input ~= '' then
     completion_context = {
-      triggerKind = lsp.CompletionTriggerKind.TriggerForIncompleteCompletions
+      triggerKind = lsp.CompletionTriggerKind.TriggerForIncompleteCompletions,
     }
   end
   if not completion_context then
@@ -170,33 +166,36 @@ source.complete = function(self, ctx, callback)
   local prev_status = self.status
   self.status = source.SourceStatus.FETCHING
   self.context = ctx
-  self.source:complete({
-    context = ctx,
-    completion_context = completion_context,
-  }, vim.schedule_wrap(function(response)
-    if self.context.id ~= ctx.id then
-      debug.log('ignore', self.name, self.id)
-      return
-    end
-    if response ~= nil then
-      debug.log('retrieve', self.name, self.id, #(response.items or response))
-      self.status = source.SourceStatus.COMPLETED
-      self.revision = self.revision + 1
-      self.trigger_kind = completion_context.triggerKind
-      self.incomplete = response.isIncomplete or false
-      self.entries = {}
-      self.offset = ctx.offset
-      for i, item in ipairs(response.items or response) do
-        local e = entry.new(ctx, self, item)
-        self.entries[i] = e
-        self.offset = math.min(self.offset, e:get_offset())
+  self.source:complete(
+    {
+      context = ctx,
+      completion_context = completion_context,
+    },
+    vim.schedule_wrap(function(response)
+      if self.context.id ~= ctx.id then
+        debug.log('ignore', self.name, self.id)
+        return
       end
-    else
-      debug.log('continue', self.name, self.id, 'nil')
-      self.status = prev_status
-    end
-    callback()
-  end))
+      if response ~= nil then
+        debug.log('retrieve', self.name, self.id, #(response.items or response))
+        self.status = source.SourceStatus.COMPLETED
+        self.revision = self.revision + 1
+        self.trigger_kind = completion_context.triggerKind
+        self.incomplete = response.isIncomplete or false
+        self.entries = {}
+        self.offset = ctx.offset
+        for i, item in ipairs(response.items or response) do
+          local e = entry.new(ctx, self, item)
+          self.entries[i] = e
+          self.offset = math.min(self.offset, e:get_offset())
+        end
+      else
+        debug.log('continue', self.name, self.id, 'nil')
+        self.status = prev_status
+      end
+      callback()
+    end)
+  )
   return true
 end
 
@@ -225,4 +224,3 @@ source.execute = function(self, item, callback)
 end
 
 return source
-

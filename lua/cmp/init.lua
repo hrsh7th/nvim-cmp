@@ -1,6 +1,6 @@
-local core = require "cmp.core"
-local source = require'cmp.source'
-local debug = require'cmp.utils.debug'
+local core = require('cmp.core')
+local source = require('cmp.source')
+local debug = require('cmp.utils.debug')
 
 local cmp = {}
 
@@ -32,9 +32,9 @@ cmp._on_event = function(name)
     debug.log('adopt', name)
   end
   if name == 'InsertEnter' then
-    core.autocomplete();
+    core.autocomplete()
   elseif name == 'TextChanged' then
-    core.autocomplete();
+    core.autocomplete()
   elseif name == 'CompleteChanged' then
     core.select()
   elseif name == 'InsertLeave' then
@@ -43,4 +43,3 @@ cmp._on_event = function(name)
 end
 
 return cmp
-

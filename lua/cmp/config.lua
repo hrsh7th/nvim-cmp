@@ -1,8 +1,8 @@
-local misc = require'cmp.utils.misc'
-local cache = require "cmp.utils.cache"
-local lsp = require "cmp.types.lsp"
-local cmp = require "cmp.types.cmp"
-local str = require "cmp.utils.str"
+local misc = require('cmp.utils.misc')
+local cache = require('cmp.utils.cache')
+local lsp = require('cmp.types.lsp')
+local cmp = require('cmp.types.cmp')
+local str = require('cmp.utils.str')
 
 local WIDE_HEIGHT = 40
 
@@ -13,7 +13,7 @@ local default = {
   default_confirm_behavior = cmp.ConfirmBehavior.Replace,
 
   documentation = {
-    border = { '', '' ,'', ' ', '', '', '', ' ' },
+    border = { '', '', '', ' ', '', '', '', ' ' },
     winhighlight = 'FloatBorder:PmenuSbar,NormalFloat:PmenuSbar',
     maxwidth = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
     maxheight = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
@@ -89,10 +89,10 @@ local default = {
       empty = 1,
       dup = 1,
       user_data = {
-        cmp = e.id
-      }
+        cmp = e.id,
+      },
     }
-  end
+  end,
 }
 
 ---@class cmp.Config
@@ -126,4 +126,3 @@ config.get = function()
 end
 
 return config
-

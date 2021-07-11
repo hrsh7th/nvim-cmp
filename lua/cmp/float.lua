@@ -1,4 +1,4 @@
-local config = require'cmp.config'
+local config = require('cmp.config')
 
 ---@class cmp.Float
 ---@field public entry cmp.Entry|nil
@@ -17,7 +17,7 @@ end
 
 ---Show floating window
 ---@param e cmp.Entry
-float.show = function (self, e)
+float.show = function(self, e)
   local documentation = config.get().documentation
   if not self.entry or e.id ~= self.entry.id then
     self.entry = e
@@ -29,7 +29,7 @@ float.show = function (self, e)
       return self:close()
     end
     local contents = doc.value
-    contents = vim.split(contents, "\n", true)
+    contents = vim.split(contents, '\n', true)
     contents = vim.lsp.util.convert_input_to_markdown_lines(contents) -- TODO: check doc.kind
     contents = vim.lsp.util._trim(contents, {})
     vim.lsp.util.stylize_markdown(self.buf, contents, {
@@ -66,8 +66,8 @@ float.show = function (self, e)
   end
 
   local style = {
-    relative = "editor",
-    style = "minimal",
+    relative = 'editor',
+    style = 'minimal',
     width = width,
     height = height,
     row = pum.row,
@@ -80,12 +80,12 @@ float.show = function (self, e)
     vim.api.nvim_win_set_config(self.win, style)
   else
     self.win = vim.api.nvim_open_win(self.buf, false, style)
-    vim.api.nvim_win_set_option(self.win, "conceallevel", 2)
-    vim.api.nvim_win_set_option(self.win, "concealcursor", "n")
-    vim.api.nvim_win_set_option(self.win, "winhighlight", config.get().documentation.winhighlight)
-    vim.api.nvim_win_set_option(self.win, "foldenable", false)
-    vim.api.nvim_win_set_option(self.win, "wrap", true)
-    vim.api.nvim_win_set_option(self.win, "scrolloff", 0)
+    vim.api.nvim_win_set_option(self.win, 'conceallevel', 2)
+    vim.api.nvim_win_set_option(self.win, 'concealcursor', 'n')
+    vim.api.nvim_win_set_option(self.win, 'winhighlight', config.get().documentation.winhighlight)
+    vim.api.nvim_win_set_option(self.win, 'foldenable', false)
+    vim.api.nvim_win_set_option(self.win, 'wrap', true)
+    vim.api.nvim_win_set_option(self.win, 'scrolloff', 0)
   end
 end
 

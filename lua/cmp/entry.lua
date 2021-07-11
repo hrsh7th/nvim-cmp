@@ -1,9 +1,9 @@
-local cache = require'cmp.utils.cache'
-local char = require'cmp.utils.char'
-local misc = require'cmp.utils.misc'
-local str = require "cmp.utils.str"
-local config = require'cmp.config'
-local lsp = require "cmp.types.lsp"
+local cache = require('cmp.utils.cache')
+local char = require('cmp.utils.char')
+local misc = require('cmp.utils.misc')
+local str = require('cmp.utils.str')
+local config = require('cmp.config')
+local lsp = require('cmp.types.lsp')
 
 ---@class cmp.Entry
 ---@field public id number
@@ -67,7 +67,7 @@ entry.get_offset = function(self)
             break
           end
           local match = true
-          for i = 1, #self.context.offset_before_line - idx + 1  do
+          for i = 1, #self.context.offset_before_line - idx + 1 do
             local c1 = string.byte(word, i)
             local c2 = string.byte(self.context.offset_before_line, idx + i - 1)
             if not c1 or not c2 or c1 ~= c2 then
@@ -215,9 +215,9 @@ entry.get_insert_range = function(self)
     insert_range = {
       start = {
         row = self.context.insert_range.start.row,
-        col = math.min(self.context.insert_range.start.col, self:get_offset())
+        col = math.min(self.context.insert_range.start.col, self:get_offset()),
       },
-      ['end'] = self.context.insert_range['end']
+      ['end'] = self.context.insert_range['end'],
     }
   end
   return insert_range
@@ -238,9 +238,9 @@ entry.get_replace_range = function(self)
       replace_range = {
         start = {
           row = self.context.replace_range.start.row,
-          col = math.min(self.context.replace_range.start.col, self:get_offset())
+          col = math.min(self.context.replace_range.start.col, self:get_offset()),
         },
-        ['end'] = self.context.replace_range['end']
+        ['end'] = self.context.replace_range['end'],
       }
     end
     return replace_range
@@ -263,7 +263,7 @@ entry.get_documentation = function(self)
   if not item.documentation then
     return nil
   end
-  if type(item.documentation) == "string" then
+  if type(item.documentation) == 'string' then
     return {
       kind = 'plaintext',
       value = item.documentation,
@@ -298,4 +298,3 @@ entry.resolve = function(self, callback)
 end
 
 return entry
-
