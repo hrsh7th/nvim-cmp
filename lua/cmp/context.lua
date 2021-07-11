@@ -106,7 +106,7 @@ context.is_forwarding = function(self)
   local prev = self.prev_context
   local curr = self
 
-  return prev.cursor.col < curr.cursor.col
+  return prev.bufnr == curr.bufnr and prev.cursor.row == curr.cursor.row and prev.cursor.col < curr.cursor.col
 end
 
 ---Return if this context is continueing previous context.
@@ -130,23 +130,23 @@ end
 
 ---Return if this context is changed from previous context or not.
 ---@return boolean
-context.changed = function(self)
-  local prev = self.prev_context
+context.changed = function(self, ctx)
   local curr = self
 
   if self.pumvisible then
-    if vim.v.completed_item and vim.v.completed_item.word then
+    local completed_item = vim.v.completed_item or {}
+    if completed_item.word then
       return false
     end
   end
 
-  if curr.bufnr ~= prev.bufnr then
+  if curr.bufnr ~= ctx.bufnr then
     return true
   end
-  if curr.cursor.row ~= prev.cursor.row then
+  if curr.cursor.row ~= ctx.cursor.row then
     return true
   end
-  if curr.cursor.col ~= prev.cursor.col then
+  if curr.cursor.col ~= ctx.cursor.col then
     return true
   end
 

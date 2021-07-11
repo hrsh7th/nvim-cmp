@@ -5,6 +5,10 @@ local async = require'cmp.utils.async'
 local context = require'cmp.context'
 local source = require'cmp.source'
 local menu = require'cmp.menu'
+local misc = require 'cmp.utils.misc'
+local config = require 'cmp.config'
+local cmp    = require 'cmp.types.cmp'
+local lsp    = require 'cmp.types.lsp'
 
 local core = {}
 
@@ -63,7 +67,7 @@ core.autocomplete = function()
   end
 
   debug.log(('ctx: `%s`'):format(ctx.cursor_before_line))
-  if ctx:changed() then
+  if ctx:changed(ctx.prev_context) then
     debug.log('changed')
     core.complete(ctx)
   else
@@ -126,6 +130,7 @@ core.on_commit_character = function(c, fallback)
     local key = keymap.t(keymap.to_key(c))
 
     -- It's annoying that if invoke 'replace' when the user type '.' so we prevent it.
+    core.reset()
     core.confirm(e, {
       behavior = char.is_printable(string.byte(key)) and 'insert' or 'replace',
     }, function()
@@ -134,9 +139,6 @@ core.on_commit_character = function(c, fallback)
       if string.sub(ctx.cursor_before_line, -#word, ctx.cursor.col - 1) == word and char.is_printable(string.byte(key)) then
         -- Don't reset current completion because reset/filter will occur by the fallback chars.
         fallback()
-      else
-        -- Reset current completion if the user type chars like `\n`/`\t`.
-        core.reset()
       end
     end)
   end)
@@ -150,7 +152,67 @@ core.confirm = function(e, option, callback)
   if not (e and not e.confirmed) then
     return
   end
-  e:confirm(option, callback)
+
+  debug.log('entry.confirm', e:get_completion_item())
+
+  --@see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/suggestController.ts#L334
+  local pre = context.new()
+  if #(misc.safe(e.completion_item.additionalTextEdits) or {}) == 0 then
+    local new = context.new(pre)
+    e:resolve(function()
+      -- has no additionalTextEdits.
+      local text_edits = misc.safe(e:get_completion_item().additionalTextEdits) or {}
+      if #text_edits == 0 then
+        return
+      end
+
+      -- cursor.row changed.
+      if pre.cursor.row ~= new.cursor.row then
+        return
+      end
+
+      -- check additionalTextEdits.
+      local has_cursor_line_text_edit = (function()
+        for _, text_edit in ipairs(text_edits) do
+          local srow = text_edit.range.start.line + 1
+          local erow = text_edit.range['end'].line + 1
+          if srow <= new.cursor.row and new.cursor.row <= erow then
+            return true
+          end
+        end
+        return false
+      end)()
+      if has_cursor_line_text_edit then
+        return
+      end
+
+      vim.fn['cmp#apply_text_edits'](new.bufnr, text_edits)
+    end)
+  end
+
+  -- confirm
+  local completion_item = misc.copy(e:get_completion_item())
+  if not misc.safe(completion_item.textEdit) then
+    completion_item.textEdit = {}
+    completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.label
+  end
+  local behavior = option.behavior or config.get().default_confirm_behavior
+  if behavior == cmp.ConfirmBehavior.Replace then
+    completion_item.textEdit.range = lsp.Range.from_vim('%', e:get_replace_range())
+  else
+    completion_item.textEdit.range = lsp.Range.from_vim('%', e:get_insert_range())
+  end
+  vim.fn['cmp#confirm']({
+    request_offset = e.context.cursor.col,
+    suggest_offset = e:get_offset(),
+    completion_item = completion_item,
+  })
+
+  -- execute
+  e:execute(function()
+    e.confirmed = true
+    callback()
+  end)
 end
 
 ---Get current active entry

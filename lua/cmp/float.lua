@@ -32,7 +32,10 @@ float.show = function (self, e)
     contents = vim.split(contents, "\n", true)
     contents = vim.lsp.util.convert_input_to_markdown_lines(contents) -- TODO: check doc.kind
     contents = vim.lsp.util._trim(contents, {})
-    vim.lsp.util.stylize_markdown(self.buf, contents)
+    vim.lsp.util.stylize_markdown(self.buf, contents, {
+      max_width = documentation.maxwidth,
+      max_height = documentation.maxheight,
+    })
   end
 
   local width, height = vim.lsp.util._make_floating_popup_size(vim.api.nvim_buf_get_lines(self.buf, 0, -1, false), {
@@ -44,15 +47,14 @@ float.show = function (self, e)
     return self:close()
   end
 
-  local border = config.get().documentation.border
-  width = width + #border[4] + #border[8]
-  height = height + #border[2] + #border[6]
-
-  local pum = vim.fn.pum_getpos()
+  local pum = vim.fn.pum_getpos() or {}
+  if not pum.col then
+    return self:close()
+  end
   local right_col = pum.col + pum.width + (pum.scrollbar and 1 or 0)
-  local right_space = vim.o.columns - right_col - 2
+  local right_space = vim.o.columns - right_col - 1
   local left_col = pum.col - width - 3
-  local left_space = pum.col - 2
+  local left_space = pum.col - 1
 
   local col
   if right_space >= width then
@@ -70,7 +72,7 @@ float.show = function (self, e)
     height = height,
     row = pum.row,
     col = col,
-    border = border,
+    border = documentation.border,
   }
 
   if self.win and vim.api.nvim_win_is_valid(self.win) then

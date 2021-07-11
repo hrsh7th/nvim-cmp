@@ -1,6 +1,17 @@
 let s:Position = vital#cmp#import('VS.LSP.Position')
+let s:TextEdit = vital#cmp#import('VS.LSP.TextEdit')
 let s:CompletionItem = vital#cmp#import('VS.LSP.CompletionItem')
 
+"
+" cmp#apply_text_edits
+"
+function! cmp#apply_text_edits(bufnr, text_edits) abort
+  call s:TextEdit.apply(a:bufnr, a:text_edits)
+endfunction
+
+"
+" cmp#confirm
+"
 function! cmp#confirm(args) abort
   call s:CompletionItem.confirm({
   \   'suggest_position': s:Position.vim_to_lsp('%', [line('.'), a:args.suggest_offset]),

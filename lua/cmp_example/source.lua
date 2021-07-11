@@ -21,7 +21,7 @@ end
 source.match = function(self, ctx)
   for id in pairs(vim.lsp.buf_get_clients(ctx.bufnr)) do
     if id == self.client.id then
-      return true
+      return not not self:_get(self.client.server_capabilities, { 'completionProvider' })
     end
   end
   return false

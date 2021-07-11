@@ -1,12 +1,9 @@
-local async = require'cmp.utils.async'
 local cache = require'cmp.utils.cache'
-local debug = require'cmp.utils.debug'
 local char = require'cmp.utils.char'
 local misc = require'cmp.utils.misc'
 local str = require "cmp.utils.str"
 local config = require'cmp.config'
 local lsp = require "cmp.types.lsp"
-local cmp = require "cmp.types.cmp"
 
 ---@class cmp.Entry
 ---@field public id number
@@ -275,42 +272,6 @@ entry.get_documentation = function(self)
   return item.documentation
 end
 
----Confirm completion item
----@param option cmp.ConfirmOption
----@param callback function
-entry.confirm = function(self, option, callback)
-  -- resolve
-  async.sync(function(done)
-    self:resolve(done)
-  end, 1000)
-
-  debug.log('entry.confirm', self:get_completion_item())
-
-  -- confirm
-  local completion_item = misc.copy(self:get_completion_item())
-  if not misc.safe(completion_item.textEdit) then
-    completion_item.textEdit = {}
-    completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.label
-  end
-  local behavior = option.behavior or config.get().default_confirm_behavior
-  if behavior == cmp.ConfirmBehavior.Replace then
-    completion_item.textEdit.range = lsp.Range.from_vim('%', self:get_replace_range())
-  else
-    completion_item.textEdit.range = lsp.Range.from_vim('%', self:get_insert_range())
-  end
-  vim.fn['cmp#confirm']({
-    request_offset = self.context.cursor.col,
-    suggest_offset = self:get_offset(),
-    completion_item = completion_item,
-  })
-
-  -- execute
-  self:execute(function()
-    self.confirmed = true
-    callback()
-  end)
-end
-
 ---Execute completion item's command.
 ---@param callback fun()
 entry.execute = function(self, callback)
@@ -328,7 +289,7 @@ entry.resolve = function(self, callback)
   if not self.resolving then
     self.resolving = true
     self.source:resolve(self.completion_item, function(completion_item)
-      self.resolved_completion_item = completion_item
+      self.resolved_completion_item = misc.safe(completion_item) or self.completion_item
       for _, c in ipairs(self.resolved_callbacks) do
         c()
       end
