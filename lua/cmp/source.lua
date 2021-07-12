@@ -128,7 +128,7 @@ end
 ---@return boolean Return true if not trigger completion.
 source.complete = function(self, ctx, callback)
   if self.offset then
-    if not ctx:maybe_continue(self.offset) then
+    if not ctx:continue(self.offset) then
       debug.log('not continue', self.name, self.id)
       self:reset()
     end
@@ -140,7 +140,7 @@ source.complete = function(self, ctx, callback)
       triggerKind = lsp.CompletionTriggerKind.TriggerCharacter,
       triggerCharacter = ctx.before_char,
     }
-  elseif ctx:is_keyword_beginning() and (not self.context or self.context.offset ~= ctx.offset) then
+  elseif ctx:is_keyword_beginning() and self.context.offset ~= ctx.offset then
     completion_context = {
       triggerKind = lsp.CompletionTriggerKind.Invoked,
     }

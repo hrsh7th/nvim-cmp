@@ -1,5 +1,6 @@
 local core = require('cmp.core')
 local source = require('cmp.source')
+local config = require('cmp.config')
 local debug = require('cmp.utils.debug')
 
 local cmp = {}
@@ -40,6 +41,13 @@ cmp._on_event = function(name)
   elseif name == 'InsertLeave' then
     core.reset()
   end
+end
+
+---Internal expand snippet function.
+---TODO: It should be removed when we remove `autoload/cmp.vim`.
+---@param args cmp.SnippetExpansionParams
+cmp._expand_snippet = function(args)
+  return config.get().snippet.expand(args)
 end
 
 return cmp

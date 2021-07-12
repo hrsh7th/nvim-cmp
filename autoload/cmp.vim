@@ -27,6 +27,6 @@ endfunction
 " get_expand_snippet
 "
 function! s:get_expand_snippet() abort
-  return { args -> vsnip#anonymous(args.body) }
+  return { args -> luaeval('require"cmp"._expand_snippet(_A)', args) }
 endfunction
 

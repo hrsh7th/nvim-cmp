@@ -19,6 +19,8 @@ end
 ---@param e cmp.Entry
 float.show = function(self, e)
   local documentation = config.get().documentation
+
+  -- update buffer content if needed.
   if not self.entry or e.id ~= self.entry.id then
     self.entry = e
     self.buf = vim.api.nvim_create_buf(true, true)
@@ -49,7 +51,7 @@ float.show = function(self, e)
 
   local right_col = pum.col + pum.width + (pum.scrollbar and 1 or 0)
   local right_space = vim.o.columns - right_col - 1
-  local left_col = pum.col - width - 3
+  local left_col = pum.col - width - 3 -- TODO: Why is this needed -3?
   local left_space = pum.col - 1
 
   local col

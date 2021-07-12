@@ -94,6 +94,12 @@ local default = {
       },
     }
   end,
+
+  snippet = {
+    expand = function()
+      error('snippet engine does not configured.')
+    end,
+  },
 }
 
 ---@class cmp.Config
@@ -104,25 +110,40 @@ local config = {}
 config.cache = cache.new()
 
 ---@type table<number, cmp.ConfigSchema>
-config.bufs = { [0] = default }
+config.bufs = {}
 
 ---Set configuration for global or specified buffer
 ---@param c cmp.ConfigSchema
 ---@param bufnr number|nil
 config.set = function(c, bufnr)
-  bufnr = bufnr == 0 and vim.api.nvim_get_current_buf() or bufnr or 0
-  config.bufs[bufnr] = c
-  config.bufs[bufnr].revision = config.bufs[bufnr].revision + 1
+  if bufnr == nil then
+    for k, v in pairs(c) do
+      default[k] = v
+    end
+    default.reivision = default.revision + 1
+  else
+    bufnr = bufnr == 0 and vim.api.nvim_get_current_buf() or bufnr
+    config.bufs[bufnr] = c
+    config.bufs[bufnr].revision = config.bufs[bufnr].revision or 1
+    config.bufs[bufnr].revision = config.bufs[bufnr].revision + 1
+  end
 end
 
 ---@return cmp.ConfigSchema
 config.get = function()
-  local buf = config.bufs[vim.api.nvim_get_current_buf()] or default
-  return config.cache:ensure({ buf.revision }, function()
-    if buf == default then
-      return default
+  local def = default
+  local buf = config.bufs[vim.api.nvim_get_current_buf()] or { revision = 1 }
+  return config.cache:ensure({ def.revision, buf.revision }, function()
+    local c = {}
+    for k, v in pairs(buf) do
+      c[k] = v
     end
-    return default
+    for k, v in pairs(default) do
+      if c[k] == nil then
+        c[k] = v
+      end
+    end
+    return c
   end)
 end
 

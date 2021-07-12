@@ -29,6 +29,8 @@ local context = {}
 context.empty = function()
   local ctx = context.new({}) -- dirty hack to prevent recursive call `context.empty`.
   ctx.bufnr = -1
+  ctx.offset = -1
+  ctx.input = ''
   ctx.cursor = {}
   ctx.cursor.row = -1
   ctx.cursor.col = -1
@@ -110,7 +112,7 @@ context.is_forwarding = function(self)
 end
 
 ---Return if this context is continueing previous context.
-context.maybe_continue = function(self, suggest_offset)
+context.continue = function(self, offset)
   local prev = self.prev_context
   local curr = self
 
@@ -120,10 +122,8 @@ context.maybe_continue = function(self, suggest_offset)
   if curr.cursor.row ~= prev.cursor.row then
     return false
   end
-  if suggest_offset then
-    if curr.cursor.col < suggest_offset then
-      return false
-    end
+  if curr.cursor.col < offset then
+    return false
   end
   return true
 end
