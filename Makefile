@@ -1,7 +1,3 @@
-.PHONY: test
-test:
-	vusted ./lua
-
 .PHONY: fmt
 fmt:
 	stylua --glob lua/**/*.lua -- lua
@@ -9,4 +5,14 @@ fmt:
 .PHONY: lint
 lint:
 	luacheck ./lua
+
+.PHONY: test
+test:
+	vusted ./lua
+
+.PHONY: integration
+integration:
+	stylua --check --glob lua/**/*.lua -- lua
+	luacheck lua
+	vusted lua
 
