@@ -2,6 +2,7 @@ local debug = require('cmp.utils.debug')
 local keymap = require('cmp.utils.keymap')
 local float = require('cmp.float')
 local cache = require('cmp.utils.cache')
+local lsp = require('cmp.types.lsp')
 
 ---@class cmp.Menu
 ---@field public on_commit_character fun(c: string, fallback: function)
@@ -52,12 +53,24 @@ menu.update = function(self, ctx, sources)
 
   local entries = {}
 
-  -- merge two sorted list.
+  -- narrow to triggered_by_character
   local offset = ctx.offset
+  local has_triggered_by_character = false
   for _, s in ipairs(sources) do
-    for _, e in ipairs(s:get_entries(ctx)) do
-      table.insert(entries, e)
+    if s.offset then
+      if s.trigger_kind == lsp.CompletionTriggerKind.TriggerCharacter then
+        has_triggered_by_character = true
+      end
       offset = math.min(offset, s.offset)
+    end
+  end
+
+  -- merge two sorted list.
+  for _, s in ipairs(sources) do
+    if not has_triggered_by_character or s.trigger_kind == lsp.CompletionTriggerKind.TriggerCharacter then
+      for _, e in ipairs(s:get_entries(ctx, offset)) do
+        table.insert(entries, e)
+      end
     end
   end
 

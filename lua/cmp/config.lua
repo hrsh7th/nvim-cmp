@@ -19,8 +19,8 @@ config.set_global = function(c)
   for k, v in pairs(c) do
     config.global[k] = v
   end
-  config.global.reivision = config.global.revision or 1
-  config.global.reivision = config.global.revision + 1
+  config.global.revision = config.global.revision or 1
+  config.global.revision = config.global.revision + 1
 end
 
 ---Set configuration for buffer

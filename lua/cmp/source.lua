@@ -74,16 +74,17 @@ end
 
 ---Return filtered entries
 ---@param ctx cmp.Context
+---@param suggest_offset number
 ---@return cmp.Entry[]
-source.get_entries = function(self, ctx)
+source.get_entries = function(self, ctx, suggest_offset)
   if not self:has_items() then
     return {}
   end
 
   local prev_entries = (function()
-    local key = { 'get_entries', self.revision }
-    for i = ctx.cursor.col, self.offset, -1 do
-      key[3] = string.sub(ctx.cursor_before_line, 1, i)
+    local key = { 'get_entries', self.revision, suggest_offset }
+    for i = ctx.cursor.col, suggest_offset, -1 do
+      key[4] = string.sub(ctx.cursor_before_line, 1, i)
       local prev_entries = self.cache:get(key)
       if prev_entries then
         return prev_entries
@@ -92,8 +93,8 @@ source.get_entries = function(self, ctx)
     return nil
   end)()
 
-  return self.cache:ensure({ 'get_entries', self.revision, ctx.cursor_before_line }, function()
-    local input = string.sub(ctx.cursor_before_line, self.offset)
+  return self.cache:ensure({ 'get_entries', self.revision, suggest_offset, ctx.cursor_before_line }, function()
+    local input = string.sub(ctx.cursor_before_line, suggest_offset)
     local entries = {}
     debug.log('filter', self.name, self.id, #(prev_entries or self.entries))
     local targets = prev_entries or self.entries
