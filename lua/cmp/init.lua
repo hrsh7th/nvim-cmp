@@ -21,6 +21,20 @@ cmp.unregister_source = function(id)
   core.unregister_source(id)
 end
 
+---@type cmp.Setup
+cmp.setup = setmetatable({
+  global = function(c)
+    config.set_global(c)
+  end,
+  buffer = function(c)
+    config.set_buffer(c, vim.api.nvim_get_current_buf())
+  end,
+}, {
+  __call = function(self, c)
+    self.global(c)
+  end,
+})
+
 ---Receive vim autocmds
 ---@param name string
 cmp._on_event = function(name)

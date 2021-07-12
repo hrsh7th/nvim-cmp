@@ -82,7 +82,7 @@ source.get_entries = function(self, ctx)
 
   local prev_entries = (function()
     local key = { 'get_entries', self.revision }
-    for i = ctx.cursor.col - 1, self.offset, -1 do
+    for i = ctx.cursor.col, self.offset, -1 do
       key[3] = string.sub(ctx.cursor_before_line, 1, i)
       local prev_entries = self.cache:get(key)
       if prev_entries then
@@ -93,17 +93,14 @@ source.get_entries = function(self, ctx)
   end)()
 
   return self.cache:ensure({ 'get_entries', self.revision, ctx.cursor_before_line }, function()
-    local inputs = {}
+    local input = string.sub(ctx.cursor_before_line, self.offset)
     local entries = {}
     debug.log('filter', self.name, self.id, #(prev_entries or self.entries))
     local targets = prev_entries or self.entries
     for _, e in ipairs(targets) do
-      if not inputs[e:get_offset()] then
-        inputs[e:get_offset()] = string.sub(ctx.cursor_before_line, e:get_offset())
-      end
-      e.score = matcher.match(inputs[e:get_offset()], e:get_filter_text(), {
-        max_word_bound = #targets > 2000 and 1 or 100,
-        prefix_start_offset = e:get_word_start_offset(),
+      e.score = matcher.match(input, e:get_filter_text(), {
+        prefix_start_offset = #targets > 2000 and 1 or e:get_word_start_offset(),
+        cheap = #targets > 2000 and true or false,
       })
       if e.score >= 1 then
         binary.insort(entries, e, config.get().compare)

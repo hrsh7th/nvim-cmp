@@ -14,6 +14,13 @@ describe('utils.str', function()
     assert.are.equal(str.strikethrough('あいうえお'), 'あ̶い̶う̶え̶お̶')
   end)
 
+  it('remove_suffix', function()
+    assert.are.equal(str.remove_suffix('log()', '$0'), 'log()')
+    assert.are.equal(str.remove_suffix('log()$0', '$0'), 'log()')
+    assert.are.equal(str.remove_suffix('log()${0}', '${0}'), 'log()')
+    assert.are.equal(str.remove_suffix('log()${0:placeholder}', '${0}'), 'log()${0:placeholder}')
+  end)
+
 end)
 
 

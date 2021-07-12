@@ -1,4 +1,3 @@
-local config = require('cmp.config')
 local debug = require('cmp.utils.debug')
 local keymap = require('cmp.utils.keymap')
 local float = require('cmp.float')
@@ -56,22 +55,8 @@ menu.update = function(self, ctx, sources)
   -- merge two sorted list.
   local offset = ctx.offset
   for _, s in ipairs(sources) do
-    local i = 1
     for _, e in ipairs(s:get_entries(ctx)) do
-      local j = i
-      while j <= #entries do
-        local diff = config.get().compare(e, entries[j])
-        if diff <= 0 then
-          table.insert(entries, j, e)
-          i = j + 1
-          break
-        end
-        j = j + 1
-      end
-      if j > #entries then
-        table.insert(entries, e)
-        i = j + 1
-      end
+      table.insert(entries, e)
       offset = math.min(offset, s.offset)
     end
   end

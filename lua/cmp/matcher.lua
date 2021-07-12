@@ -67,9 +67,9 @@ matcher.NOT_FUZZY_FACTOR = 6
 ---Match entry
 ---@param input string
 ---@param word string
----@param config cmp.MatcherConfig
+---@param option cmp.MatcherOption
 ---@return number
-matcher.match = function(input, word, config)
+matcher.match = function(input, word, option)
   -- Empty input
   if #input == 0 then
     return matcher.PREFIX_FACTOR + matcher.NOT_FUZZY_FACTOR
@@ -90,17 +90,20 @@ matcher.match = function(input, word, config)
     local m = matcher.find_match_region(input, input_start_index, input_end_index, word, word_index)
     if m and input_end_index <= m.input_match_end then
       m.index = word_bound_index
-      input_start_index = m.input_match_start
+      input_start_index = m.input_match_start + 1
       input_end_index = m.input_match_end + 1
       word_index = char.get_next_semantic_index(word, m.word_match_end)
       table.insert(matches, m)
+      if option.cheap then
+        break
+      end
     else
-      if config.max_word_bound <= word_bound_index then
+      if option.cheap then
         return 0
       end
       word_index = char.get_next_semantic_index(word, word_index)
     end
-    if word_index > config.prefix_start_offset then
+    if word_index > option.prefix_start_offset then
       word_bound_index = word_bound_index + 1
     end
   end
@@ -111,14 +114,12 @@ matcher.match = function(input, word, config)
 
   -- Compute prefix match score
   local score = 0
-  local input_char_map = {}
+  local idx = 1
   for _, m in ipairs(matches) do
     local s = 0
-    for i = m.input_match_start, m.input_match_end do
-      if not input_char_map[i] then
-        s = s + 1
-        input_char_map[i] = true
-      end
+    for i = math.max(idx, m.input_match_start), m.input_match_end do
+      s = s + 1
+      idx = i
     end
     if s > 0 then
       score = score + (s * (1 + math.max(0, matcher.WORD_BOUNDALY_ORDER_FACTOR - m.index) / matcher.WORD_BOUNDALY_ORDER_FACTOR))
@@ -127,12 +128,15 @@ matcher.match = function(input, word, config)
   end
 
   -- Add prefix bonus
-  score = score + ((matches[1].input_match_start == 1 and matches[1].word_match_start <= config.prefix_start_offset) and matcher.PREFIX_FACTOR or 0)
+  score = score + ((matches[1].input_match_start == 1 and matches[1].word_match_start <= option.prefix_start_offset) and matcher.PREFIX_FACTOR or 0)
 
   -- Check the word contains the remaining input. if not, it does not match.
   local last_match = matches[#matches]
   if last_match.input_match_end < #input then
     -- If input is remaining but all word consumed, it does not match.
+    if option.cheap then
+      return 0
+    end
     if last_match.word_match_end >= #word then
       return 0
     end
@@ -163,7 +167,7 @@ end
 --- find_match_region
 matcher.find_match_region = function(input, input_start_index, input_end_index, word, word_index)
   -- determine input position ( woroff -> word_offset )
-  while input_start_index - 1 < input_end_index do
+  while input_start_index < input_end_index do
     if char.match(string.byte(input, input_end_index), string.byte(word, word_index)) then
       break
     end
@@ -171,7 +175,7 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
   end
 
   -- Can't determine input position
-  if input_start_index - 1 == input_end_index then
+  if input_end_index < input_start_index then
     return nil
   end
 

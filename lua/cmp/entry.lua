@@ -114,7 +114,7 @@ end
 ---Create filter text
 ---@return string
 entry.get_filter_text = function(self)
-  return self.cache:ensure({ 'get_filter_text' }, function()
+  return self.cache:ensure('get_filter_text', function()
     local word
     if misc.safe(self.completion_item.filterText) then
       word = self.completion_item.filterText
@@ -143,12 +143,21 @@ end
 ---@return string
 entry.get_insert_text = function(self)
   return self.cache:ensure('get_insert_text', function()
+    local word
     if misc.safe(self.completion_item.textEdit) then
-      return str.trim(self.completion_item.textEdit.newText)
+      word = str.trim(self.completion_item.textEdit.newText)
+      if self.completion_item.insertTextFormat == lsp.InsertTextFormat.Snippet then
+        word = str.remove_suffix(str.remove_suffix(word, '$0'), '${0}')
+      end
     elseif misc.safe(self.completion_item.insertText) then
-      return str.trim(self.completion_item.insertText)
+      word = str.trim(self.completion_item.insertText)
+      if self.completion_item.insertTextFormat == lsp.InsertTextFormat.Snippet then
+        word = str.remove_suffix(str.remove_suffix(word, '$0'), '${0}')
+      end
+    else
+      word = str.trim(self.completion_item.label)
     end
-    return str.trim(self.completion_item.label)
+    return word
   end)
 end
 
@@ -163,13 +172,6 @@ entry.get_vim_item = function(self, offset)
 
     if offset ~= self:get_offset() then
       word = string.sub(self.context.cursor_before_line, offset, self:get_offset() - 1) .. word
-    end
-
-    if item.insertTextFormat == lsp.InsertTextFormat.Snippet then
-      local insert_text = self:get_insert_text()
-      if not (word == insert_text or (word .. '$0') == insert_text or (word .. '${0}') == insert_text) then
-        abbr = abbr .. '~'
-      end
     end
 
     local menu = nil

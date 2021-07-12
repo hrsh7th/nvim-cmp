@@ -34,16 +34,16 @@ describe('utils.async', function()
     assert.is.truthy(math.abs(f.timeout - (vim.loop.now() - now)) < 10)
 
     -- 4. delay for 500ms and wait 100ms (remain 400ms)
-    now = vim.loop.now()
     f.timeout = 500
     f()
     vim.wait(100) -- remain 400ms
 
     -- 5. call immediately (100ms already elapsed from No.4)
+    now = vim.loop.now()
     f.timeout = 100
     f()
     vim.wait(1000, function() return count == 3 end)
-    assert.is.truthy(math.abs(f.timeout - (vim.loop.now() - now)) < 10)
+    assert.is.truthy(math.abs(vim.loop.now() - now) < 10)
   end)
 
 end)

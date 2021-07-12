@@ -35,6 +35,25 @@ str.has_prefix = function(text, prefix)
   return true
 end
 
+---Remove suffix
+---@param text string
+---@param suffix string
+---@return string
+str.remove_suffix = function(text, suffix)
+  if #text < #suffix then
+    return text
+  end
+
+  local i = 0
+  while i < #suffix do
+    if string.byte(text, #text - i) ~= string.byte(suffix, #suffix - i) then
+      return text
+    end
+    i = i + 1
+  end
+  return string.sub(text, 1, -#suffix - 1)
+end
+
 ---strikethrough
 ---@param text string
 ---@return string

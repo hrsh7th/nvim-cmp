@@ -50,9 +50,13 @@ end
 ---@return cmp.Source[]
 core.get_sources = function(ctx, statuses)
   local sources = {}
-  for _, s in pairs(core.sources) do
-    if s:match(ctx) and (not statuses or vim.tbl_contains(statuses, s.status)) then
-      table.insert(sources, s)
+  for _, c in ipairs(config.get().sources) do
+    for _, s in pairs(core.sources) do
+      if c.name == s.name and s:match(ctx) then
+        if not statuses or vim.tbl_contains(statuses, s.status) then
+          table.insert(sources, s)
+        end
+      end
     end
   end
   return sources
