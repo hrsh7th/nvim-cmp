@@ -98,7 +98,7 @@ end
 core.filter = async.throttle(function()
   local ctx = core.get_context()
   core.menu:update(ctx, core.get_sources(ctx, { source.SourceStatus.FETCHING, source.SourceStatus.COMPLETED }))
-end, 100)
+end, 50)
 
 ---Select completion item
 core.select = function()
