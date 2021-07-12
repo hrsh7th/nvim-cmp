@@ -67,9 +67,8 @@ matcher.NOT_FUZZY_FACTOR = 6
 ---Match entry
 ---@param input string
 ---@param word string
----@param option cmp.MatcherOption
 ---@return number
-matcher.match = function(input, word, option)
+matcher.match = function(input, word)
   -- Empty input
   if #input == 0 then
     return matcher.PREFIX_FACTOR + matcher.NOT_FUZZY_FACTOR
@@ -94,18 +93,10 @@ matcher.match = function(input, word, option)
       input_end_index = m.input_match_end + 1
       word_index = char.get_next_semantic_index(word, m.word_match_end)
       table.insert(matches, m)
-      if option.cheap then
-        break
-      end
     else
-      if option.cheap then
-        return 0
-      end
       word_index = char.get_next_semantic_index(word, word_index)
     end
-    if word_index > option.prefix_start_offset then
-      word_bound_index = word_bound_index + 1
-    end
+    word_bound_index = word_bound_index + 1
   end
 
   if #matches == 0 then
@@ -128,15 +119,12 @@ matcher.match = function(input, word, option)
   end
 
   -- Add prefix bonus
-  score = score + ((matches[1].input_match_start == 1 and matches[1].word_match_start <= option.prefix_start_offset) and matcher.PREFIX_FACTOR or 0)
+  score = score + ((matches[1].input_match_start == 1 and matches[1].word_match_start == 1) and matcher.PREFIX_FACTOR or 0)
 
   -- Check the word contains the remaining input. if not, it does not match.
   local last_match = matches[#matches]
   if last_match.input_match_end < #input then
     -- If input is remaining but all word consumed, it does not match.
-    if option.cheap then
-      return 0
-    end
     if last_match.word_match_end >= #word then
       return 0
     end

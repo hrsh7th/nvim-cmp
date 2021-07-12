@@ -5,11 +5,6 @@ cmp.ConfirmBehavior = {}
 cmp.ConfirmBehavior.Insert = 'insert'
 cmp.ConfirmBehavior.Replace = 'replace'
 
----@class cmp.MatcherOption
----@field public prefix_start_offset number
----@field public cheap number
----@field public debug number
-
 ---@class cmp.Setup
 ---@field public __call fun(c: cmp.ConfigSchema)
 ---@field public buffer fun(c: cmp.ConfigSchema)

@@ -1,8 +1,6 @@
 local context = require('cmp.context')
 local matcher = require('cmp.matcher')
-local config = require('cmp.config')
 local entry = require('cmp.entry')
-local binary = require('cmp.utils.binary')
 local debug = require('cmp.utils.debug')
 local misc = require('cmp.utils.misc')
 local cache = require('cmp.utils.cache')
@@ -74,17 +72,16 @@ end
 
 ---Return filtered entries
 ---@param ctx cmp.Context
----@param suggest_offset number
 ---@return cmp.Entry[]
-source.get_entries = function(self, ctx, suggest_offset)
+source.get_entries = function(self, ctx)
   if not self:has_items() then
     return {}
   end
 
   local prev_entries = (function()
-    local key = { 'get_entries', self.revision, suggest_offset }
-    for i = ctx.cursor.col, suggest_offset, -1 do
-      key[4] = string.sub(ctx.cursor_before_line, 1, i)
+    local key = { 'get_entries', self.revision }
+    for i = ctx.cursor.col, self.offset, -1 do
+      key[3] = string.sub(ctx.cursor_before_line, 1, i)
       local prev_entries = self.cache:get(key)
       if prev_entries then
         return prev_entries
@@ -93,18 +90,15 @@ source.get_entries = function(self, ctx, suggest_offset)
     return nil
   end)()
 
-  return self.cache:ensure({ 'get_entries', self.revision, suggest_offset, ctx.cursor_before_line }, function()
-    local input = string.sub(ctx.cursor_before_line, suggest_offset)
-    local entries = {}
+  return self.cache:ensure({ 'get_entries', self.revision, ctx.cursor_before_line }, function()
     debug.log('filter', self.name, self.id, #(prev_entries or self.entries))
-    local targets = prev_entries or self.entries
-    for _, e in ipairs(targets) do
-      e.score = matcher.match(input, e:get_filter_text(), {
-        prefix_start_offset = #targets > 2000 and 1 or e:get_word_start_offset(),
-        cheap = #targets > 2000 and true or false,
-      })
+
+    local input = string.sub(ctx.cursor_before_line, self.offset)
+    local entries = {}
+    for _, e in ipairs(prev_entries or self.entries) do
+      e.score = matcher.match(input, e:get_filter_text())
       if e.score >= 1 then
-        binary.insort(entries, e, config.get().compare)
+        table.insert(entries, e)
       end
     end
     return entries

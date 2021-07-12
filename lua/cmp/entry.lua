@@ -104,13 +104,6 @@ entry.get_word = function(self)
   end)
 end
 
----Get word start position in filter_text
-entry.get_word_start_offset = function(self)
-  return self.cache:ensure('get_word_start_offset', function()
-    return string.find(self:get_filter_text(), self:get_word(), 1, true) or 1
-  end)
-end
-
 ---Create filter text
 ---@return string
 entry.get_filter_text = function(self)
@@ -170,7 +163,7 @@ entry.get_vim_item = function(self, offset)
     local word = self:get_word()
     local abbr = str.trim(self.completion_item.label)
 
-    if offset ~= self:get_offset() then
+    if offset < self:get_offset() then
       word = string.sub(self.context.cursor_before_line, offset, self:get_offset() - 1) .. word
     end
 

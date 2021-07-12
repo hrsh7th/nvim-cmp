@@ -30,15 +30,20 @@ return {
     -- preselect
     if entry1.completion_item.preselect ~= entry2.completion_item.preselect then
       if entry1.completion_item.preselect then
-        return -1
+        return false
       else
-        return 1
+        return true
       end
     end
 
     -- score
     if entry1.score ~= entry2.score then
-      return entry2.score - entry1.score
+      local diff = entry2.score - entry1.score
+      if diff < 0 then
+        return true
+      elseif diff > 0 then
+        return false
+      end
     end
 
     -- kind (NOTE: cmp's specific implementation to lower the `Text` kind)
@@ -52,21 +57,33 @@ return {
     end
     if kind1 ~= kind2 then
       if kind1 == lsp.CompletionItemKind.Snippet then
-        return -1
+        return true
       elseif kind2 == lsp.CompletionItemKind.Snippet then
-        return 1
+        return false
       end
-      return kind1 - kind2
+      local diff = kind1 - kind2
+      if diff < 0 then
+        return true
+      elseif diff > 0 then
+        return false
+      end
     end
 
     -- sortText
     if misc.safe(entry1.completion_item.sortText) and misc.safe(entry2.completion_item.sortText) then
       local diff = vim.stricmp(entry1.completion_item.sortText, entry2.completion_item.sortText)
-      if diff ~= 0 then
-        return diff
+      if diff < 0 then
+        return true
+      elseif diff > 0 then
+        return false
       end
     end
-    return #entry1:get_word() - #entry2:get_word()
+    local diff = vim.stricmp(entry1:get_word(), entry2:get_word())
+    if diff < 0 then
+      return true
+    elseif diff > 0 then
+      return false
+    end
   end,
 
   ---@param e cmp.Entry

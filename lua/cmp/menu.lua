@@ -3,6 +3,7 @@ local keymap = require('cmp.utils.keymap')
 local float = require('cmp.float')
 local cache = require('cmp.utils.cache')
 local lsp = require('cmp.types.lsp')
+local config = require('cmp.config')
 
 ---@class cmp.Menu
 ---@field public on_commit_character fun(c: string, fallback: function)
@@ -53,27 +54,41 @@ menu.update = function(self, ctx, sources)
 
   local entries = {}
 
-  -- narrow to triggered_by_character
-  local offset = ctx.offset
-  local has_triggered_by_character = false
+  -- check the source triggered by character
+  local has_triggered_by_character_source = false
   for _, s in ipairs(sources) do
-    if s.offset then
+    if s:has_items() then
       if s.trigger_kind == lsp.CompletionTriggerKind.TriggerCharacter then
-        has_triggered_by_character = true
-      end
-      offset = math.min(offset, s.offset)
-    end
-  end
-
-  -- merge two sorted list.
-  for _, s in ipairs(sources) do
-    if not has_triggered_by_character or s.trigger_kind == lsp.CompletionTriggerKind.TriggerCharacter then
-      for _, e in ipairs(s:get_entries(ctx, offset)) do
-        table.insert(entries, e)
+        has_triggered_by_character_source = true
+        break
       end
     end
   end
 
+  -- create filtered entries.
+  local offset = ctx.offset
+  for i, s in ipairs(sources) do
+    if s:has_items() then
+      if not has_triggered_by_character_source or s.trigger_kind == lsp.CompletionTriggerKind.TriggerCharacter then
+        -- source order priority bonus.
+        local priority = 10 * (#sources - i)
+
+        local filtered = s:get_entries(ctx)
+        for _, e in ipairs(filtered) do
+          e.score = e.score + priority
+          table.insert(entries, e)
+        end
+        if #filtered > 0 then
+          offset = math.min(offset, s.offset)
+        end
+      end
+    end
+  end
+
+  -- sort.
+  table.sort(entries, config.get().compare)
+
+  -- create vim items.
   local items = {}
   local abbrs = {}
   for _, e in ipairs(entries) do
@@ -84,6 +99,7 @@ menu.update = function(self, ctx, sources)
     end
   end
 
+  -- save recent pum state.
   self.offset = offset
   self.items = items
   self.entries = entries
