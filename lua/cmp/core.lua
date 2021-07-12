@@ -83,20 +83,13 @@ end
 ---@param ctx cmp.Context
 core.complete = function(ctx)
   core.menu:restore(ctx)
-
-  local complete
-  complete = function(s, c)
-    s:complete(c, function()
-      local new = context.new(c)
-      if new:changed(new.prev_context) then
-        complete(s, new)
-      end
-      core.filter()
-    end)
-  end
-
   for _, s in ipairs(core.get_sources(ctx, { source.SourceStatus.WAITING, source.SourceStatus.COMPLETED })) do
-    complete(s, ctx)
+    s:complete(ctx, function()
+      local new = context.new(ctx)
+      if new:changed(new.prev_context) then
+        core.complete(core.get_context())
+      end
+    end)
   end
   core.filter()
 end

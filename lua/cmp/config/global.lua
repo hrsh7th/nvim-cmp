@@ -27,6 +27,8 @@ return {
   ---@param entry2 cmp.Entry
   ---@return number
   compare = function(entry1, entry2)
+    local diff
+
     -- preselect
     if entry1.completion_item.preselect ~= entry2.completion_item.preselect then
       if entry1.completion_item.preselect then
@@ -37,48 +39,33 @@ return {
     end
 
     -- score
-    if entry1.score ~= entry2.score then
-      local diff = entry2.score - entry1.score
-      if diff < 0 then
-        return true
-      elseif diff > 0 then
-        return false
-      end
-    end
-
-    -- kind (NOTE: cmp's specific implementation to lower the `Text` kind)
-    local kind1 = entry1.completion_item.kind or 1
-    if kind1 == lsp.CompletionItemKind.Text then
-      kind1 = 100
-    end
-    local kind2 = entry2.completion_item.kind or 1
-    if kind2 == lsp.CompletionItemKind.Text then
-      kind2 = 100
-    end
-    if kind1 ~= kind2 then
-      if kind1 == lsp.CompletionItemKind.Snippet then
-        return true
-      elseif kind2 == lsp.CompletionItemKind.Snippet then
-        return false
-      end
-      local diff = kind1 - kind2
-      if diff < 0 then
-        return true
-      elseif diff > 0 then
-        return false
-      end
+    diff = entry2.score - entry1.score
+    if diff < 0 then
+      return true
+    elseif diff > 0 then
+      return false
     end
 
     -- sortText
     if misc.safe(entry1.completion_item.sortText) and misc.safe(entry2.completion_item.sortText) then
-      local diff = vim.stricmp(entry1.completion_item.sortText, entry2.completion_item.sortText)
+      diff = vim.stricmp(entry1.completion_item.sortText, entry2.completion_item.sortText)
       if diff < 0 then
         return true
       elseif diff > 0 then
         return false
       end
     end
-    local diff = vim.stricmp(entry1:get_word(), entry2:get_word())
+
+    -- label
+    diff = #entry1.completion_item.label - #entry2.completion_item.label
+    if diff < 0 then
+      return true
+    elseif diff > 0 then
+      return false
+    end
+
+    -- order
+    diff = entry1.id - entry2.id
     if diff < 0 then
       return true
     elseif diff > 0 then
