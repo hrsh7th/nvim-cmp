@@ -60,7 +60,7 @@ config.get_source_option = function(name)
     local c = config.get()
     for _, s in ipairs(c.sources) do
       if s.name == name then
-        if type(s.opts) == "table" then
+        if type(s.opts) == 'table' then
           return s.opts
         end
         return {}

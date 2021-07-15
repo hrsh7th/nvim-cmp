@@ -67,7 +67,7 @@ end
 ---Check auto-completion
 core.autocomplete = function()
   local ctx = core.get_context()
-  if core.has_active_entry() then
+  if core.menu:get_active_entry() then
     return
   end
 
@@ -96,7 +96,7 @@ core.complete = function(ctx)
       end
     end)
   end
-  core.filter.timeout = 100
+  core.filter.timeout = 50
   core.filter()
 end
 
@@ -113,7 +113,7 @@ core.filter = async.throttle(function()
     end
   end
   core.menu:update(ctx, core.get_sources(ctx))
-end, 100)
+end, 50)
 
 ---Select completion item
 core.select = function()
@@ -223,16 +223,6 @@ core.confirm = function(e, option, callback)
     e.confirmed = true
     callback()
   end)
-end
-
----Get current active entry
----@return boolean
-core.has_active_entry = function()
-  local completed_item = vim.v.completed_item or {}
-  if vim.fn.pumvisible() == 0 or not completed_item.user_data then
-    return false
-  end
-  return completed_item.user_data.cmp ~= nil
 end
 
 ---Reset current completion state

@@ -5,7 +5,7 @@ local context = require('cmp.context')
 describe('context', function()
   before_each(spec.before)
 
-  describe('new' , function()
+  describe('new', function()
     it('middle of text', function()
       vim.fn.setline('1', 'function! s:name() abort')
       vim.bo.filetype = 'vim'

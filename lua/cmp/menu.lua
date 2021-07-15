@@ -129,8 +129,8 @@ menu.restore = function(self, ctx)
 end
 
 ---Select current item
----@param ctx cmp.Context
-menu.select = function(self, ctx)
+---@param _ cmp.Context
+menu.select = function(self, _)
   local e = self:get_selected_entry()
   if not e then
     self:unselect()
@@ -172,6 +172,23 @@ menu.unselect = function(self)
     end)
     return
   end
+end
+
+---Geta current active entry
+---@return cmp.Entry|nil
+menu.get_active_entry = function(self)
+  local completed_item = vim.v.completed_item or {}
+  if vim.fn.pumvisible() == 0 or not completed_item.user_data then
+    return nil
+  end
+
+  local id = completed_item.user_data.cmp
+  for _, e in ipairs(self.entries) do
+    if e.id == id then
+      return e
+    end
+  end
+  return nil
 end
 
 ---Get current selected entry
