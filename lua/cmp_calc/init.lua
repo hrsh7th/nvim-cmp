@@ -45,10 +45,10 @@ source.complete = function(self, request, callback)
             ['end'] = {
               line = request.context.cursor.row - 1,
               character = request.context.cursor.col - 1,
-            }
+            },
           },
-          newText = value
-        }
+          newText = value,
+        },
       },
       {
         label = self:_trim(input) .. ' = ' .. value,
@@ -62,11 +62,11 @@ source.complete = function(self, request, callback)
             ['end'] = {
               line = request.context.cursor.row - 1,
               character = request.context.cursor.col - 1,
-            }
+            },
           },
-          newText = self:_trim(input) .. ' = ' .. value
-        }
-      }
+          newText = self:_trim(input) .. ' = ' .. value,
+        },
+      },
     },
     isIncomplete = true,
   })

@@ -124,7 +124,7 @@ end
 ---@param c string
 ---@param fallback fun()
 core.on_commit_character = function(c, fallback)
-  local e = core.menu:get_selected_entry()
+  local e = core.menu:get_active_entry()
   if not (e and not e.confirmed) then
     return fallback()
   end

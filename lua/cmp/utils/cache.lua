@@ -14,17 +14,17 @@ end
 cache.get = function(self, key)
   key = self:key(key)
   if self.entries[key] ~= nil then
-    return self.entries[key]
+    return unpack(self.entries[key])
   end
   return nil
 end
 
 ---Set cache value explicitly
 ---@param key string
----@param value any
-cache.set = function(self, key, value)
+---@vararg any
+cache.set = function(self, key, ...)
   key = self:key(key)
-  self.entries[key] = value
+  self.entries[key] = { ... }
 end
 
 ---Ensure value by callback

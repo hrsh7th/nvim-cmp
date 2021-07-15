@@ -4,7 +4,6 @@ local pattern = require 'cmp.utils.pattern'
 local str = {}
 
 local INVALID_CHARS = {}
-INVALID_CHARS[string.byte(' ')] = true
 INVALID_CHARS[string.byte('=')] = true
 INVALID_CHARS[string.byte('$')] = true
 INVALID_CHARS[string.byte('(')] = true
@@ -12,7 +11,6 @@ INVALID_CHARS[string.byte('[')] = true
 INVALID_CHARS[string.byte('"')] = true
 INVALID_CHARS[string.byte("'")] = true
 INVALID_CHARS[string.byte("\n")] = true
-INVALID_CHARS[string.byte("\t")] = true
 
 local PAIR_CHARS = {}
 PAIR_CHARS[string.byte('[')] = string.byte(']')

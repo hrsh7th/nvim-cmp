@@ -91,7 +91,10 @@ entry.get_word = function(self)
     local word
     if misc.safe(self.completion_item.textEdit) then
       word = str.trim(self.completion_item.textEdit.newText)
-      word = str.get_word(word, string.byte(self.context.cursor_after_line, 1))
+      local _, after = self:get_overwrite()
+      if after > 0 or self.completion_item.insertTextFormat == lsp.InsertTextFormat.Snippet then
+        word = str.get_word(word, string.byte(self.context.cursor_after_line, 1))
+      end
     elseif misc.safe(self.completion_item.insertText) then
       word = str.trim(self.completion_item.insertText)
       if self.completion_item.insertTextFormat == lsp.InsertTextFormat.Snippet then
@@ -101,6 +104,22 @@ entry.get_word = function(self)
       word = str.trim(self.completion_item.label)
     end
     return word
+  end)
+end
+
+---Get overwrite information
+---@return number, number
+entry.get_overwrite = function(self)
+  return self.cache:ensure('get_overwrite', function()
+    if misc.safe(self.completion_item.textEdit) then
+      local r = misc.safe(self.completion_item.textEdit.insert) or misc.safe(self.completion_item.textEdit.range)
+      local s = vim.str_byteindex(self.context.cursor_line, r.start.character) + 1
+      local e = vim.str_byteindex(self.context.cursor_line, r['end'].character) + 1
+      local before = self.context.cursor.col - s
+      local after = e - self.context.cursor.col
+      return before, after
+    end
+    return 0, 0
   end)
 end
 
