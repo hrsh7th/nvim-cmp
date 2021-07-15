@@ -16,7 +16,7 @@ lsp.Position.to_vim = function(buf, position)
   if #lines > 0 then
     return {
       row = position.line + 1,
-      col = vim.str_byteindex(lines[1], position.character) + 1,
+      col = vim.str_byteindex(lines[1], math.min(position.character, #lines[1])) + 1,
     }
   end
   return {

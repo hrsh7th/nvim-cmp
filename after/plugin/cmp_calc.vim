@@ -1,2 +1,2 @@
-lua require'cmp'.register_source('buffer', require'cmp_buffer'.new())
+lua require'cmp'.register_source('calc', require'cmp_calc'.new())
 
