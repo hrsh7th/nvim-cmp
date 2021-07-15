@@ -223,4 +223,32 @@ describe('entry', function()
     assert.are.equal(e:get_vim_item(19).word, 'lua.cmp.config')
     assert.are.equal(e:get_filter_text(), 'lua.cmp.config')
   end)
+
+  it('[intelephense] 1', function()
+    local state = spec.state("\t\t", 1, 4)
+    local e
+
+    -- press g
+    e = entry.new(state.press('$'), {}, {
+      detail = "\\Nico_URLConf",
+      kind = 6,
+      label = "$this",
+      sortText = "$this",
+      textEdit = {
+        newText = "$this",
+        range = {
+          ['end'] = {
+            character = 3,
+            line = 1
+          },
+          start = {
+            character = 2,
+            line = 1
+          }
+        }
+      }
+    })
+    assert.are.equal(e:get_vim_item(e:get_offset()).word, '$this')
+    assert.are.equal(e:get_filter_text(), '$this')
+  end)
 end)

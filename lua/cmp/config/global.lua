@@ -46,6 +46,26 @@ return {
       return false
     end
 
+    -- kind
+    local kind1 = entry1:get_kind()
+    kind1 = kind1 == lsp.CompletionItemKind.Text and 100 or kind1
+    local kind2 = entry2:get_kind()
+    kind2 = kind2 == lsp.CompletionItemKind.Text and 100 or kind2
+    if kind1 ~= kind2 then
+      if kind1 == lsp.CompletionItemKind.Snippet then
+        return true
+      end
+      if kind2 == lsp.CompletionItemKind.Snippet then
+        return false
+      end
+      diff = kind1 - kind2
+      if diff < 0 then
+        return true
+      elseif diff > 0 then
+        return false
+      end
+    end
+
     -- sortText
     if misc.safe(entry1.completion_item.sortText) and misc.safe(entry2.completion_item.sortText) then
       diff = vim.stricmp(entry1.completion_item.sortText, entry2.completion_item.sortText)
@@ -98,7 +118,7 @@ return {
     return {
       word = word,
       abbr = abbr,
-      kind = lsp.CompletionItemKind[misc.safe(completion_item.kind) or 1] or lsp.CompletionItemKind[1],
+      kind = lsp.CompletionItemKind[e:get_kind()] or lsp.CompletionItemKind[1],
       menu = menu,
       equal = 1,
       empty = 1,
@@ -114,4 +134,6 @@ return {
       error('snippet engine does not configured.')
     end,
   },
+
+  sources = {},
 }

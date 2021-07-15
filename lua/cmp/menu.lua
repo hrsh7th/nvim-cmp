@@ -16,9 +16,6 @@ local config = require('cmp.config')
 ---@field public context cmp.Context
 local menu = {}
 
----@type number
-menu.REPLACE_RANGE_NAMESPACE = vim.api.nvim_create_namespace('cmp.REPLACE_RANGE')
-
 ---Create menu
 ---@param on_commit_character fun(c: string, fallback: function)
 ---@return cmp.Menu
@@ -164,23 +161,12 @@ menu.select = function(self, ctx)
       end)(key)
     )
   end
-
-  -- Highlight replace range.
-  local replace_range = e:get_replace_range()
-  if replace_range then
-    vim.api.nvim_buf_set_extmark(0, menu.REPLACE_RANGE_NAMESPACE, ctx.cursor.row - 1, ctx.cursor.col - 1, {
-      end_line = ctx.cursor.row - 1,
-      end_col = ctx.cursor.col + replace_range['end'].col - e.context.cursor.col - 1,
-      hl_group = 'CmpReplaceRange',
-    })
-  end
 end
 
 ---Select current item
 menu.unselect = function(self)
   if self.selected_entry then
     self.selected_entry = nil
-    vim.api.nvim_buf_clear_namespace(0, menu.REPLACE_RANGE_NAMESPACE, 0, -1)
     vim.schedule(function()
       self.float:close()
     end)

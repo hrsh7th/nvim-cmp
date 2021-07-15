@@ -1,4 +1,5 @@
 local context = require('cmp.context')
+local config = require'cmp.config'
 local matcher = require('cmp.matcher')
 local entry = require('cmp.entry')
 local debug = require('cmp.utils.debug')
@@ -64,10 +65,24 @@ source.match = function(self, ctx)
   return self.source:match(ctx)
 end
 
+---Return source option
+---@return table
+source.get_option = function(self)
+  return config.get_source_option(self.name)
+end
+
 ---Return the source has items or not.
 ---@return boolean
 source.has_items = function(self)
   return self.offset ~= nil
+end
+
+---Get fetching time
+source.get_fetching_time = function(self)
+  if self.status == source.SourceStatus.FETCHING then
+    return vim.loop.now() - self.context.time
+  end
+  return 10 * 1000 -- return pseudo time if source isn't fetching.
 end
 
 ---Return filtered entries
@@ -93,10 +108,14 @@ source.get_entries = function(self, ctx)
   return self.cache:ensure({ 'get_entries', self.revision, ctx.cursor_before_line }, function()
     debug.log('filter', self.name, self.id, #(prev_entries or self.entries))
 
-    local input = string.sub(ctx.cursor_before_line, self.offset)
+    local inputs = {}
     local entries = {}
     for _, e in ipairs(prev_entries or self.entries) do
-      e.score = matcher.match(input, e:get_filter_text())
+      local o = e:get_offset()
+      if not inputs[o] then
+        inputs[o] = string.sub(ctx.cursor_before_line, o)
+      end
+      e.score = matcher.match(inputs[o], e:get_filter_text())
       if e.score >= 1 then
         table.insert(entries, e)
       end
@@ -153,6 +172,7 @@ source.complete = function(self, ctx, callback)
   self.source:complete(
     {
       context = ctx,
+      option = self:get_option(),
       completion_context = completion_context,
     },
     vim.schedule_wrap(function(response)

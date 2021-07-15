@@ -12,6 +12,8 @@ local lsp = require('cmp.types.lsp')
 
 local core = {}
 
+core.SOURCE_TIMEOUT = 500
+
 ---@type cmp.Menu
 core.menu = menu.new(function(c, fallback)
   core.on_commit_character(c, fallback)
@@ -65,7 +67,6 @@ end
 ---Check auto-completion
 core.autocomplete = function()
   local ctx = core.get_context()
-
   if core.has_active_entry() then
     return
   end
@@ -87,18 +88,32 @@ core.complete = function(ctx)
     s:complete(ctx, function()
       local new = context.new(ctx)
       if new:changed(new.prev_context) then
-        core.complete(core.get_context())
+        core.complete(new)
+      else
+        core.filter.stop()
+        core.filter.timeout = 0
+        core.filter()
       end
     end)
   end
+  core.filter.timeout = 100
   core.filter()
 end
 
 ---Update completion menu
 core.filter = async.throttle(function()
   local ctx = core.get_context()
-  core.menu:update(ctx, core.get_sources(ctx, { source.SourceStatus.FETCHING, source.SourceStatus.COMPLETED }))
-end, 80)
+  for _, s in ipairs(core.get_sources(ctx, { source.SourceStatus.FETCHING })) do
+    local time = core.SOURCE_TIMEOUT - s:get_fetching_time()
+    if time > 0 then
+      core.filter.stop()
+      core.filter.timeout = time + 1
+      core.filter()
+      return
+    end
+  end
+  core.menu:update(ctx, core.get_sources(ctx))
+end, 100)
 
 ---Select completion item
 core.select = function()

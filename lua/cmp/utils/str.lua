@@ -135,6 +135,18 @@ str.get_word = function(text, stop_char)
   return text
 end
 
+---Oneline
+---@param text string
+---@return string
+str.oneline = function(text)
+  for i = 1, #text do
+    if string.byte(text, i) == string.byte('\n', 1) then
+      return string.sub(text, 1, i - 1)
+    end
+  end
+  return text
+end
+
 return str
 
 

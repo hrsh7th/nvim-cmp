@@ -277,6 +277,12 @@ entry.get_documentation = function(self)
   return vim.lsp.util.convert_input_to_markdown_lines(documents)
 end
 
+---Get completion item kind
+---@return lsp.CompletionItemKind
+entry.get_kind = function(self)
+  return misc.safe(self.completion_item.kind) or lsp.CompletionItemKind.Text
+end
+
 ---Execute completion item's command.
 ---@param callback fun()
 entry.execute = function(self, callback)

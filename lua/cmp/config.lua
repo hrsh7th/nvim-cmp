@@ -36,7 +36,7 @@ end
 config.get = function()
   local global = config.global
   local buffer = config.buffers[vim.api.nvim_get_current_buf()] or { revision = 1 }
-  return config.cache:ensure({ global.revision or 0, buffer.revision or 0 }, function()
+  return config.cache:ensure({ 'get', global.revision or 0, buffer.revision or 0 }, function()
     local c = {}
     for k, v in pairs(buffer) do
       c[k] = v
@@ -47,6 +47,26 @@ config.get = function()
       end
     end
     return c
+  end)
+end
+
+---Return source option
+---@param name string
+---@return table
+config.get_source_option = function(name)
+  local global = config.global
+  local buffer = config.buffers[vim.api.nvim_get_current_buf()] or { revision = 1 }
+  return config.cache:ensure({ 'get_source_config', global.revision or 0, buffer.revision or 0, name }, function()
+    local c = config.get()
+    for _, s in ipairs(c.sources) do
+      if s.name == name then
+        if type(s.opts) == "table" then
+          return s.opts
+        end
+        return {}
+      end
+    end
+    return nil
   end)
 end
 

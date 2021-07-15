@@ -133,6 +133,12 @@ lsp.CompletionItemKind.Operator = 24
 lsp.CompletionItemKind.TypeParameter = 25
 lsp.CompletionItemKind = vim.tbl_add_reverse_lookup(lsp.CompletionItemKind)
 
+---@class lsp.CompletionList
+---@field public isIncomplete boolean
+---@field public items lsp.CompletionItem[]
+
+---@alias lsp.CompletionResponse lsp.CompletionList|lsp.CompletionItem[]|nil
+
 ---@class lsp.MarkupContent
 ---@field public kind lsp.MarkupKind
 ---@field public value string

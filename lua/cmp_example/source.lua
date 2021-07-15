@@ -28,8 +28,8 @@ source.match = function(self, ctx)
 end
 
 ---Invoke completion
----@param request any
----@param callback fun(response: any)
+---@param request cmp.CompletionRequest
+---@param callback fun(response: lsp.CompletionResponse)
 source.complete = function(self, request, callback)
   if self.client.is_stopped() then
     return callback()
@@ -44,7 +44,11 @@ source.complete = function(self, request, callback)
     self.client.cancel_request(self.request_id)
   end
 
-  local _, request_id = self.client.request('textDocument/completion', params, function(_, _, response)
+  local _, request_id
+  _, request_id = self.client.request('textDocument/completion', params, function(_, _, response)
+    if self.request_id ~= request_id then
+      return
+    end
     callback(response)
   end)
   self.request_id = request_id
@@ -57,7 +61,11 @@ source.resolve = function(self, completion_item, callback)
   if self.resolve_request_id ~= nil then
     self.client.cancel_request(self.resolve_request_id)
   end
-  local _, resolve_request_id = self.client.request('completionItem/resolve', completion_item, function(_, _, response)
+  local _, resolve_request_id
+  _, resolve_request_id = self.client.request('completionItem/resolve', completion_item, function(_, _, response)
+    if self.resolve_request_id ~= resolve_request_id then
+      return
+    end
     callback(response)
   end)
   self.resolve_request_id = resolve_request_id
@@ -71,7 +79,11 @@ source.execute = function(self, completion_item, callback)
     self.client.cancel_request(self.execute_request_id)
   end
   if completion_item.command then
-    local _, execute_request_id = self.client.request('workspace/executeCommand', completion_item.command, function(_, _, _)
+    local _, execute_request_id
+    _, execute_request_id = self.client.request('workspace/executeCommand', completion_item.command, function(_, _, _)
+      if self.execute_request_id ~= execute_request_id then
+        return
+      end
       callback()
     end)
     self.execute_request_id = execute_request_id

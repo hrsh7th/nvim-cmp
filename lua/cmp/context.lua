@@ -9,6 +9,7 @@ local DEFAULT_PATTERN = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]]
 ---@field public pumvisible boolean
 ---@field public pumselect  boolean
 ---@field public filetype string
+---@field public time number
 ---@field public mode string
 ---@field public bufnr number
 ---@field public cursor vim.Position
@@ -51,6 +52,7 @@ context.new = function(prev_context, option)
   self.pumvisible = completeinfo.pum_visible ~= 0
   self.pumselect = completeinfo.selected ~= -1
   self.filetype = vim.api.nvim_buf_get_option(0, 'filetype')
+  self.time = vim.loop.now()
   self.mode = vim.api.nvim_get_mode().mode
   self.bufnr = vim.api.nvim_get_current_buf()
   self.cursor = {}

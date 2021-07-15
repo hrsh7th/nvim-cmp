@@ -5,11 +5,6 @@ cmp.ConfirmBehavior = {}
 cmp.ConfirmBehavior.Insert = 'insert'
 cmp.ConfirmBehavior.Replace = 'replace'
 
----@class cmp.Setup
----@field public __call fun(c: cmp.ConfigSchema)
----@field public buffer fun(c: cmp.ConfigSchema)
----@field public global fun(c: cmp.ConfigSchema)
-
 ---@class cmp.ConfirmOption
 ---@field public behavior cmp.ConfirmBehavior
 
@@ -22,12 +17,15 @@ cmp.ConfirmBehavior.Replace = 'replace'
 ---@field public maxwidth number|nil
 ---@field public maxheight number|nil
 
----@class cmp.SnippetConfig
----@field public expand fun(args: cmp.SnippetExpansionParams)
+---@class cmp.Setup
+---@field public __call fun(c: cmp.ConfigSchema)
+---@field public buffer fun(c: cmp.ConfigSchema)
+---@field public global fun(c: cmp.ConfigSchema)
 
----@class cmp.SourceConfig
----@field public name string
----@field public opts any
+---@class cmp.CompletionRequest
+---@field public context cmp.Context
+---@field public option table
+---@field public completion_context lsp.CompletionContext
 
 ---@class cmp.ConfigSchema
 ---@field private revision number
@@ -38,6 +36,15 @@ cmp.ConfirmBehavior.Replace = 'replace'
 ---@field public documentation cmp.DocumentationConfig
 ---@field public snippet cmp.SnippetConfig
 ---@field public sources cmp.SourceConfig[]
+
+---@class cmp.SnippetConfig
+---@field public expand fun(args: cmp.SnippetExpansionParams)
+
+---@class cmp.SourceConfig
+---@field public name string
+---@field public unique boolean
+---@field public sortable boolean
+---@field public opts table
 
 return cmp
 
