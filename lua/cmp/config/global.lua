@@ -9,6 +9,8 @@ local WIDE_HEIGHT = 40
 return {
   default_confirm_behavior = cmp.ConfirmBehavior.Replace,
 
+  keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
+
   documentation = {
     border = { '', '', '', ' ', '', '', '', ' ' },
     winhighlight = 'FloatBorder:PmenuSbar,NormalFloat:PmenuSbar',

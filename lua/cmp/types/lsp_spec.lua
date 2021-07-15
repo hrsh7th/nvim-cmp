@@ -31,6 +31,17 @@ describe('types.lsp', function ()
     lsp_position = lsp.Position.from_vim('%', vim_position)
     assert.are.equal(lsp_position.line, 1)
     assert.are.equal(lsp_position.character, 5)
+
+    -- overflow (lsp -> vim)
+    vim_position = lsp.Position.to_vim('%', { line = 1, character = 6 })
+    assert.are.equal(vim_position.row, 2)
+    assert.are.equal(vim_position.col, 16)
+
+    -- overflow(vim -> lsp)
+    vim_position.col = vim_position.col + 1
+    lsp_position = lsp.Position.from_vim('%', vim_position)
+    assert.are.equal(lsp_position.line, 1)
+    assert.are.equal(lsp_position.character, 5)
   end)
 end)
 

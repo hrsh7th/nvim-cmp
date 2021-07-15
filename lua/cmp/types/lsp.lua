@@ -14,10 +14,17 @@ lsp.Position.to_vim = function(buf, position)
   end
   local lines = vim.api.nvim_buf_get_lines(buf, position.line, position.line + 1, false)
   if #lines > 0 then
-    return {
-      row = position.line + 1,
-      col = vim.str_byteindex(lines[1], math.min(position.character, #lines[1])) + 1,
-    }
+    for i = position.character, 1, -1 do
+      local s, v = pcall(function()
+        return {
+          row = position.line + 1,
+          col = vim.str_byteindex(lines[1], i) + 1
+        }
+      end)
+      if s then
+        return v
+      end
+    end
   end
   return {
     row = position.line + 1,

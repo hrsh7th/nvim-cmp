@@ -89,16 +89,16 @@ end
 entry.get_word = function(self)
   return self.cache:ensure('get_word', function()
     local word
-    if misc.safe(self.completion_item.textEdit) then
+    if misc.safe(self.completion_item.insertText) then
+      word = str.trim(self.completion_item.insertText)
+      if self.completion_item.insertTextFormat == lsp.InsertTextFormat.Snippet then
+        word = str.get_word(word)
+      end
+    elseif misc.safe(self.completion_item.textEdit) then
       word = str.trim(self.completion_item.textEdit.newText)
       local _, after = self:get_overwrite()
       if after > 0 or self.completion_item.insertTextFormat == lsp.InsertTextFormat.Snippet then
         word = str.get_word(word, string.byte(self.context.cursor_after_line, 1))
-      end
-    elseif misc.safe(self.completion_item.insertText) then
-      word = str.trim(self.completion_item.insertText)
-      if self.completion_item.insertTextFormat == lsp.InsertTextFormat.Snippet then
-        word = str.get_word(word)
       end
     else
       word = str.trim(self.completion_item.label)

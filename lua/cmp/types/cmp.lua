@@ -29,6 +29,7 @@ cmp.ConfirmBehavior.Replace = 'replace'
 
 ---@class cmp.ConfigSchema
 ---@field private revision number
+---@field public keyword_pattern string
 ---@field public default_confirm_behavior cmp.ConfirmBehavior
 ---@field public commit_characters fun(e:cmp.Entry):string[]
 ---@field public format fun(entry: cmp.Entry, word: string, abbr: string, menu: string): vim.CompletedItem
