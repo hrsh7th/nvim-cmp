@@ -173,6 +173,7 @@ source.complete = function(self, ctx, callback)
         debug.log('ignore', self.name, self.id)
         return
       end
+
       self.revision = self.revision + 1
       if misc.safe(response) ~= nil then
         debug.log('retrieve', self.name, self.id, #(response.items or response))
