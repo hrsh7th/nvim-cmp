@@ -1,6 +1,7 @@
 local types = require('cmp.types')
 local str = require('cmp.utils.str')
 local misc = require('cmp.utils.misc')
+local compare = require('cmp.config.compare')
 
 local WIDE_HEIGHT = 40
 
@@ -8,8 +9,8 @@ local WIDE_HEIGHT = 40
 return function()
   return {
     autocomplete = true,
-    keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
 
+    keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
 
     snippet = {
       expand = function()
@@ -41,70 +42,19 @@ return function()
     menu = {
       sort = function(entries)
         table.sort(entries, function(entry1, entry2)
-          local diff
-
-          -- preselect
-          if entry1.completion_item.preselect ~= entry2.completion_item.preselect then
-            if entry1.completion_item.preselect then
-              return false
-            else
-              return true
+          for _, fn in ipairs({
+            compare.preselect,
+            compare.score,
+            compare.kind,
+            compare.sort_text,
+            compare.length,
+          }) do
+            local diff = fn(entry1, entry2)
+            if diff ~= nil then
+                return diff
             end
           end
-
-          -- score
-          diff = entry2.score - entry1.score
-          if diff < 0 then
-            return true
-          elseif diff > 0 then
-            return false
-          end
-
-          -- kind
-          local kind1 = entry1:get_kind()
-          kind1 = kind1 == types.lsp.CompletionItemKind.Text and 100 or kind1
-          local kind2 = entry2:get_kind()
-          kind2 = kind2 == types.lsp.CompletionItemKind.Text and 100 or kind2
-          if kind1 ~= kind2 then
-            if kind1 == types.lsp.CompletionItemKind.Snippet then
-              return true
-            end
-            if kind2 == types.lsp.CompletionItemKind.Snippet then
-              return false
-            end
-            diff = kind1 - kind2
-            if diff < 0 then
-              return true
-            elseif diff > 0 then
-              return false
-            end
-          end
-
-          -- sortText
-          if misc.safe(entry1.completion_item.sortText) and misc.safe(entry2.completion_item.sortText) then
-            diff = vim.stricmp(entry1.completion_item.sortText, entry2.completion_item.sortText)
-            if diff < 0 then
-              return true
-            elseif diff > 0 then
-              return false
-            end
-          end
-
-          -- label
-          diff = #entry1.completion_item.label - #entry2.completion_item.label
-          if diff < 0 then
-            return true
-          elseif diff > 0 then
-            return false
-          end
-
-          -- order
-          diff = entry1.id - entry2.id
-          if diff < 0 then
-            return true
-          elseif diff > 0 then
-            return false
-          end
+          return entry1.id - entry2.id
         end)
         return entries
       end,
@@ -125,7 +75,7 @@ return function()
         end
 
         -- deprecated
-        if item.deprecated or vim.tbl_contains(e.completion_item.tags or {}, types.lsp.CompletionItemTag.Deprecated) then
+        if item.deprecated or vim.tbl_contains(item.tags or {}, types.lsp.CompletionItemTag.Deprecated) then
           abbr = str.strikethrough(abbr)
         end
 
