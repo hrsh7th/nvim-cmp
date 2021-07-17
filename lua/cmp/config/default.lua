@@ -48,13 +48,14 @@ return function()
             compare.kind,
             compare.sort_text,
             compare.length,
+            compare.order,
           }) do
             local diff = fn(entry1, entry2)
             if diff ~= nil then
                 return diff
             end
           end
-          return entry1.id - entry2.id
+          return true
         end)
         return entries
       end,

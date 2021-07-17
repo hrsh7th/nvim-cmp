@@ -47,10 +47,9 @@ core.get_context = function(option)
 end
 
 ---Get sources that sorted by priority
----@param ctx cmp.Context
 ---@param statuses cmp.SourceStatus[]
 ---@return cmp.Source[]
-core.get_sources = function(ctx, statuses)
+core.get_sources = function(statuses)
   local sources = {}
   for _, c in ipairs(config.get().sources) do
     for _, s in pairs(core.sources) do
@@ -89,7 +88,7 @@ end
 ---Invoke completion
 ---@param ctx cmp.Context
 core.complete = function(ctx)
-  for _, s in ipairs(core.get_sources(ctx, { source.SourceStatus.WAITING, source.SourceStatus.COMPLETED })) do
+  for _, s in ipairs(core.get_sources({ source.SourceStatus.WAITING, source.SourceStatus.COMPLETED })) do
     s:complete(ctx, function()
       local new = context.new(ctx)
       if new:changed(new.prev_context) then
@@ -110,7 +109,7 @@ core.filter = async.throttle(function()
   local ctx = core.get_context()
 
   -- To wait for processing source for that's timeout.
-  for _, s in ipairs(core.get_sources(ctx, { source.SourceStatus.FETCHING })) do
+  for _, s in ipairs(core.get_sources({ source.SourceStatus.FETCHING })) do
     local time = core.SOURCE_TIMEOUT - s:get_fetching_time()
     if time > 0 then
       core.filter.stop()
@@ -119,12 +118,17 @@ core.filter = async.throttle(function()
       return
     end
   end
-  core.menu:update(ctx, core.get_sources(ctx))
+  core.menu:update(ctx, core.get_sources())
 end, 50)
 
 ---Select completion item
 core.select = function()
-  core.menu:select(context.new())
+  local e = core.menu:get_selected_entry()
+  if e then
+    core.menu:select(e)
+  else
+    core.menu:unselect()
+  end
 end
 
 ---On commit character typed

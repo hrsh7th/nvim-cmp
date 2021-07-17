@@ -10,6 +10,12 @@ lint:
 test:
 	vusted ./lua
 
+.PHONY: pre-commit
+pre-commit:
+	stylua --check --glob lua/**/*.lua -- lua
+	luacheck lua
+	vusted lua
+
 .PHONY: integration
 integration:
 	stylua --check --glob lua/**/*.lua -- lua

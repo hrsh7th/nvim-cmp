@@ -123,7 +123,11 @@ menu.update = function(self, ctx, sources)
     vim.fn.complete(offset, self.items)
     vim.cmd('set completeopt=' .. completeopt)
   end
-  self:select(ctx)
+  if #self.entries > 0 then
+    self:select(self.entries[1])
+  else
+    self:unselect()
+  end
 end
 
 ---Restore previous menu
@@ -151,14 +155,8 @@ menu.restore = function(self, ctx)
 end
 
 ---Select current item
----@param _ cmp.Context
-menu.select = function(self, _)
-  local e = self:get_selected_entry()
-  if not e then
-    self:unselect()
-    return
-  end
-
+---@param e cmp.Entry
+menu.select = function(self, e)
   -- Documentation (always invoke to follow to the pum position)
   self.cache:ensure({ 'select', self.context.id }, function()
     e:resolve(vim.schedule_wrap(function()
