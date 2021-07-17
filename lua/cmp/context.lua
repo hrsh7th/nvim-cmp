@@ -1,10 +1,12 @@
 local misc = require('cmp.utils.misc')
+local types = require('cmp.types')
 local config = require('cmp.config')
 local pattern = require('cmp.utils.pattern')
 
 ---@class cmp.Context
 ---@field public id string
 ---@field public prev_context cmp.Context
+---@field public option cmp.ContextOption
 ---@field public pumvisible boolean
 ---@field public pumselect  boolean
 ---@field public filetype string
@@ -39,6 +41,7 @@ end
 
 ---Create new context
 ---@param prev_context cmp.Context
+---@param option cmp.ContextOption
 ---@return cmp.Context
 context.new = function(prev_context, option)
   option = option or {}
@@ -47,7 +50,7 @@ context.new = function(prev_context, option)
   local completeinfo = vim.fn.complete_info({ 'selected', 'mode', 'pum_visible' })
   self.id = misc.id('context')
   self.prev_context = prev_context or context.empty()
-  self.manual = option.manual or false
+  self.option = option or { reason = types.cmp.ContextReason.None }
   self.pumvisible = completeinfo.pum_visible ~= 0
   self.pumselect = completeinfo.selected ~= -1
   self.filetype = vim.api.nvim_buf_get_option(0, 'filetype')
@@ -101,6 +104,12 @@ context.is_keyword_beginning = function(self)
   local curr = self
 
   return (prev.offset ~= curr.offset or prev.input == '') and curr.input ~= ''
+end
+
+---Return context creation reason.
+---@return cmp.ContextReason
+context.get_reason = function(self)
+  return self.option.reason
 end
 
 ---if cursor moves from left to right.

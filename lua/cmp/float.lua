@@ -55,7 +55,13 @@ float.show = function(self, e)
   local left_space = pum.col - 1
 
   local col
-  if right_space >= width then
+  if right_space >= width and left_space >= width then
+    if right_space < left_space then
+      col = left_col
+    else
+      col = right_col
+    end
+  elseif right_space >= width then
     col = right_col
   elseif left_space >= width then
     col = left_col

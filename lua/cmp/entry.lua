@@ -3,7 +3,7 @@ local char = require('cmp.utils.char')
 local misc = require('cmp.utils.misc')
 local str = require('cmp.utils.str')
 local config = require('cmp.config')
-local lsp = require('cmp.types.lsp')
+local types = require('cmp.types')
 
 ---@class cmp.Entry
 ---@field public id number
@@ -85,19 +85,20 @@ entry.get_offset = function(self)
 end
 
 ---Create word for vim.CompletedItem
+---NOTE: If insertText and textEdit provided we use insertText instead (it is a cmp specific implementation).
 ---@return string
 entry.get_word = function(self)
   return self.cache:ensure('get_word', function()
     local word
     if misc.safe(self.completion_item.insertText) then
       word = str.trim(self.completion_item.insertText)
-      if self.completion_item.insertTextFormat == lsp.InsertTextFormat.Snippet then
+      if self.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
         word = str.get_word(word)
       end
     elseif misc.safe(self.completion_item.textEdit) then
       word = str.trim(self.completion_item.textEdit.newText)
       local _, after = self:get_overwrite()
-      if after > 0 or self.completion_item.insertTextFormat == lsp.InsertTextFormat.Snippet then
+      if 0 < after or self.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
         word = str.get_word(word, string.byte(self.context.cursor_after_line, 1))
       end
     else
@@ -158,12 +159,12 @@ entry.get_insert_text = function(self)
     local word
     if misc.safe(self.completion_item.textEdit) then
       word = str.trim(self.completion_item.textEdit.newText)
-      if self.completion_item.insertTextFormat == lsp.InsertTextFormat.Snippet then
+      if self.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
         word = str.remove_suffix(str.remove_suffix(word, '$0'), '${0}')
       end
     elseif misc.safe(self.completion_item.insertText) then
       word = str.trim(self.completion_item.insertText)
-      if self.completion_item.insertTextFormat == lsp.InsertTextFormat.Snippet then
+      if self.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
         word = str.remove_suffix(str.remove_suffix(word, '$0'), '${0}')
       end
     else
@@ -174,44 +175,23 @@ entry.get_insert_text = function(self)
 end
 
 ---Make vim.CompletedItem
----@param offset number
+---@param suggeset_offset number
 ---@return vim.CompletedItem
-entry.get_vim_item = function(self, offset)
-  return self.cache:ensure({ 'get_vim_item', offset }, function()
-    local item = self:get_completion_item()
-    local word = self:get_word()
-    local abbr = str.trim(self.completion_item.label)
-
-    if offset < self:get_offset() then
-      word = string.sub(self.context.cursor_before_line, offset, self:get_offset() - 1) .. word
-    end
-
-    local menu = nil
-    if misc.safe(item.labelDetails) then
-      menu = ''
-      if misc.safe(item.labelDetails.parameters) then
-        menu = menu .. item.labelDetails.parameters
-      end
-      if misc.safe(item.labelDetails.type) then
-        menu = menu .. item.labelDetails.type
-      end
-      if misc.safe(item.labelDetails.qualifier) then
-        menu = menu .. item.labelDetails.qualifier
-      end
-    end
-
-    return config.get().format(self, word, abbr, menu)
+entry.get_vim_item = function(self, suggeset_offset)
+  return self.cache:ensure({ 'get_vim_item', suggeset_offset }, function()
+    local item = config.get().menu.format(self, suggeset_offset)
+    item.equal = 1
+    item.empty = 1
+    item.dup = 1
+    item.user_data = { cmp = self.id }
+    return item
   end)
 end
 
 ---Get commit characters
 ---@return string[]
 entry.get_commit_characters = function(self)
-  local commit_characters = {}
-  local completion_item = self:get_completion_item()
-  misc.concat(commit_characters, misc.safe(completion_item.commitCharacters) or {})
-  misc.concat(commit_characters, config.get().commit_characters(self))
-  return commit_characters
+  return misc.safe(self:get_completion_item().commitCharacters) or {}
 end
 
 ---Return insert range
@@ -220,9 +200,9 @@ entry.get_insert_range = function(self)
   local insert_range
   if misc.safe(self.completion_item.textEdit) then
     if misc.safe(self.completion_item.textEdit.insert) then
-      insert_range = lsp.Range.to_vim(self.context.bufnr, self.completion_item.textEdit.insert)
+      insert_range = types.lsp.Range.to_vim(self.context.bufnr, self.completion_item.textEdit.insert)
     else
-      insert_range = lsp.Range.to_vim(self.context.bufnr, self.completion_item.textEdit.range)
+      insert_range = types.lsp.Range.to_vim(self.context.bufnr, self.completion_item.textEdit.range)
     end
   else
     insert_range = {
@@ -243,9 +223,9 @@ entry.get_replace_range = function(self)
     local replace_range
     if misc.safe(self.completion_item.textEdit) then
       if misc.safe(self.completion_item.textEdit.replace) then
-        replace_range = lsp.Range.to_vim(self.context.bufnr, self.completion_item.textEdit.replace)
+        replace_range = types.lsp.Range.to_vim(self.context.bufnr, self.completion_item.textEdit.replace)
       else
-        replace_range = lsp.Range.to_vim(self.context.bufnr, self.completion_item.textEdit.range)
+        replace_range = types.lsp.Range.to_vim(self.context.bufnr, self.completion_item.textEdit.range)
       end
     else
       replace_range = {
@@ -279,14 +259,14 @@ entry.get_documentation = function(self)
   -- detail
   if misc.safe(item.detail) and item.detail ~= '' then
     table.insert(documents, {
-      kind = lsp.MarkupKind.Markdown,
+      kind = types.lsp.MarkupKind.Markdown,
       value = ('```%s\n%s\n```'):format(self.context.filetype, str.trim(item.detail)),
     })
   end
 
   if type(item.documentation) == 'string' and item.documentation ~= '' then
     table.insert(documents, {
-      kind = lsp.MarkupKind.PlainText,
+      kind = types.lsp.MarkupKind.PlainText,
       value = str.trim(item.documentation),
     })
   elseif type(item.documentation) == 'table' and item.documentation.value ~= '' then
@@ -299,7 +279,7 @@ end
 ---Get completion item kind
 ---@return lsp.CompletionItemKind
 entry.get_kind = function(self)
-  return misc.safe(self.completion_item.kind) or lsp.CompletionItemKind.Text
+  return misc.safe(self.completion_item.kind) or types.lsp.CompletionItemKind.Text
 end
 
 ---Execute completion item's command.

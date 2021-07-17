@@ -8,7 +8,7 @@ local config = {}
 config.cache = cache.new()
 
 ---@type cmp.ConfigSchema
-config.global = require('cmp.config.global')
+config.global = require('cmp.config.default')()
 
 ---@type table<number, cmp.ConfigSchema>
 config.buffers = {}

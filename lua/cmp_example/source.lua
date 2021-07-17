@@ -15,23 +15,15 @@ source.get_trigger_characters = function(self)
   return self:_get(self.client.server_capabilities, { 'completionProvider', 'triggerCharacters' }) or {}
 end
 
----Return should completion or not.
----@param ctx cmp.Context
----@return boolean
-source.match = function(self, ctx)
-  for id in pairs(vim.lsp.buf_get_clients(ctx.bufnr)) do
-    if id == self.client.id then
-      return not not self:_get(self.client.server_capabilities, { 'completionProvider' })
-    end
-  end
-  return false
-end
-
 ---Invoke completion
 ---@param request cmp.CompletionRequest
 ---@param callback fun(response: lsp.CompletionResponse)
 source.complete = function(self, request, callback)
   if self.client.is_stopped() then
+    return callback()
+  end
+
+  if not vim.lsp.buf_get_clients(request.context.bufnr)[self.client.id] then
     return callback()
   end
 

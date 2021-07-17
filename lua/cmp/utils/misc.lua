@@ -52,7 +52,7 @@ misc.set = function(t, keys, v)
   local c = t
   for i = 1, #keys - 1 do
     local key = keys[i]
-    c[key] = c[key] or {}
+    c[key] = misc.safe(c[key]) or {}
     c = c[key]
   end
   c[keys[#keys]] = v

@@ -1,9 +1,17 @@
 local core = require('cmp.core')
+local types = require('cmp.types')
 local source = require('cmp.source')
 local config = require('cmp.config')
 local debug = require('cmp.utils.debug')
 
 local cmp = {}
+
+---Expose types
+for k, v in pairs(require('cmp.types.cmp')) do
+  cmp[k] = v
+end
+cmp.lsp = require('cmp.types.lsp')
+cmp.vim = require('cmp.types.vim')
 
 ---Register completion sources
 ---@param name string
@@ -35,17 +43,28 @@ cmp.setup = setmetatable({
   end,
 })
 
+cmp.get_config = function()
+  return
+end
+
+---Invoke completion manually
+cmp.complete = function()
+  core.complete(core.get_context({
+    reason = types.cmp.ContextReason.Manual,
+  }))
+end
+
 ---Receive vim autocmds
 ---@param name string
 cmp._on_event = function(name)
   debug.log('')
   debug.log('----------------------------------------------------------------------------------------------------')
+  debug.log('>>> ', name)
+
   if vim.fn.getchar(1) ~= 0 then
-    debug.log('ignore', name)
     return
-  else
-    debug.log('adopt', name)
   end
+
   if name == 'InsertEnter' then
     core.autocomplete()
   elseif name == 'TextChanged' then

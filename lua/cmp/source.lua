@@ -5,7 +5,7 @@ local entry = require('cmp.entry')
 local debug = require('cmp.utils.debug')
 local misc = require('cmp.utils.misc')
 local cache = require('cmp.utils.cache')
-local lsp = require('cmp.types.lsp')
+local types = require('cmp.types')
 
 ---@class cmp.Source
 ---@field public id number
@@ -55,14 +55,6 @@ source.reset = function(self)
   self.entries = {}
   self.offset = nil
   self.status = source.SourceStatus.WAITING
-end
-
----Return if this source matches to current context or not.
-source.match = function(self, ctx)
-  if not self.source.match then
-    return true
-  end
-  return self.source:match(ctx)
 end
 
 ---Return source option
@@ -138,26 +130,27 @@ end
 ---@param callback function
 ---@return boolean Return true if not trigger completion.
 source.complete = function(self, ctx, callback)
-  if self.offset then
-    if not ctx:continue(self.offset) then
-      debug.log('not continue', self.name, self.id)
-      self:reset()
-    end
+  if ctx.input == '' then
+    self:reset()
   end
 
   local completion_context
   if vim.tbl_contains(self:get_trigger_characters(), ctx.before_char) then
     completion_context = {
-      triggerKind = lsp.CompletionTriggerKind.TriggerCharacter,
+      triggerKind = types.lsp.CompletionTriggerKind.TriggerCharacter,
       triggerCharacter = ctx.before_char,
+    }
+  elseif ctx:get_reason() == types.cmp.ContextReason.Manual then
+    completion_context = {
+      triggerKind = types.lsp.CompletionTriggerKind.Invoked,
     }
   elseif ctx:is_keyword_beginning() and self.context.offset ~= ctx.offset then
     completion_context = {
-      triggerKind = lsp.CompletionTriggerKind.Invoked,
+      triggerKind = types.lsp.CompletionTriggerKind.Invoked,
     }
   elseif self.incomplete and ctx.input ~= '' then
     completion_context = {
-      triggerKind = lsp.CompletionTriggerKind.TriggerForIncompleteCompletions,
+      triggerKind = types.lsp.CompletionTriggerKind.TriggerForIncompleteCompletions,
     }
   end
   if not completion_context then
@@ -180,10 +173,10 @@ source.complete = function(self, ctx, callback)
         debug.log('ignore', self.name, self.id)
         return
       end
-      if response ~= nil then
+      self.revision = self.revision + 1
+      if misc.safe(response) ~= nil then
         debug.log('retrieve', self.name, self.id, #(response.items or response))
         self.status = source.SourceStatus.COMPLETED
-        self.revision = self.revision + 1
         self.trigger_kind = completion_context.triggerKind
         self.incomplete = response.isIncomplete or false
         self.entries = {}

@@ -2,7 +2,7 @@ local debug = require('cmp.utils.debug')
 local keymap = require('cmp.utils.keymap')
 local float = require('cmp.float')
 local cache = require('cmp.utils.cache')
-local lsp = require('cmp.types.lsp')
+local types = require('cmp.types')
 local config = require('cmp.config')
 
 ---@class cmp.Menu
@@ -12,6 +12,7 @@ local config = require('cmp.config')
 ---@field public offset number
 ---@field public items vim.CompletedItem[]
 ---@field public entries cmp.Entry[]
+---@field public preselect boolean
 ---@field public selected_entry cmp.Entry|nil
 ---@field public context cmp.Context
 local menu = {}
@@ -55,7 +56,7 @@ menu.update = function(self, ctx, sources)
   local has_triggered_by_character_source = false
   for _, s in ipairs(sources) do
     if s:has_items() then
-      if s.trigger_kind == lsp.CompletionTriggerKind.TriggerCharacter then
+      if s.trigger_kind == types.lsp.CompletionTriggerKind.TriggerCharacter then
         has_triggered_by_character_source = true
         break
       end
@@ -66,7 +67,7 @@ menu.update = function(self, ctx, sources)
   local offset = ctx.offset
   for i, s in ipairs(sources) do
     if s:has_items() and s.offset <= offset then
-      if not has_triggered_by_character_source or s.trigger_kind == lsp.CompletionTriggerKind.TriggerCharacter then
+      if not has_triggered_by_character_source or s.trigger_kind == types.lsp.CompletionTriggerKind.TriggerCharacter then
         -- source order priority bonus.
         local priority = 10 * (#sources - i)
 
@@ -83,7 +84,7 @@ menu.update = function(self, ctx, sources)
   end
 
   -- sort.
-  table.sort(entries, config.get().compare)
+  config.get().menu.sort(entries)
 
   -- create vim items.
   local items = {}
@@ -96,17 +97,31 @@ menu.update = function(self, ctx, sources)
     end
   end
 
+  -- preselect.
+  local preselect = false
+  preselect = preselect or self.entries[1] and self.entries[1].completion_item.preselect
+  preselect = preselect or config.get().preselect.mode == types.cmp.PreselectMode.Always
+
   -- save recent pum state.
   self.offset = offset
   self.items = items
   self.entries = entries
   self.context = ctx
+  self.preselect = preselect
 
   if vim.fn.pumvisible() == 0 and #items == 0 then
     debug.log('menu/not-show')
   else
     debug.log('menu/show', offset, #self.items)
+
+    local completeopt = vim.o.completeopt
+    if self.preselect then
+      vim.cmd('set completeopt=menuone,noinsert')
+    else
+      vim.cmd('set completeopt=menuone,noselect')
+    end
     vim.fn.complete(offset, self.items)
+    vim.cmd('set completeopt=' .. completeopt)
   end
   self:select(ctx)
 end
@@ -122,7 +137,14 @@ menu.restore = function(self, ctx)
     if #self.items > 0 then
       if self.offset <= ctx.cursor.col then
         debug.log('menu/restore')
+        local completeopt = vim.o.completeopt
+        if self.preselect then
+          vim.cmd('set completeopt=menuone,noinsert')
+        else
+          vim.cmd('set completeopt=menuone,noselect')
+        end
         vim.fn.complete(self.offset, self.items)
+        vim.cmd('set completeopt=' .. completeopt)
       end
     end
   end
@@ -151,7 +173,7 @@ menu.select = function(self, _)
   self.selected_entry = e
 
   -- Add commit character listeners.
-  for _, key in ipairs(e:get_commit_characters()) do
+  for _, key in ipairs(config.get().commit_characters.resolve(e)) do
     keymap.listen(
       key,
       (function(k)
