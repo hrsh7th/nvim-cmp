@@ -43,10 +43,6 @@ cmp.setup = setmetatable({
   end,
 })
 
-cmp.get_config = function()
-  return
-end
-
 ---Invoke completion manually
 cmp.complete = function()
   core.complete(core.get_context({

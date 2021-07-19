@@ -77,6 +77,7 @@ core.autocomplete = function()
     if config.get().autocomplete then
       core.complete(ctx)
     else
+      core.filter.stop()
       core.filter.timeout = 50
       core.filter()
     end

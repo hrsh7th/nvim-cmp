@@ -107,7 +107,6 @@ menu.update = function(self, ctx, sources)
   self.items = items
   self.entries = entries
   self.context = ctx
-  self.preselect = preselect
 
   if vim.fn.pumvisible() == 0 and #items == 0 then
     debug.log('menu/not-show')
@@ -115,7 +114,7 @@ menu.update = function(self, ctx, sources)
     debug.log('menu/show', offset, #self.items)
 
     local completeopt = vim.o.completeopt
-    if self.preselect then
+    if preselect then
       vim.cmd('set completeopt=menuone,noinsert')
     else
       vim.cmd('set completeopt=menuone,noselect')
@@ -140,15 +139,19 @@ menu.restore = function(self, ctx)
   if not ctx.pumvisible then
     if #self.items > 0 then
       if self.offset <= ctx.cursor.col then
-        debug.log('menu/restore')
-        local completeopt = vim.o.completeopt
-        if self.preselect then
-          vim.cmd('set completeopt=menuone,noinsert')
-        else
-          vim.cmd('set completeopt=menuone,noselect')
+        local i = 0
+        for j, e in ipairs(self.entries) do
+          if e == self.selected_entry then
+            i = j
+            break
+          end
         end
+
+        debug.log('menu/restore', i)
         vim.fn.complete(self.offset, self.items)
-        vim.cmd('set completeopt=' .. completeopt)
+        if i > 0 then
+          vim.api.nvim_select_popupmenu_item(i - 1, false, false, {})
+        end
       end
     end
   end
