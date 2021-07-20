@@ -17,6 +17,13 @@ cmp.ContextReason.Auto = 'auto'
 cmp.ContextReason.Manual = 'manual'
 cmp.ContextReason.None = 'none'
 
+---@alias cmp.TriggerEvent "'InsertEnter'" | "'TextChanged'" | "'TriggerCharacter'"
+cmp.TriggerEvent = {}
+cmp.TriggerEvent.InsertEnter = 'InsertEnter'
+cmp.TriggerEvent.TextChanged = 'TextChanged'
+cmp.TriggerEvent.TriggerCharacter = 'TriggerCharacter'
+
+
 ---@class cmp.ContextOption
 ---@field public reason cmp.ContextReason|nil
 
@@ -25,6 +32,7 @@ cmp.ContextReason.None = 'none'
 
 ---@class cmp.SnippetExpansionParams
 ---@field public body string
+---@field public insert_text_mode number
 
 ---@class cmp.Setup
 ---@field public __call fun(c: cmp.ConfigSchema)

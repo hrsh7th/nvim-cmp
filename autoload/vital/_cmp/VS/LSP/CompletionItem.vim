@@ -26,12 +26,12 @@ endfunction
 "
 " confirm
 "
-" @param {LSP.Position}                       args.suggest_position
-" @param {LSP.Position}                       args.request_position
-" @param {LSP.Position}                       args.current_position
-" @param {string}                             args.current_line
-" @param {LSP.CompletionItem}                 args.completion_item
-" @param {(args: { body: string; }) => void?} args.expand_snippet
+" @param {LSP.Position}                                                 args.suggest_position
+" @param {LSP.Position}                                                 args.request_position
+" @param {LSP.Position}                                                 args.current_position
+" @param {string}                                                       args.current_line
+" @param {LSP.CompletionItem}                                           args.completion_item
+" @param {(args: { body: string; insert_text_mode: number; }) => void?} args.expand_snippet
 "
 " # Pre-condition
 "
@@ -109,7 +109,7 @@ function! s:confirm(args) abort
     if l:expansion.is_snippet && !empty(l:ExpandSnippet)
       call s:TextEdit.apply('%', [{ 'range': l:range, 'newText': '' }])
       call cursor(s:Position.lsp_to_vim('%', l:range.start))
-      call l:ExpandSnippet({ 'body': l:expansion.new_text })
+      call l:ExpandSnippet({ 'body': l:expansion.new_text, 'insert_text_mode': get(l:completion_item, 'insertTextMode', 2) })
 
     " TextEdit.
     else
@@ -155,7 +155,8 @@ function! s:_get_expansion(args) abort
     endif
   else
     let l:inserted = strcharpart(l:current_line, l:suggest_position.character, l:current_position.character - l:suggest_position.character)
-    let l:new_text = get(l:completion_item, 'insertText', l:completion_item.label)
+    let l:new_text = get(l:completion_item, 'insertText', v:null)
+    let l:new_text = !empty(l:new_text) ? l:new_text : l:completion_item.label
     if s:_trim_tabstop(l:new_text) !=# l:inserted
       return {
       \   'overflow_before': l:request_position.character - l:suggest_position.character,
