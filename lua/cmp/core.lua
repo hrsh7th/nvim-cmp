@@ -74,7 +74,7 @@ core.autocomplete = function()
   if ctx:changed(ctx.prev_context) then
     debug.log('changed')
     core.menu:restore(ctx)
-    if config.get().autocomplete then
+    if ctx:is_forwarding() and config.get().autocomplete then
       core.complete(ctx)
     else
       core.filter.stop()
@@ -174,12 +174,13 @@ core.confirm = function(e, option, callback)
   if not (e and not e.confirmed) then
     return
   end
+  e.confirmed = true
 
   debug.log('entry.confirm', e:get_completion_item())
 
   --@see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/suggestController.ts#L334
   local pre = context.new()
-  if #(misc.safe(e.completion_item.additionalTextEdits) or {}) == 0 then
+  if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) == 0 then
     local new = context.new(pre)
     e:resolve(function()
       -- has no additionalTextEdits.
@@ -232,7 +233,6 @@ core.confirm = function(e, option, callback)
 
   -- execute
   e:execute(function()
-    e.confirmed = true
     if callback then
       callback()
     end

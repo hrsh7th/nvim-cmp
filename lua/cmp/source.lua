@@ -6,6 +6,7 @@ local debug = require('cmp.utils.debug')
 local misc = require('cmp.utils.misc')
 local cache = require('cmp.utils.cache')
 local types = require('cmp.types')
+local async = require('cmp.utils.async')
 
 ---@class cmp.Source
 ---@field public id number
@@ -19,6 +20,7 @@ local types = require('cmp.types')
 ---@field public entries cmp.Entry[]
 ---@field public offset number|nil
 ---@field public status cmp.SourceStatus
+---@field public complete_dedup function
 local source = {}
 
 ---@alias cmp.SourceStatus "1" | "2" | "3"
@@ -39,6 +41,7 @@ source.new = function(name, s)
   self.name = name
   self.source = s
   self.cache = cache.new()
+  self.complete_dedup = async.dedup()
   self.revision = 0
   self:reset()
   return self
@@ -74,7 +77,7 @@ source.get_fetching_time = function(self)
   if self.status == source.SourceStatus.FETCHING then
     return vim.loop.now() - self.context.time
   end
-  return 10 * 1000 -- return pseudo time if source isn't fetching.
+  return 100 * 1000 -- return pseudo time if source isn't fetching.
 end
 
 ---Return filtered entries
@@ -168,12 +171,7 @@ source.complete = function(self, ctx, callback)
       option = self:get_option(),
       completion_context = completion_context,
     },
-    vim.schedule_wrap(function(response)
-      if self.context.id ~= ctx.id then
-        debug.log('ignore', self.name, self.id)
-        return
-      end
-
+    vim.schedule_wrap(self.complete_dedup(function(response)
       self.revision = self.revision + 1
       if misc.safe(response) ~= nil then
         debug.log('retrieve', self.name, self.id, #(response.items or response))
@@ -192,7 +190,7 @@ source.complete = function(self, ctx, callback)
         self.status = prev_status
       end
       callback()
-    end)
+    end))
   )
   return true
 end

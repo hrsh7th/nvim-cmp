@@ -1,7 +1,7 @@
 local debug = require('cmp.utils.debug')
+local async = require('cmp.utils.async')
 local keymap = require('cmp.utils.keymap')
 local float = require('cmp.float')
-local cache = require('cmp.utils.cache')
 local types = require('cmp.types')
 local config = require('cmp.config')
 
@@ -15,6 +15,7 @@ local config = require('cmp.config')
 ---@field public preselect boolean
 ---@field public selected_entry cmp.Entry|nil
 ---@field public context cmp.Context
+---@field public resolve_dedup fun(callback: function)
 local menu = {}
 
 ---Create menu
@@ -24,7 +25,7 @@ menu.new = function(on_commit_character)
   local self = setmetatable({}, { __index = menu })
   self.on_commit_character = on_commit_character
   self.float = float.new()
-  self.cache = cache.new()
+  self.resolve_dedup = async.dedup()
   self:reset()
   return self
 end
@@ -106,6 +107,7 @@ menu.update = function(self, ctx, sources)
   self.offset = offset
   self.items = items
   self.entries = entries
+  self.preselect = preselect
   self.context = ctx
 
   if vim.fn.pumvisible() == 0 and #items == 0 then
@@ -139,19 +141,15 @@ menu.restore = function(self, ctx)
   if not ctx.pumvisible then
     if #self.items > 0 then
       if self.offset <= ctx.cursor.col then
-        local i = 0
-        for j, e in ipairs(self.entries) do
-          if e == self.selected_entry then
-            i = j
-            break
-          end
+        debug.log('menu/restore')
+        local completeopt = vim.o.completeopt
+        if self.preselect then
+          vim.cmd('set completeopt=menuone,noinsert')
+        else
+          vim.cmd('set completeopt=menuone,noselect')
         end
-
-        debug.log('menu/restore', i)
         vim.fn.complete(self.offset, self.items)
-        if i > 0 then
-          vim.api.nvim_select_popupmenu_item(i - 1, false, false, {})
-        end
+        vim.cmd('set completeopt=' .. completeopt)
       end
     end
   end
@@ -161,11 +159,9 @@ end
 ---@param e cmp.Entry
 menu.select = function(self, e)
   -- Documentation (always invoke to follow to the pum position)
-  self.cache:ensure({ 'select', self.context.id }, function()
-    e:resolve(vim.schedule_wrap(function()
-      self.float:show(e)
-    end))
-  end)
+  e:resolve(self.resolve_dedup(vim.schedule_wrap(function()
+    self.float:show(e)
+  end)))
 
   -- Avoid duplicate handling
   if self.selected_entry == e then

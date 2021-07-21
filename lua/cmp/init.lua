@@ -53,13 +53,8 @@ end
 ---Receive vim autocmds
 ---@param name string
 cmp._on_event = function(name)
-  debug.log('')
   debug.log('----------------------------------------------------------------------------------------------------')
   debug.log('>>> ', name)
-
-  if vim.fn.getchar(1) ~= 0 then
-    return
-  end
 
   if name == 'InsertEnter' then
     core.autocomplete()

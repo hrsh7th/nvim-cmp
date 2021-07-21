@@ -33,5 +33,21 @@ async.throttle = function(fn, timeout)
   })
 end
 
+---Create deduplicated callback
+---@return function
+async.dedup = function()
+  local id = 0
+  return function(callback)
+    id = id + 1
+
+    local current = id
+    return function(...)
+      if current == id then
+        callback(...)
+      end
+    end
+  end
+end
+
 return async
 

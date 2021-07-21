@@ -117,26 +117,12 @@ function buffer.index_line(self, i, line)
 end
 
 --- get_words
-function buffer.get_words(self, lnum)
+function buffer.get_words(self)
   local words = {}
-  local offset = 0
-  while true do
-    local below = lnum - offset - 1
-    local above = lnum + offset
-    if not self.words[below] and not self.words[above] then
-      break
+  for _, line in ipairs(self.words) do
+    for _, w in ipairs(line) do
+      table.insert(words, w)
     end
-    if self.words[below] then
-      for _, word in ipairs(self.words[below]) do
-        table.insert(words, word)
-      end
-    end
-    if self.words[above] then
-      for _, word in ipairs(self.words[above]) do
-        table.insert(words, word)
-      end
-    end
-    offset = offset + 1
   end
   return words
 end
