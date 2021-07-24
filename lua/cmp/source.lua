@@ -133,8 +133,15 @@ end
 ---@param callback function
 ---@return boolean Return true if not trigger completion.
 source.complete = function(self, ctx, callback)
+  local c = config.get()
+
   if ctx.input == '' then
     self:reset()
+  end
+
+  if not ctx:is_forwarding() then
+    debug.log('skip backwarding', self.name, self.id)
+    return
   end
 
   local completion_context
@@ -147,7 +154,7 @@ source.complete = function(self, ctx, callback)
     completion_context = {
       triggerKind = types.lsp.CompletionTriggerKind.Invoked,
     }
-  elseif ctx:is_keyword_beginning() and self.context.offset ~= ctx.offset then
+  elseif c.keyword_length <= #ctx.input and self.context.offset ~= ctx.offset then
     completion_context = {
       triggerKind = types.lsp.CompletionTriggerKind.Invoked,
     }
@@ -157,7 +164,7 @@ source.complete = function(self, ctx, callback)
     }
   end
   if not completion_context then
-    debug.log('skip', self.name, self.id)
+    debug.log('skip empty context', self.name, self.id)
     return
   end
 

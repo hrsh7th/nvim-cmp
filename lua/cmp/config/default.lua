@@ -12,6 +12,8 @@ return function()
 
     keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
 
+    keyword_length = 1,
+
     snippet = {
       expand = function()
         error('snippet engine does not configured.')

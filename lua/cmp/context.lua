@@ -97,15 +97,6 @@ context.new = function(prev_context, option)
   return self
 end
 
----Return if keyword was beginning or not.
----@return boolean
-context.is_keyword_beginning = function(self)
-  local prev = self.prev_context
-  local curr = self
-
-  return (prev.offset ~= curr.offset or prev.input == '') and curr.input ~= ''
-end
-
 ---Return context creation reason.
 ---@return cmp.ContextReason
 context.get_reason = function(self)

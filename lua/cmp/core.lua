@@ -79,7 +79,8 @@ core.autocomplete = function()
   if ctx:changed(ctx.prev_context) then
     debug.log('changed')
     core.menu:restore(ctx)
-    if ctx:is_forwarding() and config.get().autocomplete then
+
+    if config.get().autocomplete then
       core.complete(ctx)
     else
       core.filter.stop()

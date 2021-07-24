@@ -47,6 +47,7 @@ cmp.TriggerEvent.TriggerCharacter = 'TriggerCharacter'
 ---@field private revision number
 ---@field public autocomplete boolean
 ---@field public keyword_pattern string
+---@field public keyword_length number
 ---@field public snippet cmp.SnippetConfig
 ---@field public preselect cmp.PreselectConfig
 ---@field public commit_characters cmp.CommitCharactersConfig
