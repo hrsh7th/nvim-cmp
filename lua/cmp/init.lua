@@ -57,6 +57,7 @@ cmp._on_event = function(name)
   debug.log('>>> ', name)
 
   if name == 'InsertEnter' then
+    core.prepare()
     core.autocomplete()
   elseif name == 'TextChanged' then
     core.autocomplete()

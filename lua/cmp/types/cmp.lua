@@ -23,7 +23,6 @@ cmp.TriggerEvent.InsertEnter = 'InsertEnter'
 cmp.TriggerEvent.TextChanged = 'TextChanged'
 cmp.TriggerEvent.TriggerCharacter = 'TriggerCharacter'
 
-
 ---@class cmp.ContextOption
 ---@field public reason cmp.ContextReason|nil
 

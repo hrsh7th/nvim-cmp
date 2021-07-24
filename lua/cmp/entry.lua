@@ -85,21 +85,25 @@ entry.get_offset = function(self)
 end
 
 ---Create word for vim.CompletedItem
----NOTE: If insertText and textEdit provided we use insertText instead (it is a cmp specific implementation).
 ---@return string
 entry.get_word = function(self)
   return self.cache:ensure('get_word', function()
+    --NOTE: This is nvim-cmp specific implementation.
+    if misc.safe(self.completion_item.word) then
+      return self.completion_item.word
+    end
+
     local word
-    if misc.safe(self.completion_item.insertText) then
-      word = str.trim(self.completion_item.insertText)
-      if self.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-        word = str.get_word(word)
-      end
-    elseif misc.safe(self.completion_item.textEdit) then
+    if misc.safe(self.completion_item.textEdit) then
       word = str.trim(self.completion_item.textEdit.newText)
       local _, after = self:get_overwrite()
       if 0 < after or self.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
         word = str.get_word(word, string.byte(self.context.cursor_after_line, 1))
+      end
+    elseif misc.safe(self.completion_item.insertText) then
+      word = str.trim(self.completion_item.insertText)
+      if self.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
+        word = str.get_word(word)
       end
     else
       word = str.trim(self.completion_item.label)

@@ -63,6 +63,11 @@ core.get_sources = function(statuses)
   return sources
 end
 
+---Prepare completion
+core.prepare = function()
+  -- Apply confirmation mapping in here
+end
+
 ---Check auto-completion
 core.autocomplete = function()
   local ctx = core.get_context({ reason = types.cmp.ContextReason.Auto })

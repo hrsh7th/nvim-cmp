@@ -124,9 +124,8 @@ menu.update = function(self, ctx, sources)
     vim.fn.complete(offset, self.items)
     vim.cmd('set completeopt=' .. completeopt)
   end
-  if #self.entries > 0 then
-    self:select(self.entries[1])
-  else
+
+  if #self.entries == 0 then
     self:unselect()
   end
 end
