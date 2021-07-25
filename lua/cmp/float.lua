@@ -1,3 +1,4 @@
+local async = require('cmp.utils.async')
 local config = require('cmp.config')
 
 ---@class cmp.Float
@@ -18,6 +19,8 @@ end
 ---Show floating window
 ---@param e cmp.Entry
 float.show = function(self, e)
+  float.close.stop()
+
   local documentation = config.get().documentation
 
   -- update buffer content if needed.
@@ -94,13 +97,13 @@ float.show = function(self, e)
 end
 
 ---Close floating window
-float.close = function(self)
+float.close = async.throttle(function(self)
   if self.win and vim.api.nvim_win_is_valid(self.win) then
     vim.api.nvim_win_close(self.win, true)
   end
   self.entry = nil
   self.buf = nil
   self.win = nil
-end
+end, 100)
 
 return float

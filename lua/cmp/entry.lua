@@ -9,6 +9,7 @@ local types = require('cmp.types')
 ---@field public id number
 ---@field public cache cmp.Cache
 ---@field public score number
+---@field public exact boolean
 ---@field public context cmp.Context
 ---@field public source cmp.Source
 ---@field public completion_item lsp.CompletionItem

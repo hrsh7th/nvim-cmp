@@ -2,9 +2,13 @@ local core = require('cmp.core')
 local types = require('cmp.types')
 local source = require('cmp.source')
 local config = require('cmp.config')
+local keymap = require('cmp.keymap')
 local debug = require('cmp.utils.debug')
 
 local cmp = {}
+
+---Listen keypress handler
+keymap.listen(core.on_char)
 
 ---Expose types
 for k, v in pairs(require('cmp.types.cmp')) do

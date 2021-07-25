@@ -1,14 +1,18 @@
 local misc = {}
 
----Merge list2's values to list1
+---Return concatenated list
 ---@param list1 any[]
 ---@param list2 any[]
 ---@return any[]
 misc.concat = function(list1, list2)
-  for _, v in ipairs(list2) do
-    table.insert(list1, v)
+  local new_list = {}
+  for _, v in ipairs(list1) do
+    table.insert(new_list, v)
   end
-  return list1
+  for _, v in ipairs(list2) do
+    table.insert(new_list, v)
+  end
+  return new_list
 end
 
 

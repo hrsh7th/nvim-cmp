@@ -111,6 +111,7 @@ source.get_entries = function(self, ctx)
         inputs[o] = string.sub(ctx.cursor_before_line, o)
       end
       e.score = matcher.match(inputs[o], e:get_filter_text())
+      e.exact = inputs[o] == e:get_filter_text()
       if e.score >= 1 then
         table.insert(entries, e)
       end

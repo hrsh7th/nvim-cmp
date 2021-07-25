@@ -3,14 +3,10 @@ local misc  = require 'cmp.utils.misc'
 
 local compare = {}
 
--- preselect
-compare.preselect = function(entry1, entry2)
-  if entry1.completion_item.preselect ~= entry2.completion_item.preselect then
-    if entry1.completion_item.preselect then
-      return false
-    else
-      return true
-    end
+-- exact
+compare.exact = function(entry1, entry2)
+  if entry1.exact ~= entry2.exact then
+    return entry1.exact
   end
 end
 

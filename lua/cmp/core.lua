@@ -1,7 +1,7 @@
-local keymap = require('cmp.utils.keymap')
 local debug = require('cmp.utils.debug')
 local char = require('cmp.utils.char')
 local async = require('cmp.utils.async')
+local keymap = require('cmp.keymap')
 local context = require('cmp.context')
 local source = require('cmp.source')
 local menu = require('cmp.menu')
@@ -14,9 +14,7 @@ local core = {}
 core.SOURCE_TIMEOUT = 500
 
 ---@type cmp.Menu
-core.menu = menu.new(function(c, fallback)
-  core.on_commit_character(c, fallback)
-end)
+core.menu = menu.new()
 
 ---@type table<number, cmp.Source>
 core.sources = {}
@@ -51,7 +49,7 @@ end
 ---@return cmp.Source[]
 core.get_sources = function(statuses)
   local sources = {}
-  for _, c in ipairs(config.get().sources) do
+  for _, c in pairs(config.get().sources) do
     for _, s in pairs(core.sources) do
       if c.name == s.name then
         if not statuses or vim.tbl_contains(statuses, s.status) then
@@ -63,9 +61,52 @@ core.get_sources = function(statuses)
   return sources
 end
 
+---Keypress handler
+core.on_char = function(ch, fallback)
+  -- Confirm character
+  for confirm_char, c in pairs(config.get().confirm.characters) do
+    if confirm_char == ch then
+      local e = core.menu:get_selected_entry()
+      if not e and c.select then
+        e = core.menu:get_first_entry()
+      end
+      if not e then
+        return fallback()
+      end
+
+      return core.confirm(e, {
+        behavior = c.behavior,
+      })
+    end
+  end
+
+  --Commit character. NOTE: This has a lot of cmp specific implementation to make more user-friendly.
+  local e = core.menu:get_selected_entry()
+  if not e then
+    return fallback()
+  end
+  if not vim.tbl_contains(e:get_commit_characters(), char) then
+    return fallback()
+  end
+
+  local key = keymap.t(keymap.to_key(char))
+  core.confirm(e, {
+    behavior = char.is_printable(string.byte(key)) and 'insert' or 'replace',
+  }, function()
+    local ctx = core.get_context()
+    local word = e:get_word()
+    if string.sub(ctx.cursor_before_line, -#word, ctx.cursor.col - 1) == word and char.is_printable(string.byte(key)) then
+      -- Don't reset current completion because reset/filter will occur by the fallback chars.
+      fallback()
+    end
+  end)
+end
+
 ---Prepare completion
 core.prepare = function()
-  -- Apply confirmation mapping in here
+  for key in pairs(config.get().confirm.characters) do
+    keymap.register(key)
+  end
 end
 
 ---Check auto-completion
@@ -138,45 +179,11 @@ core.select = function()
   end
 end
 
----On commit character typed
----@param c string
----@param fallback fun()
-core.on_commit_character = function(c, fallback)
-  local e = core.menu:get_selected_entry()
-  if not (e and not e.confirmed) then
-    return fallback()
-  end
-
-  if not vim.tbl_contains(config.get().commit_characters.resolve(e), c) then
-    return fallback()
-  end
-
-  -- Handle commit characters.
-  -- NOTE: This has a lot of cmp specific implementation to make more user-friendly.
-  vim.schedule(function()
-    local key = keymap.t(keymap.to_key(c))
-
-    -- It's annoying that if invoke 'replace' when the user type '.' so we prevent it.
-    core.confirm(e, {
-      behavior = char.is_printable(string.byte(key)) and 'insert' or 'replace',
-    }, function()
-      local ctx = core.get_context()
-      local word = e:get_word()
-      if string.sub(ctx.cursor_before_line, -#word, ctx.cursor.col - 1) == word and char.is_printable(string.byte(key)) then
-        -- Don't reset current completion because reset/filter will occur by the fallback chars.
-        fallback()
-      else
-        core.reset()
-      end
-    end)
-  end)
-end
-
 ---Confirm completion.
 ---@param e cmp.Entry
 ---@param option cmp.ConfirmOption
 ---@param callback function
-core.confirm = function(e, option, callback)
+core.confirm = vim.schedule_wrap(function(e, option, callback)
   if not (e and not e.confirmed) then
     return
   end
@@ -239,11 +246,12 @@ core.confirm = function(e, option, callback)
 
   -- execute
   e:execute(function()
+    core.menu:close()
     if callback then
       callback()
     end
   end)
-end
+end)
 
 ---Reset current completion state
 core.reset = function()

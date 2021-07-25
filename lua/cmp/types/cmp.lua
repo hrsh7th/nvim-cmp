@@ -5,12 +5,6 @@ cmp.ConfirmBehavior = {}
 cmp.ConfirmBehavior.Insert = 'insert'
 cmp.ConfirmBehavior.Replace = 'replace'
 
----@alias cmp.PreselectMode "'item'" | "'always'" | "'none'"
-cmp.PreselectMode = {}
-cmp.PreselectMode.Item = 'item'
-cmp.PreselectMode.Always = 'always'
-cmp.PreselectMode.None = 'none'
-
 ---@alias cmp.ContextReason "'auto'" | "'manual'" | "'none'"
 cmp.ContextReason = {}
 cmp.ContextReason.Auto = 'auto'
@@ -49,8 +43,6 @@ cmp.TriggerEvent.TriggerCharacter = 'TriggerCharacter'
 ---@field public keyword_pattern string
 ---@field public keyword_length number
 ---@field public snippet cmp.SnippetConfig
----@field public preselect cmp.PreselectConfig
----@field public commit_characters cmp.CommitCharactersConfig
 ---@field public documentation cmp.DocumentationConfig
 ---@field public menu cmp.MenuConfig
 ---@field public confirm cmp.ConfirmConfig
@@ -58,9 +50,6 @@ cmp.TriggerEvent.TriggerCharacter = 'TriggerCharacter'
 
 ---@class cmp.SnippetConfig
 ---@field public expand fun(args: cmp.SnippetExpansionParams)
-
----@class cmp.PreselectConfig
----@field public mode cmp.PreselectMode
 
 ---@class cmp.CommitCharactersConfig
 ---@field public resolve fun(e: cmp.Entry): string[]
@@ -77,6 +66,11 @@ cmp.TriggerEvent.TriggerCharacter = 'TriggerCharacter'
 
 ---@class cmp.ConfirmConfig
 ---@field public default_behavior cmp.ConfirmBehavior
+---@field public characters table<string, cmp.ConfirmCharacterConfig>
+
+---@class cmp.ConfirmCharacterConfig
+---@field behavior cmp.ConfirmBehavior
+---@field select boolean
 
 ---@class cmp.SourceConfig
 ---@field public name string

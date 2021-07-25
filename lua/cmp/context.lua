@@ -2,6 +2,7 @@ local misc = require('cmp.utils.misc')
 local types = require('cmp.types')
 local config = require('cmp.config')
 local pattern = require('cmp.utils.pattern')
+local cmp = require('cmp.types.cmp')
 
 ---@class cmp.Context
 ---@field public id string
@@ -148,6 +149,9 @@ context.changed = function(self, ctx)
     return true
   end
   if curr.cursor.col ~= ctx.cursor.col then
+    return true
+  end
+  if curr:get_reason() == cmp.ContextReason.Manual then
     return true
   end
 

@@ -20,16 +20,6 @@ return function()
       end,
     },
 
-    preselect = {
-      mode = types.cmp.PreselectMode.Item,
-    },
-
-    commit_characters = {
-      resolve = function(e)
-        return misc.concat(e:get_commit_characters(), { '\n' })
-      end
-    },
-
     documentation = {
       border = { '', '', '', ' ', '', '', '', ' ' },
       winhighlight = 'NormalFloat:CmpDocumentation,FloatBorder:CmpDocumentationBorder',
@@ -39,13 +29,19 @@ return function()
 
     confirm = {
       default_behavior = types.cmp.ConfirmBehavior.Replace,
+      characters = {
+        ['\n'] = {
+          behavior = types.cmp.ConfirmBehavior.Replace,
+          select = true,
+        },
+      }
     },
 
     menu = {
       sort = function(entries)
         table.sort(entries, function(entry1, entry2)
           for _, fn in ipairs({
-            compare.preselect,
+            compare.exact,
             compare.score,
             compare.kind,
             compare.sort_text,

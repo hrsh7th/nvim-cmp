@@ -1,33 +1,37 @@
 local debug = require('cmp.utils.debug')
 local async = require('cmp.utils.async')
-local keymap = require('cmp.utils.keymap')
+local keymap = require('cmp.keymap')
 local float = require('cmp.float')
 local types = require('cmp.types')
 local config = require('cmp.config')
 
 ---@class cmp.Menu
----@field public on_commit_character fun(c: string, fallback: function)
 ---@field public float cmp.Float
 ---@field public cache cmp.Cache
 ---@field public offset number
 ---@field public items vim.CompletedItem[]
 ---@field public entries cmp.Entry[]
----@field public preselect boolean
 ---@field public selected_entry cmp.Entry|nil
 ---@field public context cmp.Context
 ---@field public resolve_dedup fun(callback: function)
 local menu = {}
 
 ---Create menu
----@param on_commit_character fun(c: string, fallback: function)
 ---@return cmp.Menu
-menu.new = function(on_commit_character)
+menu.new = function()
   local self = setmetatable({}, { __index = menu })
-  self.on_commit_character = on_commit_character
   self.float = float.new()
   self.resolve_dedup = async.dedup()
   self:reset()
   return self
+end
+
+---Close menu
+menu.close = function(self)
+  if vim.fn.pumvisible() == 1 then
+    vim.fn.complete(1, {})
+  end
+  self:unselect()
 end
 
 ---Reset menu
@@ -36,10 +40,8 @@ menu.reset = function(self)
   self.items = {}
   self.entries = {}
   self.context = nil
-  if vim.tbl_contains({ 'i', 'ic' }, vim.api.nvim_get_mode().mode) then
-    vim.fn.complete(1, {})
-  end
-  self:unselect()
+  self.preselect = 0
+  self:close()
 end
 
 ---Update menu
@@ -90,7 +92,12 @@ menu.update = function(self, ctx, sources)
   -- create vim items.
   local items = {}
   local abbrs = {}
-  for _, e in ipairs(entries) do
+  local preselect = 0
+  for i, e in ipairs(entries) do
+    if preselect == 0 and e.completion_item.preselect then
+      preselect = i
+    end
+
     local item = e:get_vim_item(offset)
     if not abbrs[item.abbr] then
       table.insert(items, item)
@@ -98,32 +105,13 @@ menu.update = function(self, ctx, sources)
     end
   end
 
-  -- preselect.
-  local preselect = false
-  preselect = preselect or self.entries[1] and self.entries[1].completion_item.preselect
-  preselect = preselect or config.get().preselect.mode == types.cmp.PreselectMode.Always
-
   -- save recent pum state.
   self.offset = offset
   self.items = items
   self.entries = entries
   self.preselect = preselect
   self.context = ctx
-
-  if vim.fn.pumvisible() == 0 and #items == 0 then
-    debug.log('menu/not-show')
-  else
-    debug.log('menu/show', offset, #self.items)
-
-    local completeopt = vim.o.completeopt
-    if preselect then
-      vim.cmd('set completeopt=menuone,noinsert')
-    else
-      vim.cmd('set completeopt=menuone,noselect')
-    end
-    vim.fn.complete(offset, self.items)
-    vim.cmd('set completeopt=' .. completeopt)
-  end
+  self:show()
 
   if #self.entries == 0 then
     self:unselect()
@@ -141,17 +129,27 @@ menu.restore = function(self, ctx)
     if #self.items > 0 then
       if self.offset <= ctx.cursor.col then
         debug.log('menu/restore')
-        local completeopt = vim.o.completeopt
-        if self.preselect then
-          vim.cmd('set completeopt=menuone,noinsert')
-        else
-          vim.cmd('set completeopt=menuone,noselect')
-        end
-        vim.fn.complete(self.offset, self.items)
-        vim.cmd('set completeopt=' .. completeopt)
+        self:show()
       end
     end
   end
+end
+
+---Show completion item
+menu.show = function(self)
+  if vim.fn.pumvisible() == 0 and #self.entries == 0 then
+    return
+  end
+
+  local completeopt = vim.o.completeopt
+  if self.preselect == 1 then
+    vim.cmd('set completeopt=menuone,noinsert')
+  else
+    vim.cmd('set completeopt=menuone,noselect')
+  end
+  vim.fn.complete(self.offset, self.items)
+  vim.cmd('set completeopt=' .. completeopt)
+  vim.api.nvim_select_popupmenu_item(self.preselect - 1, false, false, {})
 end
 
 ---Select current item
@@ -169,15 +167,8 @@ menu.select = function(self, e)
   self.selected_entry = e
 
   -- Add commit character listeners.
-  for _, key in ipairs(config.get().commit_characters.resolve(e)) do
-    keymap.listen(
-      key,
-      (function(k)
-        return function(fallback)
-          return self.on_commit_character(k, fallback)
-        end
-      end)(key)
-    )
+  for _, key in ipairs(e:get_commit_characters()) do
+    keymap.register(key)
   end
 end
 
@@ -185,9 +176,7 @@ end
 menu.unselect = function(self)
   if self.selected_entry then
     self.selected_entry = nil
-    vim.schedule(function()
-      self.float:close()
-    end)
+    self.float:close()
     return
   end
 end
@@ -218,6 +207,24 @@ menu.get_selected_entry = function(self)
   end
 
   local completed_item = info.items[math.max(info.selected, 0) + 1] or {}
+  if not completed_item.user_data then
+    return nil
+  end
+
+  local id = completed_item.user_data.cmp
+  for _, e in ipairs(self.entries) do
+    if e.id == id then
+      return e
+    end
+  end
+  return nil
+end
+
+---Get first entry
+---@param self cmp.Entry|nil
+menu.get_first_entry = function(self)
+  local info = vim.fn.complete_info({ 'items' })
+  local completed_item = info.items[1] or {}
   if not completed_item.user_data then
     return nil
   end
