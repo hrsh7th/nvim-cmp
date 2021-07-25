@@ -55,19 +55,19 @@ cmp.complete = function()
 end
 
 ---Receive vim autocmds
----@param name string
-cmp._on_event = function(name)
+---@param event string
+cmp._on_event = function(event)
   debug.log('----------------------------------------------------------------------------------------------------')
-  debug.log('>>> ', name)
+  debug.log('>>> ', event)
 
-  if name == 'InsertEnter' then
+  if event == 'InsertEnter' then
     core.prepare()
-    core.autocomplete()
-  elseif name == 'TextChanged' then
-    core.autocomplete()
-  elseif name == 'CompleteChanged' then
+    core.autocomplete(event)
+  elseif event == 'TextChanged' then
+    core.autocomplete(event)
+  elseif event == 'CompleteChanged' then
     core.select()
-  elseif name == 'InsertLeave' then
+  elseif event == 'InsertLeave' then
     core.reset()
   end
 end

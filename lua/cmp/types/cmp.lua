@@ -11,11 +11,10 @@ cmp.ContextReason.Auto = 'auto'
 cmp.ContextReason.Manual = 'manual'
 cmp.ContextReason.None = 'none'
 
----@alias cmp.TriggerEvent "'InsertEnter'" | "'TextChanged'" | "'TriggerCharacter'"
+---@alias cmp.TriggerEvent "'InsertEnter'" | "'TextChanged'"
 cmp.TriggerEvent = {}
 cmp.TriggerEvent.InsertEnter = 'InsertEnter'
 cmp.TriggerEvent.TextChanged = 'TextChanged'
-cmp.TriggerEvent.TriggerCharacter = 'TriggerCharacter'
 
 ---@class cmp.ContextOption
 ---@field public reason cmp.ContextReason|nil
@@ -39,14 +38,18 @@ cmp.TriggerEvent.TriggerCharacter = 'TriggerCharacter'
 
 ---@class cmp.ConfigSchema
 ---@field private revision number
----@field public autocomplete boolean
----@field public keyword_pattern string
----@field public keyword_length number
+---@field public completion cmp.CompletionConfig
 ---@field public snippet cmp.SnippetConfig
 ---@field public documentation cmp.DocumentationConfig
----@field public menu cmp.MenuConfig
----@field public confirm cmp.ConfirmConfig
+---@field public confirmation cmp.ConfirmationConfig
+---@field public sorting cmp.SortingConfig
+---@field public formatting cmp.FormattingConfig
 ---@field public sources cmp.SourceConfig[]
+
+---@class cmp.CompletionConfig
+---@field public autocomplete cmp.TriggerEvent[]
+---@field public keyword_pattern string
+---@field public keyword_length number
 
 ---@class cmp.SnippetConfig
 ---@field public expand fun(args: cmp.SnippetExpansionParams)
@@ -60,11 +63,13 @@ cmp.TriggerEvent.TriggerCharacter = 'TriggerCharacter'
 ---@field public maxwidth number|nil
 ---@field public maxheight number|nil
 
----@class cmp.MenuConfig
+---@class cmp.SortingConfig
 ---@field public sort fun(entries: cmp.Entry[]): cmp.Entry[]
+
+---@class cmp.FormattingConfig
 ---@field public format fun(entry: cmp.Entry, suggeset_offset: number): vim.CompletedItem
 
----@class cmp.ConfirmConfig
+---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior
 ---@field public characters table<string, cmp.ConfirmCharacterConfig>
 

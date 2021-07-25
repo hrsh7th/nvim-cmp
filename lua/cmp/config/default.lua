@@ -2,17 +2,21 @@ local types = require('cmp.types')
 local str = require('cmp.utils.str')
 local misc = require('cmp.utils.misc')
 local compare = require('cmp.config.compare')
+local cmp     = require('cmp.types.cmp')
 
 local WIDE_HEIGHT = 40
 
 ---@return cmp.ConfigSchema
 return function()
   return {
-    autocomplete = true,
-
-    keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
-
-    keyword_length = 1,
+    completion = {
+      autocomplete = {
+        cmp.TriggerEvent.InsertEnter,
+        cmp.TriggerEvent.TextChanged,
+      },
+      keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
+      keyword_length = 1,
+    },
 
     snippet = {
       expand = function()
@@ -27,7 +31,7 @@ return function()
       maxheight = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
     },
 
-    confirm = {
+    confirmation = {
       default_behavior = types.cmp.ConfirmBehavior.Replace,
       characters = {
         ['\n'] = {
@@ -37,7 +41,7 @@ return function()
       }
     },
 
-    menu = {
+    sorting = {
       sort = function(entries)
         table.sort(entries, function(entry1, entry2)
           for _, fn in ipairs({
@@ -56,8 +60,10 @@ return function()
           return true
         end)
         return entries
-      end,
+      end
+    },
 
+    formatting = {
       format = function(e, suggest_offset)
         local item = e:get_completion_item()
         local word = e:get_word()
@@ -104,7 +110,7 @@ return function()
           kind = types.lsp.CompletionItemKind[e:get_kind()] or types.lsp.CompletionItemKind[1],
           menu = menu,
         }
-      end,
+      end
     },
 
     sources = {},

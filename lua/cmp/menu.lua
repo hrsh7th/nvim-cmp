@@ -87,7 +87,7 @@ menu.update = function(self, ctx, sources)
   end
 
   -- sort.
-  config.get().menu.sort(entries)
+  config.get().sorting.sort(entries)
 
   -- create vim items.
   local items = {}

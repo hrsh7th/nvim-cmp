@@ -64,7 +64,7 @@ end
 ---Keypress handler
 core.on_char = function(ch, fallback)
   -- Confirm character
-  for confirm_char, c in pairs(config.get().confirm.characters) do
+  for confirm_char, c in pairs(config.get().confirmation.characters) do
     if confirm_char == ch then
       local e = core.menu:get_selected_entry()
       if not e and c.select then
@@ -104,13 +104,13 @@ end
 
 ---Prepare completion
 core.prepare = function()
-  for key in pairs(config.get().confirm.characters) do
+  for key in pairs(config.get().confirmation.characters) do
     keymap.register(key)
   end
 end
 
 ---Check auto-completion
-core.autocomplete = function()
+core.autocomplete = function(event)
   local ctx = core.get_context({ reason = types.cmp.ContextReason.Auto })
   if core.menu:get_active_entry() then
     return
@@ -121,10 +121,9 @@ core.autocomplete = function()
     debug.log('changed')
     core.menu:restore(ctx)
 
-    if config.get().autocomplete then
+    if vim.tbl_contains(config.get().completion.autocomplete, event) then
       core.complete(ctx)
     else
-      core.filter.stop()
       core.filter.timeout = 50
       core.filter()
     end
@@ -142,7 +141,6 @@ core.complete = function(ctx)
       if new:changed(new.prev_context) then
         core.complete(new)
       else
-        core.filter.stop()
         core.filter.timeout = 50
         core.filter()
       end
@@ -232,7 +230,7 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
     completion_item.textEdit = {}
     completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.label
   end
-  local behavior = option.behavior or config.get().confirm.default_behavior
+  local behavior = option.behavior or config.get().confirmation.default_behavior
   if behavior == types.cmp.ConfirmBehavior.Replace then
     completion_item.textEdit.range = types.lsp.Range.from_vim('%', e:get_replace_range())
   else

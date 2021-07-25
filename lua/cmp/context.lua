@@ -64,7 +64,7 @@ context.new = function(prev_context, option)
   self.cursor_line = vim.api.nvim_get_current_line()
   self.cursor_before_line = string.sub(self.cursor_line, 1, self.cursor.col - 1)
   self.cursor_after_line = string.sub(self.cursor_line, self.cursor.col)
-  self.offset = pattern.offset(config.get().keyword_pattern .. '$', self.cursor_before_line) or self.cursor.col
+  self.offset = pattern.offset(config.get().completion.keyword_pattern .. '$', self.cursor_before_line) or self.cursor.col
   self.offset_before_line = string.sub(self.cursor_line, 1, self.offset - 1)
   self.offset_after_line = string.sub(self.cursor_line, self.offset)
   self.input = string.sub(self.cursor_line, self.offset, self.cursor.col - 1)
@@ -87,7 +87,7 @@ context.new = function(prev_context, option)
     ['end'] = {
       row = self.cursor.row,
       col = (function()
-        local _, e = pattern.offset('^' .. config.get().keyword_pattern, self.offset_after_line)
+        local _, e = pattern.offset('^' .. config.get().completion.keyword_pattern, self.offset_after_line)
         if e then
           return self.offset + e - 1
         end

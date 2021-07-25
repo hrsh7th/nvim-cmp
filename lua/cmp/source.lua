@@ -146,16 +146,16 @@ source.complete = function(self, ctx, callback)
   end
 
   local completion_context
-  if vim.tbl_contains(self:get_trigger_characters(), ctx.before_char) then
+  if ctx:get_reason() == types.cmp.ContextReason.Manual then
+    completion_context = {
+      triggerKind = types.lsp.CompletionTriggerKind.Invoked,
+    }
+  elseif vim.tbl_contains(self:get_trigger_characters(), ctx.before_char) then
     completion_context = {
       triggerKind = types.lsp.CompletionTriggerKind.TriggerCharacter,
       triggerCharacter = ctx.before_char,
     }
-  elseif ctx:get_reason() == types.cmp.ContextReason.Manual then
-    completion_context = {
-      triggerKind = types.lsp.CompletionTriggerKind.Invoked,
-    }
-  elseif c.keyword_length <= #ctx.input and self.context.offset ~= ctx.offset then
+  elseif c.completion.keyword_length <= #ctx.input and self.context.offset ~= ctx.offset then
     completion_context = {
       triggerKind = types.lsp.CompletionTriggerKind.Invoked,
     }

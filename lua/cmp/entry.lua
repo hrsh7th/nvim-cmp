@@ -184,7 +184,7 @@ end
 ---@return vim.CompletedItem
 entry.get_vim_item = function(self, suggeset_offset)
   return self.cache:ensure({ 'get_vim_item', suggeset_offset }, function()
-    local item = config.get().menu.format(self, suggeset_offset)
+    local item = config.get().formatting.format(self, suggeset_offset)
     item.equal = 1
     item.empty = 1
     item.dup = 1

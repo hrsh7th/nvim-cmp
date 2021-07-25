@@ -1,4 +1,5 @@
 local cache = require('cmp.utils.cache')
+local misc = require('cmp.utils.misc')
 
 ---@class cmp.Config
 ---@field public g cmp.ConfigSchema
@@ -16,9 +17,7 @@ config.buffers = {}
 ---Set configuration for global.
 ---@param c cmp.ConfigSchema
 config.set_global = function(c)
-  for k, v in pairs(c) do
-    config.global[k] = v
-  end
+  config.global = misc.merge(c, config.global)
   config.global.revision = config.global.revision or 1
   config.global.revision = config.global.revision + 1
 end
@@ -37,16 +36,7 @@ config.get = function()
   local global = config.global
   local buffer = config.buffers[vim.api.nvim_get_current_buf()] or { revision = 1 }
   return config.cache:ensure({ 'get', global.revision or 0, buffer.revision or 0 }, function()
-    local c = {}
-    for k, v in pairs(buffer) do
-      c[k] = v
-    end
-    for k, v in pairs(global) do
-      if c[k] == nil then
-        c[k] = v
-      end
-    end
-    return c
+    return misc.merge(buffer, global)
   end)
 end
 
