@@ -234,9 +234,9 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
   end
   local behavior = option.behavior or config.get().confirmation.default_behavior
   if behavior == types.cmp.ConfirmBehavior.Replace then
-    completion_item.textEdit.range = types.lsp.Range.from_vim('%', e:get_replace_range())
+    completion_item.textEdit.range = types.lsp.Range.to_lsp('%', e:get_replace_range())
   else
-    completion_item.textEdit.range = types.lsp.Range.from_vim('%', e:get_insert_range())
+    completion_item.textEdit.range = types.lsp.Range.to_lsp('%', e:get_insert_range())
   end
   vim.fn['cmp#confirm']({
     request_offset = e.context.cursor.col,

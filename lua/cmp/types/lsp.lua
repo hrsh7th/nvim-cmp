@@ -36,7 +36,7 @@ end
 ---@param buf number|string
 ---@param position vim.Position
 ---@return lsp.Position
-lsp.Position.from_vim = function(buf, position)
+lsp.Position.to_lsp = function(buf, position)
   if not vim.api.nvim_buf_is_loaded(buf) then
     vim.fn.bufload(buf)
   end
@@ -70,10 +70,10 @@ end
 ---@param buf number|string
 ---@param range vim.Range
 ---@return lsp.Range
-lsp.Range.from_vim = function(buf, range)
+lsp.Range.to_lsp = function(buf, range)
   return {
-    start = lsp.Position.from_vim(buf, range.start),
-    ['end'] = lsp.Position.from_vim(buf, range['end']),
+    start = lsp.Position.to_lsp(buf, range.start),
+    ['end'] = lsp.Position.to_lsp(buf, range['end']),
   }
 end
 
