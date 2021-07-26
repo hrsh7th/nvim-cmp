@@ -42,9 +42,9 @@ source.complete = function(self, request, callback)
   callback({
     items = {
       {
+        word = self:_trim_right(program) .. ' = ' .. value,
         label = self:_trim_right(program) .. ' = ' .. value,
         filterText = program .. string.rep(table.concat(self:get_trigger_characters(), '_'), 2),
-        insertText = self:_trim_right(program) .. ' = ' .. value,
         textEdit = {
           range = {
             start = {

@@ -39,11 +39,11 @@ cmp.TriggerEvent.TextChanged = 'TextChanged'
 ---@class cmp.ConfigSchema
 ---@field private revision number
 ---@field public completion cmp.CompletionConfig
----@field public snippet cmp.SnippetConfig
 ---@field public documentation cmp.DocumentationConfig
 ---@field public confirmation cmp.ConfirmationConfig
 ---@field public sorting cmp.SortingConfig
 ---@field public formatting cmp.FormattingConfig
+---@field public snippet cmp.SnippetConfig
 ---@field public sources cmp.SourceConfig[]
 
 ---@class cmp.CompletionConfig
@@ -52,23 +52,11 @@ cmp.TriggerEvent.TextChanged = 'TextChanged'
 ---@field public keyword_pattern string
 ---@field public keyword_length number
 
----@class cmp.SnippetConfig
----@field public expand fun(args: cmp.SnippetExpansionParams)
-
----@class cmp.CommitCharactersConfig
----@field public resolve fun(e: cmp.Entry): string[]
-
 ---@class cmp.DocumentationConfig
 ---@field public border string[]
 ---@field public winhighlight string
 ---@field public maxwidth number|nil
 ---@field public maxheight number|nil
-
----@class cmp.SortingConfig
----@field public sort fun(entries: cmp.Entry[]): cmp.Entry[]
-
----@class cmp.FormattingConfig
----@field public format fun(entry: cmp.Entry, suggeset_offset: number): vim.CompletedItem
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior
@@ -78,10 +66,17 @@ cmp.TriggerEvent.TextChanged = 'TextChanged'
 ---@field behavior cmp.ConfirmBehavior
 ---@field select boolean
 
+---@class cmp.SortingConfig
+---@field public sort fun(entries: cmp.Entry[]): cmp.Entry[]
+
+---@class cmp.FormattingConfig
+---@field public format fun(entry: cmp.Entry, suggeset_offset: number): vim.CompletedItem
+
+---@class cmp.SnippetConfig
+---@field public expand fun(args: cmp.SnippetExpansionParams)
+
 ---@class cmp.SourceConfig
 ---@field public name string
----@field public unique boolean
----@field public sortable boolean
 ---@field public opts table
 
 return cmp

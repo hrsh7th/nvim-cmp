@@ -54,7 +54,10 @@ source._do_complete = function(self, request, callback)
     for _, word in ipairs(b:get_words()) do
       if not words_uniq[word] then
         words_uniq[word] = true
-        table.insert(words, { label = word })
+        table.insert(words, {
+          label = word,
+          dup = 0,
+        })
       end
     end
   end

@@ -16,12 +16,9 @@ You should read [type definitions](/lua/cmp/types) and [LSP spec](https://micros
 
 ### Overview
 
-`nvim-cmp` emphasizes compatibility with the VSCode behavior and the LSP protocol but there are some little differences.
+`nvim-cmp` emphasizes compatibility with the VSCode behavior and the LSP specification but there are some little differences.
 
-1. In `nvim-cmp`, the `CompletionItem` can have `word` property.
-
-The reason is that the VSCode doesn't insert any text when the user selects item but vim does it so we should detect it.
-The `word` property will be used for it.
+1. In `nvim-cmp`, the `CompletionItem` can have `word` and `dup` property that introduced by vim's completion mechanism.
 
 
 ### Create custom source

@@ -99,7 +99,7 @@ menu.update = function(self, ctx, sources)
     end
 
     local item = e:get_vim_item(offset)
-    if not abbrs[item.abbr] then
+    if not abbrs[item.abbr] or item.dup == 1 then
       table.insert(items, item)
       abbrs[item.abbr] = true
     end

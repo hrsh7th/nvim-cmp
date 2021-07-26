@@ -187,7 +187,7 @@ entry.get_vim_item = function(self, suggeset_offset)
     local item = config.get().formatting.format(self, suggeset_offset)
     item.equal = 1
     item.empty = 1
-    item.dup = 1
+    item.dup = self.completion_item.dup or 1
     item.user_data = { cmp = self.id }
     return item
   end)
