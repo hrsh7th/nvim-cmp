@@ -97,13 +97,16 @@ float.show = function(self, e)
 end
 
 ---Close floating window
-float.close = async.throttle(function(self)
-  if self.win and vim.api.nvim_win_is_valid(self.win) then
-    vim.api.nvim_win_close(self.win, true)
-  end
-  self.entry = nil
-  self.buf = nil
-  self.win = nil
-end, 100)
+float.close = async.throttle(
+  vim.schedule_wrap(function(self)
+    if self.win and vim.api.nvim_win_is_valid(self.win) then
+      vim.api.nvim_win_close(self.win, true)
+    end
+    self.entry = nil
+    self.buf = nil
+    self.win = nil
+  end),
+  100
+)
 
 return float

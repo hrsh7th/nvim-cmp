@@ -3,7 +3,7 @@ local types = require('cmp.types')
 local source = require('cmp.source')
 local config = require('cmp.config')
 local keymap = require('cmp.keymap')
-local debug = require('cmp.utils.debug')
+local autocmd = require('cmp.autocmd')
 
 local cmp = {}
 
@@ -54,22 +54,9 @@ cmp.complete = function()
   }))
 end
 
----Receive vim autocmds
----@param event string
-cmp._on_event = function(event)
-  debug.log('----------------------------------------------------------------------------------------------------')
-  debug.log('>>> ', event)
-
-  if event == 'InsertEnter' then
-    core.prepare()
-    core.autocomplete(event)
-  elseif event == 'TextChanged' then
-    core.autocomplete(event)
-  elseif event == 'CompleteChanged' then
-    core.select()
-  elseif event == 'InsertLeave' then
-    core.reset()
-  end
+---Close completion
+cmp.close = function()
+  core.reset()
 end
 
 ---Internal expand snippet function.
@@ -78,5 +65,22 @@ end
 cmp._expand_snippet = function(args)
   return config.get().snippet.expand(args)
 end
+
+autocmd.subscribe('InsertEnter', function()
+  core.prepare()
+  core.autocomplete('InsertEnter')
+end)
+
+autocmd.subscribe('TextChanged', function()
+  core.autocomplete('TextChanged')
+end)
+
+autocmd.subscribe('CompleteChanged', function()
+  core.select()
+end)
+
+autocmd.subscribe('InsertLeave', function()
+  core.reset()
+end)
 
 return cmp

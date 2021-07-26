@@ -52,7 +52,7 @@ source._do_complete = function(self, request, callback)
   for _, b in ipairs(self:_get_buffers(request)) do
     processing = processing or b.processing
     for _, word in ipairs(b:get_words()) do
-      if not words_uniq[word] and request.context.input ~= word then
+      if not words_uniq[word] then
         words_uniq[word] = true
         table.insert(words, { label = word })
       end

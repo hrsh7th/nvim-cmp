@@ -112,7 +112,9 @@ end
 ---Check auto-completion
 core.autocomplete = function(event)
   local ctx = core.get_context({ reason = types.cmp.ContextReason.Auto })
-  if core.menu:get_active_entry() then
+
+  -- Skip autocompletion when the item is selected manually.
+  if ctx.pumvisible and not vim.tbl_isempty(vim.v.completed_item) then
     return
   end
 
@@ -245,6 +247,7 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
   -- execute
   e:execute(function()
     core.menu:close()
+    core.get_context() -- To prevent new event
     if callback then
       callback()
     end
@@ -258,7 +261,7 @@ core.reset = function()
   end
   core.menu:reset()
 
-  core.get_context()
+  core.get_context() -- To prevent new event
 end
 
 return core
