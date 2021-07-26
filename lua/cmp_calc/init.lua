@@ -23,6 +23,9 @@ source.complete = function(self, request, callback)
 
   -- Analyze column count and program script.
   local program, delta = self:_analyze(input)
+  if not program then
+    return callback()
+  end
 
   -- Ignore if failed to interpret to Lua.
   local m = load(('return (%s)'):format(program))
@@ -33,18 +36,16 @@ source.complete = function(self, request, callback)
     return '' .. m()
   end)
 
-  -- Ignore if return values is not number.
+  -- Ignore if return values is not a number.
   if not status then
     return callback()
   end
 
-  -- NOTE: Super hacky but useful implementation...
   callback({
     items = {
       {
         word = self:_trim_right(program) .. ' = ' .. value,
         label = self:_trim_right(program) .. ' = ' .. value,
-        filterText = program .. string.rep(table.concat(self:get_trigger_characters(), '_'), 2),
         textEdit = {
           range = {
             start = {
@@ -66,7 +67,7 @@ end
 
 source._analyze = function(_, input)
   local stack = {}
-  local count = 0
+  local unmatched_paren_count = 0
   local o = string.byte('(')
   local c = string.byte(')')
   for i = #input, 1, -1 do
@@ -76,15 +77,27 @@ source._analyze = function(_, input)
       if #stack > 0 then
         table.remove(stack, #stack)
       else
-        count = count + 1
+        unmatched_paren_count = unmatched_paren_count + 1
       end
     end
   end
 
   local program = input
-  for _ = 1, count do
-    program = string.gsub(program, '%(', '')
+  while true do
+    local fixed_program = string.gsub(program, '^%s*%(', '')
+    if fixed_program ~= program then
+      unmatched_paren_count = unmatched_paren_count - 1
+      program = fixed_program
+    else
+      break
+    end
   end
+
+  -- invalid math expression.
+  if unmatched_paren_count > 0 then
+    return nil, nil
+  end
+
   return program, #input - #program
 end
 
