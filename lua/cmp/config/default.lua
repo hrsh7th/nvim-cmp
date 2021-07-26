@@ -14,6 +14,7 @@ return function()
         cmp.TriggerEvent.InsertEnter,
         cmp.TriggerEvent.TextChanged,
       },
+      completeopt = 'menu,menuone,noselect',
       keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
       keyword_length = 1,
     },
@@ -33,8 +34,8 @@ return function()
 
     confirmation = {
       default_behavior = types.cmp.ConfirmBehavior.Replace,
-      characters = {
-        ['\n'] = {
+      mapping = {
+        ['<CR>'] = {
           behavior = types.cmp.ConfirmBehavior.Replace,
           select = true,
         },

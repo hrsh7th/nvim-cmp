@@ -8,7 +8,7 @@ local autocmd = require('cmp.autocmd')
 local cmp = {}
 
 ---Listen keypress handler
-keymap.listen(core.on_char)
+keymap.listen(core.on_keymap)
 
 ---Expose types
 for k, v in pairs(require('cmp.types.cmp')) do

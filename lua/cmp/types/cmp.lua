@@ -48,6 +48,7 @@ cmp.TriggerEvent.TextChanged = 'TextChanged'
 
 ---@class cmp.CompletionConfig
 ---@field public autocomplete cmp.TriggerEvent[]
+---@field public completeopt string
 ---@field public keyword_pattern string
 ---@field public keyword_length number
 
@@ -71,9 +72,9 @@ cmp.TriggerEvent.TextChanged = 'TextChanged'
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior
----@field public characters table<string, cmp.ConfirmCharacterConfig>
+---@field public mapping table<string, cmp.ConfirmMappingConfig>
 
----@class cmp.ConfirmCharacterConfig
+---@class cmp.ConfirmMappingConfig
 ---@field behavior cmp.ConfirmBehavior
 ---@field select boolean
 

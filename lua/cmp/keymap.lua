@@ -14,6 +14,9 @@ end
 keymap._table = {
   ['<CR>'] = { '\n', '\r', '\r\n' },
   ['<Tab>'] = { '\t' },
+  ['<BSlash>'] = { '\\' },
+  ['<Bar>'] = { '|' },
+  ['<Space>'] = { ' ' },
 }
 
 ---Shortcut for nvim_replace_termcodes
@@ -23,26 +26,18 @@ keymap.t = function(keys)
   return vim.api.nvim_replace_termcodes(keys, true, true, true)
 end
 
----Return vim notation keymapping.
----@param v string
+---Return vim notation keymapping (simple conversion).
+---@param s string
 ---@return string
-keymap.to_key = function(v)
-  for key, chars in pairs(keymap._table) do
-    if vim.tbl_contains(chars, v) then
-      return key
+keymap.to_keymap = function(s)
+  return string.gsub(s, '.', function(c)
+    for key, chars in pairs(keymap._table) do
+      if vim.tbl_contains(chars, c) then
+        return key
+      end
     end
-  end
-  return v
-end
-
----Return vim notation keymapping.
----@param v string
----@return string
-keymap.to_char = function(v)
-  if keymap._table[v] then
-    return keymap._table[v][1]
-  end
-  return v
+    return c
+  end)
 end
 
 ---Listen key pressed
@@ -55,10 +50,11 @@ end
 keymap.register = setmetatable({
   cache = cache.new(),
 }, {
-  __call = function(_, char_or_key)
+  __call = function(_, keys)
+    keys = keymap.to_keymap(keys)
+
     local bufnr = vim.api.nvim_get_current_buf()
-    local key = keymap.to_key(char_or_key)
-    if keymap.register.cache:get({ bufnr, key }) then
+    if keymap.register.cache:get({ bufnr, keys }) then
       return
     end
 
@@ -67,7 +63,7 @@ keymap.register = setmetatable({
       if existing then
         break
       end
-      if map.lhs == key then
+      if map.lhs == keys then
         existing = map
       end
     end
@@ -75,23 +71,23 @@ keymap.register = setmetatable({
       if existing then
         break
       end
-      if map.lhs == key then
+      if map.lhs == keys then
         existing = map
         break
       end
     end
     existing = existing or {
-      lhs = key,
-      rhs = key,
+      lhs = keys,
+      rhs = keys,
       expr = 0,
       nowait = 0,
       noremap = 1,
     }
 
-    keymap.register.cache:set({ bufnr, key }, {
+    keymap.register.cache:set({ bufnr, keys }, {
       existing = existing,
     })
-    vim.api.nvim_buf_set_keymap(0, 'i', key, ('v:lua.cmp.keymap.expr("%s")'):format(key), {
+    vim.api.nvim_buf_set_keymap(0, 'i', keys, ('v:lua.cmp.keymap.expr("%s")'):format(keys), {
       expr = true,
       nowait = true,
       noremap = true,
@@ -99,11 +95,11 @@ keymap.register = setmetatable({
   end,
 })
 
-misc.set(_G, { 'cmp', 'keymap', 'expr' }, function(char_or_key)
+misc.set(_G, { 'cmp', 'keymap', 'expr' }, function(keys)
+  keys = keymap.to_keymap(keys)
   local bufnr = vim.api.nvim_get_current_buf()
-  local key = keymap.to_key(char_or_key)
 
-  local existing = keymap.register.cache:get({ bufnr, key }).existing
+  local existing = keymap.register.cache:get({ bufnr, keys }).existing
   local fallback = function()
     vim.api.nvim_buf_set_keymap(0, 'i', '<Plug>(cmp-utils-keymap:_)', existing.rhs, {
       expr = existing.expr == 1,
@@ -111,7 +107,7 @@ misc.set(_G, { 'cmp', 'keymap', 'expr' }, function(char_or_key)
     })
     vim.fn.feedkeys(keymap.t('<Plug>(cmp-utils-keymap:_)'), 'i')
   end
-  keymap._callback(keymap.to_char(key), fallback)
+  keymap._callback(keys, fallback)
   return keymap.t('<Ignore>')
 end)
 

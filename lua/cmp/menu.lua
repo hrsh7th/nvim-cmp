@@ -145,11 +145,14 @@ menu.show = function(self)
   if self.preselect == 1 then
     vim.cmd('set completeopt=menuone,noinsert')
   else
-    vim.cmd('set completeopt=menuone,noselect')
+    vim.cmd('set completeopt=' .. config.get().completion.completeopt)
   end
   vim.fn.complete(self.offset, self.items)
   vim.cmd('set completeopt=' .. completeopt)
-  vim.api.nvim_select_popupmenu_item(self.preselect - 1, false, false, {})
+
+  if self.preselect > 0 then
+    vim.api.nvim_select_popupmenu_item(self.preselect - 1, false, false, {})
+  end
 end
 
 ---Select current item

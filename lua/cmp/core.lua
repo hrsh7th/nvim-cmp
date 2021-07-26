@@ -62,50 +62,42 @@ core.get_sources = function(statuses)
 end
 
 ---Keypress handler
-core.on_char = function(ch, fallback)
+core.on_keymap = function(keys, fallback)
   -- Confirm character
-  for confirm_char, c in pairs(config.get().confirmation.characters) do
-    if confirm_char == ch then
-      local e = core.menu:get_selected_entry()
-      if not e and c.select then
-        e = core.menu:get_first_entry()
-      end
-      if not e then
-        return fallback()
-      end
-
-      return core.confirm(e, {
-        behavior = c.behavior,
-      })
+  if config.get().confirmation.mapping[keys] then
+    local c = config.get().confirmation.mapping[keys]
+    local e = core.menu:get_selected_entry() or (c.select and core.menu:get_first_entry())
+    if not e then
+      return fallback()
     end
+    return core.confirm(e, {
+      behavior = c.behavior,
+    })
   end
 
   --Commit character. NOTE: This has a lot of cmp specific implementation to make more user-friendly.
+  local chars = keymap.t(keys)
   local e = core.menu:get_selected_entry()
-  if not e then
-    return fallback()
-  end
-  if not vim.tbl_contains(e:get_commit_characters(), char) then
-    return fallback()
+  if e and vim.tbl_contains(e:get_commit_characters(), chars) then
+    local is_printable = char.is_printable(string.byte(chars, 1))
+    return core.confirm(e, {
+      behavior = is_printable and 'insert' or 'replace',
+    }, function()
+      local ctx = core.get_context()
+      local word = e:get_word()
+      if string.sub(ctx.cursor_before_line, -#word, ctx.cursor.col - 1) == word and is_printable then
+        fallback()
+      end
+    end)
   end
 
-  local key = keymap.t(keymap.to_key(char))
-  core.confirm(e, {
-    behavior = char.is_printable(string.byte(key)) and 'insert' or 'replace',
-  }, function()
-    local ctx = core.get_context()
-    local word = e:get_word()
-    if string.sub(ctx.cursor_before_line, -#word, ctx.cursor.col - 1) == word and char.is_printable(string.byte(key)) then
-      -- Don't reset current completion because reset/filter will occur by the fallback chars.
-      fallback()
-    end
-  end)
+  fallback()
 end
 
 ---Prepare completion
 core.prepare = function()
-  for key in pairs(config.get().confirmation.characters) do
-    keymap.register(key)
+  for keys in pairs(config.get().confirmation.mapping) do
+    keymap.register(keys)
   end
 end
 
