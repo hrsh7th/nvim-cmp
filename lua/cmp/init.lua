@@ -66,6 +66,7 @@ cmp._expand_snippet = function(args)
   return config.get().snippet.expand(args)
 end
 
+---Handle events
 autocmd.subscribe('InsertEnter', function()
   core.prepare()
   core.autocomplete('InsertEnter')

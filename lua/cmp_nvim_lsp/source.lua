@@ -19,11 +19,18 @@ end
 ---@param request cmp.CompletionRequest
 ---@param callback fun(response: lsp.CompletionResponse)
 source.complete = function(self, request, callback)
+  -- client is stopped.
   if self.client.is_stopped() then
     return callback()
   end
 
+  -- client is not attached to current buffer.
   if not vim.lsp.buf_get_clients(request.context.bufnr)[self.client.id] then
+    return callback()
+  end
+
+  -- client has no completion capability.
+  if not self:_get(self.client.server_capabilities, { 'completionProvider' }) then
     return callback()
   end
 
@@ -50,6 +57,16 @@ end
 ---@param completion_item lsp.CompletionItem
 ---@param callback fun(response: any)
 source.resolve = function(self, completion_item, callback)
+  -- client is stopped.
+  if self.client.is_stopped() then
+    return callback()
+  end
+
+  -- client has no completion capability.
+  if not self:_get(self.client.server_capabilities, { 'completionProvider', 'resolveProvider' }) then
+    return callback()
+  end
+
   if self.resolve_request_id ~= nil then
     self.client.cancel_request(self.resolve_request_id)
   end

@@ -238,8 +238,7 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
 
   -- execute
   e:execute(function()
-    core.menu:close()
-    core.get_context() -- To prevent new event
+    core.reset()
     if callback then
       callback()
     end
