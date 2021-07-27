@@ -140,7 +140,8 @@ core.complete = function(ctx)
       end
     end)
   end
-  core.filter.timeout = 50
+
+  core.filter.timeout = ctx.pumvisible and 50 or 0
   core.filter()
 end
 
@@ -158,18 +159,9 @@ core.filter = async.throttle(function()
       return
     end
   end
+
   core.menu:update(ctx, core.get_sources())
 end, 50)
-
----Select completion item
-core.select = function()
-  local e = core.menu:get_selected_entry()
-  if e then
-    core.menu:select(e)
-  else
-    core.menu:unselect()
-  end
-end
 
 ---Confirm completion.
 ---@param e cmp.Entry

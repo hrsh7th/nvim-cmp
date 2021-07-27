@@ -76,10 +76,6 @@ autocmd.subscribe('TextChanged', function()
   core.autocomplete('TextChanged')
 end)
 
-autocmd.subscribe('CompleteChanged', function()
-  core.select()
-end)
-
 autocmd.subscribe('InsertLeave', function()
   core.reset()
 end)

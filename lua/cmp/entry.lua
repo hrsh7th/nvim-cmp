@@ -60,7 +60,7 @@ entry.get_offset = function(self)
       -- The VSCode does not implement this but it's useful if the server does not care about word patterns.
       -- We should care about this performance.
       local word = self:get_word()
-      for idx = #self.context.offset_before_line, #self.context.offset_before_line - #word, -1 do
+      for idx = #self.context.offset_before_line, #self.context.offset_before_line - #word - 1, -1 do
         if char.is_semantic_index(self.context.offset_before_line, idx) then
           local c = string.byte(self.context.offset_before_line, idx)
           if char.is_white(c) then

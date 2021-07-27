@@ -44,7 +44,7 @@ lsp.Position.to_lsp = function(buf, position)
   if #lines > 0 then
     return {
       line = position.row - 1,
-      character = vim.str_utfindex(lines[1], math.min(position.col - 1, #lines[1])),
+      character = vim.str_utfindex(lines[1], math.max(0, math.min(position.col - 1, #lines[1]))),
     }
   end
   return {

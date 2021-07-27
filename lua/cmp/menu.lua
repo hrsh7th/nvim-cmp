@@ -4,6 +4,7 @@ local keymap = require('cmp.keymap')
 local float = require('cmp.float')
 local types = require('cmp.types')
 local config = require('cmp.config')
+local autocmd = require('cmp.autocmd')
 
 ---@class cmp.Menu
 ---@field public float cmp.Float
@@ -11,6 +12,7 @@ local config = require('cmp.config')
 ---@field public offset number
 ---@field public items vim.CompletedItem[]
 ---@field public entries cmp.Entry[]
+---@field public entry_map table<number, cmp.Entry>
 ---@field public selected_entry cmp.Entry|nil
 ---@field public context cmp.Context
 ---@field public resolve_dedup fun(callback: function)
@@ -23,6 +25,14 @@ menu.new = function()
   self.float = float.new()
   self.resolve_dedup = async.dedup()
   self:reset()
+  autocmd.subscribe('CompleteChanged', function()
+    local e = self:get_selected_entry()
+    if e then
+      self:select(e)
+    else
+      self:unselect()
+    end
+  end)
   return self
 end
 
@@ -39,6 +49,7 @@ menu.reset = function(self)
   self.offset = nil
   self.items = {}
   self.entries = {}
+  self.entry_map = {}
   self.context = nil
   self.preselect = 0
   self:close()
@@ -54,6 +65,7 @@ menu.update = function(self, ctx, sources)
   end
 
   local entries = {}
+  local entry_map = {}
 
   -- check the source triggered by character
   local has_triggered_by_character_source = false
@@ -78,6 +90,7 @@ menu.update = function(self, ctx, sources)
         for _, e in ipairs(filtered) do
           e.score = e.score + priority
           table.insert(entries, e)
+          entry_map[e.id] = e
         end
         if #filtered > 0 then
           offset = math.min(offset, s.offset)
@@ -109,6 +122,7 @@ menu.update = function(self, ctx, sources)
   self.offset = offset
   self.items = items
   self.entries = entries
+  self.entry_map = entry_map
   self.preselect = preselect
   self.context = ctx
   self:show()
@@ -160,14 +174,10 @@ end
 menu.select = function(self, e)
   -- Documentation (always invoke to follow to the pum position)
   e:resolve(self.resolve_dedup(vim.schedule_wrap(function()
-    self.float:show(e)
+    if self:get_selected_entry() == e then
+      self.float:show(e)
+    end
   end)))
-
-  -- Avoid duplicate handling
-  if self.selected_entry == e then
-    return
-  end
-  self.selected_entry = e
 
   -- Add commit character listeners.
   for _, key in ipairs(e:get_commit_characters()) do
@@ -177,11 +187,7 @@ end
 
 ---Select current item
 menu.unselect = function(self)
-  if self.selected_entry then
-    self.selected_entry = nil
-    self.float:close()
-    return
-  end
+  self.float:close()
 end
 
 ---Geta current active entry
@@ -193,10 +199,8 @@ menu.get_active_entry = function(self)
   end
 
   local id = completed_item.user_data.cmp
-  for _, e in ipairs(self.entries) do
-    if e.id == id then
-      return e
-    end
+  if id then
+    return self.entry_map[id]
   end
   return nil
 end
@@ -215,10 +219,8 @@ menu.get_selected_entry = function(self)
   end
 
   local id = completed_item.user_data.cmp
-  for _, e in ipairs(self.entries) do
-    if e.id == id then
-      return e
-    end
+  if id then
+    return self.entry_map[id]
   end
   return nil
 end
@@ -233,10 +235,8 @@ menu.get_first_entry = function(self)
   end
 
   local id = completed_item.user_data.cmp
-  for _, e in ipairs(self.entries) do
-    if e.id == id then
-      return e
-    end
+  if id then
+    return self.entry_map[id]
   end
   return nil
 end

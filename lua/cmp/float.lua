@@ -106,7 +106,7 @@ float.close = async.throttle(
     self.buf = nil
     self.win = nil
   end),
-  100
+  0
 )
 
 return float
