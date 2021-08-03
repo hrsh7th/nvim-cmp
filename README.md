@@ -6,8 +6,7 @@ A completion plugin for neovim written in Lua.
 Status
 ====================
 
-design and development
-
+not yet stable but ok to use (for testing).
 
 Development
 ====================

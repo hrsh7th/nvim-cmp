@@ -9,6 +9,7 @@ cmp.ConfirmBehavior.Replace = 'replace'
 cmp.ContextReason = {}
 cmp.ContextReason.Auto = 'auto'
 cmp.ContextReason.Manual = 'manual'
+cmp.ContextReason.TriggerOnly = 'triggerOnly'
 cmp.ContextReason.None = 'none'
 
 ---@alias cmp.TriggerEvent "'InsertEnter'" | "'TextChanged'"

@@ -195,24 +195,40 @@ source.complete = function(self, ctx, callback)
     self:reset()
   end
 
+  local before_char = string.sub(ctx.cursor_before_line, -1)
+  local before_char_iw = string.match(ctx.cursor_before_line, '(.)%s*$') or before_char
+
   local completion_context
   if ctx:get_reason() == types.cmp.ContextReason.Manual then
     completion_context = {
       triggerKind = types.lsp.CompletionTriggerKind.Invoked,
     }
-  elseif vim.tbl_contains(self:get_trigger_characters(), ctx.before_char) then
-    completion_context = {
-      triggerKind = types.lsp.CompletionTriggerKind.TriggerCharacter,
-      triggerCharacter = ctx.before_char,
-    }
-  elseif c.completion.keyword_length <= (ctx.cursor.col - offset) and self.offset ~= offset then
-    completion_context = {
-      triggerKind = types.lsp.CompletionTriggerKind.Invoked,
-    }
-  elseif self.incomplete and offset ~= ctx.cursor.col then
-    completion_context = {
-      triggerKind = types.lsp.CompletionTriggerKind.TriggerForIncompleteCompletions,
-    }
+  else
+    if vim.tbl_contains(self:get_trigger_characters(), before_char) then
+      completion_context = {
+        triggerKind = types.lsp.CompletionTriggerKind.TriggerCharacter,
+        triggerCharacter = before_char,
+      }
+    elseif vim.tbl_contains(self:get_trigger_characters(), before_char_iw) then
+      completion_context = {
+        triggerKind = types.lsp.CompletionTriggerKind.TriggerCharacter,
+        triggerCharacter = before_char_iw,
+      }
+    else
+      if ctx:get_reason() == types.cmp.ContextReason.Auto then
+        if c.completion.keyword_length <= (ctx.cursor.col - offset) and self.offset ~= offset then
+          completion_context = {
+            triggerKind = types.lsp.CompletionTriggerKind.Invoked,
+          }
+        elseif self.incomplete and offset ~= ctx.cursor.col then
+          completion_context = {
+            triggerKind = types.lsp.CompletionTriggerKind.TriggerForIncompleteCompletions,
+          }
+        end
+      else
+        self:reset()
+      end
+    end
   end
   if not completion_context then
     debug.log('skip empty context', self.name, self.id)

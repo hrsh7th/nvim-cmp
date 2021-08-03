@@ -71,9 +71,18 @@ core.on_keymap = function(keys, fallback)
     if not e then
       return fallback()
     end
-    return core.confirm(e, {
+    local pre = core.get_context()
+    core.confirm(e, {
       behavior = c.behavior,
-    })
+    }, function()
+      local new = core.get_context({ reason = types.cmp.ContextReason.TriggerOnly })
+      if new:changed(pre) then
+        core.complete(new)
+      else
+        core.reset()
+      end
+    end)
+    return
   end
 
   --Commit character. NOTE: This has a lot of cmp specific implementation to make more user-friendly.
@@ -88,6 +97,8 @@ core.on_keymap = function(keys, fallback)
       local word = e:get_word()
       if string.sub(ctx.cursor_before_line, -#word, ctx.cursor.col - 1) == word and is_printable then
         fallback()
+      else
+        core.reset()
       end
     end)
   end
@@ -233,7 +244,6 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
 
       -- execute
       e:execute(function()
-        core.reset()
         if callback then
           callback()
         end

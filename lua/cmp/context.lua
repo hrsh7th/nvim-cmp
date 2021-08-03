@@ -18,7 +18,6 @@ local cache = require('cmp.utils.cache')
 ---@field public cursor_line string
 ---@field public cursor_after_line string
 ---@field public cursor_before_line string
----@field public before_char string
 local context = {}
 
 ---Create new empty context
@@ -58,7 +57,6 @@ context.new = function(prev_context, option)
   self.cursor_line = vim.api.nvim_get_current_line()
   self.cursor_before_line = string.sub(self.cursor_line, 1, self.cursor.col - 1)
   self.cursor_after_line = string.sub(self.cursor_line, self.cursor.col)
-  self.before_char = string.sub(self.cursor_line, self.cursor.col - 1, self.cursor.col - 1)
   return self
 end
 
