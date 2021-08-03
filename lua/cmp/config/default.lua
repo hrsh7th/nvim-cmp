@@ -45,6 +45,7 @@ return function()
       sort = function(entries)
         table.sort(entries, function(entry1, entry2)
           for _, fn in ipairs({
+            compare.offset,
             compare.exact,
             compare.score,
             compare.kind,

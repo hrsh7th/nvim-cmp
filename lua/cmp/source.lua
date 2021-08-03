@@ -219,7 +219,7 @@ source.complete = function(self, ctx, callback)
     return
   end
 
-  debug.log('request', self.name, self.id, vim.inspect(completion_context))
+  debug.log('request', self.name, self.id, offset, vim.inspect(completion_context))
   local prev_status = self.status
   self.status = source.SourceStatus.FETCHING
   self.offset = offset

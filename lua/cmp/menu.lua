@@ -85,7 +85,7 @@ menu.update = function(self, ctx, sources)
     if s:has_items() and s.offset <= offset then
       if not has_triggered_by_character_source or s.trigger_kind == types.lsp.CompletionTriggerKind.TriggerCharacter then
         -- source order priority bonus.
-        local priority = 5 * (#sources - i)
+        local priority = (#sources - i - 1) * 2
 
         local filtered = s:get_entries(ctx)
         for _, e in ipairs(filtered) do

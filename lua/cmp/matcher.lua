@@ -147,32 +147,32 @@ matcher.fuzzy = function(input, word, matches)
   for i = 1, #matches - 1 do
     local curr_match = matches[i]
     local next_match = matches[i + 1]
-    local word_index = char.get_next_semantic_index(word, curr_match.word_match_end)
     local word_offset = 0
+    local word_index = char.get_next_semantic_index(word, curr_match.word_match_end)
     while word_offset + word_index < next_match.word_match_start and input_index <= #input do
       if char.match(string.byte(word, word_index + word_offset), string.byte(input, input_index)) then
         input_index = input_index + 1
         word_offset = word_offset + 1
       else
-        word_index = char.get_next_semantic_index(word, word_index)
+        word_index = char.get_next_semantic_index(word, word_index + word_offset)
         word_offset = 0
       end
     end
   end
 
   -- Remaining text fuzzy match.
-  for word_index = last_match.word_match_end + 1, #word do
-    local matched = false
-    local word_offset = 0
-    while word_offset + word_index <= #word and input_index <= #input do
-      if char.match(string.byte(word, word_index + word_offset), string.byte(input, input_index)) then
-        matched = true
-        input_index = input_index + 1
-      elseif matched then
-        break
-      end
-      word_offset = word_offset + 1
+  local last_input_index = input_index
+  local matched = false
+  local word_offset = 0
+  local word_index = last_match.word_match_end + 1
+  while word_offset + word_index <= #word and input_index <= #input do
+    if char.match(string.byte(word, word_index + word_offset), string.byte(input, input_index)) then
+      matched = true
+      input_index = input_index + 1
+    elseif matched then
+      input_index = last_input_index
     end
+    word_offset = word_offset + 1
   end
   if input_index >= #input then
     return true

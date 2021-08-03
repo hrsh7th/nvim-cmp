@@ -3,6 +3,16 @@ local misc  = require 'cmp.utils.misc'
 
 local compare = {}
 
+-- offset
+compare.offset = function(entry1, entry2)
+  local diff = entry1:get_offset() - entry2:get_offset()
+  if diff < 0 then
+    return true
+  elseif diff > 0 then
+    return false
+  end
+end
+
 -- exact
 compare.exact = function(entry1, entry2)
   if entry1.exact ~= entry2.exact then
