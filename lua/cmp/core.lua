@@ -1,13 +1,14 @@
 local debug = require('cmp.utils.debug')
 local char = require('cmp.utils.char')
 local async = require('cmp.utils.async')
-local keymap = require('cmp.keymap')
+local keymap = require('cmp.utils.keymap')
 local context = require('cmp.context')
 local source = require('cmp.source')
 local menu = require('cmp.menu')
 local misc = require('cmp.utils.misc')
 local config = require('cmp.config')
 local types = require('cmp.types')
+local patch = require('cmp.utils.patch')
 
 local core = {}
 
@@ -97,7 +98,7 @@ end
 ---Prepare completion
 core.prepare = function()
   for keys in pairs(config.get().confirmation.mapping) do
-    keymap.register(keys)
+    keymap.listen(keys, core.on_keymap)
   end
 end
 
@@ -111,7 +112,7 @@ core.autocomplete = function(event)
   end
 
   debug.log(('ctx: `%s`'):format(ctx.cursor_before_line))
-  if ctx:changed(ctx.prev_context) then
+  if ctx:is_forwarding() then
     debug.log('changed')
     core.menu:restore(ctx)
 
@@ -180,23 +181,18 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
   if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) == 0 then
     local new = context.new(pre)
     e:resolve(function()
-      -- has no additionalTextEdits.
       local text_edits = misc.safe(e:get_completion_item().additionalTextEdits) or {}
       if #text_edits == 0 then
         return
       end
 
-      -- cursor.row changed.
-      if pre.cursor.row ~= new.cursor.row then
-        return
-      end
-
-      -- check additionalTextEdits.
       local has_cursor_line_text_edit = (function()
+        local minrow = math.min(pre.cursor.row, new.cursor.row)
+        local maxrow = math.max(pre.cursor.row, new.cursor.row)
         for _, text_edit in ipairs(text_edits) do
           local srow = text_edit.range.start.line + 1
           local erow = text_edit.range['end'].line + 1
-          if srow <= new.cursor.row and new.cursor.row <= erow then
+          if srow <= minrow and maxrow <= erow then
             return true
           end
         end
@@ -210,7 +206,7 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
     end)
   end
 
-  -- confirm
+  -- Prepare completion item for confirmation
   local completion_item = misc.copy(e:get_completion_item())
   if not misc.safe(completion_item.textEdit) then
     completion_item.textEdit = {}
@@ -218,23 +214,32 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
   end
   local behavior = option.behavior or config.get().confirmation.default_behavior
   if behavior == types.cmp.ConfirmBehavior.Replace then
-    completion_item.textEdit.range = types.lsp.Range.to_lsp('%', e:get_replace_range())
+    completion_item.textEdit.range = e:get_replace_range()
   else
-    completion_item.textEdit.range = types.lsp.Range.to_lsp('%', e:get_insert_range())
+    completion_item.textEdit.range = e:get_insert_range()
   end
-  vim.fn['cmp#confirm']({
-    request_offset = e.context.cursor.col,
-    suggest_offset = e:get_offset(),
-    completion_item = completion_item,
-  })
 
-  -- execute
-  e:execute(function()
-    core.reset()
-    if callback then
-      callback()
-    end
-  end)
+  -- First, emulates vim's `<C-y>` behavior and then confirms LSP functionalities.
+  patch.apply(
+    pre,
+    completion_item.textEdit.range,
+    e:get_word(),
+    vim.schedule_wrap(function()
+      vim.fn['cmp#confirm']({
+        request_offset = e.context.cursor.col,
+        suggest_offset = e:get_offset(),
+        completion_item = completion_item,
+      })
+
+      -- execute
+      e:execute(function()
+        core.reset()
+        if callback then
+          callback()
+        end
+      end)
+    end)
+  )
 end)
 
 ---Reset current completion state

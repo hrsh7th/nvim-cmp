@@ -1,8 +1,7 @@
-local types = require('cmp.types')
 local str = require('cmp.utils.str')
 local misc = require('cmp.utils.misc')
 local compare = require('cmp.config.compare')
-local cmp     = require('cmp.types.cmp')
+local types = require('cmp.types')
 
 local WIDE_HEIGHT = 40
 
@@ -11,8 +10,8 @@ return function()
   return {
     completion = {
       autocomplete = {
-        cmp.TriggerEvent.InsertEnter,
-        cmp.TriggerEvent.TextChanged,
+        types.cmp.TriggerEvent.InsertEnter,
+        types.cmp.TriggerEvent.TextChanged,
       },
       completeopt = 'menu,menuone,noselect',
       keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],

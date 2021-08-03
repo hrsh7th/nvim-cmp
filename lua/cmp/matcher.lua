@@ -7,6 +7,11 @@ matcher.WORD_BOUNDALY_ORDER_FACTOR = 5
 matcher.PREFIX_FACTOR = 8
 matcher.NOT_FUZZY_FACTOR = 6
 
+---@type function
+matcher.debug = function(...)
+  return ...
+end
+
 --- score
 --
 -- ### The score
@@ -122,35 +127,57 @@ matcher.match = function(input, word)
   -- Add prefix bonus
   score = score + ((matches[1].input_match_start == 1 and matches[1].word_match_start == 1) and matcher.PREFIX_FACTOR or 0)
 
-  -- Check the word contains the remaining input. if not, it does not match.
-  local last_match = matches[#matches]
-  if last_match.input_match_end < #input then
-    -- If input is remaining but all word consumed, it does not match.
-    if last_match.word_match_end >= #word then
-      return 0
-    end
-
-    for word_index_ = last_match.word_match_end + 1, #word do
-      local word_offset = 0
-      local input_index = last_match.input_match_end + 1
-      local matched = false
-      while word_offset + word_index_ <= #word and input_index <= #input do
-        if char.match(string.byte(word, word_index_ + word_offset), string.byte(input, input_index)) then
-          matched = true
-          input_index = input_index + 1
-        elseif matched then
-          break
-        end
-        word_offset = word_offset + 1
-      end
-      if input_index > #input then
-        return score
-      end
+  -- Check remaining input as fuzzy
+  if matches[#matches].input_match_end < #input then
+    if matcher.fuzzy(input, word, matches) then
+      return score
     end
     return 0
   end
 
   return score + matcher.NOT_FUZZY_FACTOR
+end
+
+--- fuzzy
+matcher.fuzzy = function(input, word, matches)
+  local last_match = matches[#matches]
+
+  -- Lately specified middle of text.
+  local input_index = last_match.input_match_end + 1
+  for i = 1, #matches - 1 do
+    local curr_match = matches[i]
+    local next_match = matches[i + 1]
+    local word_index = char.get_next_semantic_index(word, curr_match.word_match_end)
+    local word_offset = 0
+    while word_offset + word_index < next_match.word_match_start and input_index <= #input do
+      if char.match(string.byte(word, word_index + word_offset), string.byte(input, input_index)) then
+        input_index = input_index + 1
+        word_offset = word_offset + 1
+      else
+        word_index = char.get_next_semantic_index(word, word_index)
+        word_offset = 0
+      end
+    end
+  end
+
+  -- Remaining text fuzzy match.
+  for word_index = last_match.word_match_end + 1, #word do
+    local matched = false
+    local word_offset = 0
+    while word_offset + word_index <= #word and input_index <= #input do
+      if char.match(string.byte(word, word_index + word_offset), string.byte(input, input_index)) then
+        matched = true
+        input_index = input_index + 1
+      elseif matched then
+        break
+      end
+      word_offset = word_offset + 1
+    end
+  end
+  if input_index >= #input then
+    return true
+  end
+  return false
 end
 
 --- find_match_region

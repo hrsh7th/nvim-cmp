@@ -34,6 +34,7 @@ cmp.TriggerEvent.TextChanged = 'TextChanged'
 ---@class cmp.CompletionRequest
 ---@field public context cmp.Context
 ---@field public option table
+---@field public offset number
 ---@field public completion_context lsp.CompletionContext
 
 ---@class cmp.ConfigSchema

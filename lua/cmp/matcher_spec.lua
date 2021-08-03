@@ -19,5 +19,15 @@ describe('matcher', function()
     assert.is.truthy(matcher.match('fmodify', 'fnamemodify') >= 1)
     assert.is.truthy(matcher.match('candlesingle', 'candle#accept#single') >= 1)
     assert.is.truthy(matcher.match('conso', 'console') > matcher.match('conso', 'ConstantSourceNode'))
+    assert.is.truthy(matcher.match('var_', 'var_dump') >= 1)
+  end)
+
+  it('debug', function()
+    assert.is.truthy(true)
+
+    matcher.debug = function(...)
+      print(vim.inspect({ ... }))
+    end
+    print('score', matcher.match('vsnipnextjump', 'vsnip-jump-next'))
   end)
 end)

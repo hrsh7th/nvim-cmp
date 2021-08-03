@@ -1,6 +1,5 @@
 local debug = require('cmp.utils.debug')
 local async = require('cmp.utils.async')
-local keymap = require('cmp.keymap')
 local float = require('cmp.float')
 local types = require('cmp.types')
 local config = require('cmp.config')
@@ -10,6 +9,7 @@ local autocmd = require('cmp.autocmd')
 ---@field public float cmp.Float
 ---@field public cache cmp.Cache
 ---@field public offset number
+---@field public on_select fun(e: cmp.Entry)
 ---@field public items vim.CompletedItem[]
 ---@field public entries cmp.Entry[]
 ---@field public entry_map table<number, cmp.Entry>
@@ -24,6 +24,7 @@ menu.new = function()
   local self = setmetatable({}, { __index = menu })
   self.float = float.new()
   self.resolve_dedup = async.dedup()
+  self.on_select = function() end
   self:reset()
   autocmd.subscribe('CompleteChanged', function()
     local e = self:get_selected_entry()
@@ -79,7 +80,7 @@ menu.update = function(self, ctx, sources)
   end
 
   -- create filtered entries.
-  local offset = ctx.offset
+  local offset = ctx.cursor.col
   for i, s in ipairs(sources) do
     if s:has_items() and s.offset <= offset then
       if not has_triggered_by_character_source or s.trigger_kind == types.lsp.CompletionTriggerKind.TriggerCharacter then
@@ -179,10 +180,7 @@ menu.select = function(self, e)
     end
   end)))
 
-  -- Add commit character listeners.
-  for _, key in ipairs(e:get_commit_characters()) do
-    keymap.register(key)
-  end
+  self.on_select(e)
 end
 
 ---Select current item

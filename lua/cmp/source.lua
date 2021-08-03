@@ -7,6 +7,7 @@ local misc = require('cmp.utils.misc')
 local cache = require('cmp.utils.cache')
 local types = require('cmp.types')
 local async = require('cmp.utils.async')
+local pattern = require('cmp.utils.pattern')
 
 ---@class cmp.Source
 ---@field public id number
@@ -56,8 +57,9 @@ source.reset = function(self)
   self.trigger_kind = nil
   self.incomplete = false
   self.entries = {}
-  self.offset = nil
+  self.offset = -1
   self.status = source.SourceStatus.WAITING
+  self.complete_dedup(function() end)
 end
 
 ---Return source option
@@ -69,7 +71,7 @@ end
 ---Return the source has items or not.
 ---@return boolean
 source.has_items = function(self)
-  return self.offset ~= nil
+  return self.offset ~= -1
 end
 
 ---Get fetching time
@@ -120,6 +122,58 @@ source.get_entries = function(self, ctx)
   end)
 end
 
+---Get default insert range
+---@return lsp.Range|nil
+source.get_default_insert_range = function(self)
+  if not self.context then
+    return nil
+  end
+
+  return self.cache:ensure({ 'get_default_insert_range', self.revision }, function()
+    return {
+      start = {
+        line = self.context.cursor.row - 1,
+        character = vim.str_utfindex(self.context.cursor_line, self.offset - 1),
+      },
+      ['end'] = {
+        line = self.context.cursor.row - 1,
+        character = vim.str_utfindex(self.context.cursor_line, self.context.cursor.col - 1),
+      },
+    }
+  end)
+end
+
+---Get default replace range
+---@return lsp.Range|nil
+source.get_default_replace_range = function(self)
+  if not self.context then
+    return nil
+  end
+
+  return self.cache:ensure({ 'get_default_replace_range', self.revision }, function()
+    local _, e = pattern.offset('^' .. self:get_keyword_pattern(), string.sub(self.context.cursor_line, self.offset))
+    return {
+      start = {
+        line = self.context.cursor.row - 1,
+        character = vim.str_utfindex(self.context.cursor_line, self.offset - 1),
+      },
+      ['end'] = {
+        line = self.context.cursor.row - 1,
+        character = vim.str_utfindex(self.context.cursor_line, e and self.offset + e - 2 or self.context.cursor.col - 1),
+      },
+    }
+  end)
+end
+
+---Get keyword_pattern
+---@return string
+source.get_keyword_pattern = function(self)
+  if self.source.get_keyword_pattern then
+    return self.source:get_keyword_pattern()
+  end
+  return config.get().completion.keyword_pattern
+end
+
 ---Get trigger_characters
 ---@return string[]
 source.get_trigger_characters = function(self)
@@ -136,13 +190,9 @@ end
 source.complete = function(self, ctx, callback)
   local c = config.get()
 
-  if ctx.input == '' then
+  local offset = ctx:get_offset(self:get_keyword_pattern())
+  if offset == ctx.cursor.col then
     self:reset()
-  end
-
-  if not ctx:is_forwarding() then
-    debug.log('skip backwarding', self.name, self.id)
-    return
   end
 
   local completion_context
@@ -155,11 +205,11 @@ source.complete = function(self, ctx, callback)
       triggerKind = types.lsp.CompletionTriggerKind.TriggerCharacter,
       triggerCharacter = ctx.before_char,
     }
-  elseif c.completion.keyword_length <= #ctx.input and self.context.offset ~= ctx.offset then
+  elseif c.completion.keyword_length <= (ctx.cursor.col - offset) and self.offset ~= offset then
     completion_context = {
       triggerKind = types.lsp.CompletionTriggerKind.Invoked,
     }
-  elseif self.incomplete and ctx.input ~= '' then
+  elseif self.incomplete and offset ~= ctx.cursor.col then
     completion_context = {
       triggerKind = types.lsp.CompletionTriggerKind.TriggerForIncompleteCompletions,
     }
@@ -172,22 +222,23 @@ source.complete = function(self, ctx, callback)
   debug.log('request', self.name, self.id, vim.inspect(completion_context))
   local prev_status = self.status
   self.status = source.SourceStatus.FETCHING
+  self.offset = offset
   self.context = ctx
   self.source:complete(
     {
       context = ctx,
+      offset = self.offset,
       option = self:get_option(),
       completion_context = completion_context,
     },
     vim.schedule_wrap(self.complete_dedup(function(response)
       self.revision = self.revision + 1
-      if misc.safe(response) ~= nil then
+      if #(misc.safe(response) and response.items or response or {}) > 0 then
         debug.log('retrieve', self.name, self.id, #(response.items or response))
         self.status = source.SourceStatus.COMPLETED
         self.trigger_kind = completion_context.triggerKind
         self.incomplete = response.isIncomplete or false
         self.entries = {}
-        self.offset = ctx.offset
         for i, item in ipairs(response.items or response) do
           local e = entry.new(ctx, self, item)
           self.entries[i] = e
