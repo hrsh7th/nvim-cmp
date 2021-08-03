@@ -123,7 +123,7 @@ core.autocomplete = function(event)
   end
 
   debug.log(('ctx: `%s`'):format(ctx.cursor_before_line))
-  if ctx:is_forwarding() then
+  if ctx:changed(ctx.prev_context) then
     debug.log('changed')
     core.menu:restore(ctx)
 
