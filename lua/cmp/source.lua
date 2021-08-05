@@ -112,9 +112,10 @@ source.get_entries = function(self, ctx)
       if not inputs[o] then
         inputs[o] = string.sub(ctx.cursor_before_line, o)
       end
-      e.score = matcher.match(inputs[o], e:get_filter_text())
-      e.exact = inputs[o] == e:get_filter_text()
+      e.score = matcher.match(inputs[o], e:get_filter_text(), { e:get_word() })
+      e.exact = false
       if e.score >= 1 then
+        e.exact = vim.tbl_contains({ e:get_filter_text(), e:get_word() }, inputs[o])
         table.insert(entries, e)
       end
     end

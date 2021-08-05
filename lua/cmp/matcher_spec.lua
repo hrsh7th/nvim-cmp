@@ -20,6 +20,7 @@ describe('matcher', function()
     assert.is.truthy(matcher.match('candlesingle', 'candle#accept#single') >= 1)
     assert.is.truthy(matcher.match('conso', 'console') > matcher.match('conso', 'ConstantSourceNode'))
     assert.is.truthy(matcher.match('var_', 'var_dump') >= 1)
+    assert.is.truthy(matcher.match('my_', 'my_awesome_variable') > matcher.match('my_', 'completion_matching_strategy_list'))
   end)
 
   it('debug', function()

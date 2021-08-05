@@ -58,7 +58,6 @@ return function()
                 return diff
             end
           end
-          return true
         end)
         return entries
       end

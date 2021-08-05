@@ -1,4 +1,5 @@
 local char = require('cmp.utils.char')
+local str = require('cmp.utils.str')
 
 local matcher = {}
 
@@ -72,8 +73,9 @@ end
 ---Match entry
 ---@param input string
 ---@param word string
+---@param words string[]
 ---@return number
-matcher.match = function(input, word)
+matcher.match = function(input, word, words)
   -- Empty input
   if #input == 0 then
     return matcher.PREFIX_FACTOR + matcher.NOT_FUZZY_FACTOR
@@ -108,8 +110,22 @@ matcher.match = function(input, word)
     return 0
   end
 
+  -- Add prefix bonus
+  local prefix = false
+  if matches[1].input_match_start == 1 and matches[1].word_match_start == 1 then
+    prefix = true
+  else
+    for _, w in ipairs(words or {}) do
+      if str.has_prefix(w, string.sub(input, matches[1].input_match_start, matches[1].input_match_end)) then
+        prefix = true
+        break
+      end
+    end
+  end
+
   -- Compute prefix match score
-  local score = 0
+  local score = prefix and matcher.PREFIX_FACTOR or 0
+  local boundary_fixer = prefix and matches[1].index - 1 or 0
   local idx = 1
   for _, m in ipairs(matches) do
     local s = 0
@@ -119,13 +135,10 @@ matcher.match = function(input, word)
     end
     idx = idx + 1
     if s > 0 then
-      score = score + (s * (1 + math.max(0, matcher.WORD_BOUNDALY_ORDER_FACTOR - m.index) / matcher.WORD_BOUNDALY_ORDER_FACTOR))
+      score = score + (s * (1 + math.max(0, matcher.WORD_BOUNDALY_ORDER_FACTOR - (m.index - boundary_fixer)) / matcher.WORD_BOUNDALY_ORDER_FACTOR))
       score = score + (m.strict_match and 0.1 or 0)
     end
   end
-
-  -- Add prefix bonus
-  score = score + ((matches[1].input_match_start == 1 and matches[1].word_match_start == 1) and matcher.PREFIX_FACTOR or 0)
 
   -- Check remaining input as fuzzy
   if matches[#matches].input_match_end < #input then
