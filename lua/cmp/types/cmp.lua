@@ -69,7 +69,7 @@ cmp.TriggerEvent.TextChanged = 'TextChanged'
 ---@field select boolean
 
 ---@class cmp.SortingConfig
----@field public sort fun(entries: cmp.Entry[]): cmp.Entry[]
+---@field public comparators function[]
 
 ---@class cmp.FormattingConfig
 ---@field public format fun(entry: cmp.Entry, suggeset_offset: number): vim.CompletedItem

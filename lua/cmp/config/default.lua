@@ -42,25 +42,15 @@ return function()
     },
 
     sorting = {
-      sort = function(entries)
-        table.sort(entries, function(entry1, entry2)
-          for _, fn in ipairs({
-            compare.offset,
-            compare.exact,
-            compare.score,
-            compare.kind,
-            compare.sort_text,
-            compare.length,
-            compare.order,
-          }) do
-            local diff = fn(entry1, entry2)
-            if diff ~= nil then
-                return diff
-            end
-          end
-        end)
-        return entries
-      end
+      comparators = {
+        compare.offset,
+        compare.exact,
+        compare.score,
+        compare.kind,
+        compare.sort_text,
+        compare.length,
+        compare.order,
+      }
     },
 
     formatting = {
