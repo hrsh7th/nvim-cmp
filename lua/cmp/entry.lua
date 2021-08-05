@@ -190,7 +190,9 @@ end
 ---@return vim.CompletedItem
 entry.get_vim_item = function(self, suggeset_offset)
   return self.cache:ensure({ 'get_vim_item', suggeset_offset }, function()
+    local diff = vim.str_byteindex(self.context.cursor_line, self:get_replace_range()['end'].character)
     local item = config.get().formatting.format(self, suggeset_offset)
+    item.word = str.remove_suffix(item.word, string.sub(self.context.cursor_line, self.context.cursor.col, diff + 1))
     item.equal = 1
     item.empty = 1
     item.dup = self.completion_item.dup or 1
@@ -228,7 +230,7 @@ entry.get_insert_range = function(self)
 end
 
 ---Return replace range
----@return vim.Range|nil
+---@return lsp.Range|nil
 entry.get_replace_range = function(self)
   return self.cache:ensure('get_replace_range', function()
     local replace_range
