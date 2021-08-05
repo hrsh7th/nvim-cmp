@@ -65,11 +65,11 @@ end
 ---Handle events
 autocmd.subscribe('InsertEnter', function()
   core.prepare()
-  core.autocomplete('InsertEnter')
+  core.on_change('InsertEnter')
 end)
 
 autocmd.subscribe('TextChanged', function()
-  core.autocomplete('TextChanged')
+  core.on_change('TextChanged')
 end)
 
 autocmd.subscribe('InsertLeave', function()

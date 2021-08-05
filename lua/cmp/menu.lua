@@ -5,6 +5,9 @@ local types = require('cmp.types')
 local config = require('cmp.config')
 local autocmd = require('cmp.autocmd')
 
+---@class cmp.MenuOption
+---@field on_select fun(e: cmp.Entry)
+
 ---@class cmp.Menu
 ---@field public float cmp.Float
 ---@field public cache cmp.Cache
@@ -19,12 +22,13 @@ local autocmd = require('cmp.autocmd')
 local menu = {}
 
 ---Create menu
+---@param opts cmp.MenuOption
 ---@return cmp.Menu
-menu.new = function()
+menu.new = function(opts)
   local self = setmetatable({}, { __index = menu })
   self.float = float.new()
   self.resolve_dedup = async.dedup()
-  self.on_select = function() end
+  self.on_select = opts.on_select or function() end
   self:reset()
   autocmd.subscribe('CompleteChanged', function()
     local e = self:get_selected_entry()

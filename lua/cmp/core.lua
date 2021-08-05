@@ -15,7 +15,13 @@ local core = {}
 core.SOURCE_TIMEOUT = 500
 
 ---@type cmp.Menu
-core.menu = menu.new()
+core.menu = menu.new({
+  on_select = function(e)
+    for _, c in ipairs(e:get_commit_characters()) do
+      keymap.listen(c, core.on_keymap)
+    end
+  end,
+})
 
 ---@type table<number, cmp.Source>
 core.sources = {}
@@ -114,7 +120,7 @@ core.prepare = function()
 end
 
 ---Check auto-completion
-core.autocomplete = function(event)
+core.on_change = function(event)
   local ctx = core.get_context({ reason = types.cmp.ContextReason.Auto })
 
   -- Skip autocompletion when the item is selected manually.
