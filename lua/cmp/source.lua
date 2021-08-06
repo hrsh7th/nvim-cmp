@@ -30,11 +30,6 @@ source.SourceStatus.WAITING = 1
 source.SourceStatus.FETCHING = 2
 source.SourceStatus.COMPLETED = 3
 
----@alias cmp.SourceChangeKind "1" | "2" | "3"
-source.SourceChangeKind = {}
-source.SourceChangeKind.RETRIEVE = 1
-source.SourceChangeKind.CONTINUE = 2
-
 ---@return cmp.Source
 source.new = function(name, s)
   local self = setmetatable({}, { __index = source })
@@ -51,6 +46,7 @@ end
 ---Reset current completion state
 ---@return boolean
 source.reset = function(self)
+  debug.log(self.id, self.name, 'source.reset')
   self.cache:clear()
   self.revision = self.revision + 1
   self.context = context.empty()
@@ -242,6 +238,9 @@ source.complete = function(self, ctx, callback)
   end
   if not completion_context then
     debug.log('skip empty context', self.name, self.id)
+    if ctx:get_reason() == types.cmp.ContextReason.TriggerOnly then
+      self:reset()
+    end
     return
   end
 

@@ -138,10 +138,6 @@ menu.update = function(self, ctx, sources)
   self.preselect = preselect
   self.context = ctx
   self:show()
-
-  if #self.entries == 0 then
-    self:unselect()
-  end
 end
 
 ---Restore previous menu
@@ -164,6 +160,7 @@ end
 ---Show completion item
 menu.show = function(self)
   if vim.fn.pumvisible() == 0 and #self.entries == 0 then
+    self:close()
     return
   end
 
@@ -174,11 +171,10 @@ menu.show = function(self)
     vim.cmd('set completeopt=' .. config.get().completion.completeopt)
   end
   vim.fn.complete(self.offset, self.items)
-  vim.cmd('set completeopt=' .. completeopt)
-
   if self.preselect > 0 then
     vim.api.nvim_select_popupmenu_item(self.preselect - 1, false, false, {})
   end
+  vim.cmd('set completeopt=' .. completeopt)
 end
 
 ---Select current item

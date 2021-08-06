@@ -76,16 +76,10 @@ core.on_keymap = function(keys, fallback)
     if not e then
       return fallback()
     end
-    local pre = core.get_context()
     core.confirm(e, {
       behavior = c.behavior,
     }, function()
-      local new = core.get_context({ reason = types.cmp.ContextReason.TriggerOnly })
-      if new:changed(pre) then
-        core.complete(new)
-      else
-        core.reset()
-      end
+      core.complete(core.get_context({ reason = types.cmp.ContextReason.TriggerOnly }))
     end)
     return
   end
@@ -146,7 +140,7 @@ end
 ---Invoke completion
 ---@param ctx cmp.Context
 core.complete = function(ctx)
-  for _, s in ipairs(core.get_sources({ source.SourceStatus.WAITING, source.SourceStatus.COMPLETED })) do
+  for _, s in ipairs(core.get_sources()) do
     s:complete(ctx, function()
       local new = context.new(ctx)
       if new:changed(new.prev_context) then
