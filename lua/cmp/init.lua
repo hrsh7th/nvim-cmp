@@ -55,13 +55,6 @@ cmp.close = function()
   core.reset()
 end
 
----Internal expand snippet function.
----TODO: It should be removed when we remove `autoload/cmp.vim`.
----@param args cmp.SnippetExpansionParams
-cmp._expand_snippet = function(args)
-  return config.get().snippet.expand(args)
-end
-
 ---Handle events
 autocmd.subscribe('InsertEnter', function()
   core.prepare()

@@ -205,9 +205,9 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
       local has_cursor_line_text_edit = (function()
         local minrow = math.min(pre.cursor.row, new.cursor.row)
         local maxrow = math.max(pre.cursor.row, new.cursor.row)
-        for _, text_edit in ipairs(text_edits) do
-          local srow = text_edit.range.start.line + 1
-          local erow = text_edit.range['end'].line + 1
+        for _, te in ipairs(text_edits) do
+          local srow = te.range.start.line + 1
+          local erow = te.range['end'].line + 1
           if srow <= minrow and maxrow <= erow then
             return true
           end
@@ -235,30 +235,48 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
     completion_item.textEdit.range = e:get_insert_range()
   end
 
-  -- First, emulates vim's `<C-y>` behavior and then confirms LSP functionalities.
+  if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) > 0 then
+    vim.fn['cmp#apply_text_edits'](pre.bufnr, e:get_completion_item().additionalTextEdits)
+  end
 
-  local range = types.lsp.Range.to_vim(pre.bufnr, e:get_insert_range())
+  -- First, emulates vim's `<C-y>` behavior and then confirms LSP functionalities.
+  local range = types.lsp.Range.to_vim(pre.bufnr, completion_item.textEdit.range)
   local before_text = string.sub(pre.cursor_line, range.start.col, pre.cursor.col - 1)
   local after_text = string.sub(pre.cursor_line, pre.cursor.col, pre.cursor.col + (range['end'].col - e.context.cursor.col) - 1)
   local before_len = vim.fn.strchars(before_text)
   local after_len = vim.fn.strchars(after_text)
-  local keys = string.rep('<C-g>U<Right>', after_len) .. string.rep('<BS>', before_len + after_len) .. e:get_word()
+  local keys = '<C-g>u' .. string.rep('<C-g>U<Right>', after_len) .. string.rep('<BS>', before_len + after_len)
+  if not completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
+    keys = keys .. completion_item.textEdit.newText
+  else
+    keys = keys .. e:get_word()
+  end
   keymap.feedkeys(
     keys,
     'n',
     vim.schedule_wrap(function()
-      vim.fn['cmp#confirm']({
-        request_offset = e.context.cursor.col,
-        suggest_offset = e:get_offset(),
-        completion_item = completion_item,
-      })
-
-      -- execute
-      e:execute(function()
-        if callback then
-          callback()
-        end
-      end)
+      local execute = function()
+        e:execute(function()
+          if callback then
+            callback()
+          end
+        end)
+      end
+      if completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
+        keymap.feedkeys(
+          '<C-g>U' .. string.rep('<BS>', vim.fn.strchars(e:get_word())),
+          'n',
+          vim.schedule_wrap(function()
+            config.get().snippet.expand({
+              body = completion_item.textEdit.newText,
+              insert_text_mode = completion_item.insertTextMode,
+            })
+            execute()
+          end)
+        )
+      else
+        execute()
+      end
     end)
   )
 end)

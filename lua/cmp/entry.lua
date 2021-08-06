@@ -190,13 +190,19 @@ end
 ---@return vim.CompletedItem
 entry.get_vim_item = function(self, suggeset_offset)
   return self.cache:ensure({ 'get_vim_item', suggeset_offset }, function()
-    local diff = vim.str_byteindex(self.context.cursor_line, self:get_replace_range()['end'].character)
     local item = config.get().formatting.format(self, suggeset_offset)
-    item.word = str.remove_suffix(item.word, string.sub(self.context.cursor_line, self.context.cursor.col, diff))
     item.equal = 1
     item.empty = 1
     item.dup = self.completion_item.dup or 1
     item.user_data = { cmp = self.id }
+
+    for i = 1, #item.word - 1 do
+      if str.has_prefix(self.context.cursor_after_line, string.sub(item.word, i, #item.word)) then
+        item.word = string.sub(item.word, 1, i - 1)
+        break
+      end
+    end
+
     return item
   end)
 end
