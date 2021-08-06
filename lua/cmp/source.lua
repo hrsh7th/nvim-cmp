@@ -199,6 +199,15 @@ source.complete = function(self, ctx, callback)
   local before_char = string.sub(ctx.cursor_before_line, -1)
   local before_char_iw = string.match(ctx.cursor_before_line, '(.)%s*$') or before_char
 
+  if ctx:get_reason() == types.cmp.ContextReason.TriggerOnly then
+    if string.match(before_char, '^%a+$') then
+      before_char = ''
+    end
+    if string.match(before_char_iw, '^%a+$') then
+      before_char_iw = ''
+    end
+  end
+
   local completion_context
   if ctx:get_reason() == types.cmp.ContextReason.Manual then
     completion_context = {
