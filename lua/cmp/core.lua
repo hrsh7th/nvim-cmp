@@ -8,7 +8,6 @@ local menu = require('cmp.menu')
 local misc = require('cmp.utils.misc')
 local config = require('cmp.config')
 local types = require('cmp.types')
-local patch = require('cmp.utils.patch')
 
 local core = {}
 
@@ -237,10 +236,16 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
   end
 
   -- First, emulates vim's `<C-y>` behavior and then confirms LSP functionalities.
-  patch.apply(
-    pre,
-    completion_item.textEdit.range,
-    e:get_word(),
+
+  local range = types.lsp.Range.to_vim(pre.bufnr, e:get_insert_range())
+  local before_text = string.sub(pre.cursor_line, range.start.col, pre.cursor.col - 1)
+  local after_text = string.sub(pre.cursor_line, pre.cursor.col, pre.cursor.col + (range['end'].col - e.context.cursor.col) - 1)
+  local before_len = vim.fn.strchars(before_text)
+  local after_len = vim.fn.strchars(after_text)
+  local keys = string.rep('<C-g>U<Right>', after_len) .. string.rep('<BS>', before_len + after_len) .. e:get_word()
+  keymap.feedkeys(
+    keys,
+    'n',
     vim.schedule_wrap(function()
       vim.fn['cmp#confirm']({
         request_offset = e.context.cursor.col,
