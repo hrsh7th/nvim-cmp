@@ -192,91 +192,86 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
 
   debug.log('entry.confirm', e:get_completion_item())
 
-  --@see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/suggestController.ts#L334
-  local pre = context.new()
-  if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) == 0 then
-    local new = context.new(pre)
-    e:resolve(function()
-      local text_edits = misc.safe(e:get_completion_item().additionalTextEdits) or {}
-      if #text_edits == 0 then
-        return
-      end
-
-      local has_cursor_line_text_edit = (function()
-        local minrow = math.min(pre.cursor.row, new.cursor.row)
-        local maxrow = math.max(pre.cursor.row, new.cursor.row)
-        for _, te in ipairs(text_edits) do
-          local srow = te.range.start.line + 1
-          local erow = te.range['end'].line + 1
-          if srow <= minrow and maxrow <= erow then
-            return true
-          end
-        end
-        return false
-      end)()
-      if has_cursor_line_text_edit then
-        return
-      end
-
-      vim.fn['cmp#apply_text_edits'](new.bufnr, text_edits)
-    end)
-  end
-
-  -- Prepare completion item for confirmation
-  local completion_item = misc.copy(e:get_completion_item())
-  if not misc.safe(completion_item.textEdit) then
-    completion_item.textEdit = {}
-    completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.label
-  end
-  local behavior = option.behavior or config.get().confirmation.default_behavior
-  if behavior == types.cmp.ConfirmBehavior.Replace then
-    completion_item.textEdit.range = e:get_replace_range()
-  else
-    completion_item.textEdit.range = e:get_insert_range()
-  end
-
-  if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) > 0 then
-    vim.fn['cmp#apply_text_edits'](pre.bufnr, e:get_completion_item().additionalTextEdits)
-  end
-
-  -- First, emulates vim's `<C-y>` behavior and then confirms LSP functionalities.
-  local range = types.lsp.Range.to_vim(pre.bufnr, completion_item.textEdit.range)
-  local before_text = string.sub(pre.cursor_line, range.start.col, pre.cursor.col - 1)
-  local after_text = string.sub(pre.cursor_line, pre.cursor.col, pre.cursor.col + (range['end'].col - e.context.cursor.col) - 1)
-  local before_len = vim.fn.strchars(before_text)
-  local after_len = vim.fn.strchars(after_text)
-  local keys = '<C-g>u' .. string.rep('<C-g>U<Right>', after_len) .. string.rep('<BS>', before_len + after_len)
-  if not completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-    keys = keys .. completion_item.textEdit.newText
-  else
-    keys = keys .. e:get_word()
-  end
+  local ctx = context.new()
+  local restore_text = string.sub(ctx.cursor_line, e.context.cursor.col, ctx.cursor.col - 1)
+  local restore_keys = string.rep('<BS>', vim.fn.strchars(restore_text))
   keymap.feedkeys(
-    keys,
+    '<C-g>U' .. restore_keys,
     'n',
     vim.schedule_wrap(function()
-      local execute = function()
-        e:execute(function()
-          if callback then
-            callback()
+      --@see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/suggestController.ts#L334
+      if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) == 0 then
+        local pre = context.new()
+        e:resolve(function()
+          local new = context.new()
+          local text_edits = misc.safe(e:get_completion_item().additionalTextEdits) or {}
+          if #text_edits == 0 then
+            return
           end
+
+          local has_cursor_line_text_edit = (function()
+            local minrow = math.min(pre.cursor.row, new.cursor.row)
+            local maxrow = math.max(pre.cursor.row, new.cursor.row)
+            for _, te in ipairs(text_edits) do
+              local srow = te.range.start.line + 1
+              local erow = te.range['end'].line + 1
+              if srow <= minrow and maxrow <= erow then
+                return true
+              end
+            end
+            return false
+          end)()
+          if has_cursor_line_text_edit then
+            return
+          end
+          vim.fn['cmp#apply_text_edits'](new.bufnr, text_edits)
         end)
+      else
+        vim.fn['cmp#apply_text_edits'](ctx.bufnr, e:get_completion_item().additionalTextEdits)
       end
-      if completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-        keymap.feedkeys(
-          '<C-g>U' .. string.rep('<BS>', vim.fn.strchars(e:get_word())),
-          'n',
-          vim.schedule_wrap(function()
+
+      -- Prepare completion item for confirmation
+      local completion_item = misc.copy(e:get_completion_item())
+      if not misc.safe(completion_item.textEdit) then
+        completion_item.textEdit = {}
+        completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.label
+      end
+      local behavior = option.behavior or config.get().confirmation.default_behavior
+      if behavior == types.cmp.ConfirmBehavior.Replace then
+        completion_item.textEdit.range = e:get_replace_range()
+      else
+        completion_item.textEdit.range = e:get_insert_range()
+      end
+
+      local is_snippet = vim.lsp.util.parse_snippet(completion_item.textEdit.newText) ~= completion_item.textEdit.newText
+
+      local keys = ''
+      if completion_item.textEdit.range['end'].character > e.context.cursor.character then
+        keys = keys .. string.rep('<C-g>U<Right><BS>', completion_item.textEdit.range['end'].character - e.context.cursor.character)
+      end
+      if e.context.cursor.character > completion_item.textEdit.range.start.character then
+        keys = keys .. string.rep('<BS>', e.context.cursor.character - completion_item.textEdit.range.start.character)
+      end
+      if not is_snippet then
+        keys = keys .. '<C-g>u' .. completion_item.textEdit.newText
+      end
+      keymap.feedkeys(
+        keys,
+        'n',
+        vim.schedule_wrap(function()
+          if is_snippet then
             config.get().snippet.expand({
               body = completion_item.textEdit.newText,
               insert_text_mode = completion_item.insertTextMode,
             })
-            execute()
+          end
+          e:execute(function()
+            if callback then
+              callback()
+            end
           end)
-        )
-      else
-        execute()
-      end
+        end)
+      )
     end)
   )
 end)

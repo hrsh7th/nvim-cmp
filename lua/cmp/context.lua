@@ -14,7 +14,7 @@ local cache = require('cmp.utils.cache')
 ---@field public time number
 ---@field public mode string
 ---@field public bufnr number
----@field public cursor vim.Position
+---@field public cursor vim.Position|lsp.Position
 ---@field public cursor_line string
 ---@field public cursor_after_line string
 ---@field public cursor_before_line string
@@ -51,10 +51,12 @@ context.new = function(prev_context, option)
   self.time = vim.loop.now()
   self.mode = vim.api.nvim_get_mode().mode
   self.bufnr = vim.api.nvim_get_current_buf()
+  self.cursor_line = vim.api.nvim_get_current_line()
   self.cursor = {}
   self.cursor.row = vim.api.nvim_win_get_cursor(0)[1]
   self.cursor.col = vim.api.nvim_win_get_cursor(0)[2] + 1
-  self.cursor_line = vim.api.nvim_get_current_line()
+  self.cursor.line = self.cursor.row - 1
+  self.cursor.character = vim.str_utfindex(self.cursor_line, self.cursor.col - 1)
   self.cursor_before_line = string.sub(self.cursor_line, 1, self.cursor.col - 1)
   self.cursor_after_line = string.sub(self.cursor_line, self.cursor.col)
   return self
