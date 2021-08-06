@@ -96,9 +96,7 @@ menu.update = function(self, ctx, sources)
           e.score = e.score + priority
           table.insert(entries, e)
           entry_map[e.id] = e
-        end
-        if #filtered > 0 then
-          offset = math.min(offset, s.offset)
+          offset = math.min(offset, e:get_offset())
         end
       end
     end

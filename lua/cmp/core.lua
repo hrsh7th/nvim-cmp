@@ -184,7 +184,7 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
   end
   e.confirmed = true
 
-  debug.log('entry.confirm', e:get_completion_item())
+  debug.log('entry.confirm', e)
 
   local ctx = context.new()
   local restore_text = string.sub(ctx.cursor_line, e.context.cursor.col, ctx.cursor.col - 1)
