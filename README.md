@@ -8,21 +8,57 @@ Status
 
 not yet stable but ok to use (for testing).
 
-Development
+
+Configuration
 ====================
 
-You should read [type definitions](/lua/cmp/types) and [LSP spec](https://microsoft.github.io/language-server-protocol/specifications/specification-current/) to develop core or sources.
+First, you should install sources to use by your favorite plugin manager.
 
-### Overview
+```viml
+Plug 'hrsh7th/nvim-cmp'
+Plug 'hrsh7th/cmp-buffer'
+```
 
-`nvim-cmp` emphasizes compatibility with the VSCode behavior and the LSP specification but there are some little differences.
+※ The above example is installing `cmp-buffer` source.
+※ The `nvim-cmp` sources can be found in [here](https://github.com/topics/nvim-cmp).
 
-1. In `nvim-cmp`, the `CompletionItem` can have `word` and `dup` property that introduced by vim's completion mechanism.
+```viml
+-- Setup global configuration
+lua require'cmp'.setup {
+\   -- You should change this example to your chosen snippet engine.
+\   snippet = {
+\     expand = function(args)
+\       vim.fn['vsnip#anonymous'](args.body)
+\     end
+\   },
+\ 
+\   -- You should specify your *installed* sources.
+\   sources = {
+\     {
+\       name = 'buffer',
+\       opts = {
+\         get_bufnrs = function()
+\           return vim.api.nvim_list_bufs()
+\         end
+\       }
+\     }
+\   },
+\ }
 
+-- Setup buffer configuration
+autocmd FileType markdown lua require'cmp'.setup.buffer {
+\   sources = {
+\     { name = '...' }
+\   },
+\ }
+```
 
-### Create custom source
+Source creation
+====================
 
-The example source is here.
+If you publish `nvim-cmp` source to GitHub, please add `nvim-cmp` topic for the repo.
+
+You should read [cmp types](/lua/cmp/types) and [LSP spec](https://microsoft.github.io/language-server-protocol/specifications/specification-current/) to create sources.
 
 - The `complete` function is required but others can be omitted.
 - The `callback` argument must always be called.
@@ -30,14 +66,14 @@ The example source is here.
 ```lua
 local source = {}
 
----Create source.
+---Source constructor.
 source.new = function()
   local self = setmetatable({}, { __index = source })
   self.your_awesome_variable = 1
   return self
 end
 
----Return keyword pattern which will be used by the followings.
+---Return keyword pattern which will be used...
 ---  1. Trigger keyword completion
 ---  2. Detect menu start offset
 ---  3. Reset completion state
@@ -52,10 +88,10 @@ function source:get_trigger_characters()
   return { ??? }
 end
 
----Invoke completion.
+---Invoke completion (required).
+---  If you want to abort completion, just call the callback without arguments.
 ---@param request  cmp.CompletionRequest
 ---@param callback fun(response: lsp.CompletionResponse|nil)
----NOTE: This method is required.
 function source:complete(request, callback)
   callback({
     { label = 'January' },
