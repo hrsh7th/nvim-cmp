@@ -19,7 +19,8 @@ local pattern = require('cmp.utils.pattern')
 ---@field public trigger_kind lsp.CompletionTriggerKind|nil
 ---@field public incomplete boolean
 ---@field public entries cmp.Entry[]
----@field public offset number|nil
+---@field public offset number
+---@field public request_offset number
 ---@field public status cmp.SourceStatus
 ---@field public complete_dedup function
 local source = {}
@@ -50,6 +51,7 @@ source.reset = function(self)
   self.cache:clear()
   self.revision = self.revision + 1
   self.context = context.empty()
+  self.request_offset = -1
   self.trigger_kind = nil
   self.incomplete = false
   self.entries = {}
@@ -188,7 +190,7 @@ source.complete = function(self, ctx, callback)
   local c = config.get()
 
   local offset = ctx:get_offset(self:get_keyword_pattern())
-  if offset == ctx.cursor.col then
+  if ctx.cursor.col <= offset then
     self:reset()
   end
 
@@ -222,11 +224,11 @@ source.complete = function(self, ctx, callback)
       }
     else
       if ctx:get_reason() == types.cmp.ContextReason.Auto then
-        if c.completion.keyword_length <= (ctx.cursor.col - offset) and self.offset ~= offset then
+        if c.completion.keyword_length <= (ctx.cursor.col - offset) and self.request_offset ~= offset then
           completion_context = {
             triggerKind = types.lsp.CompletionTriggerKind.Invoked,
           }
-        elseif self.incomplete and offset ~= ctx.cursor.col then
+        elseif self.incomplete then
           completion_context = {
             triggerKind = types.lsp.CompletionTriggerKind.TriggerForIncompleteCompletions,
           }
@@ -247,6 +249,7 @@ source.complete = function(self, ctx, callback)
   debug.log('request', self.name, self.id, offset, vim.inspect(completion_context))
   local prev_status = self.status
   self.status = source.SourceStatus.FETCHING
+  self.request_offset = offset
   self.offset = offset
   self.context = ctx
   self.source:complete(
