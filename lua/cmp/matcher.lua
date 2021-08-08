@@ -187,7 +187,7 @@ matcher.fuzzy = function(input, word, matches)
     end
     word_offset = word_offset + 1
   end
-  if input_index >= #input then
+  if input_index > #input then
     return true
   end
   return false
