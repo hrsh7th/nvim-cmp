@@ -135,8 +135,8 @@ matcher.match = function(input, word, words)
     end
     idx = idx + 1
     if s > 0 then
+      s = s * (m.strict_match and 1.2 or 1)
       score = score + (s * (1 + math.max(0, matcher.WORD_BOUNDALY_ORDER_FACTOR - (m.index - boundary_fixer)) / matcher.WORD_BOUNDALY_ORDER_FACTOR))
-      score = score + (m.strict_match and 0.1 or 0)
     end
   end
 
