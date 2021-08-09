@@ -239,7 +239,7 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
       local completion_item = misc.copy(e:get_completion_item())
       if not misc.safe(completion_item.textEdit) then
         completion_item.textEdit = {}
-        completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.label
+        completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.word or completion_item.label
       end
       local behavior = option.behavior or config.get().confirmation.default_behavior
       if behavior == types.cmp.ConfirmBehavior.Replace then
@@ -248,7 +248,9 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
         completion_item.textEdit.range = e:get_insert_range()
       end
 
-      local is_snippet = vim.lsp.util.parse_snippet(completion_item.textEdit.newText) ~= completion_item.textEdit.newText
+      local is_snippet = true
+      is_snippet = is_snippet and completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet
+      is_snippet = is_snippet and vim.lsp.util.parse_snippet(completion_item.textEdit.newText) ~= completion_item.textEdit.newText
 
       local keys = ''
       if completion_item.textEdit.range['end'].character > e.context.cursor.character then
@@ -262,7 +264,7 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
         keys = keys .. '<C-g>u' .. e:get_word() .. '<C-g>u'
         keys = keys .. string.rep('<BS>', vim.fn.strchars(e:get_word()))
       else
-        keys = keys .. '<C-g>u' .. e:get_word() .. '<C-g>u'
+        keys = keys .. '<C-g>u' .. completion_item.textEdit.newText .. '<C-g>u'
       end
       keymap.feedkeys(
         keys,
