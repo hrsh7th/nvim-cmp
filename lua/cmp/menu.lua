@@ -43,11 +43,13 @@ end
 
 ---Close menu
 menu.close = function(self)
-  debug.log('menu.close', vim.fn.pumvisible())
-  if vim.fn.pumvisible() == 1 then
-    vim.fn.complete(1, {})
-  end
-  self:unselect()
+  vim.schedule(function()
+    debug.log('menu.close', vim.fn.pumvisible())
+    if vim.fn.pumvisible() == 1 then
+      vim.fn.complete(1, {})
+    end
+    self:unselect()
+  end)
 end
 
 ---Reset menu
