@@ -2,7 +2,6 @@
 
 A completion plugin for neovim written in Lua.
 
-
 Status
 ====================
 
@@ -12,43 +11,40 @@ not yet stable but ok to use (for testing).
 Configuration
 ====================
 
-First, you should install sources to use by your favorite plugin manager.
+First, You should install core and sources by your favorite plugin manager.
+
+The `nvim-cmp` sources can be found in [here](https://github.com/topics/nvim-cmp).
 
 ```viml
 Plug 'hrsh7th/nvim-cmp'
 Plug 'hrsh7th/cmp-buffer'
 ```
 
-※ The above example is installing `cmp-buffer` source.
-※ The `nvim-cmp` sources can be found in [here](https://github.com/topics/nvim-cmp).
+Then setup configuration.
 
 ```viml
--- Setup global configuration
-lua require'cmp'.setup {
-\   -- You should change this example to your chosen snippet engine.
-\   snippet = {
-\     expand = function(args)
-\       vim.fn['vsnip#anonymous'](args.body)
-\     end
-\   },
-\ 
-\   -- You should specify your *installed* sources.
-\   sources = {
-\     {
-\       name = 'buffer',
-\       opts = {
-\         get_bufnrs = function()
-\           return vim.api.nvim_list_bufs()
-\         end
-\       }
-\     }
-\   },
-\ }
+" Setup global configuration
+lua <<EOF
+  require'cmp'.setup {
+    -- You should change this example to your chosen snippet engine.
+    snippet = {
+      expand = function(args)
+        -- You must install `vim-vsnip` if you set up as same as the following.
+        vim.fn['vsnip#anonymous'](args.body)
+      end
+    },
+  
+    -- You should specify your *installed* sources.
+    sources = {
+      { name = 'buffer' }
+    },
+  }
+EOF
 
--- Setup buffer configuration
+" Setup buffer configuration
 autocmd FileType markdown lua require'cmp'.setup.buffer {
 \   sources = {
-\     { name = '...' }
+\     { name = 'buffer' },
 \   },
 \ }
 ```
