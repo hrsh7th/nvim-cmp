@@ -57,15 +57,23 @@ __call = function(self, keys, mode, callback)
 
     if callback then
       local current_mode = string.sub(vim.api.nvim_get_mode().mode, 1, 1)
+      local ctrl_r = current_mode == 'i'
       local id = misc.id('cmp.utils.keymap.feedkeys')
       local cb = ('<Plug>(cmp-utils-keymap-feedkeys:%s)'):format(id)
       self.callbacks[id] = function()
-        callback()
+        self.callbacks[id] = nil
         vim.api.nvim_buf_del_keymap(0, current_mode, cb)
+        callback()
+        if ctrl_r then
+          return ''
+        end
         return keymap.t('<Ignore>')
       end
-      vim.api.nvim_buf_set_keymap(0, current_mode, cb, ('v:lua.cmp.utils.keymap.feedkeys.expr(%s)'):format(id), {
-        expr = true,
+
+      local rhs = ctrl_r and '<C-r>=v:lua.cmp.utils.keymap.feedkeys.run(%s)<CR>' or ':<C-u>v:lua.cmp.utils.keymap.feedkeys.run(%s)<CR>'
+      vim.api.nvim_buf_set_keymap(0, current_mode, cb, string.format(rhs, id), {
+        expr = not ctrl_r,
+        noremap = true,
         nowait = true,
         silent = true,
       })
@@ -73,11 +81,11 @@ __call = function(self, keys, mode, callback)
     end
   end
 })
-misc.set(_G, { 'cmp', 'utils', 'keymap', 'feedkeys', 'expr' }, function(id)
+misc.set(_G, { 'cmp', 'utils', 'keymap', 'feedkeys', 'run' }, function(id)
   if keymap.feedkeys.callbacks[id] then
-    keymap.feedkeys.callbacks[id]()
+    return keymap.feedkeys.callbacks[id]()
   end
-  return keymap.t('<Ignore>')
+  return ''
 end)
 
 ---Register keypress handler.
@@ -126,6 +134,7 @@ keymap.listen = setmetatable({
       expr = true,
       nowait = true,
       noremap = true,
+      silent = true,
     })
   end,
 })
@@ -138,6 +147,7 @@ misc.set(_G, { 'cmp', 'utils', 'keymap', 'expr' }, function(keys)
     vim.api.nvim_buf_set_keymap(0, 'i', '<Plug>(cmp-utils-keymap:_)', existing.rhs, {
       expr = existing.expr == 1,
       noremap = existing.noremap == 1,
+      silent = true,
     })
     vim.fn.feedkeys(keymap.t('<Plug>(cmp-utils-keymap:_)'), 'i')
   end)
