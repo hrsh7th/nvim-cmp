@@ -22,17 +22,20 @@ float.show = function(self, e)
   float.close.stop()
 
   local documentation = config.get().documentation
+  if not documentation then
+    return
+  end
 
   -- update buffer content if needed.
   if not self.entry or e.id ~= self.entry.id then
-    self.entry = e
-    self.buf = vim.api.nvim_create_buf(true, true)
-    vim.api.nvim_buf_set_option(self.buf, 'bufhidden', 'wipe')
-
     local documents = e:get_documentation()
     if #documents == 0 then
       return self:close()
     end
+
+    self.entry = e
+    self.buf = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_buf_set_option(self.buf, 'bufhidden', 'wipe')
     vim.lsp.util.stylize_markdown(self.buf, documents, {
       max_width = documentation.maxwidth,
       max_height = documentation.maxheight,
