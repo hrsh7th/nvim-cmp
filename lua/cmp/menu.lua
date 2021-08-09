@@ -43,6 +43,7 @@ end
 
 ---Close menu
 menu.close = function(self)
+  debug.log('menu.close', vim.fn.pumvisible())
   if vim.fn.pumvisible() == 1 then
     vim.fn.complete(1, {})
   end
@@ -157,10 +158,11 @@ end
 
 ---Show completion item
 menu.show = function(self)
-  if vim.fn.pumvisible() == 0 and #self.entries == 0 then
+  if #self.entries == 0 then
     self:close()
     return
   end
+  debug.log('menu.show', #self.entries)
 
   local completeopt = vim.o.completeopt
   if self.preselect == 1 then
