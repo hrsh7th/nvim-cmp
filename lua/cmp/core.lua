@@ -200,10 +200,8 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
   debug.log('entry.confirm', e)
 
   local ctx = context.new()
-  local restore_text = string.sub(ctx.cursor_line, e.context.cursor.col, ctx.cursor.col - 1)
-  local restore_keys = string.rep('<BS>', vim.fn.strchars(restore_text))
   keymap.feedkeys(
-    '<C-g>U' .. restore_keys,
+    '<C-g>U' .. string.rep('<BS>', ctx.cursor.col - e.context.cursor.col),
     'n',
     vim.schedule_wrap(function()
       --@see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/suggestController.ts#L334
@@ -259,8 +257,12 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
       if e.context.cursor.character > completion_item.textEdit.range.start.character then
         keys = keys .. string.rep('<BS>', e.context.cursor.character - completion_item.textEdit.range.start.character)
       end
-      if not is_snippet then
-        keys = keys .. '<C-g>u' .. completion_item.textEdit.newText
+
+      if is_snippet then
+        keys = keys .. '<C-g>u' .. e:get_word() .. '<C-g>u'
+        keys = keys .. string.rep('<BS>', vim.fn.strchars(e:get_word()))
+      else
+        keys = keys .. '<C-g>u' .. e:get_word() .. '<C-g>u'
       end
       keymap.feedkeys(
         keys,
