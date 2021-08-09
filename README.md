@@ -59,6 +59,8 @@ You should read [cmp types](/lua/cmp/types) and [LSP spec](https://microsoft.git
 - The `complete` function is required but others can be omitted.
 - The `callback` argument must always be called.
 
+You can use only `require('cmp')` in the custom source.
+
 ```lua
 local source = {}
 
