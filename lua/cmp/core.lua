@@ -69,6 +69,16 @@ end
 
 ---Keypress handler
 core.on_keymap = function(keys, fallback)
+  -- Documentation scroll
+  if config.get().documentation.mapping[keys] then
+    if config.get().documentation.mapping[keys] == types.cmp.ScrollDirection.Up then
+      core.menu.float:scroll(-4)
+    elseif config.get().documentation.mapping[keys] == types.cmp.ScrollDirection.Down then
+      core.menu.float:scroll(4)
+    end
+    return
+  end
+
   -- Confirm character
   if config.get().confirmation.mapping[keys] then
     local c = config.get().confirmation.mapping[keys]
@@ -108,6 +118,9 @@ end
 ---Prepare completion
 core.prepare = function()
   for keys in pairs(config.get().confirmation.mapping) do
+    keymap.listen(keys, core.on_keymap)
+  end
+  for keys in pairs(config.get().documentation.mapping) do
     keymap.listen(keys, core.on_keymap)
   end
 end

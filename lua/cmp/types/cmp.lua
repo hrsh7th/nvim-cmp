@@ -17,6 +17,11 @@ cmp.TriggerEvent = {}
 cmp.TriggerEvent.InsertEnter = 'InsertEnter'
 cmp.TriggerEvent.TextChanged = 'TextChanged'
 
+---@alias cmp.ScrollDirection "'up'" | "'down'"
+cmp.ScrollDirection = {}
+cmp.ScrollDirection.Up = 'up'
+cmp.ScrollDirection.Down = 'down'
+
 ---@class cmp.ContextOption
 ---@field public reason cmp.ContextReason|nil
 
@@ -59,6 +64,7 @@ cmp.TriggerEvent.TextChanged = 'TextChanged'
 ---@field public winhighlight string
 ---@field public maxwidth number|nil
 ---@field public maxheight number|nil
+---@field public mapping table<string, cmp.ScrollDirection>
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior

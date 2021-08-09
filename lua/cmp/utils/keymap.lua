@@ -19,6 +19,21 @@ keymap.t = function(keys)
   return vim.api.nvim_replace_termcodes(keys, true, true, true)
 end
 
+---Escape keymap with <LT>
+keymap.escape = function(keys)
+  local i = 1
+  while i <= #keys do
+    if string.sub(keys, i, i) == '<' then
+      if not vim.tbl_contains({ '<lt>', '<Lt>', '<lT>', '<LT>' }, string.sub(keys, i, i + 3)) then
+        keys = string.sub(keys, 1, i -1) .. '<LT>' ..  string.sub(keys, i + 1)
+        i = i + 3
+      end
+    end
+    i = i + 1
+  end
+  return keys
+end
+
 ---Return vim notation keymapping (simple conversion).
 ---@param s string
 ---@return string
@@ -107,7 +122,7 @@ keymap.listen = setmetatable({
       existing = existing,
       callback = callback,
     })
-    vim.api.nvim_buf_set_keymap(0, 'i', keys, ('v:lua.cmp.utils.keymap.expr("%s")'):format(keys), {
+    vim.api.nvim_buf_set_keymap(0, 'i', keys, ('v:lua.cmp.utils.keymap.expr("%s")'):format(keymap.escape(keys)), {
       expr = true,
       nowait = true,
       noremap = true,
@@ -115,7 +130,6 @@ keymap.listen = setmetatable({
   end,
 })
 misc.set(_G, { 'cmp', 'utils', 'keymap', 'expr' }, function(keys)
-  keys = keymap.to_keymap(keys)
   local bufnr = vim.api.nvim_get_current_buf()
 
   local existing = keymap.listen.cache:get({ bufnr, keys }).existing

@@ -112,4 +112,21 @@ float.close = async.throttle(
   20
 )
 
+float.scroll = function(self, delta)
+  if self.win and vim.api.nvim_win_is_valid(self.win) then
+    local info = vim.fn.getwininfo(self.win)[1] or {}
+    local buf = vim.api.nvim_win_get_buf(self.win)
+    local top = info.topline or 1
+    top = top + delta
+    top = math.max(top, 1)
+    top = math.min(top, vim.api.nvim_buf_line_count(buf) - info.height + 1)
+
+    vim.defer_fn(function()
+      vim.api.nvim_buf_call(buf, function()
+        vim.cmd('normal! ' .. top .. 'zt')
+      end)
+    end, 0)
+  end
+end
+
 return float
