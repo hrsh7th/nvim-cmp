@@ -64,10 +64,7 @@ __call = function(self, keys, mode, callback)
         self.callbacks[id] = nil
         vim.api.nvim_buf_del_keymap(0, current_mode, cb)
         callback()
-        if ctrl_r then
-          return ''
-        end
-        return keymap.t('<Ignore>')
+        return ''
       end
 
       local rhs = ctrl_r and '<C-r>=v:lua.cmp.utils.keymap.feedkeys.run(%s)<CR>' or ':<C-u>v:lua.cmp.utils.keymap.feedkeys.run(%s)<CR>'

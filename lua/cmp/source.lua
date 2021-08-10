@@ -261,7 +261,7 @@ source.complete = function(self, ctx, callback)
       option = self:get_option(),
       completion_context = completion_context,
     },
-    vim.schedule_wrap(self.complete_dedup(function(response)
+    self.complete_dedup(function(response)
       self.revision = self.revision + 1
       if #(misc.safe(response) and response.items or response or {}) > 0 then
         debug.log('retrieve', self.name, self.id, #(response.items or response))
@@ -279,7 +279,7 @@ source.complete = function(self, ctx, callback)
         self.status = prev_status
       end
       callback()
-    end))
+    end)
   )
   return true
 end

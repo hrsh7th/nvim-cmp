@@ -7,7 +7,8 @@ describe('entry', function()
 
   it('one char', function()
     local state = spec.state('@.', 1, 3)
-    local e = entry.new(state.press('@'), state.source(), {
+    state.input('@')
+    local e = entry.new(state.manual(), state.source(), {
       label = '@',
     })
     assert.are.equal(e:get_offset(), 3)
@@ -16,7 +17,8 @@ describe('entry', function()
 
   it('word length (no fix)', function()
     local state = spec.state('a.b', 1, 4)
-    local e = entry.new(state.press('.'), state.source(), {
+    state.input('.')
+    local e = entry.new(state.manual(), state.source(), {
       label = 'b',
     })
     assert.are.equal(e:get_offset(), 5)
@@ -25,7 +27,8 @@ describe('entry', function()
 
   it('word length (fix)', function()
     local state = spec.state('a.b', 1, 4)
-    local e = entry.new(state.press('.'), state.source(), {
+    state.input('.')
+    local e = entry.new(state.manual(), state.source(), {
       label = 'b.',
     })
     assert.are.equal(e:get_offset(), 3)
@@ -34,7 +37,8 @@ describe('entry', function()
 
   it('semantic index (no fix)', function()
     local state = spec.state('a.bc', 1, 5)
-    local e = entry.new(state.press('.'), state.source(), {
+    state.input('.')
+    local e = entry.new(state.manual(), state.source(), {
       label = 'c.',
     })
     assert.are.equal(e:get_offset(), 6)
@@ -43,7 +47,8 @@ describe('entry', function()
 
   it('semantic index (fix)', function()
     local state = spec.state('a.bc', 1, 5)
-    local e = entry.new(state.press('.'), state.source(), {
+    state.input('.')
+    local e = entry.new(state.manual(), state.source(), {
       label = 'bc.',
     })
     assert.are.equal(e:get_offset(), 3)
@@ -52,7 +57,8 @@ describe('entry', function()
 
   it('[vscode-html-language-server] 1', function()
     local state = spec.state('    </>', 1, 7)
-    local e = entry.new(state.press('.'), state.source(), {
+    state.input('.')
+    local e = entry.new(state.manual(), state.source(), {
       label = '/div',
       textEdit = {
         range = {
@@ -76,7 +82,8 @@ describe('entry', function()
     --NOTE: clangd does not return `.foo` as filterText but we should care about it.
     --nvim-cmp does care it by special handling in entry.lua.
     local state = spec.state('foo', 1, 4)
-    local e = entry.new(state.press('.'), state.source(), {
+    state.input('.')
+    local e = entry.new(state.manual(), state.source(), {
       insertText = '->foo',
       label = ' foo',
       textEdit = {
@@ -99,7 +106,8 @@ describe('entry', function()
 
   it('[typescript-language-server] 1', function()
     local state = spec.state('Promise.resolve()', 1, 18)
-    local e = entry.new(state.press('.'), state.source(), {
+    state.input('.')
+    local e = entry.new(state.manual(), state.source(), {
       label = 'catch',
     })
     -- The offset will be 18 in this situation because the server returns `[Symbol]` as candidate.
@@ -109,7 +117,8 @@ describe('entry', function()
 
   it('[typescript-language-server] 2', function()
     local state = spec.state('Promise.resolve()', 1, 18)
-    local e = entry.new(state.press('.'), state.source(), {
+    state.input('.')
+    local e = entry.new(state.manual(), state.source(), {
       filterText = '.Symbol',
       label = 'Symbol',
       textEdit = {
@@ -135,7 +144,8 @@ describe('entry', function()
     local e
 
     -- press g
-    e = entry.new(state.press('g'), state.source(), {
+    state.input('g')
+    e = entry.new(state.manual(), state.source(), {
       insertTextFormat = 2,
       label = 'cmp.config',
       textEdit = {
@@ -156,7 +166,8 @@ describe('entry', function()
     assert.are.equal(e:get_filter_text(), 'cmp.config')
 
     -- press '
-    e = entry.new(state.press("'"), state.source(), {
+    state.input("'")
+    e = entry.new(state.manual(), state.source(), {
       insertTextFormat = 2,
       label = 'cmp.config',
       textEdit = {
@@ -182,7 +193,8 @@ describe('entry', function()
     local e
 
     -- press g
-    e = entry.new(state.press('g'), state.source(), {
+    state.input('g')
+    e = entry.new(state.manual(), state.source(), {
       insertTextFormat = 2,
       label = 'lua.cmp.config',
       textEdit = {
@@ -203,7 +215,8 @@ describe('entry', function()
     assert.are.equal(e:get_filter_text(), 'lua.cmp.config')
 
     -- press '
-    e = entry.new(state.press("'"), state.source(), {
+    state.input("'")
+    e = entry.new(state.manual(), state.source(), {
       insertTextFormat = 2,
       label = 'lua.cmp.config',
       textEdit = {
@@ -228,7 +241,8 @@ describe('entry', function()
     local state = spec.state('\t\t', 1, 4)
 
     -- press g
-    local e = entry.new(state.press('$'), state.source(), {
+    state.input('$')
+    local e = entry.new(state.manual(), state.source(), {
       detail = '\\Nico_URLConf',
       kind = 6,
       label = '$this',

@@ -27,10 +27,22 @@ spec.state = function(text, row, col)
     source = function()
       return s
     end,
-    press = function(char)
+    backspace = function()
+      vim.fn.feedkeys('x', 'nx')
+      vim.fn.feedkeys('h', 'nx')
+      ctx = context.new(ctx, { reason = types.cmp.ContextReason.Auto })
+      s:complete(ctx, function() end)
+      return ctx
+    end,
+    input = function(char)
       vim.fn.feedkeys(('i%s'):format(char), 'nx')
-      vim.fn.feedkeys(('l'):format(char), 'nx')
+      vim.fn.feedkeys(string.rep('l', #char), 'nx')
       ctx.prev_context = nil
+      ctx = context.new(ctx, { reason = types.cmp.ContextReason.Auto })
+      s:complete(ctx, function() end)
+      return ctx
+    end,
+    manual = function()
       ctx = context.new(ctx, { reason = types.cmp.ContextReason.Manual })
       s:complete(ctx, function() end)
       return ctx
