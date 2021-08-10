@@ -187,12 +187,9 @@ end
 ---@param callback function
 ---@return boolean Return true if not trigger completion.
 source.complete = function(self, ctx, callback)
-  local c = config.get()
-
   local offset = ctx:get_offset(self:get_keyword_pattern())
-  if ctx.cursor.col <= offset then
-    self:reset()
-  end
+
+  local c = config.get()
 
   local before_char = string.sub(ctx.cursor_before_line, -1)
   local before_char_iw = string.match(ctx.cursor_before_line, '(.)%s*$') or before_char
@@ -222,27 +219,32 @@ source.complete = function(self, ctx, callback)
         triggerKind = types.lsp.CompletionTriggerKind.TriggerCharacter,
         triggerCharacter = before_char_iw,
       }
-    else
-      if ctx:get_reason() == types.cmp.ContextReason.Auto then
-        if c.completion.keyword_length <= (ctx.cursor.col - offset) and self.request_offset ~= offset then
-          completion_context = {
-            triggerKind = types.lsp.CompletionTriggerKind.Invoked,
-          }
-        elseif self.incomplete then
+    elseif ctx:get_reason() ~= types.cmp.ContextReason.TriggerOnly then
+      if c.completion.keyword_length <= (ctx.cursor.col - offset) then
+        if self.incomplete and self.context.cursor.col ~= ctx.cursor.col then
           completion_context = {
             triggerKind = types.lsp.CompletionTriggerKind.TriggerForIncompleteCompletions,
           }
+        elseif self.request_offset ~= offset then
+          completion_context = {
+            triggerKind = types.lsp.CompletionTriggerKind.Invoked,
+          }
         end
-      else
-        self:reset()
       end
+    else
+      self:reset()
     end
   end
+
+  if ctx.cursor.col <= offset then
+    self:reset()
+  end
+
   if not completion_context then
-    debug.log('skip empty context', self.name, self.id)
     if ctx:get_reason() == types.cmp.ContextReason.TriggerOnly then
       self:reset()
     end
+    debug.log('skip completion', self.name, self.id)
     return
   end
 

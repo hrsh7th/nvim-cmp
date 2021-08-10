@@ -4,6 +4,7 @@ local float = require('cmp.float')
 local types = require('cmp.types')
 local config = require('cmp.config')
 local autocmd = require('cmp.autocmd')
+local check = require('cmp.utils.check')
 
 ---@class cmp.MenuOption
 ---@field on_select fun(e: cmp.Entry)
@@ -67,11 +68,7 @@ end
 ---@param ctx cmp.Context
 ---@param sources cmp.Source[]
 ---@return cmp.Menu
-menu.update = function(self, ctx, sources)
-  if not (ctx.mode == 'i' or ctx.mode == 'ic') then
-    return
-  end
-
+menu.update = check.wrap(function(self, ctx, sources)
   local entries = {}
   local entry_map = {}
 
@@ -139,15 +136,11 @@ menu.update = function(self, ctx, sources)
   self.preselect = preselect
   self.context = ctx
   self:show()
-end
+end)
 
 ---Restore previous menu
 ---@param ctx cmp.Context
-menu.restore = function(self, ctx)
-  if not (ctx.mode == 'i' or ctx.mode == 'ic') then
-    return
-  end
-
+menu.restore = check.wrap(function(self, ctx)
   if not ctx.pumvisible then
     if #self.items > 0 then
       if self.offset <= ctx.cursor.col then
@@ -156,7 +149,7 @@ menu.restore = function(self, ctx)
       end
     end
   end
-end
+end)
 
 ---Show completion item
 menu.show = function(self)

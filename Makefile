@@ -12,7 +12,7 @@ test:
 
 .PHONY: pre-commit
 pre-commit:
-	stylua --check --glob lua/**/*.lua -- lua
+	stylua --glob lua/**/*.lua -- lua
 	luacheck lua
 	vusted lua
 
