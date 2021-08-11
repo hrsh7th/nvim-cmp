@@ -53,6 +53,7 @@ Configuration
 ====================
 
 The default configuration can be found in [here](./lua/cmp/config/default.lua)
+
 You can use your own configuration like this:
 ```lua
 require'cmp'.setup {
@@ -64,6 +65,7 @@ require'cmp'.setup {
 	},
 	sorting = {
 		priority_weight = 2.,
+		comparators = { ... },
 	},
 	...
 }
@@ -71,7 +73,7 @@ require'cmp'.setup {
 
 ### completion.autocomplete (type: cmp.TriggerEvent[])
 
-The `autocompletion` trigger events. 
+Which events should trigger `autocompletion`.
 
 If you leave this empty or `nil`, `nvim-cmp` does not perform completion automatically. 
 You can still use manual completion though (like omni-completion).
@@ -80,7 +82,7 @@ Default: `{types.cmp.TriggerEvent.InsertEnter, types.cmp.TriggerEvent.TextChange
 
 ### completion.keyword_pattern (type: string)
 
-A default keyword pattern.  This value will be used if the source has no source specific pattern.
+The default keyword pattern.  This value will be used if a source does not set a source specific pattern.
 
 Default: `[[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]]`
 
@@ -117,7 +119,7 @@ to return something other than `nil` takes precedence.
 
 Each function must return `boolean|nil`.
 
-Default: ```lua
+Default: ``lua
 {
         compare.offset,
         compare.exact,
