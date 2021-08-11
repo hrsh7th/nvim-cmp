@@ -119,7 +119,8 @@ to return something other than `nil` takes precedence.
 
 Each function must return `boolean|nil`.
 
-Default: ``lua
+Default: 
+```lua
 {
         compare.offset,
         compare.exact,
