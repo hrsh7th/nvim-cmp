@@ -99,8 +99,8 @@ You should read [cmp types](/lua/cmp/types) and [LSP spec](https://microsoft.git
 
 - The `complete` function is required but others can be omitted.
 - The `callback` argument must always be called.
-
-You can use only `require('cmp')` in the custom source.
+- The custom source only can use `require('cmp')`.
+- The custom source can specify `word` property to CompletionItem. (It isn't an LSP specification but supported as a special case.)
 
 ```lua
 local source = {}
