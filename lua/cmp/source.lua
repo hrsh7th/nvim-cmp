@@ -164,6 +164,14 @@ source.get_default_replace_range = function(self)
   end)
 end
 
+---Return the source is available or not.
+source.is_available = function(self)
+  if self.source.is_available then
+    return self.source.is_available()
+  end
+  return true
+end
+
 ---Get keyword_pattern
 ---@return string
 source.get_keyword_pattern = function(self)

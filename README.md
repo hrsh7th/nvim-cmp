@@ -156,6 +156,12 @@ source.new = function()
   return self
 end
 
+---Return the source is available or not.
+---@return boolean
+function source:is_available()
+  return true
+end
+
 ---Return keyword pattern which will be used...
 ---  1. Trigger keyword completion
 ---  2. Detect menu start offset

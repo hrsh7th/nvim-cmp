@@ -59,7 +59,9 @@ core.get_sources = function(statuses)
     for _, s in pairs(core.sources) do
       if c.name == s.name then
         if not statuses or vim.tbl_contains(statuses, s.status) then
-          table.insert(sources, s)
+          if s:is_available() then
+            table.insert(sources, s)
+          end
         end
       end
     end
