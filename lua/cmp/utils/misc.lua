@@ -35,7 +35,10 @@ misc.merge = function(v1, v2)
     end
     return new_tbl
   end
-  return v1 or v2
+  if v1 == nil then
+    return v2
+  end
+  return v1
 end
 
 
