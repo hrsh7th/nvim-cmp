@@ -46,6 +46,7 @@ return function()
     },
 
     sorting = {
+      priority_weight = 2,
       comparators = {
         compare.offset,
         compare.exact,

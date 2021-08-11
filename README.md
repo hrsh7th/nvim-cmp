@@ -49,6 +49,47 @@ autocmd FileType markdown lua require'cmp'.setup.buffer {
 \ }
 ```
 
+Configuration
+====================
+
+The default configuration can be found in [here](./lua/cmp/config/default.lua)
+
+### completion.autocomplete (type: cmp.TriggerEvent[])
+
+The autocompletion trigger events.
+
+If you specify an empty table, nvim-cmp does not perform completion automatically.
+
+But you can still use manual completion. It is similar to omni-completion.
+
+
+### completion.keyword_pattern (type: string)
+
+A default keyword pattern. This value will be used if the source has no source specific pattern.
+
+
+### completion.keyword_length (type: number)
+
+A minimum keyword length to completion.
+
+
+### completion.completeopt (type: string)
+
+A vim's `completeopt` setting. Warning: Be careful when changing this value.
+
+
+### sorting.priority_weight (type: number)
+
+A the source priority for sorting.
+
+`score + ((#sources - (source_index - 1)) * sorting.priority_weight)`
+
+
+### sorting.comparators (type: function[])
+
+A comparator function list. The function must return `boolean|nil`.
+
+
 Source creation
 ====================
 

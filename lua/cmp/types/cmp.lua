@@ -75,6 +75,7 @@ cmp.ScrollDirection.Down = 'down'
 ---@field select boolean
 
 ---@class cmp.SortingConfig
+---@field public priority_weight number
 ---@field public comparators function[]
 
 ---@class cmp.FormattingConfig
