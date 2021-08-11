@@ -104,6 +104,16 @@ cmp.setup {
 
 Define mappings with `cmp.mapping` helper.
 
+The `cmp.mapping` helper has the below functions.
+
+*cmp.mapping.confirm({ select = true or false, behavior = cmp.ConfirmBehavior.Insert or cmp.ConfirmBehavior.Replace })*
+*cmp.mapping.complete()*
+*cmp.mapping.close()*
+*cmp.mapping.item.next()*
+*cmp.mapping.item.prev()*
+*cmp.mapping.scroll.up()*
+*cmp.mapping.scroll.down()*
+
 ### completion.autocomplete (type: cmp.TriggerEvent[])
 
 Which events should trigger `autocompletion`.
