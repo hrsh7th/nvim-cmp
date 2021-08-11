@@ -8,7 +8,7 @@ Status
 not yet stable but ok to use (for testing).
 
 
-Configuration
+Setup
 ====================
 
 First, You should install core and sources by your favorite plugin manager.
@@ -23,7 +23,7 @@ Plug 'hrsh7th/cmp-buffer'
 Then setup configuration.
 
 ```viml
-" Setup global configuration
+" Setup global configuration. More on configuration below.
 lua <<EOF
   require'cmp'.setup {
     -- You should change this example to your chosen snippet engine.
@@ -57,6 +57,7 @@ The default configuration can be found in [here](./lua/cmp/config/default.lua)
 You can use your own configuration like this:
 ```lua
 require'cmp'.setup {
+	...
 	completion = {
 		autocomplete = { .. },
 		completeopt = 'menu,menuone,noselect',
@@ -67,6 +68,7 @@ require'cmp'.setup {
 		priority_weight = 2.,
 		comparators = { ... },
 	},
+	sources = { ... },
 	...
 }
 ```
