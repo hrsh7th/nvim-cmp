@@ -53,42 +53,81 @@ Configuration
 ====================
 
 The default configuration can be found in [here](./lua/cmp/config/default.lua)
+You can use your own configuration like this:
+```lua
+require'cmp'.setup {
+	completion = {
+		autocomplete = { .. },
+		completeopt = 'menu,menuone,noselect',
+		keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
+		keyword_length = 1,
+	},
+	sorting = {
+		priority_weight = 2.,
+	},
+	...
+}
+```
 
 ### completion.autocomplete (type: cmp.TriggerEvent[])
 
-The autocompletion trigger events.
+The `autocompletion` trigger events. 
 
-If you specify an empty table, nvim-cmp does not perform completion automatically.
+If you leave this empty or `nil`, `nvim-cmp` does not perform completion automatically. 
+You can still use manual completion though (like omni-completion).
 
-But you can still use manual completion. It is similar to omni-completion.
-
+Default: `{types.cmp.TriggerEvent.InsertEnter, types.cmp.TriggerEvent.TextChanged}`
 
 ### completion.keyword_pattern (type: string)
 
-A default keyword pattern. This value will be used if the source has no source specific pattern.
+A default keyword pattern.  This value will be used if the source has no source specific pattern.
 
+Default: `[[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]]`
 
 ### completion.keyword_length (type: number)
 
-A minimum keyword length to completion.
+The minimal length of a word to complete; e.g., do not try to complete when the
+length of the word to the left of the cursor is less than `keyword_length`.
+
+Default: `1`
 
 
 ### completion.completeopt (type: string)
 
-A vim's `completeopt` setting. Warning: Be careful when changing this value.
+vim's `completeopt` setting. Warning: Be careful when changing this value.
+
+Default: `menu,menuone,noselect`
 
 
 ### sorting.priority_weight (type: number)
 
-A the source priority for sorting.
+When sorting completion items before displaying them, boost each item's score
+based on the originating source. Each source gets a base priority of `#sources -
+(source_index - 1)`, and we then multiply this by `priority_weight`:
 
-`score + ((#sources - (source_index - 1)) * sorting.priority_weight)`
+`score = score + ((#sources - (source_index - 1)) * sorting.priority_weight)`
 
+Default: `2`
 
 ### sorting.comparators (type: function[])
 
-A comparator function list. The function must return `boolean|nil`.
+When sorting completion items, the sort logic tries each function in
+`sorting.comparators` consecutively when comparing two items. The first function
+to return something other than `nil` takes precedence.
 
+Each function must return `boolean|nil`.
+
+Default: ```lua
+{
+        compare.offset,
+        compare.exact,
+        compare.score,
+        compare.kind,
+        compare.sort_text,
+        compare.length,
+        compare.order,
+}
+```
 
 Source creation
 ====================
