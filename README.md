@@ -33,6 +33,20 @@ lua <<EOF
         vim.fn['vsnip#anonymous'](args.body)
       end
     },
+
+    -- You must set mapping.
+    mapping = {
+      ['<C-p>'] = cmp.mapping.item.prev(),
+      ['<C-n>'] = cmp.mapping.item.next(),
+      ['<C-d>'] = cmp.mapping.scroll.up(),
+      ['<C-f>'] = cmp.mapping.scroll.down(),
+      ['<C-Space>'] = cmp.mapping.complete(),
+      ['<C-e>'] = cmp.mapping.close(),
+      ['<CR>'] = cmp.mapping.confirm({
+        behavior = cmp.ConfirmBehavior.Replace,
+        select = true,
+      })
+    },
   
     -- You should specify your *installed* sources.
     sources = {
@@ -56,22 +70,39 @@ The default configuration can be found in [here](./lua/cmp/config/default.lua)
 
 You can use your own configuration like this:
 ```lua
-require'cmp'.setup {
-	...
-	completion = {
-		autocomplete = { .. },
-		completeopt = 'menu,menuone,noselect',
-		keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
-		keyword_length = 1,
-	},
-	sorting = {
-		priority_weight = 2.,
-		comparators = { ... },
-	},
-	sources = { ... },
-	...
+local cmp = require'cmp'
+cmp.setup {
+  ...
+  completion = {
+    autocomplete = { .. },
+    completeopt = 'menu,menuone,noselect',
+    keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
+    keyword_length = 1,
+  },
+  sorting = {
+    priority_weight = 2.,
+    comparators = { ... },
+  },
+  mapping = {
+    ['<C-p>'] = cmp.mapping.item.prev(),
+    ['<C-n>'] = cmp.mapping.item.next(),
+    ['<C-d>'] = cmp.mapping.scroll.up(),
+    ['<C-f>'] = cmp.mapping.scroll.down(),
+    ['<C-Space>'] = cmp.mapping.complete(),
+    ['<C-e>'] = cmp.mapping.close(),
+    ['<CR>'] = cmp.mapping.confirm({
+      behavior = cmp.ConfirmBehavior.Replace,
+      select = true,
+    })
+  },
+  sources = { ... },
+  ...
 }
 ```
+
+### mapping (type: table<string, cmp.MappingConfig>)
+
+Define mappings with `cmp.mapping` helper.
 
 ### completion.autocomplete (type: cmp.TriggerEvent[])
 
@@ -124,13 +155,13 @@ Each function must return `boolean|nil`.
 Default: 
 ```lua
 {
-        compare.offset,
-        compare.exact,
-        compare.score,
-        compare.kind,
-        compare.sort_text,
-        compare.length,
-        compare.order,
+  compare.offset,
+  compare.exact,
+  compare.score,
+  compare.kind,
+  compare.sort_text,
+  compare.length,
+  compare.order,
 }
 ```
 

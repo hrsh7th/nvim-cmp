@@ -51,6 +51,7 @@ cmp.ScrollDirection.Down = 'down'
 ---@field public sorting cmp.SortingConfig
 ---@field public formatting cmp.FormattingConfig
 ---@field public snippet cmp.SnippetConfig
+---@field public mapping table<string, cmp.MappingConfig>
 ---@field public sources cmp.SourceConfig[]
 
 ---@class cmp.CompletionConfig
@@ -64,15 +65,9 @@ cmp.ScrollDirection.Down = 'down'
 ---@field public winhighlight string
 ---@field public maxwidth number|nil
 ---@field public maxheight number|nil
----@field public mapping table<string, cmp.ScrollDirection>
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior
----@field public mapping table<string, cmp.ConfirmMappingConfig>
-
----@class cmp.ConfirmMappingConfig
----@field behavior cmp.ConfirmBehavior
----@field select boolean
 
 ---@class cmp.SortingConfig
 ---@field public priority_weight number
@@ -87,6 +82,35 @@ cmp.ScrollDirection.Down = 'down'
 ---@class cmp.SourceConfig
 ---@field public name string
 ---@field public opts table
+
+---@alias cmp.MappingConfig cmp.ConfirmMapping | cmp.CompleteMapping | cmp.CloseMapping | cmp.ItemNextMapping | cmp.ItemPrevMapping | cmp.ScrollUpMapping | cmp.ScrollDownMapping
+
+---@class cmp.ConfirmMapping
+---@field public type '"confirm"'
+---@field public select boolean
+---@field public behavior cmp.ConfirmBehavior
+
+---@class cmp.CompleteMapping
+---@field public type '"complete"'
+
+---@class cmp.CloseMapping
+---@field public type '"close"'
+
+---@class cmp.ItemNextMapping
+---@field public type '"item.next"'
+---@field public delta number
+
+---@class cmp.ItemPrevMapping
+---@field public type '"item.prev"'
+---@field public delta number
+
+---@class cmp.ScrollUpMapping
+---@field public type '"scroll.up"'
+---@field public delta number
+
+---@class cmp.ScrollDownMapping
+---@field public type '"scroll.down"'
+---@field public delta number
 
 return cmp
 

@@ -1,5 +1,4 @@
 local core = require('cmp.core')
-local types = require('cmp.types')
 local source = require('cmp.source')
 local config = require('cmp.config')
 local autocmd = require('cmp.autocmd')
@@ -12,6 +11,9 @@ for k, v in pairs(require('cmp.types.cmp')) do
 end
 cmp.lsp = require('cmp.types.lsp')
 cmp.vim = require('cmp.types.vim')
+
+---Export mapping
+cmp.mapping = require('cmp.mapping')
 
 ---Register completion sources
 ---@param name string
@@ -42,18 +44,6 @@ cmp.setup = setmetatable({
     self.global(c)
   end,
 })
-
----Invoke completion manually
-cmp.complete = function()
-  core.complete(core.get_context({
-    reason = types.cmp.ContextReason.Manual,
-  }))
-end
-
----Close completion
-cmp.close = function()
-  core.reset()
-end
 
 ---Handle events
 autocmd.subscribe('InsertEnter', function()

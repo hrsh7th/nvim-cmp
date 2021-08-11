@@ -26,13 +26,3 @@ if vim.fn.hlexists('CmpDocumentationBorder') == 0 then
   vim.cmd [[highlight link CmpDocumentationBorder NormalFloat]]
 end
 
-misc.set(_G, { 'cmp', 'complete' }, function()
-  cmp.complete()
-  return vim.api.nvim_replace_termcodes('<Ignore>', true, true, true)
-end)
-
-misc.set(_G, { 'cmp', 'close' }, function()
-  cmp.close()
-  return vim.api.nvim_replace_termcodes('<Ignore>', true, true, true)
-end)
-

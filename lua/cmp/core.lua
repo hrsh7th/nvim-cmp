@@ -71,29 +71,49 @@ end
 
 ---Keypress handler
 core.on_keymap = function(keys, fallback)
-  -- Documentation scroll
-  if config.get().documentation.mapping[keys] then
-    if config.get().documentation.mapping[keys] == types.cmp.ScrollDirection.Up then
-      core.menu.float:scroll(-4)
-    elseif config.get().documentation.mapping[keys] == types.cmp.ScrollDirection.Down then
-      core.menu.float:scroll(4)
-    end
-    return
-  end
-
-  -- Confirm character
-  if config.get().confirmation.mapping[keys] then
-    local c = config.get().confirmation.mapping[keys]
-    local e = core.menu:get_selected_entry() or (c.select and core.menu:get_first_entry())
-    if not e then
+  for key, c in pairs(config.get().mapping) do
+    if key == keys then
+      if c.type == 'confirm' then
+        local e = core.menu:get_selected_entry() or (c.select and core.menu:get_first_entry())
+        if e then
+          core.confirm(e, {
+            behavior = c.behavior,
+          }, function()
+            core.complete(core.get_context({ reason = types.cmp.ContextReason.TriggerOnly }))
+          end)
+          return
+        end
+      elseif c.type == 'complete' then
+        core.complete(core.get_context({ reason = types.cmp.ContextReason.Manual }))
+        return
+      elseif c.type == 'close' then
+        if vim.fn.pumvisible() == 1 then
+          core.reset()
+          return
+        end
+      elseif c.type == 'scroll.up' then
+        if core.menu.float:is_visible() then
+          core.menu.float:scroll(-c.delta)
+          return
+        end
+      elseif c.type == 'scroll.down' then
+        if core.menu.float:is_visible() then
+          core.menu.float:scroll(c.delta)
+          return
+        end
+      elseif c.type == 'item.next' then
+        if vim.fn.pumvisible() == 1 then
+          keymap.feedkeys('<C-n>', 'n')
+          return
+        end
+      elseif c.type == 'item.prev' then
+        if vim.fn.pumvisible() == 1 then
+          keymap.feedkeys('<C-p>', 'n')
+          return
+        end
+      end
       return fallback()
     end
-    core.confirm(e, {
-      behavior = c.behavior,
-    }, function()
-      core.complete(core.get_context({ reason = types.cmp.ContextReason.TriggerOnly }))
-    end)
-    return
   end
 
   --Commit character. NOTE: This has a lot of cmp specific implementation to make more user-friendly.
@@ -101,7 +121,7 @@ core.on_keymap = function(keys, fallback)
   local e = core.menu:get_selected_entry()
   if e and vim.tbl_contains(e:get_commit_characters(), chars) then
     local is_printable = char.is_printable(string.byte(chars, 1))
-    return core.confirm(e, {
+    core.confirm(e, {
       behavior = is_printable and 'insert' or 'replace',
     }, function()
       local ctx = core.get_context()
@@ -112,6 +132,7 @@ core.on_keymap = function(keys, fallback)
         core.reset()
       end
     end)
+    return
   end
 
   fallback()
@@ -119,10 +140,7 @@ end
 
 ---Prepare completion
 core.prepare = function()
-  for keys in pairs(config.get().confirmation.mapping) do
-    keymap.listen(keys, core.on_keymap)
-  end
-  for keys in pairs(config.get().documentation.mapping) do
+  for keys in pairs(config.get().mapping) do
     keymap.listen(keys, core.on_keymap)
   end
 end

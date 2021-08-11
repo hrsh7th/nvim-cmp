@@ -29,20 +29,10 @@ return function()
       winhighlight = 'NormalFloat:CmpDocumentation,FloatBorder:CmpDocumentationBorder',
       maxwidth = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
       maxheight = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
-      mapping = {
-        ['<C-d>'] = types.cmp.ScrollDirection.Up,
-        ['<C-f>'] = types.cmp.ScrollDirection.Down,
-      }
     },
 
     confirmation = {
       default_behavior = types.cmp.ConfirmBehavior.Replace,
-      mapping = {
-        ['<CR>'] = {
-          behavior = types.cmp.ConfirmBehavior.Replace,
-          select = true,
-        },
-      }
     },
 
     sorting = {
@@ -57,6 +47,8 @@ return function()
         compare.order,
       }
     },
+
+    mapping = {},
 
     formatting = {
       format = function(e, suggest_offset)

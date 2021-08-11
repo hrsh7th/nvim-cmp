@@ -102,7 +102,7 @@ end
 ---Close floating window
 float.close = async.throttle(
   vim.schedule_wrap(function(self)
-    if self.win and vim.api.nvim_win_is_valid(self.win) then
+    if self:is_visible() then
       vim.api.nvim_win_close(self.win, true)
     end
     self.entry = nil
@@ -113,7 +113,7 @@ float.close = async.throttle(
 )
 
 float.scroll = function(self, delta)
-  if self.win and vim.api.nvim_win_is_valid(self.win) then
+  if self:is_visible() then
     local info = vim.fn.getwininfo(self.win)[1] or {}
     local buf = vim.api.nvim_win_get_buf(self.win)
     local top = info.topline or 1
@@ -127,6 +127,10 @@ float.scroll = function(self, delta)
       end)
     end, 0)
   end
+end
+
+float.is_visible = function(self)
+  return self.win and vim.api.nvim_win_is_valid(self.win)
 end
 
 return float
