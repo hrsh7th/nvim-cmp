@@ -102,7 +102,7 @@ cmp.setup {
 }
 ```
 
-### mapping (type: table<string, cmp.MappingConfig>)
+### mapping (type: table<string, fun(core: cmp.Core, fallback: function)>)
 
 Define mappings with `cmp.mapping` helper.
 
