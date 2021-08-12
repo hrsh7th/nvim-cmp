@@ -31,7 +31,7 @@ end
 mapping.next_item = function()
   return function(_, fallback)
     if vim.fn.pumvisible() == 1 then
-      vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-n>', 'n'))
+      vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-n>', 'n', true, true))
     else
       fallback()
     end
@@ -41,7 +41,7 @@ end
 mapping.prev_item = function()
   return function(_, fallback)
     if vim.fn.pumvisible() == 1 then
-      vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-p>', 'n'))
+      vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-p>', 'n', true, true))
     else
       fallback()
     end
