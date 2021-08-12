@@ -11,7 +11,7 @@ end
 mapping.close = function()
   return function(core, fallback)
     if vim.fn.pumvisible() == 1 then
-      core.close()
+      core.reset()
     else
       fallback()
     end
