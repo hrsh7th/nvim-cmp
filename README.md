@@ -36,10 +36,10 @@ lua <<EOF
 
     -- You must set mapping.
     mapping = {
-      ['<C-p>'] = cmp.mapping.item.prev(),
-      ['<C-n>'] = cmp.mapping.item.next(),
-      ['<C-d>'] = cmp.mapping.scroll.up(),
-      ['<C-f>'] = cmp.mapping.scroll.down(),
+      ['<C-p>'] = cmp.mapping.prev_item(),
+      ['<C-n>'] = cmp.mapping.next_item(),
+      ['<C-d>'] = cmp.mapping.scroll(-4),
+      ['<C-f>'] = cmp.mapping.scroll(4),
       ['<C-Space>'] = cmp.mapping.complete(),
       ['<C-e>'] = cmp.mapping.close(),
       ['<CR>'] = cmp.mapping.confirm({
@@ -84,10 +84,10 @@ cmp.setup {
     comparators = { ... },
   },
   mapping = {
-    ['<C-p>'] = cmp.mapping.item.prev(),
-    ['<C-n>'] = cmp.mapping.item.next(),
-    ['<C-d>'] = cmp.mapping.scroll.up(),
-    ['<C-f>'] = cmp.mapping.scroll.down(),
+    ['<C-p>'] = cmp.mapping.prev_item(),
+    ['<C-n>'] = cmp.mapping.next_item(),
+    ['<C-d>'] = cmp.mapping.scroll(-4),
+    ['<C-f>'] = cmp.mapping.scroll(4),
     ['<C-Space>'] = cmp.mapping.complete(),
     ['<C-e>'] = cmp.mapping.close(),
     ['<CR>'] = cmp.mapping.confirm({
@@ -106,13 +106,12 @@ Define mappings with `cmp.mapping` helper.
 
 The `cmp.mapping` helper has the below functions.
 
-*cmp.mapping.confirm({ select = true or false, behavior = cmp.ConfirmBehavior.Insert or cmp.ConfirmBehavior.Replace })*
-*cmp.mapping.complete()*
-*cmp.mapping.close()*
-*cmp.mapping.item.next()*
-*cmp.mapping.item.prev()*
-*cmp.mapping.scroll.up()*
-*cmp.mapping.scroll.down()*
+- *cmp.mapping.confirm({ select = true or false, behavior = cmp.ConfirmBehavior.Insert or cmp.ConfirmBehavior.Replace })*
+- *cmp.mapping.complete()*
+- *cmp.mapping.close()*
+- *cmp.mapping.next_item()*
+- *cmp.mapping.prev_item()*
+- *cmp.mapping.scroll(delta = number)*
 
 ### completion.autocomplete (type: cmp.TriggerEvent[])
 

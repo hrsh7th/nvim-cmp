@@ -9,6 +9,7 @@ local misc = require('cmp.utils.misc')
 local config = require('cmp.config')
 local types = require('cmp.types')
 
+---@class cmp.Core
 local core = {}
 
 core.SOURCE_TIMEOUT = 500
@@ -71,48 +72,9 @@ end
 
 ---Keypress handler
 core.on_keymap = function(keys, fallback)
-  for key, c in pairs(config.get().mapping) do
+  for key, action in pairs(config.get().mapping) do
     if key == keys then
-      if c.type == 'confirm' then
-        local e = core.menu:get_selected_entry() or (c.select and core.menu:get_first_entry())
-        if e then
-          core.confirm(e, {
-            behavior = c.behavior,
-          }, function()
-            core.complete(core.get_context({ reason = types.cmp.ContextReason.TriggerOnly }))
-          end)
-          return
-        end
-      elseif c.type == 'complete' then
-        core.complete(core.get_context({ reason = types.cmp.ContextReason.Manual }))
-        return
-      elseif c.type == 'close' then
-        if vim.fn.pumvisible() == 1 then
-          core.reset()
-          return
-        end
-      elseif c.type == 'scroll.up' then
-        if core.menu.float:is_visible() then
-          core.menu.float:scroll(-c.delta)
-          return
-        end
-      elseif c.type == 'scroll.down' then
-        if core.menu.float:is_visible() then
-          core.menu.float:scroll(c.delta)
-          return
-        end
-      elseif c.type == 'item.next' then
-        if vim.fn.pumvisible() == 1 then
-          keymap.feedkeys('<C-n>', 'n')
-          return
-        end
-      elseif c.type == 'item.prev' then
-        if vim.fn.pumvisible() == 1 then
-          keymap.feedkeys('<C-p>', 'n')
-          return
-        end
-      end
-      return fallback()
+      return action(core, fallback)
     end
   end
 

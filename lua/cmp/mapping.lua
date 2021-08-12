@@ -2,58 +2,66 @@ local types = require('cmp.types')
 
 local mapping = {}
 
----Create complete mapping
 mapping.complete = function()
-  return {
-    type = 'complete',
-  }
+  return function(core)
+    core.complete(core.get_context({ reason = types.cmp.ContextReason.Manual }))
+  end
 end
 
----Create close mapping
 mapping.close = function()
-  return {
-    type = 'close',
-  }
+  return function(core, fallback)
+    if vim.fn.pumvisible() == 1 then
+      core.close()
+    else
+      fallback()
+    end
+  end
 end
 
----Create scroll mapping
-mapping.scroll = {
-  up = function(delta)
-    return {
-      type = 'scroll.up',
-      delta = delta or 4,
-    }
-  end,
-  down = function(delta)
-    return {
-      type = 'scroll.down',
-      delta = delta or 4,
-    }
-  end,
-}
+mapping.scroll = function(delta)
+  return function(core, fallback)
+    if core.menu.float:is_visible() then
+      core.menu.float:scroll(delta)
+    else
+      fallback()
+    end
+  end
+end
 
----Create item mapping
-mapping.item = {
-  prev = function()
-    return {
-      type = 'item.prev',
-    }
-  end,
-  next = function()
-    return {
-      type = 'item.next',
-    }
-  end,
-}
+mapping.next_item = function()
+  return function(_, fallback)
+    if vim.fn.pumvisible() == 1 then
+      vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-n>', 'n'))
+    else
+      fallback()
+    end
+  end
+end
 
----Create confirm mapping
+mapping.prev_item = function()
+  return function(_, fallback)
+    if vim.fn.pumvisible() == 1 then
+      vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-p>', 'n'))
+    else
+      fallback()
+    end
+  end
+end
+
 mapping.confirm = function(option)
   option = option or {}
-  return {
-    type = 'confirm',
-    select = option.select or false,
-    behavior = option.behavior or types.cmp.ConfirmBehavior.Insert,
-  }
+  return function(core, fallback)
+    local e = core.menu:get_selected_entry() or (option.select and core.menu:get_first_entry() or nil)
+    if e then
+      core.confirm(e, {
+        behavior = option.behavior,
+      }, function()
+        core.complete(core.get_context({ reason = types.cmp.ContextReason.TriggerOnly }))
+      end)
+    else
+      fallback()
+    end
+  end
 end
 
 return mapping
