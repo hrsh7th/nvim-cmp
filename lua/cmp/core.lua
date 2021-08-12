@@ -254,6 +254,9 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
         })
       end
       e:execute(function()
+        if config.get().event.on_confirm_done then
+          config.get().event.on_confirm_done(e)
+        end
         if callback then
           callback()
         end

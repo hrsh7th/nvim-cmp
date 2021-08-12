@@ -2,6 +2,7 @@
 
 A completion plugin for neovim written in Lua.
 
+
 Status
 ====================
 
@@ -62,6 +63,7 @@ autocmd FileType markdown lua require'cmp'.setup.buffer {
 \   },
 \ }
 ```
+
 
 Configuration
 ====================
@@ -173,6 +175,7 @@ Default:
   compare.order,
 }
 ```
+
 
 Source creation
 ====================

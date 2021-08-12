@@ -48,6 +48,8 @@ return function()
       }
     },
 
+    event = {},
+
     mapping = {},
 
     formatting = {
