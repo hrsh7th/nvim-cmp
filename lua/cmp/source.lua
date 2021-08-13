@@ -8,6 +8,7 @@ local cache = require('cmp.utils.cache')
 local types = require('cmp.types')
 local async = require('cmp.utils.async')
 local pattern = require('cmp.utils.pattern')
+local char = require('cmp.utils.char')
 
 ---@class cmp.Source
 ---@field public id number
@@ -16,8 +17,8 @@ local pattern = require('cmp.utils.pattern')
 ---@field public cache cmp.Cache
 ---@field public revision number
 ---@field public context cmp.Context
----@field public trigger_kind lsp.CompletionTriggerKind|nil
 ---@field public incomplete boolean
+---@field public is_triggered_by_symbol boolean
 ---@field public entries cmp.Entry[]
 ---@field public offset number
 ---@field public request_offset number
@@ -52,7 +53,7 @@ source.reset = function(self)
   self.revision = self.revision + 1
   self.context = context.empty()
   self.request_offset = -1
-  self.trigger_kind = nil
+  self.is_triggered_by_symbol = false
   self.incomplete = false
   self.entries = {}
   self.offset = -1
@@ -196,8 +197,9 @@ end
 ---@return boolean Return true if not trigger completion.
 source.complete = function(self, ctx, callback)
   local offset = ctx:get_offset(self:get_keyword_pattern())
-
-  local c = config.get()
+  if ctx.cursor.col <= offset then
+    self:reset()
+  end
 
   local before_char = string.sub(ctx.cursor_before_line, -1)
   local before_char_iw = string.match(ctx.cursor_before_line, '(.)%s*$') or before_char
@@ -228,7 +230,7 @@ source.complete = function(self, ctx, callback)
         triggerCharacter = before_char_iw,
       }
     elseif ctx:get_reason() ~= types.cmp.ContextReason.TriggerOnly then
-      if c.completion.keyword_length <= (ctx.cursor.col - offset) then
+      if config.get().completion.keyword_length <= (ctx.cursor.col - offset) then
         if self.incomplete and self.context.cursor.col ~= ctx.cursor.col then
           completion_context = {
             triggerKind = types.lsp.CompletionTriggerKind.TriggerForIncompleteCompletions,
@@ -244,16 +246,16 @@ source.complete = function(self, ctx, callback)
     end
   end
 
-  if ctx.cursor.col <= offset then
-    self:reset()
-  end
-
   if not completion_context then
     if ctx:get_reason() == types.cmp.ContextReason.TriggerOnly then
       self:reset()
     end
     debug.log('skip completion', self.name, self.id)
     return
+  end
+
+  if completion_context.triggerKind == types.lsp.CompletionTriggerKind.TriggerCharacter then
+    self.is_triggered_by_symbol = char.is_symbol(string.byte(completion_context.triggerCharacter))
   end
 
   debug.log('request', self.name, self.id, offset, vim.inspect(completion_context))
@@ -274,7 +276,6 @@ source.complete = function(self, ctx, callback)
       if #(misc.safe(response) and response.items or response or {}) > 0 then
         debug.log('retrieve', self.name, self.id, #(response.items or response))
         self.status = source.SourceStatus.COMPLETED
-        self.trigger_kind = completion_context.triggerKind
         self.incomplete = response.isIncomplete or false
         self.entries = {}
         for i, item in ipairs(response.items or response) do

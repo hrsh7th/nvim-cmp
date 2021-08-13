@@ -1,7 +1,6 @@
 local debug = require('cmp.utils.debug')
 local async = require('cmp.utils.async')
 local float = require('cmp.float')
-local types = require('cmp.types')
 local config = require('cmp.config')
 local autocmd = require('cmp.autocmd')
 local check = require('cmp.utils.check')
@@ -73,11 +72,11 @@ menu.update = check.wrap(function(self, ctx, sources)
   local entry_map = {}
 
   -- check the source triggered by character
-  local has_triggered_by_character_source = false
+  local has_triggered_by_symbol_source = false
   for _, s in ipairs(sources) do
     if s:has_items() then
-      if s.trigger_kind == types.lsp.CompletionTriggerKind.TriggerCharacter then
-        has_triggered_by_character_source = true
+      if s.is_triggered_by_symbol then
+        has_triggered_by_symbol_source = true
         break
       end
     end
@@ -87,7 +86,7 @@ menu.update = check.wrap(function(self, ctx, sources)
   local offset = ctx.cursor.col
   for i, s in ipairs(sources) do
     if s:has_items() and s.offset <= offset then
-      if not has_triggered_by_character_source or s.trigger_kind == types.lsp.CompletionTriggerKind.TriggerCharacter then
+      if not has_triggered_by_symbol_source or s.is_triggered_by_symbol then
         -- source order priority bonus.
         local priority = (#sources - (i - 1)) * config.get().sorting.priority_weight
 
