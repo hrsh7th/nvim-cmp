@@ -151,7 +151,7 @@ source.get_default_replace_range = function(self)
   end
 
   return self.cache:ensure({ 'get_default_replace_range', self.revision }, function()
-    local _, e = pattern.offset('^' .. self:get_keyword_pattern(), string.sub(self.context.cursor_line, self.offset))
+    local _, e = pattern.offset('^' .. '\\%(' .. self:get_keyword_pattern() .. '\\)', string.sub(self.context.cursor_line, self.offset))
     return {
       start = {
         line = self.context.cursor.row - 1,
