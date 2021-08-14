@@ -52,8 +52,10 @@ end
 keymap.feedkeys = setmetatable({
   callbacks = {},
 }, {
-__call = function(self, keys, mode, callback)
-    vim.fn.feedkeys(keymap.t(keys), mode)
+  __call = function(self, keys, mode, callback)
+    if #keys ~= 0 then
+      vim.fn.feedkeys(keymap.t(keys), mode)
+    end
 
     if callback then
       local current_mode = string.sub(vim.api.nvim_get_mode().mode, 1, 1)
@@ -102,7 +104,7 @@ keymap.listen = setmetatable({
       if existing then
         break
       end
-      if map.lhs == keys then
+      if keymap.t(map.lhs) == keymap.t(keys) then
         existing = map
       end
     end
@@ -110,7 +112,7 @@ keymap.listen = setmetatable({
       if existing then
         break
       end
-      if map.lhs == keys then
+      if keymap.t(map.lhs) == keymap.t(keys) then
         existing = map
         break
       end
