@@ -9,6 +9,23 @@ Status
 not yet stable but ok to use (for testing).
 
 
+Features
+====================
+
+- Support pairs-wise plugin automatically
+- Fully customizable via Lua functions (WIP)
+- Fully supported LSP's Completion capabilities
+  - Snippets
+  - CommitCharacters
+  - TriggerCharacters
+  - TextEdit and InsertReplaceTextEdit
+  - AdditionalTextEdits
+  - Markdown documentation
+  - Execute commands (Some LSP server needs it to auto-importing. e.g. `sumneko_lua` or `purescript-language-server`)
+  - Preselect
+  - CompletionItemTags
+
+
 Setup
 ====================
 
