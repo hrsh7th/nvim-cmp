@@ -75,7 +75,7 @@ cmp.ScrollDirection.Down = 'down'
 ---@field public comparators function[]
 
 ---@class cmp.FormattingConfig
----@field public format fun(entry: cmp.Entry, suggeset_offset: number): vim.CompletedItem
+---@field public format fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem
 
 ---@class cmp.SnippetConfig
 ---@field public expand fun(args: cmp.SnippetExpansionParams)

@@ -163,6 +163,24 @@ vim's `completeopt` setting. Warning: Be careful when changing this value.
 Default: `menu,menuone,noselect`
 
 
+### formatting.format (type: fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem)
+
+A function to customize completion menu.
+
+You can display the fancy icons to completion-menu with [lspkind-nvim](https://github.com/onsails/lspkind-nvim).
+
+```lua
+local lspkind = require('lspkind')
+cmp.setup {
+  formatting = {
+    format = function(entry, vim_item)
+      vim_item.kind = lspkind.presets.default[vim_item.kind]
+      return vim_item
+    end
+  }
+}
+```
+
 ### sorting.priority_weight (type: number)
 
 When sorting completion items before displaying them, boost each item's score

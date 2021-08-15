@@ -53,52 +53,8 @@ return function()
     mapping = {},
 
     formatting = {
-      format = function(e, suggest_offset)
-        local item = e:get_completion_item()
-        local word = e:get_word()
-        local abbr = str.trim(item.label)
-
-        -- ~ indicator
-        if #(misc.safe(item.additionalTextEdits) or {}) > 0 then
-          abbr = abbr .. '~'
-        elseif item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-          local insert_text = e:get_insert_text()
-          if word ~= insert_text then
-            abbr = abbr .. '~'
-          end
-        end
-
-        -- deprecated
-        if item.deprecated or vim.tbl_contains(item.tags or {}, types.lsp.CompletionItemTag.Deprecated) then
-          abbr = str.strikethrough(abbr)
-        end
-
-        -- append delta text
-        if suggest_offset < e:get_offset() then
-          word = string.sub(e.context.cursor_before_line, suggest_offset, e:get_offset() - 1) .. word
-        end
-
-        -- labelDetails.
-        local menu = nil
-        if misc.safe(item.labelDetails) then
-          menu = ''
-          if misc.safe(item.labelDetails.parameters) then
-            menu = menu .. item.labelDetails.parameters
-          end
-          if misc.safe(item.labelDetails.type) then
-            menu = menu .. item.labelDetails.type
-          end
-          if misc.safe(item.labelDetails.qualifier) then
-            menu = menu .. item.labelDetails.qualifier
-          end
-        end
-
-        return {
-          word = word,
-          abbr = abbr,
-          kind = types.lsp.CompletionItemKind[e:get_kind()] or types.lsp.CompletionItemKind[1],
-          menu = menu,
-        }
+      format = function(_, vim_item)
+        return vim_item
       end
     },
 

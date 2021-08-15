@@ -186,24 +186,72 @@ entry.get_insert_text = function(self)
 end
 
 ---Make vim.CompletedItem
----@param suggeset_offset number
+---@param suggest_offset number
 ---@return vim.CompletedItem
-entry.get_vim_item = function(self, suggeset_offset)
-  return self.cache:ensure({ 'get_vim_item', suggeset_offset }, function()
-    local item = config.get().formatting.format(self, suggeset_offset)
-    item.equal = 1
-    item.empty = 1
-    item.dup = self.completion_item.dup or 1
-    item.user_data = { cmp = self.id }
+entry.get_vim_item = function(self, suggest_offset)
+  return self.cache:ensure({ 'get_vim_item', suggest_offset, self.resolved_completion_item and 1 or 0 }, function()
+    local completion_item = self:get_completion_item()
+    local word = self:get_word()
+    local abbr = str.trim(completion_item.label)
 
-    for i = 1, #item.word - 1 do
-      if str.has_prefix(self.context.cursor_after_line, string.sub(item.word, i, #item.word)) then
-        item.word = string.sub(item.word, 1, i - 1)
+    -- ~ indicator
+    if #(misc.safe(completion_item.additionalTextEdits) or {}) > 0 then
+      abbr = abbr .. '~'
+    elseif completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
+      local insert_text = self:get_insert_text()
+      if word ~= insert_text then
+        abbr = abbr .. '~'
+      end
+    end
+
+    -- deprecated
+    if completion_item.deprecated or vim.tbl_contains(completion_item.tags or {}, types.lsp.CompletionItemTag.Deprecated) then
+      abbr = str.strikethrough(abbr)
+    end
+
+    -- append delta text
+    if suggest_offset < self:get_offset() then
+      word = string.sub(self.context.cursor_before_line, suggest_offset, self:get_offset() - 1) .. word
+    end
+
+    -- labelDetails.
+    local menu = nil
+    if misc.safe(completion_item.labelDetails) then
+      menu = ''
+      if misc.safe(completion_item.labelDetails.parameters) then
+        menu = menu .. completion_item.labelDetails.parameters
+      end
+      if misc.safe(completion_item.labelDetails.type) then
+        menu = menu .. completion_item.labelDetails.type
+      end
+      if misc.safe(completion_item.labelDetails.qualifier) then
+        menu = menu .. completion_item.labelDetails.qualifier
+      end
+    end
+
+    -- remove duplicated string.
+    for i = 1, #word - 1 do
+      if str.has_prefix(self.context.cursor_after_line, string.sub(word, i, #word)) then
+        word = string.sub(word, 1, i - 1)
         break
       end
     end
 
-    return item
+    local vim_item = {
+      word = word,
+      abbr = abbr,
+      kind = types.lsp.CompletionItemKind[self:get_kind()] or types.lsp.CompletionItemKind[1],
+      menu = menu,
+    }
+    if config.get().formatting.format then
+      vim_item = config.get().formatting.format(self, vim_item)
+    end
+    vim_item.equal = 1
+    vim_item.empty = 1
+    vim_item.dup = self.completion_item.dup or 1
+    vim_item.user_data = { cmp = self.id }
+
+    return vim_item
   end)
 end
 
