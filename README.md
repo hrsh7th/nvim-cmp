@@ -26,7 +26,8 @@ Then setup configuration.
 ```viml
 " Setup global configuration. More on configuration below.
 lua <<EOF
-  require'cmp'.setup {
+  local cmp = require('cmp')
+  cmp.setup {
     -- You should change this example to your chosen snippet engine.
     snippet = {
       expand = function(args)
@@ -48,7 +49,7 @@ lua <<EOF
         select = true,
       })
     },
-  
+
     -- You should specify your *installed* sources.
     sources = {
       { name = 'buffer' }
@@ -119,7 +120,7 @@ The `cmp.mapping` helper has the below functions.
 
 Which events should trigger `autocompletion`.
 
-If you leave this empty or `nil`, `nvim-cmp` does not perform completion automatically. 
+If you leave this empty or `nil`, `nvim-cmp` does not perform completion automatically.
 You can still use manual completion though (like omni-completion).
 
 Default: `{types.cmp.TriggerEvent.InsertEnter, types.cmp.TriggerEvent.TextChanged}`
@@ -163,7 +164,7 @@ to return something other than `nil` takes precedence.
 
 Each function must return `boolean|nil`.
 
-Default: 
+Default:
 ```lua
 {
   compare.offset,
