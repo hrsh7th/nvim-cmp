@@ -195,6 +195,22 @@ Default:
 ```
 
 
+FAQ
+====================
+
+#### How to set up like nvim-compe's `preselect = 'always'`?
+
+You can use the following configuration.
+
+```lua
+cmp.setup {
+  completion = {
+    completeopt = 'menu,menuone,noinsert',
+  }
+}
+```
+
+
 Source creation
 ====================
 
