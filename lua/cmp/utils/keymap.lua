@@ -144,8 +144,9 @@ misc.set(_G, { 'cmp', 'utils', 'keymap', 'expr' }, function(keys)
   local callback = keymap.listen.cache:get({ bufnr, keys }).callback
   callback(keys, function()
     vim.api.nvim_buf_set_keymap(0, 'i', '<Plug>(cmp-utils-keymap:_)', existing.rhs, {
-      expr = existing.expr == 1,
-      noremap = existing.noremap == 1,
+      expr = existing.expr ~= 0,
+      noremap = existing.noremap ~= 0,
+      script = existing.script ~= 0,
       silent = true,
     })
     vim.fn.feedkeys(keymap.t('<Plug>(cmp-utils-keymap:_)'), 'i')
