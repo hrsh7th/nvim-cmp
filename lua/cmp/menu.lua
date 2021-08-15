@@ -75,7 +75,7 @@ menu.update = check.wrap(function(self, ctx, sources)
   local has_triggered_by_symbol_source = false
   for _, s in ipairs(sources) do
     if s:has_items() then
-      if s.is_triggered_by_symbol then
+      if #s:get_entries(ctx) > 0 and s.is_triggered_by_symbol then
         has_triggered_by_symbol_source = true
         break
       end
@@ -90,8 +90,7 @@ menu.update = check.wrap(function(self, ctx, sources)
         -- source order priority bonus.
         local priority = (#sources - (i - 1)) * config.get().sorting.priority_weight
 
-        local filtered = s:get_entries(ctx)
-        for _, e in ipairs(filtered) do
+        for _, e in ipairs(s:get_entries(ctx)) do
           e.score = e.score + priority
           table.insert(entries, e)
           entry_map[e.id] = e

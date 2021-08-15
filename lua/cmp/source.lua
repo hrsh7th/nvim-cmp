@@ -273,7 +273,7 @@ source.complete = function(self, ctx, callback)
     },
     self.complete_dedup(function(response)
       self.revision = self.revision + 1
-      if #(misc.safe(response) and response.items or response or {}) > 0 then
+      if (misc.safe(response) and misc.safe(response.items) or misc.safe(response)) ~= nil then
         debug.log('retrieve', self.name, self.id, #(response.items or response))
         self.status = source.SourceStatus.COMPLETED
         self.incomplete = response.isIncomplete or false
