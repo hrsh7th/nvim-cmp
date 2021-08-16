@@ -18,7 +18,7 @@ core.SOURCE_TIMEOUT = 500
 core.menu = menu.new({
   on_select = function(e)
     for _, c in ipairs(e:get_commit_characters()) do
-      keymap.listen(c, core.on_keymap)
+      keymap.listen('i', c, core.on_keymap)
     end
   end,
 })
@@ -102,8 +102,16 @@ end
 
 ---Prepare completion
 core.prepare = function()
-  for keys in pairs(config.get().mapping) do
-    keymap.listen(keys, core.on_keymap)
+  for keys, action in pairs(config.get().mapping) do
+    if type(action) == 'function' then
+      action = {
+        modes = { 'i' },
+        action = action,
+      }
+    end
+    for _, mode in ipairs(action.modes) do
+      keymap.listen(mode, keys, core.on_keymap)
+    end
   end
 end
 

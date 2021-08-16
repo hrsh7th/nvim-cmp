@@ -74,8 +74,8 @@ menu.update = check.wrap(function(self, ctx, sources)
   -- check the source triggered by character
   local has_triggered_by_symbol_source = false
   for _, s in ipairs(sources) do
-    if s:has_items() then
-      if #s:get_entries(ctx) > 0 and s.is_triggered_by_symbol then
+    if #s:get_entries(ctx) > 0 then
+      if s.is_triggered_by_symbol then
         has_triggered_by_symbol_source = true
         break
       end
@@ -85,7 +85,7 @@ menu.update = check.wrap(function(self, ctx, sources)
   -- create filtered entries.
   local offset = ctx.cursor.col
   for i, s in ipairs(sources) do
-    if s:has_items() and s.offset <= offset then
+    if s.offset <= offset then
       if not has_triggered_by_symbol_source or s.is_triggered_by_symbol then
         -- source order priority bonus.
         local priority = (#sources - (i - 1)) * config.get().sorting.priority_weight

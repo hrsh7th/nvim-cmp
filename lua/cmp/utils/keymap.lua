@@ -91,16 +91,16 @@ end)
 keymap.listen = setmetatable({
   cache = cache.new(),
 }, {
-  __call = function(_, keys, callback)
+  __call = function(_, mode, keys, callback)
     keys = keymap.to_keymap(keys)
 
     local bufnr = vim.api.nvim_get_current_buf()
-    if keymap.listen.cache:get({ bufnr, keys }) then
+    if keymap.listen.cache:get({ mode, bufnr, keys }) then
       return
     end
 
     local existing = nil
-    for _, map in ipairs(vim.api.nvim_buf_get_keymap(0, 'i')) do
+    for _, map in ipairs(vim.api.nvim_buf_get_keymap(0, mode)) do
       if existing then
         break
       end
@@ -108,7 +108,7 @@ keymap.listen = setmetatable({
         existing = map
       end
     end
-    for _, map in ipairs(vim.api.nvim_get_keymap('i')) do
+    for _, map in ipairs(vim.api.nvim_get_keymap(mode)) do
       if existing then
         break
       end
@@ -125,11 +125,12 @@ keymap.listen = setmetatable({
       noremap = 1,
     }
 
-    keymap.listen.cache:set({ bufnr, keys }, {
+    keymap.listen.cache:set({ mode, bufnr, keys }, {
+      mode = mode,
       existing = existing,
       callback = callback,
     })
-    vim.api.nvim_buf_set_keymap(0, 'i', keys, ('v:lua.cmp.utils.keymap.expr("%s")'):format(keymap.escape(keys)), {
+    vim.api.nvim_buf_set_keymap(0, mode, keys, ('v:lua.cmp.utils.keymap.expr("%s", "%s")'):format(mode, keymap.escape(keys)), {
       expr = true,
       nowait = true,
       noremap = true,
@@ -137,13 +138,13 @@ keymap.listen = setmetatable({
     })
   end,
 })
-misc.set(_G, { 'cmp', 'utils', 'keymap', 'expr' }, function(keys)
+misc.set(_G, { 'cmp', 'utils', 'keymap', 'expr' }, function(mode, keys)
   local bufnr = vim.api.nvim_get_current_buf()
 
-  local existing = keymap.listen.cache:get({ bufnr, keys }).existing
-  local callback = keymap.listen.cache:get({ bufnr, keys }).callback
+  local existing = keymap.listen.cache:get({ mode, bufnr, keys }).existing
+  local callback = keymap.listen.cache:get({ mode, bufnr, keys }).callback
   callback(keys, function()
-    vim.api.nvim_buf_set_keymap(0, 'i', '<Plug>(cmp-utils-keymap:_)', existing.rhs, {
+    vim.api.nvim_buf_set_keymap(0, mode, '<Plug>(cmp-utils-keymap:_)', existing.rhs, {
       expr = existing.expr ~= 0,
       noremap = existing.noremap ~= 0,
       script = existing.script ~= 0,
