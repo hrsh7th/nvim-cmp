@@ -3,8 +3,15 @@ local types = require('cmp.types')
 local mapping = {}
 
 mapping.mode = function(modes, action)
+  if type(action) == 'table' then
+    if type(action.action) == 'function' then
+      action = action.action
+    else
+      error('`action` must be function or result of `cmp.mapping.mode`.')
+    end
+  end
   return setmetatable({
-    modes = modes or { 'i' },
+    modes = modes,
     action = action,
   }, {
     __call = function(_, ...)

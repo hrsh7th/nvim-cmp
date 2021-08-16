@@ -122,6 +122,8 @@ cmp.setup {
 
 ### mapping (type: table<string, fun(core: cmp.Core, fallback: function)>)
 
+_TODO: This API is not stable yet. It can be changed with no announcement._
+
 Define mappings with `cmp.mapping` helper.
 
 The `cmp.mapping` helper has the below functions.
@@ -132,6 +134,36 @@ The `cmp.mapping` helper has the below functions.
 - *cmp.mapping.next_item()*
 - *cmp.mapping.prev_item()*
 - *cmp.mapping.scroll(delta = number)*
+
+You can use `<Tab>`and `<S-Tab>` for navigating menu.
+
+```lua
+-- This is just an example of LusSnip integration. You have to adjust it yourself.
+local luasnip = require'luasnip'
+local cmp = require'cmp'
+cmp.setup {
+  mapping = {
+    ['<Tab>'] = cmp.mapping.mode({ 'i', 's' }, function(core, fallback)
+      if vim.fn.pumvisible() == 1 then
+        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-n>', true, true, true), 'n')
+      elseif luasnip.expand_or_jumpable() then
+        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>luasnip-expand-or-jump', true, true, true), '')
+      else
+        fallback()
+      end
+    end),
+    ['<S-Tab>'] = cmp.mapping.mode({ 'i', 's' }, function(core, fallback)
+      if vim.fn.pumvisible() == 1 then
+        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-p>', true, true, true), 'n')
+      elseif luasnip.jumpable(-1) then
+        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>luasnip-jump-prev', true, true, true), '')
+      else
+        fallback()
+      end
+    end)
+  }
+}
+```
 
 ### completion.autocomplete (type: cmp.TriggerEvent[])
 
