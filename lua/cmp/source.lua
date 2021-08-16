@@ -102,7 +102,7 @@ source.get_entries = function(self, ctx)
   end)()
 
   return self.cache:ensure({ 'get_entries', self.revision, ctx.cursor_before_line }, function()
-    debug.log('filter', self:get_debug_name(), #(prev_entries or self.entries))
+    debug.log(self:get_debug_name(), 'filter', #(prev_entries or self.entries))
 
     local inputs = {}
     local entries = {}
@@ -167,10 +167,11 @@ end
 
 ---Return source name.
 source.get_debug_name = function(self)
+  local name = self.name
   if self.source.get_debug_name then
-    return self.source:get_debug_name()
+    name = self.source:get_debug_name()
   end
-  return self.name .. '(' .. self.id .. ')'
+  return name .. '(' .. self.id .. ')'
 end
 
 ---Return the source is available or not.
@@ -258,7 +259,7 @@ source.complete = function(self, ctx, callback)
     if ctx:get_reason() == types.cmp.ContextReason.TriggerOnly then
       self:reset()
     end
-    debug.log('skip completion', self:get_debug_name())
+    debug.log(self:get_debug_name(), 'skip completion')
     return
   end
 
@@ -266,7 +267,7 @@ source.complete = function(self, ctx, callback)
     self.is_triggered_by_symbol = char.is_symbol(string.byte(completion_context.triggerCharacter))
   end
 
-  debug.log('request', self:get_debug_name(), offset, vim.inspect(completion_context))
+  debug.log(self:get_debug_name(), 'request', offset, vim.inspect(completion_context))
   local prev_status = self.status
   self.status = source.SourceStatus.FETCHING
   self.request_offset = offset
@@ -282,7 +283,7 @@ source.complete = function(self, ctx, callback)
     self.complete_dedup(function(response)
       self.revision = self.revision + 1
       if (misc.safe(response) and misc.safe(response.items) or misc.safe(response)) ~= nil then
-        debug.log('retrieve', self:get_debug_name(), #(response.items or response))
+        debug.log(self:get_debug_name(), 'retrieve', #(response.items or response))
         self.status = source.SourceStatus.COMPLETED
         self.incomplete = response.isIncomplete or false
         self.entries = {}
@@ -292,7 +293,7 @@ source.complete = function(self, ctx, callback)
           self.offset = math.min(self.offset, e:get_offset())
         end
       else
-        debug.log('continue', self:get_debug_name(), 'nil')
+        debug.log(self:get_debug_name(), 'continue', 'nil')
         self.status = prev_status
       end
       callback()
