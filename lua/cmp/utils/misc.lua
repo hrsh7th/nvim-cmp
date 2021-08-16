@@ -112,4 +112,28 @@ misc.copy = function(tbl)
   return copy
 end
 
+---Safe version of vim.str_utfindex
+---@param text string
+---@param vimindex number
+---@return number
+misc.to_utfindex = function(text, vimindex)
+  return vim.str_utfindex(text, math.max(0, math.min(vimindex - 1, #text)))
+end
+
+---Safe version of vim.str_byteindex
+---@param text string
+---@param utfindex number
+---@return number
+misc.to_vimindex = function(text, utfindex)
+  for i = utfindex, 1, -1 do
+    local s, v = pcall(function()
+      return vim.str_byteindex(text, i) + 1
+    end)
+    if s then
+      return v
+    end
+  end
+  return utfindex + 1
+end
+
 return misc

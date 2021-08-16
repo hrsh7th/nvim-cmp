@@ -1,3 +1,5 @@
+
+local misc = require "cmp.utils.misc"
 ---@see https://microsoft.github.io/language-server-protocol/specifications/specification-current/
 ---@class lsp
 local lsp = {}
@@ -14,17 +16,10 @@ lsp.Position.to_vim = function(buf, position)
   end
   local lines = vim.api.nvim_buf_get_lines(buf, position.line, position.line + 1, false)
   if #lines > 0 then
-    for i = position.character, 1, -1 do
-      local s, v = pcall(function()
-        return {
-          row = position.line + 1,
-          col = vim.str_byteindex(lines[1], i) + 1
-        }
-      end)
-      if s then
-        return v
-      end
-    end
+    return {
+      row = position.line + 1,
+      col = misc.to_vimindex(lines[1], position.character)
+    }
   end
   return {
     row = position.line + 1,
@@ -44,7 +39,7 @@ lsp.Position.to_lsp = function(buf, position)
   if #lines > 0 then
     return {
       line = position.row - 1,
-      character = vim.str_utfindex(lines[1], math.max(0, math.min(position.col - 1, #lines[1]))),
+      character = misc.to_utfindex(lines[1], position.col),
     }
   end
   return {

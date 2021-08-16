@@ -133,11 +133,11 @@ source.get_default_insert_range = function(self)
     return {
       start = {
         line = self.context.cursor.row - 1,
-        character = vim.str_utfindex(self.context.cursor_line, self.offset - 1),
+        character = misc.to_utfindex(self.context.cursor_line, self.offset),
       },
       ['end'] = {
         line = self.context.cursor.row - 1,
-        character = vim.str_utfindex(self.context.cursor_line, self.context.cursor.col - 1),
+        character = misc.to_utfindex(self.context.cursor_line, self.context.cursor.col),
       },
     }
   end)
@@ -155,11 +155,11 @@ source.get_default_replace_range = function(self)
     return {
       start = {
         line = self.context.cursor.row - 1,
-        character = vim.str_utfindex(self.context.cursor_line, self.offset - 1),
+        character = misc.to_utfindex(self.context.cursor_line, self.offset),
       },
       ['end'] = {
         line = self.context.cursor.row - 1,
-        character = vim.str_utfindex(self.context.cursor_line, e and self.offset + e - 2 or self.context.cursor.col - 1),
+        character = misc.to_utfindex(self.context.cursor_line, e and self.offset + e - 1 or self.context.cursor.col),
       },
     }
   end)

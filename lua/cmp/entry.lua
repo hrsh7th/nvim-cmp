@@ -53,7 +53,7 @@ entry.get_offset = function(self)
     if misc.safe(self.completion_item.textEdit) then
       local range = misc.safe(self.completion_item.textEdit.insert) or misc.safe(self.completion_item.textEdit.range)
       if range then
-        local c = vim.str_byteindex(self.context.cursor_line, range.start.character) + 1
+        local c = misc.to_vimindex(self.context.cursor_line, range.start.character)
         for idx = c, self.source_offset do
           if not char.is_white(string.byte(self.context.cursor_line, idx)) then
             offset = math.min(offset, idx)
@@ -125,8 +125,8 @@ entry.get_overwrite = function(self)
   return self.cache:ensure('get_overwrite', function()
     if misc.safe(self.completion_item.textEdit) then
       local r = misc.safe(self.completion_item.textEdit.insert) or misc.safe(self.completion_item.textEdit.range)
-      local s = vim.str_byteindex(self.context.cursor_line, r.start.character) + 1
-      local e = vim.str_byteindex(self.context.cursor_line, r['end'].character) + 1
+      local s = misc.to_vimindex(self.context.cursor_line, r.start.character)
+      local e = misc.to_vimindex(self.context.cursor_line, r['end'].character)
       local before = self.context.cursor.col - s
       local after = e - self.context.cursor.col
       return before, after
@@ -275,7 +275,7 @@ entry.get_insert_range = function(self)
     insert_range = {
       start = {
         line = self.context.cursor.row - 1,
-        character = math.min(vim.str_utfindex(self.context.cursor_line, self:get_offset() - 1), self.source_insert_range.start.character),
+        character = math.min(misc.to_utfindex(self.context.cursor_line, self:get_offset()), self.source_insert_range.start.character),
       },
       ['end'] = self.source_insert_range['end'],
     }
@@ -298,7 +298,7 @@ entry.get_replace_range = function(self)
       replace_range = {
         start = {
           line = self.source_replace_range.start.line,
-          character = math.min(vim.str_utfindex(self.context.cursor_line, self:get_offset() - 1), self.source_replace_range.start.character),
+          character = math.min(misc.to_utfindex(self.context.cursor_line, self:get_offset()), self.source_replace_range.start.character),
         },
         ['end'] = self.source_replace_range['end'],
       }
