@@ -1,5 +1,3 @@
-local str = require('cmp.utils.str')
-local misc = require('cmp.utils.misc')
 local compare = require('cmp.config.compare')
 local types = require('cmp.types')
 
