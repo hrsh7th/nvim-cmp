@@ -2,22 +2,19 @@ local types = require('cmp.types')
 
 local mapping = {}
 
-mapping.mode = function(modes, action)
-  if type(action) == 'table' then
-    if type(action.action) == 'function' then
-      action = action.action
+mapping.mode = function(modes, action_or_invoke)
+  local invoke = action_or_invoke
+  if type(action_or_invoke) == 'table' then
+    if type(action_or_invoke.invoke) == 'function' then
+      invoke = action_or_invoke.invoke
     else
-      error('`action` must be function or result of `cmp.mapping.mode`.')
+      error('`invoke` must be function or result of `cmp.mapping.mode`.')
     end
   end
-  return setmetatable({
+  return {
     modes = modes,
-    action = action,
-  }, {
-    __call = function(_, ...)
-      action(...)
-    end,
-  })
+    invoke = invoke,
+  }
 end
 
 mapping.complete = function()
