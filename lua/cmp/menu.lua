@@ -46,7 +46,8 @@ menu.close = function(self)
   vim.schedule(function()
     debug.log('menu.close', vim.fn.pumvisible())
     if vim.fn.pumvisible() == 1 then
-      vim.fn.complete(1, {})
+      -- TODO: Is it safe to call...?
+      vim.fn.complete(#vim.fn.getline('.') + 1, {})
     end
     self:unselect()
   end)
