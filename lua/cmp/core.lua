@@ -74,7 +74,11 @@ end
 core.on_keymap = function(keys, fallback)
   for key, action in pairs(config.get().mapping) do
     if key == keys then
-      return action.invoke(core, fallback)
+      if type(action) == 'function' then
+        return action(core, fallback)
+      else
+        return action.invoke(core, fallback)
+      end
     end
   end
 
