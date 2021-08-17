@@ -1,11 +1,11 @@
 local debug = {}
 
-local flag = false
+debug.flag = false
 
 ---Print log
 ---@vararg any
 debug.log = function(...)
-  if flag then
+  if debug.flag then
     local data = {}
     for _, v in ipairs({ ... }) do
       if not vim.tbl_contains({ 'string', 'number', 'boolean' }, type(v)) then
