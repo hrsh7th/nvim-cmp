@@ -242,13 +242,13 @@ entry.get_vim_item = function(self, suggest_offset)
       abbr = abbr,
       kind = types.lsp.CompletionItemKind[self:get_kind()] or types.lsp.CompletionItemKind[1],
       menu = menu,
+      dup = self.completion_item.dup or 1,
     }
     if config.get().formatting.format then
       vim_item = config.get().formatting.format(self, vim_item)
     end
     vim_item.equal = 1
     vim_item.empty = 1
-    vim_item.dup = self.completion_item.dup or 1
     vim_item.user_data = { cmp = self.id }
 
     return vim_item
