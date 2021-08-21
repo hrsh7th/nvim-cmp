@@ -143,7 +143,7 @@ local luasnip = require'luasnip'
 local cmp = require'cmp'
 cmp.setup {
   mapping = {
-    ['<Tab>'] = cmp.mapping.mode({ 'i', 's' }, function(core, fallback)
+    ['<Tab>'] = cmp.mapping.mode({ 'i', 's' }, function(_, fallback)
       if vim.fn.pumvisible() == 1 then
         vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-n>', true, true, true), 'n')
       elseif luasnip.expand_or_jumpable() then
@@ -152,7 +152,7 @@ cmp.setup {
         fallback()
       end
     end),
-    ['<S-Tab>'] = cmp.mapping.mode({ 'i', 's' }, function(core, fallback)
+    ['<S-Tab>'] = cmp.mapping.mode({ 'i', 's' }, function(_, fallback)
       if vim.fn.pumvisible() == 1 then
         vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-p>', true, true, true), 'n')
       elseif luasnip.jumpable(-1) then
@@ -346,4 +346,3 @@ end
 
 return source
 ```
-
