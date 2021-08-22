@@ -36,6 +36,7 @@ The `nvim-cmp` sources can be found in [here](https://github.com/topics/nvim-cmp
 ```viml
 Plug 'hrsh7th/nvim-cmp'
 Plug 'hrsh7th/cmp-buffer'
+Plug 'hrsh7th/cmp-nvim-lua'
 ```
 
 Then setup configuration.
@@ -74,10 +75,10 @@ lua <<EOF
   }
 EOF
 
-" Setup buffer configuration
-autocmd FileType markdown lua require'cmp'.setup.buffer {
+" Setup buffer configuration (nvim-lua source only enables in Lua filetype).
+autocmd FileType lua lua require'cmp'.setup.buffer {
 \   sources = {
-\     { name = 'buffer' },
+\     { name = 'nvim_lua' },
 \   },
 \ }
 ```
