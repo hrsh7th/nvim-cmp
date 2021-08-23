@@ -294,6 +294,9 @@ source.complete = function(self, ctx, callback)
         end
       else
         debug.log(self:get_debug_name(), 'continue', 'nil')
+        if prev_status == source.SourceStatus.WAITING then
+          self:reset()
+        end
         self.status = prev_status
       end
       callback()
