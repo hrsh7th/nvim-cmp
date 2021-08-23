@@ -63,7 +63,7 @@ lua <<EOF
       ['<C-Space>'] = cmp.mapping.complete(),
       ['<C-e>'] = cmp.mapping.close(),
       ['<CR>'] = cmp.mapping.confirm({
-        behavior = cmp.ConfirmBehavior.Replace,
+        behavior = cmp.ConfirmBehavior.Insert,
         select = true,
       })
     },
@@ -260,6 +260,10 @@ cmp.setup {
   }
 }
 ```
+
+#### nvim-cmp is slow.
+
+I optimized nvim-cmp as much as possible but some reason exists maybe.
 
 
 Source creation

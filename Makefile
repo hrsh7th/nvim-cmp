@@ -8,7 +8,7 @@ lint:
 
 .PHONY: test
 test:
-	vusted ./lua
+	vusted --output=gtest ./lua
 
 .PHONY: pre-commit
 pre-commit:

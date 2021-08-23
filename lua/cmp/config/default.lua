@@ -30,7 +30,7 @@ return function()
     },
 
     confirmation = {
-      default_behavior = types.cmp.ConfirmBehavior.Replace,
+      default_behavior = types.cmp.ConfirmBehavior.Insert,
     },
 
     sorting = {
