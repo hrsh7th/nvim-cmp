@@ -39,7 +39,8 @@ jobs:
     - name: Setup tools
       shell: bash
       run: |
-        cargo install stylua
+        sudo apt install -y curl unzip --no-install-recommends
+        bash ./utils/install_stylua.sh
         luarocks install luacheck
         luarocks install vusted
 

@@ -1,6 +1,6 @@
 .PHONY: fmt
 fmt:
-	stylua --glob lua/**/*.lua -- lua
+	./utils/stylua --config-path stylua.toml ---glob lua/**/*.lua -- lua
 
 .PHONY: lint
 lint:
@@ -12,13 +12,13 @@ test:
 
 .PHONY: pre-commit
 pre-commit:
-	stylua --glob lua/**/*.lua -- lua
+	./utils/stylua --config-path stylua.toml --glob lua/**/*.lua -- lua
 	luacheck lua
 	vusted lua
 
 .PHONY: integration
 integration:
-	stylua --check --glob lua/**/*.lua -- lua
+	./utils/stylua --config-path stylua.toml --check --glob lua/**/*.lua -- lua
 	luacheck lua
 	vusted lua
 
