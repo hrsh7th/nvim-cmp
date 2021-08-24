@@ -204,8 +204,10 @@ entry.get_vim_item = function(self, suggest_offset)
     end
 
     -- deprecated
-    if completion_item.deprecated or vim.tbl_contains(completion_item.tags or {}, types.lsp.CompletionItemTag.Deprecated) then
-      abbr = str.strikethrough(abbr)
+    if config.get().formatting.deprecated then
+      if completion_item.deprecated or vim.tbl_contains(completion_item.tags or {}, types.lsp.CompletionItemTag.Deprecated) then
+        abbr = str.strikethrough(abbr)
+      end
     end
 
     -- append delta text

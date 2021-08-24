@@ -51,6 +51,7 @@ return function()
     mapping = {},
 
     formatting = {
+      deprecated = true,
       format = function(_, vim_item)
         return vim_item
       end

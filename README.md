@@ -195,6 +195,13 @@ vim's `completeopt` setting. Warning: Be careful when changing this value.
 Default: `menu,menuone,noselect`
 
 
+### formatting.deprecated (type: boolean)
+
+Specify deprecated candidate should be marked as deprecated or not.
+
+Default: `true`
+
+
 ### formatting.format (type: fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem)
 
 A function to customize completion menu.
