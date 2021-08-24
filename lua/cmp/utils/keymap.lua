@@ -54,7 +54,7 @@ keymap.feedkeys = setmetatable({
 }, {
   __call = function(self, keys, mode, callback)
     if #keys ~= 0 then
-      vim.fn.feedkeys(keymap.t(keys), mode)
+      vim.fn.feedkeys(keys, mode)
     end
 
     if callback then

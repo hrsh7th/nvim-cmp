@@ -196,7 +196,7 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
   debug.log('entry.confirm', e)
 
   local ctx = context.new()
-  keymap.feedkeys('<C-g>U' .. string.rep('<BS>', ctx.cursor.col - e.context.cursor.col), 'n', function()
+  keymap.feedkeys(keymap.t('<C-g>U' .. string.rep('<BS>', ctx.cursor.col - e.context.cursor.col)), 'n', function()
     --@see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/suggestController.ts#L334
     if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) == 0 then
       local pre = context.new()
@@ -245,21 +245,21 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
     is_snippet = is_snippet and completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet
     is_snippet = is_snippet and vim.lsp.util.parse_snippet(completion_item.textEdit.newText) ~= completion_item.textEdit.newText
 
-    local keys = ''
+    local keys = {}
     if completion_item.textEdit.range['end'].character > e.context.cursor.character then
-      keys = keys .. string.rep('<C-g>U<Right><BS>', completion_item.textEdit.range['end'].character - e.context.cursor.character)
+      table.insert(keys, keymap.t(string.rep('<C-g>U<Right><BS>', completion_item.textEdit.range['end'].character - e.context.cursor.character)))
     end
     if e.context.cursor.character > completion_item.textEdit.range.start.character then
-      keys = keys .. string.rep('<BS>', e.context.cursor.character - completion_item.textEdit.range.start.character)
+      table.insert(keys, keymap.t(string.rep('<BS>', e.context.cursor.character - completion_item.textEdit.range.start.character)))
     end
 
     if is_snippet then
-      keys = keys .. '<C-g>u' .. e:get_word() .. '<C-g>u'
-      keys = keys .. string.rep('<BS>', vim.fn.strchars(e:get_word()))
+      table.insert(keys, keymap.t('<C-g>u') .. e:get_word() .. keymap.t('<C-g>u'))
+      table.insert(keys, keymap.t(string.rep('<BS>', vim.fn.strchars(e:get_word()))))
     else
-      keys = keys .. '<C-g>u' .. completion_item.textEdit.newText .. '<C-g>u'
+      table.insert(keys, keymap.t('<C-g>u') .. completion_item.textEdit.newText .. keymap.t('<C-g>u'))
     end
-    keymap.feedkeys(keys, 'n', function()
+    keymap.feedkeys(table.concat(keys, ''), 'n', function()
       if is_snippet then
         config.get().snippet.expand({
           body = completion_item.textEdit.newText,
