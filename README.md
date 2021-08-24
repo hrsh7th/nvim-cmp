@@ -138,7 +138,7 @@ mapping = {
 - *cmp.mapping.close()*
 - *cmp.mapping.confirm({ select = bool, behavior = cmp.ConfirmBehavior.{Insert,Replace} })*
 
-In addition, You can specify vim's mode to those mapping functions like this.
+In addition, You can specify vim's mode to those mapping functions.
 
 ```lua
 mapping = {
@@ -147,6 +147,23 @@ mapping = {
   ...
 }
 ```
+
+You can specify your custom mapping function.
+
+```lua
+mapping = {
+  ['<Tab>'] = function(fallback)
+    if vim.fn.pumvisible() == 1 then
+      vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-n>', true, true, true), 'n')
+    elseif vim.fn['vsnip#available']() == 1 then
+      vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>(vsnip-expand-or-jump)', true, true, true), '')
+    else
+      fallback()
+    end
+  end,
+}
+```
+
 
 ### completion.autocomplete (type: cmp.TriggerEvent[])
 
