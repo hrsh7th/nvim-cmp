@@ -41,6 +41,7 @@ jobs:
       run: |
         sudo apt install -y curl unzip --no-install-recommends
         bash ./utils/install_stylua.sh
+        sudo cp ./utils/stylua /usr/local/bin/stylua
         luarocks install luacheck
         luarocks install vusted
 
