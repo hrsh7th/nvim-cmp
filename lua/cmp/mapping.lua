@@ -1,82 +1,70 @@
-local types = require('cmp.types')
+local misc = require('cmp.utils.misc')
 
-local mapping = {}
-
-mapping.mode = function(modes, action_or_invoke)
-  local invoke = action_or_invoke
-  if type(action_or_invoke) == 'table' then
-    if type(action_or_invoke.invoke) == 'function' then
-      invoke = action_or_invoke.invoke
-    else
-      error('`invoke` must be function or result of `cmp.mapping.mode`.')
+local mapping = setmetatable({}, {
+  __call = function(_, invoke, modes)
+    return {
+      invoke = function(...)
+        invoke(...)
+      end,
+      modes = modes or { 'i' },
+    }
+  end,
+})
+---Invoke completion
+mapping.complete = function()
+  return function(fallback)
+    if not require('cmp').complete() then
+      fallback()
     end
   end
-  return {
-    modes = modes,
-    invoke = invoke,
-  }
 end
 
-mapping.complete = function()
-  return mapping.mode({ 'i' }, function(core)
-    core.complete(core.get_context({ reason = types.cmp.ContextReason.Manual }))
-  end)
-end
-
+---Close current completion menu if it displayed.
 mapping.close = function()
-  return mapping.mode({ 'i' }, function(core, fallback)
-    if vim.fn.pumvisible() == 1 then
-      core.reset()
-    else
+  return function(fallback)
+    if not require('cmp').close() then
       fallback()
     end
-  end)
+  end
 end
 
-mapping.scroll = function(delta)
-  return mapping.mode({ 'i' }, function(core, fallback)
-    if core.menu.float:is_visible() then
-      core.menu.float:scroll(delta)
-    else
+---Scroll documentation window.
+mapping.scroll_docs = function(delta)
+  return function(fallback)
+    if not require('cmp').scroll_docs(delta) then
       fallback()
     end
-  end)
+  end
 end
+mapping.scroll = misc.deprecated(mapping.scroll_docs, '`cmp.mapping.scroll` is deprecated. Please change it to `cmp.mapping.scroll_docs` instead.')
 
-mapping.next_item = function()
-  return mapping.mode({ 'i' }, function(_, fallback)
-    if vim.fn.pumvisible() == 1 then
-      vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-n>', true, true, true), 'n')
-    else
+---Select next completion item.
+mapping.select_next_item = function()
+  return function(fallback)
+    if not require('cmp').select_next_item() then
       fallback()
     end
-  end)
+  end
 end
+mapping.next_item = misc.deprecated(mapping.select_next_item, '`cmp.mapping.next_item` is deprecated. Please change it to `cmp.mapping.select_next_item` instead.')
 
-mapping.prev_item = function()
-  return mapping.mode({ 'i' }, function(_, fallback)
-    if vim.fn.pumvisible() == 1 then
-      vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-p>', true, true, true), 'n')
-    else
+---Select prev completion item.
+mapping.select_prev_item = function()
+  return function(fallback)
+    if not require('cmp').select_prev_item() then
       fallback()
     end
-  end)
+  end
 end
+mapping.prev_item = misc.deprecated(mapping.select_prev_item, '`cmp.mapping.prev_item` is deprecated. Please change it to `cmp.mapping.select_prev_item` instead.')
 
+---Confirm selection
 mapping.confirm = function(option)
-  option = option or {}
-  return mapping.mode({ 'i' }, function(core, fallback)
-    local e = core.menu:get_selected_entry() or (option.select and core.menu:get_first_entry() or nil)
-    if e then
-      core.confirm(e, {
-        behavior = option.behavior,
-      }, function()
-        core.complete(core.get_context({ reason = types.cmp.ContextReason.TriggerOnly }))
-      end)
-    else
+  return function(fallback)
+    if not require('cmp').confirm(option) then
       fallback()
     end
-  end)
+  end
 end
 
 return mapping

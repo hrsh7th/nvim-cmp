@@ -136,4 +136,16 @@ misc.to_vimindex = function(text, utfindex)
   return utfindex + 1
 end
 
+---Mark the function as deprecated
+misc.deprecated = function(fn, msg)
+  local printed = false
+  return function(...)
+    if not printed then
+      print(msg)
+      printed = true
+    end
+    return fn(...)
+  end
+end
+
 return misc

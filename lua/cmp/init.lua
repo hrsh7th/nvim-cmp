@@ -1,4 +1,5 @@
 local core = require('cmp.core')
+local keymap = require('cmp.utils.keymap')
 local source = require('cmp.source')
 local config = require('cmp.config')
 local autocmd = require('cmp.autocmd')
@@ -29,6 +30,68 @@ end
 ---@param id number
 cmp.unregister_source = function(id)
   core.unregister_source(id)
+end
+
+---Invoke completion manually
+cmp.complete = function()
+  core.complete(core.get_context({ reason = cmp.ContextReason.Manual }))
+  return true
+end
+
+---Close current completion
+cmp.close = function()
+  if vim.fn.pumvisible() == 1 then
+    core.reset()
+    return true
+  else
+    return false
+  end
+end
+
+---Select next item if possible
+cmp.select_next_item = function()
+  if vim.fn.pumvisible() == 1 then
+    vim.fn.feedkeys(keymap.t('<C-n>'), 'n')
+    return true
+  else
+    return false
+  end
+end
+
+---Select prev item if possible
+cmp.select_prev_item = function()
+  if vim.fn.pumvisible() == 1 then
+    vim.fn.feedkeys(keymap.t('<C-p>'), 'n')
+    return true
+  else
+    return false
+  end
+end
+
+---Scrolling documentation window if possible
+cmp.scroll_docs = function(delta)
+  if core.menu.float:is_visible() then
+    core.menu.float:scroll(delta)
+    return true
+  else
+    return false
+  end
+end
+
+---Confirm completion
+cmp.confirm = function(option)
+  option = option or {}
+  local e = core.menu:get_selected_entry() or (option.select and core.menu:get_first_entry() or nil)
+  if e then
+    core.confirm(e, {
+      behavior = option.behavior,
+    }, function()
+      core.complete(core.get_context({ reason = cmp.ContextReason.TriggerOnly }))
+    end)
+    return true
+  else
+    return false
+  end
 end
 
 ---@type cmp.Setup

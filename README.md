@@ -1,6 +1,6 @@
 # nvim-cmp
 
-A completion plugin for neovim written in Lua.
+A completion plugin for neovim coded by Lua.
 
 
 Status
@@ -9,11 +9,11 @@ Status
 not yet stable but ok to use (for testing).
 
 
-Features
+Concept
 ====================
 
 - Support pairs-wise plugin automatically
-- Fully customizable via Lua functions (WIP)
+- Fully customizable via Lua functions
 - Fully supported LSP's Completion capabilities
   - Snippets
   - CommitCharacters
@@ -29,7 +29,7 @@ Features
 Setup
 ====================
 
-First, You should install core and sources by your favorite plugin manager.
+First, You should install nvim-cmp itself and completion sources by your favorite plugin manager.
 
 The `nvim-cmp` sources can be found in [here](https://github.com/topics/nvim-cmp).
 
@@ -46,20 +46,19 @@ Then setup configuration.
 lua <<EOF
   local cmp = require('cmp')
   cmp.setup {
-    -- You should change this example to your chosen snippet engine.
     snippet = {
       expand = function(args)
-        -- You must install `vim-vsnip` if you set up as same as the following.
+        -- You must install `vim-vsnip` if you use the following as-is.
         vim.fn['vsnip#anonymous'](args.body)
       end
     },
 
-    -- You must set mapping.
+    -- You must set mapping if you want.
     mapping = {
-      ['<C-p>'] = cmp.mapping.prev_item(),
-      ['<C-n>'] = cmp.mapping.next_item(),
-      ['<C-d>'] = cmp.mapping.scroll(-4),
-      ['<C-f>'] = cmp.mapping.scroll(4),
+      ['<C-p>'] = cmp.mapping.select_prev_item(),
+      ['<C-n>'] = cmp.mapping.select_next_item(),
+      ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+      ['<C-f>'] = cmp.mapping.scroll_docs(4),
       ['<C-Space>'] = cmp.mapping.complete(),
       ['<C-e>'] = cmp.mapping.close(),
       ['<CR>'] = cmp.mapping.confirm({
@@ -70,7 +69,7 @@ lua <<EOF
 
     -- You should specify your *installed* sources.
     sources = {
-      { name = 'buffer' }
+      { name = 'buffer' },
     },
   }
 EOF
@@ -78,6 +77,7 @@ EOF
 " Setup buffer configuration (nvim-lua source only enables in Lua filetype).
 autocmd FileType lua lua require'cmp'.setup.buffer {
 \   sources = {
+      { name = 'buffer' },
 \     { name = 'nvim_lua' },
 \   },
 \ }
@@ -90,79 +90,61 @@ Configuration
 The default configuration can be found in [here](./lua/cmp/config/default.lua)
 
 You can use your own configuration like this:
+
 ```lua
 local cmp = require'cmp'
 cmp.setup {
   ...
   completion = {
-    autocomplete = { .. },
-    completeopt = 'menu,menuone,noselect',
-    keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
-    keyword_length = 1,
+    autocomplete = { ... },
   },
   sorting = {
     priority_weight = 2.,
     comparators = { ... },
   },
   mapping = {
-    ['<C-p>'] = cmp.mapping.prev_item(),
-    ['<C-n>'] = cmp.mapping.next_item(),
-    ['<C-d>'] = cmp.mapping.scroll(-4),
-    ['<C-f>'] = cmp.mapping.scroll(4),
-    ['<C-Space>'] = cmp.mapping.complete(),
-    ['<C-e>'] = cmp.mapping.close(),
-    ['<CR>'] = cmp.mapping.confirm({
-      behavior = cmp.ConfirmBehavior.Replace,
-      select = true,
-    })
+    ...
   },
   sources = { ... },
   ...
 }
 ```
 
-### mapping (type: table<string, fun(core: cmp.Core, fallback: function)>)
-
-_TODO: This API is not stable yet. It can be changed with no announcement._
+### mapping (type: table<string, fun(fallback: function)>)
 
 Define mappings with `cmp.mapping` helper.
 
-The `cmp.mapping` helper has the below functions.
-
-- *cmp.mapping.confirm({ select = true or false, behavior = cmp.ConfirmBehavior.Insert or cmp.ConfirmBehavior.Replace })*
-- *cmp.mapping.complete()*
-- *cmp.mapping.close()*
-- *cmp.mapping.next_item()*
-- *cmp.mapping.prev_item()*
-- *cmp.mapping.scroll(delta = number)*
-
-You can use `<Tab>`and `<S-Tab>` for navigating menu.
+You can use the following functions as mapping configuration like this.
 
 ```lua
--- This is just an example of LusSnip integration. You have to adjust it yourself.
-local luasnip = require'luasnip'
-local cmp = require'cmp'
-cmp.setup {
-  mapping = {
-    ['<Tab>'] = cmp.mapping.mode({ 'i', 's' }, function(_, fallback)
-      if vim.fn.pumvisible() == 1 then
-        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-n>', true, true, true), 'n')
-      elseif luasnip.expand_or_jumpable() then
-        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>luasnip-expand-or-jump', true, true, true), '')
-      else
-        fallback()
-      end
-    end),
-    ['<S-Tab>'] = cmp.mapping.mode({ 'i', 's' }, function(_, fallback)
-      if vim.fn.pumvisible() == 1 then
-        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-p>', true, true, true), 'n')
-      elseif luasnip.jumpable(-1) then
-        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>luasnip-jump-prev', true, true, true), '')
-      else
-        fallback()
-      end
-    end)
-  }
+mapping = {
+  ['<C-p>'] = cmp.mapping.select_prev_item(),
+  ['<C-n>'] = cmp.mapping.select_next_item(),
+  ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+  ['<C-f>'] = cmp.mapping.scroll_docs(4),
+  ['<C-Space>'] = cmp.mapping.complete(),
+  ['<C-e>'] = cmp.mapping.close(),
+  ['<CR>'] = cmp.mapping.confirm({
+    behavior = cmp.ConfirmBehavior.Replace,
+    select = true,
+  })
+}
+```
+
+- *cmp.mapping.select_prev_item()*
+- *cmp.mapping.select_next_item()*
+- *cmp.mapping.scroll_docs(number)*
+- *cmp.mapping.complete()*
+- *cmp.mapping.close()*
+- *cmp.mapping.confirm({ select = bool, behavior = cmp.ConfirmBehavior.{Insert,Replace} })*
+
+In addition, You can specify vim's mode to those mapping functions like this.
+
+```lua
+mapping = {
+  ...
+  ['<Tab>'] = cmp.mapping(cmp.mapping.select_next_item(), { 'i', 's' })
+  ...
 }
 ```
 
