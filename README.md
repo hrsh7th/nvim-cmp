@@ -77,7 +77,7 @@ EOF
 " Setup buffer configuration (nvim-lua source only enables in Lua filetype).
 autocmd FileType lua lua require'cmp'.setup.buffer {
 \   sources = {
-      { name = 'buffer' },
+\     { name = 'buffer' },
 \     { name = 'nvim_lua' },
 \   },
 \ }
