@@ -109,11 +109,10 @@ entry.get_word = function(self)
       end
     elseif misc.safe(self.completion_item.insertText) then
       word = str.trim(self.completion_item.insertText)
-      if self.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-        word = str.get_word(word)
-      end
+      word = str.get_word(word)
     else
       word = str.trim(self.completion_item.label)
+      word = str.get_word(word, '')
     end
     return word
   end)

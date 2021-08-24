@@ -243,7 +243,6 @@ describe('entry', function()
     -- press g
     state.input('$')
     local e = entry.new(state.manual(), state.source(), {
-      detail = '\\Nico_URLConf',
       kind = 6,
       label = '$this',
       sortText = '$this',
@@ -263,5 +262,20 @@ describe('entry', function()
     })
     assert.are.equal(e:get_vim_item(e:get_offset()).word, '$this')
     assert.are.equal(e:get_filter_text(), '$this')
+  end)
+
+  it('[#47] word should not contain \\n character', function()
+    local state = spec.state('', 1, 1)
+
+    -- press g
+    state.input('_')
+    local e = entry.new(state.manual(), state.source(), {
+      kind = 6,
+      label = '__init__',
+      insertTextFormat = 1,
+      insertText = '__init__(self) -> None:\n  pass',
+    })
+    assert.are.equal(e:get_vim_item(e:get_offset()).word, '__init__')
+    assert.are.equal(e:get_filter_text(), '__init__')
   end)
 end)
