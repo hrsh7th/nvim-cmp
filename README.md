@@ -206,6 +206,8 @@ Default: `true`
 
 A function to customize completion menu.
 
+The return value is defined by vim. See `:help complete-items`.
+
 You can display the fancy icons to completion-menu with [lspkind-nvim](https://github.com/onsails/lspkind-nvim).
 
 ```lua
