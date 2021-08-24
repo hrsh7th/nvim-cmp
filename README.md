@@ -110,7 +110,7 @@ cmp.setup {
 }
 ```
 
-### mapping (type: table<string, fun(fallback: function)>)
+#### mapping (type: table<string, fun(fallback: function)>)
 
 Define mappings with `cmp.mapping` helper.
 
@@ -165,7 +165,7 @@ mapping = {
 ```
 
 
-### completion.autocomplete (type: cmp.TriggerEvent[])
+#### completion.autocomplete (type: cmp.TriggerEvent[])
 
 Which events should trigger `autocompletion`.
 
@@ -174,13 +174,13 @@ You can still use manual completion though (like omni-completion).
 
 Default: `{types.cmp.TriggerEvent.InsertEnter, types.cmp.TriggerEvent.TextChanged}`
 
-### completion.keyword_pattern (type: string)
+#### completion.keyword_pattern (type: string)
 
 The default keyword pattern.  This value will be used if a source does not set a source specific pattern.
 
 Default: `[[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]]`
 
-### completion.keyword_length (type: number)
+#### completion.keyword_length (type: number)
 
 The minimal length of a word to complete; e.g., do not try to complete when the
 length of the word to the left of the cursor is less than `keyword_length`.
@@ -188,21 +188,46 @@ length of the word to the left of the cursor is less than `keyword_length`.
 Default: `1`
 
 
-### completion.completeopt (type: string)
+#### completion.completeopt (type: string)
 
 vim's `completeopt` setting. Warning: Be careful when changing this value.
 
 Default: `menu,menuone,noselect`
 
+#### documentation (type: false | cmp.DocumentationConfig)
 
-### formatting.deprecated (type: boolean)
+A documentation configuration or false to disable feature.
+
+#### documentation.border (type: string[])
+
+A border characters for documentation window.
+
+#### documentation.winhighlight (type: string)
+
+A neovim's `winhighlight` option for documentation window.
+
+#### documentation.maxwidth (type: number)
+
+A documentation window's max width.
+
+#### documentation.maxheight (type: number)
+
+A documentation window's max height.
+
+#### confirmation.default_behavior (type: cmp.ConfirmBehavior)
+
+A default `cmp.ConfirmBehavior` value when to use confirmed by commitCharacters
+
+Default: `cmp.ConfirmBehavior.Insert`
+
+#### formatting.deprecated (type: boolean)
 
 Specify deprecated candidate should be marked as deprecated or not.
 
 Default: `true`
 
 
-### formatting.format (type: fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem)
+#### formatting.format (type: fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem)
 
 A function to customize completion menu.
 
@@ -222,7 +247,11 @@ cmp.setup {
 }
 ```
 
-### sorting.priority_weight (type: number)
+#### event.on_confirm_done (type: fun(entry: cmp.Entry))
+
+A callback function called when the item is confirmed.
+
+#### sorting.priority_weight (type: number)
 
 When sorting completion items before displaying them, boost each item's score
 based on the originating source. Each source gets a base priority of `#sources -
@@ -232,7 +261,7 @@ based on the originating source. Each source gets a base priority of `#sources -
 
 Default: `2`
 
-### sorting.comparators (type: function[])
+#### sorting.comparators (type: function[])
 
 When sorting completion items, the sort logic tries each function in
 `sorting.comparators` consecutively when comparing two items. The first function
