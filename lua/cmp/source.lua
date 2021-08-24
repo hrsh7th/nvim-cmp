@@ -177,7 +177,7 @@ end
 ---Return the source is available or not.
 source.is_available = function(self)
   if self.source.is_available then
-    return self.source.is_available()
+    return self.source:is_available()
   end
   return true
 end
