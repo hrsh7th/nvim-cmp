@@ -340,8 +340,9 @@ end
 ---  1. Trigger keyword completion
 ---  2. Detect menu start offset
 ---  3. Reset completion state
+---@param params cmp.SourceBaseApiParams
 ---@return string
-function source:get_keyword_pattern()
+function source:get_keyword_pattern(params)
   return '???'
 end
 
@@ -353,9 +354,9 @@ end
 
 ---Invoke completion (required).
 ---  If you want to abort completion, just call the callback without arguments.
----@param request  cmp.CompletionRequest
+---@param params cmp.SourceCompletionApiParams
 ---@param callback fun(response: lsp.CompletionResponse|nil)
-function source:complete(request, callback)
+function source:complete(params, callback)
   callback({
     { label = 'January' },
     { label = 'February' },

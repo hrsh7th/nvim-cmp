@@ -186,7 +186,9 @@ end
 ---@return string
 source.get_keyword_pattern = function(self)
   if self.source.get_keyword_pattern then
-    return self.source:get_keyword_pattern()
+    return self.source:get_keyword_pattern({
+      option = self:get_option(),
+    })
   end
   return config.get().completion.keyword_pattern
 end

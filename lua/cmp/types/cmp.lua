@@ -37,9 +37,11 @@ cmp.ScrollDirection.Down = 'down'
 ---@field public buffer fun(c: cmp.ConfigSchema)
 ---@field public global fun(c: cmp.ConfigSchema)
 
----@class cmp.CompletionRequest
----@field public context cmp.Context
+---@class cmp.SourceBaseApiParams
 ---@field public option table
+
+---@class cmp.SourceCompletionApiParams : cmp.SourceBaseApiParams
+---@field public context cmp.Context
 ---@field public offset number
 ---@field public completion_context lsp.CompletionContext
 
