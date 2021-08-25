@@ -21,6 +21,8 @@ return function()
       end,
     },
 
+    preselect = types.cmp.PreselectMode.Item,
+
     documentation = {
       border = { '', '', '', ' ', '', '', '', ' ' },
       winhighlight = 'NormalFloat:CmpDocumentation,FloatBorder:CmpDocumentationBorder',

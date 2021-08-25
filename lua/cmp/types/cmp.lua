@@ -17,10 +17,10 @@ cmp.TriggerEvent = {}
 cmp.TriggerEvent.InsertEnter = 'InsertEnter'
 cmp.TriggerEvent.TextChanged = 'TextChanged'
 
----@alias cmp.ScrollDirection "'up'" | "'down'"
-cmp.ScrollDirection = {}
-cmp.ScrollDirection.Up = 'up'
-cmp.ScrollDirection.Down = 'down'
+---@alias cmp.PreselectMode "'item'" | "'None'"
+cmp.PreselectMode = {}
+cmp.PreselectMode.Item = 'item'
+cmp.PreselectMode.None = 'none'
 
 ---@class cmp.ContextOption
 ---@field public reason cmp.ContextReason|nil
@@ -47,6 +47,7 @@ cmp.ScrollDirection.Down = 'down'
 
 ---@class cmp.ConfigSchema
 ---@field private revision number
+---@field public preselect cmp.PreselectMode
 ---@field public completion cmp.CompletionConfig
 ---@field public documentation cmp.DocumentationConfig
 ---@field public confirmation cmp.ConfirmationConfig

@@ -54,7 +54,7 @@ cmp.abort = function()
     keymap.feedkeys(keymap.t('<C-e>'), 'n', function()
       core.reset()
     end)
-    return true;
+    return true
   else
     return false
   end

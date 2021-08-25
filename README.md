@@ -283,6 +283,17 @@ Default:
 }
 ```
 
+#### preselect (type: cmp.PreselectMode)
+
+Specify preselect mode. The following modes are available.
+
+- cmp.Preselect.Item
+  - If the item has `preselect = true`, nvim-cmp will preselect it.
+- cmp.Preselect.None
+  - Disable preselect feature.
+
+Default: `cmp.PreselectMode.Item`
+
 
 FAQ
 ====================
