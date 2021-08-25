@@ -134,7 +134,7 @@ core.on_change = function(event)
     debug.log('changed')
     core.menu:restore(ctx)
 
-    if vim.tbl_contains(config.get().completion.autocomplete, event) then
+    if vim.tbl_contains(config.get().completion.autocomplete or {}, event) then
       core.complete(ctx)
     else
       core.filter.timeout = 50
