@@ -8,7 +8,6 @@ return function()
   return {
     completion = {
       autocomplete = {
-        types.cmp.TriggerEvent.InsertEnter,
         types.cmp.TriggerEvent.TextChanged,
       },
       completeopt = 'menu,menuone,noselect',

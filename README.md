@@ -173,7 +173,7 @@ Which events should trigger `autocompletion`.
 If you leave this empty or `nil`, `nvim-cmp` does not perform completion automatically.
 You can still use manual completion though (like omni-completion).
 
-Default: `{types.cmp.TriggerEvent.InsertEnter, types.cmp.TriggerEvent.TextChanged}`
+Default: `{ types.cmp.TriggerEvent.TextChanged }`
 
 #### completion.keyword_pattern (type: string)
 
