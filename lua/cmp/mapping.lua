@@ -28,6 +28,15 @@ mapping.close = function()
   end
 end
 
+---Abort current completion menu if it displayed.
+mapping.abort = function()
+  return function(fallback)
+    if not require('cmp').abort() then
+      fallback()
+    end
+  end
+end
+
 ---Scroll documentation window.
 mapping.scroll_docs = function(delta)
   return function(fallback)

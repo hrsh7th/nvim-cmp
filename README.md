@@ -136,6 +136,7 @@ mapping = {
 - *cmp.mapping.scroll_docs(number)*
 - *cmp.mapping.complete()*
 - *cmp.mapping.close()*
+- *cmp.mapping.abort()*
 - *cmp.mapping.confirm({ select = bool, behavior = cmp.ConfirmBehavior.{Insert,Replace} })*
 
 In addition, You can specify vim's mode to those mapping functions.

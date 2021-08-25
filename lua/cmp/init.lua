@@ -48,6 +48,18 @@ cmp.close = function()
   end
 end
 
+---Abort current completion
+cmp.abort = function()
+  if vim.fn.pumvisible() == 1 then
+    keymap.feedkeys(keymap.t('<C-e>'), 'n', function()
+      core.reset()
+    end)
+    return true;
+  else
+    return false
+  end
+end
+
 ---Select next item if possible
 cmp.select_next_item = function()
   if vim.fn.pumvisible() == 1 then
