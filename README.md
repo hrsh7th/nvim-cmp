@@ -298,9 +298,30 @@ cmp.setup {
 }
 ```
 
+#### I dislike auto-completion
+
+You can use `nvim-cmp` without auto-completion like this.
+
+```lua
+cmp.setup {
+  completion = {
+    autocomplete = false
+  }
+}
+```
+
 #### nvim-cmp is slow.
 
-I optimized nvim-cmp as much as possible but some reason exists maybe.
+I've optimized nvim-cmp as much as possible, but there are currently some known / unfixable issues.
+
+1. `cmp-buffer` source and too large buffer
+
+The `cmp-buffer` source makes index of the current buffer so if the current buffer is too large, will be slowdown main UI thread.
+
+1. some language servers
+
+For example, `typescript-language-server` will returns 15k items to the client.
+In such case, the time near the 100ms will be consumed just to parse payloads as JSON.
 
 
 Source creation
