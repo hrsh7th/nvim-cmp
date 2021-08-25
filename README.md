@@ -53,7 +53,7 @@ lua <<EOF
       end
     },
 
-    -- You must set mapping if you want.
+    -- You can set mapping if you want.
     mapping = {
       ['<C-p>'] = cmp.mapping.select_prev_item(),
       ['<C-n>'] = cmp.mapping.select_next_item(),
