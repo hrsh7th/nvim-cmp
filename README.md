@@ -347,8 +347,9 @@ function source:get_keyword_pattern(params)
 end
 
 ---Return trigger characters.
+---@param params cmp.SourceBaseApiParams
 ---@return string[]
-function source:get_trigger_characters()
+function source:get_trigger_characters(params)
   return { ??? }
 end
 

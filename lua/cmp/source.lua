@@ -197,7 +197,9 @@ end
 ---@return string[]
 source.get_trigger_characters = function(self)
   if self.source.get_trigger_characters then
-    return self.source:get_trigger_characters() or {}
+    return self.source:get_trigger_characters({
+      option = self:get_option(),
+    }) or {}
   end
   return {}
 end
