@@ -53,7 +53,7 @@ lua <<EOF
       end
     },
 
-    -- You must set mapping if you want.
+    -- You can set mapping if you want.
     mapping = {
       ['<C-p>'] = cmp.mapping.select_prev_item(),
       ['<C-n>'] = cmp.mapping.select_next_item(),
@@ -281,6 +281,17 @@ Default:
   compare.order,
 }
 ```
+
+#### preselect (type: cmp.PreselectMode)
+
+Specify preselect mode. The following modes are available.
+
+- cmp.Preselect.Item
+  - If the item has `preselect = true`, nvim-cmp will preselect it.
+- cmp.Preselect.None
+  - Disable preselect feature.
+
+Default: `cmp.PreselectMode.Item`
 
 
 FAQ

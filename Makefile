@@ -1,6 +1,6 @@
 .PHONY: fmt
 fmt:
-	./utils/stylua --config-path stylua.toml --glob lua/**/*.lua -- lua
+	stylua --config-path stylua.toml --glob lua/**/*.lua -- lua
 
 .PHONY: lint
 lint:

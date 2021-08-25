@@ -1,4 +1,5 @@
 local debug = require('cmp.utils.debug')
+local types = require('cmp.types')
 local async = require('cmp.utils.async')
 local float = require('cmp.float')
 local config = require('cmp.config')
@@ -116,7 +117,7 @@ menu.update = check.wrap(function(self, ctx, sources)
   local abbrs = {}
   local preselect = 0
   for i, e in ipairs(entries) do
-    if preselect == 0 and e.completion_item.preselect then
+    if preselect == 0 and e.completion_item.preselect and config.get().preselect ~= types.cmp.PreselectMode.None then
       preselect = i
     end
 
