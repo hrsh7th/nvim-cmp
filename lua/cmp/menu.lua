@@ -116,15 +116,15 @@ menu.update = check.wrap(function(self, ctx, sources)
   local items = {}
   local abbrs = {}
   local preselect = 0
-  for i, e in ipairs(entries) do
-    if preselect == 0 and e.completion_item.preselect and config.get().preselect ~= types.cmp.PreselectMode.None then
-      preselect = i
-    end
-
+  for _, e in ipairs(entries) do
     local item = e:get_vim_item(offset)
     if not abbrs[item.abbr] or item.dup == 1 then
       table.insert(items, item)
       abbrs[item.abbr] = true
+
+      if preselect == 0 and e.completion_item.preselect and config.get().preselect ~= types.cmp.PreselectMode.None then
+        preselect = #items
+      end
     end
   end
 
@@ -166,7 +166,7 @@ menu.show = function(self)
     vim.cmd('set completeopt=' .. config.get().completion.completeopt)
   end
   vim.fn.complete(self.offset, self.items)
-  if self.preselect > 0 then
+  if self.preselect > 1 then
     vim.api.nvim_select_popupmenu_item(self.preselect - 1, false, false, {})
   end
   vim.cmd('set completeopt=' .. completeopt)
