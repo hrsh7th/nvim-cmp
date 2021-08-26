@@ -63,6 +63,7 @@ cmp.PreselectMode.None = 'none'
 ---@field public completeopt string
 ---@field public keyword_pattern string
 ---@field public keyword_length number
+---@field public get_trigger_characters fun(trigger_characters: string[]): string[]
 
 ---@class cmp.DocumentationConfig
 ---@field public border string[]

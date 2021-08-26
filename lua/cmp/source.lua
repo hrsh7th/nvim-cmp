@@ -196,12 +196,16 @@ end
 ---Get trigger_characters
 ---@return string[]
 source.get_trigger_characters = function(self)
+  local trigger_characters = {}
   if self.source.get_trigger_characters then
-    return self.source:get_trigger_characters({
+    trigger_characters = self.source:get_trigger_characters({
       option = self:get_option(),
     }) or {}
   end
-  return {}
+  if config.get().completion.get_trigger_characters then
+    return config.get().completion.get_trigger_characters(trigger_characters)
+  end
+  return trigger_characters
 end
 
 ---Invoke completion
