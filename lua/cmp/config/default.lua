@@ -20,7 +20,7 @@ return function()
 
     snippet = {
       expand = function()
-        error('snippet engine does not configured.')
+        error('snippet engine is not configured.')
       end,
     },
 

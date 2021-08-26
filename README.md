@@ -1,17 +1,19 @@
 # nvim-cmp
 
-A completion plugin for neovim coded in Lua.
+A completion engine plugin for neovim written in Lua.
+Completion sources are installed from external repositories and "sourced".
 
 
 Status
 ====================
 
-can be used. feedbacks are wanted.
+Can be used. Feedbacks wanted!
 
 
 Concept
 ====================
 
+- Provides a completion engine to handle completion sources
 - Support pairs-wise plugin automatically
 - Fully customizable via Lua functions
 - Fully supported LSP's Completion capabilities
@@ -29,31 +31,54 @@ Concept
 Setup
 ====================
 
-First, You should install nvim-cmp itself and completion sources by your favorite plugin manager.
+## Install
 
-The `nvim-cmp` sources can be found in [here](https://github.com/topics/nvim-cmp).
+First, You should install `nvim-cmp` itself and completion sources by your
+favourite plugin manager.
+
+The `nvim-cmp` sources can be found in
+[here](https://github.com/topics/nvim-cmp).
+
+Using [vim-plug](https://github.com/junegunn/vim-plug):
 
 ```viml
+" Install nvim-cmp
 Plug 'hrsh7th/nvim-cmp'
+" Install the buffer completion source
 Plug 'hrsh7th/cmp-buffer'
-Plug 'hrsh7th/cmp-nvim-lua'
 ```
 
-Then setup configuration.
+Using [packer.nvim](https://github.com/wbthomason/packer.nvim):
+
+```lua
+-- Install nvim-cmp, and buffer source as a dependency
+use {
+  "hrsh7th/nvim-cmp",
+  requires = {
+    "hrsh7th/cmp-buffer",
+  }
+}
+```
+
+## Basic Configuration
+
+To use `nvim-cmp` with the default configuration:
 
 ```viml
-" Setup global configuration. More on configuration below.
+lua <<EOF
+  local cmp = require'cmp'.setup()
+EOF
+```
+
+The default configuration can be found in [here](./lua/cmp/config/default.lua)
+
+To configure with suggested key mappings and the `hrsh7th/cmp-buffer` source:
+
+```viml
 lua <<EOF
   local cmp = require('cmp')
   cmp.setup {
-    snippet = {
-      expand = function(args)
-        -- You must install `vim-vsnip` if you use the following as-is.
-        vim.fn['vsnip#anonymous'](args.body)
-      end
-    },
-
-    -- You can set mapping if you want.
+    -- You can set mappings if you want
     mapping = {
       ['<C-p>'] = cmp.mapping.select_prev_item(),
       ['<C-n>'] = cmp.mapping.select_next_item(),
@@ -74,47 +99,55 @@ lua <<EOF
   }
 EOF
 
-" Setup buffer configuration (nvim-lua source only enables in Lua filetype).
-autocmd FileType lua lua require'cmp'.setup.buffer {
-\   sources = {
-\     { name = 'buffer' },
-\     { name = 'nvim_lua' },
-\   },
-\ }
-```
-
-
-Configuration
+Avanced Configuration
 ====================
 
-The default configuration can be found in [here](./lua/cmp/config/default.lua)
-
-You can use your own configuration like this:
-
-```lua
-local cmp = require'cmp'
-cmp.setup {
-  ...
-  completion = {
-    autocomplete = { ... },
-  },
-  sorting = {
-    priority_weight = 2.,
-    comparators = { ... },
-  },
-  mapping = {
+```viml
+lua <<EOF
+  local cmp = require'cmp'
+  cmp.setup {
     ...
-  },
-  sources = { ... },
-  ...
-}
+    completion = {
+      autocomplete = { ... },
+    },
+    ...
+    snippet = {
+      ...
+    },
+    ...
+    preselect = ...,
+    ...
+    documentation = {
+      ...
+    },
+    ...
+
+    sorting = {
+      priority_weight = 2.,
+      comparators = { ... },
+    },
+    mapping = {
+      ...
+    },
+    sources = { ... },
+    ...
+  }
+EOF
 ```
 
 #### mapping (type: table<string, fun(fallback: function)>)
 
-Define mappings with `cmp.mapping` helper.
+Built in helper `cmd.mappings` are:
 
-You can use the following functions as mapping configuration like this.
+- *cmp.mapping.select_prev_item()*
+- *cmp.mapping.select_next_item()*
+- *cmp.mapping.scroll_docs(number)*
+- *cmp.mapping.complete()*
+- *cmp.mapping.close()*
+- *cmp.mapping.abort()*
+- *cmp.mapping.confirm({ select = bool, behavior = cmp.ConfirmBehavior.{Insert,Replace} })*
+
+You can configure `nvim-cmp` to use these `cmd.mappings` like this:
 
 ```lua
 mapping = {
@@ -131,15 +164,7 @@ mapping = {
 }
 ```
 
-- *cmp.mapping.select_prev_item()*
-- *cmp.mapping.select_next_item()*
-- *cmp.mapping.scroll_docs(number)*
-- *cmp.mapping.complete()*
-- *cmp.mapping.close()*
-- *cmp.mapping.abort()*
-- *cmp.mapping.confirm({ select = bool, behavior = cmp.ConfirmBehavior.{Insert,Replace} })*
-
-In addition, You can specify vim's mode to those mapping functions.
+In addition, the mapping mode can be specified. The default is insert mode (i).
 
 ```lua
 mapping = {
@@ -149,7 +174,7 @@ mapping = {
 }
 ```
 
-You can specify your custom mapping function.
+You can specify your own custom mapping function.
 
 ```lua
 mapping = {
@@ -165,24 +190,51 @@ mapping = {
 }
 ```
 
+#### sources (type: table<string>)
+
+Globals source lists are listed in the `source` table. These are applied to all
+buffers. The order of the sources list helps define the source priority, see
+the *sorting.priority_weight* options below.
+
+It is possible to setup different source lists for different filetypes, this is
+an example using the `FileType` autocommand to setup different sources for the
+lua filetype.
+
+```viml
+" Setup buffer configuration (nvim-lua source only enables in Lua filetype).
+autocmd FileType lua lua require'cmp'.setup.buffer {
+\   sources = {
+\     { name = 'buffer' },
+\     { name = 'nvim_lua' },
+\   },
+\ }
+```
+
+Note that the source name isn't necessarily the source repository name.
+Source names are defined in the source repository README files. For
+example look at the [hrsh7th/cmp-buffer](https://github.com/hrsh7th/cmp-buffer)
+source README which defines the source name as `buffer`.
+
 #### completion.autocomplete (type: cmp.TriggerEvent[])
 
 Which events should trigger `autocompletion`.
 
-If you leave this empty or `nil`, `nvim-cmp` does not perform completion automatically.
-You can still use manual completion though (like omni-completion).
+If you set this to empty or `nil`, `nvim-cmp` will not perform completion
+automatically. You can still use manual completion though (like omni-completion
+via the `cmp.mapping.complete` function).
 
 Default: `{ types.cmp.TriggerEvent.TextChanged }`
 
 #### completion.keyword_pattern (type: string)
 
-The default keyword pattern.  This value will be used if a source does not set a source specific pattern.
+The default keyword pattern.  This value will be used if a source does not set
+a source specific pattern.
 
 Default: `[[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]]`
 
 #### completion.keyword_length (type: number)
 
-The minimal length of a word to complete; e.g., do not try to complete when the
+The minimum length of a word to complete on; e.g., do not try to complete when the
 length of the word to the left of the cursor is less than `keyword_length`.
 
 Default: `1`
@@ -205,7 +257,7 @@ A documentation configuration or false to disable feature.
 
 #### documentation.border (type: string[])
 
-A border characters for documentation window.
+Border characters used for documentation window.
 
 #### documentation.winhighlight (type: string)
 
@@ -213,11 +265,11 @@ A neovim's `winhighlight` option for documentation window.
 
 #### documentation.maxwidth (type: number)
 
-A documentation window's max width.
+The documentation window's max width.
 
 #### documentation.maxheight (type: number)
 
-A documentation window's max height.
+The documentation window's max height.
 
 #### confirmation.default_behavior (type: cmp.ConfirmBehavior)
 
@@ -230,7 +282,6 @@ Default: `cmp.ConfirmBehavior.Insert`
 Specify deprecated candidate should be marked as deprecated or not.
 
 Default: `true`
-
 
 #### formatting.format (type: fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem)
 
@@ -294,7 +345,7 @@ Default:
 Specify preselect mode. The following modes are available.
 
 - cmp.Preselect.Item
-  - If the item has `preselect = true`, nvim-cmp will preselect it.
+  - If the item has `preselect = true`, `nvim-cmp` will preselect it.
 - cmp.Preselect.None
   - Disable preselect feature.
 
@@ -330,7 +381,7 @@ cmp.setup {
 
 #### nvim-cmp is slow.
 
-I've optimized nvim-cmp as much as possible, but there are currently some known / unfixable issues.
+I've optimized `nvim-cmp` as much as possible, but there are currently some known / unfixable issues.
 
 1. `cmp-buffer` source and too large buffer
 
