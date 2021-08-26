@@ -1,6 +1,6 @@
 # nvim-cmp
 
-A completion plugin for neovim coded by Lua.
+A completion plugin for neovim coded in Lua.
 
 
 Status
