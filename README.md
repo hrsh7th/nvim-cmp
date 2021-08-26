@@ -7,7 +7,7 @@ Completion sources are installed from external repositories and "sourced".
 Status
 ====================
 
-Can be used. Feedbacks wanted!
+Can be used. Feedback wanted!
 
 
 Concept
