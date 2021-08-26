@@ -1,5 +1,6 @@
 local debug = require('cmp.utils.debug')
 local char = require('cmp.utils.char')
+local str = require('cmp.utils.str')
 local async = require('cmp.utils.async')
 local keymap = require('cmp.utils.keymap')
 local context = require('cmp.context')
@@ -196,7 +197,7 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
   debug.log('entry.confirm', e)
 
   local ctx = context.new()
-  keymap.feedkeys(keymap.t('<C-g>U' .. string.rep('<BS>', ctx.cursor.col - e.context.cursor.col)), 'n', function()
+  keymap.feedkeys(keymap.t('<C-g>U' .. string.rep('<BS>', str.chars(ctx.cursor_line, e.context.cursor.col, ctx.cursor.col - 1))), 'n', function()
     --@see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/suggestController.ts#L334
     if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) == 0 then
       local pre = context.new()
@@ -245,12 +246,13 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
     is_snippet = is_snippet and completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet
     is_snippet = is_snippet and vim.lsp.util.parse_snippet(completion_item.textEdit.newText) ~= completion_item.textEdit.newText
 
+    local range = types.lsp.Range.to_vim(ctx.bufnr, completion_item.textEdit.range)
     local keys = {}
-    if completion_item.textEdit.range['end'].character > e.context.cursor.character then
-      table.insert(keys, keymap.t(string.rep('<C-g>U<Right><BS>', completion_item.textEdit.range['end'].character - e.context.cursor.character)))
+    if e.context.cursor.col < range['end'].col then
+      table.insert(keys, keymap.t(string.rep('<C-g>U<Right><BS>', str.chars(ctx.cursor_line, e.context.cursor.col, range['end'].col - 1))))
     end
-    if e.context.cursor.character > completion_item.textEdit.range.start.character then
-      table.insert(keys, keymap.t(string.rep('<BS>', e.context.cursor.character - completion_item.textEdit.range.start.character)))
+    if range.start.col < e.context.cursor.col then
+      table.insert(keys, keymap.t(string.rep('<BS>', str.chars(ctx.cursor_line, range.start.col, e.context.cursor.col - 1))))
     end
 
     if is_snippet then

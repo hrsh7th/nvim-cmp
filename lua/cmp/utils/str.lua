@@ -135,6 +135,15 @@ str.get_word = function(text, stop_char)
   return text
 end
 
+---Get character length.
+---@param text string
+---@param s number
+---@param e number
+---@return number
+str.chars = function(text, s, e)
+  return vim.fn.strchars(string.sub(text, s, e))
+end
+
 ---Oneline
 ---@param text string
 ---@return string
