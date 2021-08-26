@@ -431,7 +431,7 @@ source.new = function()
 end
 
 ---Return the source name for some information.
-source.get_debug_name = function()
+function source:get_debug_name = function()
   return 'example'
 end
 
