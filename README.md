@@ -235,6 +235,8 @@ The return value is defined by vim. See `:help complete-items`.
 
 You can display the fancy icons to completion-menu with [lspkind-nvim](https://github.com/onsails/lspkind-nvim).
 
+Please see [FAQ](#how-to-show-name-of-item-kind-and-source-like-compe) if you would like to show symbol-text (e.g. function) and source (e.g. LSP) like compe.
+
 ```lua
 local lspkind = require('lspkind')
 cmp.setup {
@@ -377,6 +379,28 @@ mapping = {
     "s",
   }),
 }
+```
+
+#### How to show name of item kind and source (like compe)?
+
+```lua
+formatting = {
+  format = function(entry, vim_item)
+    -- fancy icons and a name of kind
+    vim_item.kind = require("lspkind").presets.default[vim_item.kind]
+      .. " "
+      .. vim_item.kind
+    -- set a name for each source
+    vim_item.menu = ({
+      buffer = "[Buffer]",
+      nvim_lsp = "[LSP]",
+      luasnip = "[LuaSnip]",
+      nvim_lua = "[Lua]",
+      latex_symbols = "[Latex]",
+    })[entry.source.name]
+    return vim_item
+  end,
+},
 ```
 
 Source creation
