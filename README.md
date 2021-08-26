@@ -187,7 +187,7 @@ length of the word to the left of the cursor is less than `keyword_length`.
 
 Default: `1`
 
-### completion.get_trigger_characters (type: fun(trigger_characters: string[]): string[])
+#### completion.get_trigger_characters (type: fun(trigger_characters: string[]): string[])
 
 The function to resolve trigger_characters.
 
