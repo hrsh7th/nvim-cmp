@@ -149,7 +149,7 @@ end
 ---Invoke completion
 ---@param ctx cmp.Context
 core.complete = function(ctx)
-  local callback = vim.schedule_wrap(function()
+  local callback = function()
     local new = context.new(ctx)
     if new:changed(new.prev_context) then
       core.complete(new)
@@ -157,7 +157,7 @@ core.complete = function(ctx)
       core.filter.timeout = 50
       core.filter()
     end
-  end)
+  end
   for _, s in ipairs(core.get_sources()) do
     s:complete(ctx, callback)
   end

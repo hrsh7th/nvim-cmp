@@ -288,7 +288,7 @@ source.complete = function(self, ctx, callback)
       option = self:get_option(),
       completion_context = completion_context,
     },
-    self.complete_dedup(function(response)
+    self.complete_dedup(vim.schedule_wrap(function(response)
       self.revision = self.revision + 1
       if (misc.safe(response) and misc.safe(response.items) or misc.safe(response)) ~= nil then
         debug.log(self:get_debug_name(), 'retrieve', #(response.items or response))
@@ -308,7 +308,7 @@ source.complete = function(self, ctx, callback)
         self.status = prev_status
       end
       callback()
-    end)
+    end))
   )
   return true
 end
