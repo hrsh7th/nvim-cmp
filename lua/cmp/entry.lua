@@ -104,15 +104,21 @@ entry.get_word = function(self)
     if misc.safe(self.completion_item.textEdit) then
       word = str.trim(self.completion_item.textEdit.newText)
       local _, after = self:get_overwrite()
-      if 0 < after or self.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-        word = str.get_word(word, string.byte(self.context.cursor_after_line, 1))
+      if (0 < after or self.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet)
+        and config.get().completion.trim_match
+        then
+          word = str.get_word(word, string.byte(self.context.cursor_after_line, 1))
       end
     elseif misc.safe(self.completion_item.insertText) then
       word = str.trim(self.completion_item.insertText)
-      word = str.get_word(word)
+      if config.get().completion.trim_match then
+        word = str.get_word(word)
+      end
     else
       word = str.trim(self.completion_item.label)
-      word = str.get_word(word, '')
+      if config.get().completion.trim_match then
+        word = str.get_word(word, '')
+      end
     end
     return word
   end)
