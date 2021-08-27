@@ -194,7 +194,7 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
   end
   e.confirmed = true
 
-  debug.log('entry.confirm', e)
+  debug.log('entry.confirm', e:get_completion_item())
 
   local ctx = context.new()
   keymap.feedkeys(keymap.t('<C-g>U' .. string.rep('<BS>', str.chars(ctx.cursor_line, e.context.cursor.col, ctx.cursor.col - 1))), 'n', function()
@@ -242,9 +242,7 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
       completion_item.textEdit.range = e:get_insert_range()
     end
 
-    local is_snippet = true
-    is_snippet = is_snippet and completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet
-    is_snippet = is_snippet and vim.lsp.util.parse_snippet(completion_item.textEdit.newText) ~= completion_item.textEdit.newText
+    local is_snippet = completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet
 
     local range = types.lsp.Range.to_vim(ctx.bufnr, completion_item.textEdit.range)
     local keys = {}
