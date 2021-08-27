@@ -1,5 +1,4 @@
 local config = require('cmp.config')
-local async = require('cmp.utils.async')
 local spec = require('cmp.utils.spec')
 
 local source = require('cmp.source')
@@ -86,15 +85,25 @@ describe('source', function()
           })
         end,
       })
-      vim.wait(100, function() return s.status == source.SourceStatus.COMPLETED end, 100, false)
+      vim.wait(100, function()
+        return s.status == source.SourceStatus.COMPLETED
+      end, 100, false)
       assert.is.truthy(s:complete(state.input('s'), function() end))
-      vim.wait(100, function() return s.status == source.SourceStatus.COMPLETED end, 100, false)
+      vim.wait(100, function()
+        return s.status == source.SourceStatus.COMPLETED
+      end, 100, false)
       assert.is.truthy(s:complete(state.input('p'), function() end))
-      vim.wait(100, function() return s.status == source.SourceStatus.COMPLETED end, 100, false)
+      vim.wait(100, function()
+        return s.status == source.SourceStatus.COMPLETED
+      end, 100, false)
       assert.is.truthy(s:complete(state.input('e'), function() end))
-      vim.wait(100, function() return s.status == source.SourceStatus.COMPLETED end, 100, false)
+      vim.wait(100, function()
+        return s.status == source.SourceStatus.COMPLETED
+      end, 100, false)
       assert.is.truthy(s:complete(state.input('c'), function() end))
-      vim.wait(100, function() return s.status == source.SourceStatus.COMPLETED end, 100, false)
+      vim.wait(100, function()
+        return s.status == source.SourceStatus.COMPLETED
+      end, 100, false)
     end)
   end)
 end)
