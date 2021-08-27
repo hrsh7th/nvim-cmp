@@ -244,13 +244,12 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
 
     local is_snippet = completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet
 
-    local range = types.lsp.Range.to_vim(ctx.bufnr, completion_item.textEdit.range)
     local keys = {}
-    if e.context.cursor.col < range['end'].col then
-      table.insert(keys, keymap.t(string.rep('<C-g>U<Right><BS>', str.chars(ctx.cursor_line, e.context.cursor.col, range['end'].col - 1))))
+    if e.context.cursor.character < completion_item.textEdit.range['end'].character then
+      table.insert(keys, keymap.t(string.rep('<C-g>U<Right><BS>', completion_item.textEdit.range['end'].character - e.context.cursor.character)))
     end
-    if range.start.col < e.context.cursor.col then
-      table.insert(keys, keymap.t(string.rep('<BS>', str.chars(ctx.cursor_line, range.start.col, e.context.cursor.col - 1))))
+    if completion_item.textEdit.range.start.character < e.context.cursor.character then
+      table.insert(keys, keymap.t(string.rep('<BS>', e.context.cursor.character - completion_item.textEdit.range.start.character)))
     end
 
     if is_snippet then
