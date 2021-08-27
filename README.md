@@ -490,6 +490,8 @@ formatting = {
 Source creation
 ====================
 
+Warning: If the LSP spec is changed, nvim-comp will keep up to it without announcement.
+
 If you publish `nvim-cmp` source to GitHub, please add `nvim-cmp` topic for the repo.
 
 You should read [cmp types](/lua/cmp/types) and [LSP spec](https://microsoft.github.io/language-server-protocol/specifications/specification-current/) to create sources.
