@@ -98,6 +98,7 @@ lua <<EOF
     },
   }
 EOF
+```
 
 Avanced Configuration
 ====================
