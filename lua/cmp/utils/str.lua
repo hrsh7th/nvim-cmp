@@ -13,6 +13,7 @@ INVALID_CHARS[string.byte('[')] = true
 INVALID_CHARS[string.byte(' ')] = true
 INVALID_CHARS[string.byte('\t')] = true
 INVALID_CHARS[string.byte('\n')] = true
+INVALID_CHARS[string.byte('\r')] = true
 
 local PAIR_CHARS = {}
 PAIR_CHARS[string.byte('[')] = string.byte(']')

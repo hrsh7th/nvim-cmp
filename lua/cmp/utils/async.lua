@@ -51,5 +51,20 @@ async.dedup = function()
   end
 end
 
+---Wiat for callback.
+---@param runner fun(done: function)
+---@param timeout number
+---@return any
+async.sync = function(runner, timeout)
+  local done = false
+  local res = runner(function()
+    done = true
+  end)
+  vim.wait(timeout or 1000, function()
+    return done
+  end, 100, false)
+  return res
+end
+
 return async
 

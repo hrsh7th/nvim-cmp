@@ -275,7 +275,7 @@ describe('entry', function()
       insertTextFormat = 1,
       insertText = '__init__(self) -> None:\n  pass',
     })
-    assert.are.equal(e:get_vim_item(e:get_offset()).word, '__init__')
+    assert.are.equal(e:get_vim_item(e:get_offset()).word, '__init__(self) -> None:')
     assert.are.equal(e:get_filter_text(), '__init__')
   end)
 end)
