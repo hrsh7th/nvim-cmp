@@ -100,7 +100,7 @@ lua <<EOF
 EOF
 ```
 
-Avanced Configuration
+Advanced Configuration
 ====================
 
 ```viml
