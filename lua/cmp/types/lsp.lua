@@ -168,9 +168,8 @@ lsp.CompletionItemKind = vim.tbl_add_reverse_lookup(lsp.CompletionItemKind)
 ---@field public newText string
 
 ---@class lsp.CompletionItemLabelDetails
----@field public parameters string|nil
----@field public qualifier string|nil
----@field public type string|nil
+---@field public detail string|nil
+---@field public description string|nil
 
 ---@class lsp.CompletionItem
 ---@field public label string

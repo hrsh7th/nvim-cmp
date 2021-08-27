@@ -219,14 +219,11 @@ entry.get_vim_item = function(self, suggest_offset)
     local menu = nil
     if misc.safe(completion_item.labelDetails) then
       menu = ''
-      if misc.safe(completion_item.labelDetails.parameters) then
-        menu = menu .. completion_item.labelDetails.parameters
+      if misc.safe(completion_item.labelDetails.detail) then
+        menu = menu .. completion_item.labelDetails.detail
       end
-      if misc.safe(completion_item.labelDetails.type) then
-        menu = menu .. completion_item.labelDetails.type
-      end
-      if misc.safe(completion_item.labelDetails.qualifier) then
-        menu = menu .. completion_item.labelDetails.qualifier
+      if misc.safe(completion_item.labelDetails.description) then
+        menu = menu .. completion_item.labelDetails.description
       end
     end
 
