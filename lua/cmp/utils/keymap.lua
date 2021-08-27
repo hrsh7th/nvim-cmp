@@ -120,7 +120,7 @@ keymap.listen = setmetatable({
     end
     existing = existing or {
       lhs = keys,
-      rhs = keymap.t('<C-]>') .. keys,
+      rhs = keys,
       expr = 0,
       nowait = 0,
       noremap = 1,
