@@ -355,6 +355,26 @@ Default: `cmp.PreselectMode.Item`
 FAQ
 ====================
 
+#### What is the `pairs-wise plugin automatically supported`?
+
+Some pairs-wise plugin set up the mapping automatically.
+For example, `vim-endwise` will map `<CR>` even if you don't do any mapping instructions for the plugin.
+
+But I think the user want to override `<CR>` mapping only when the mapping item is selected.
+
+The `nvim-cmp` does it automatically.
+
+The following configuration will be working as
+
+1. If the completion-item is selected, will be working as `cmp.mapping.confirm`.
+2. If the completion-item isn't selected, will be working as vim-endwise feature.
+
+```lua
+mapping = {
+  ['<CR>'] = cmp.mapping.confirm()
+}
+```
+
 #### How to set up like nvim-compe's `preselect = 'always'`?
 
 You can use the following configuration.
