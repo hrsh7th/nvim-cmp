@@ -120,7 +120,7 @@ keymap.listen = setmetatable({
     end
     existing = existing or {
       lhs = keys,
-      rhs = keys,
+      rhs = keymap.t('<C-]>') .. keys,
       expr = 0,
       nowait = 0,
       noremap = 1,
@@ -151,7 +151,7 @@ misc.set(_G, { 'cmp', 'utils', 'keymap', 'expr' }, function(mode, keys)
       script = existing.script ~= 0,
       silent = true,
     })
-    vim.fn.feedkeys(keymap.t('<Plug>(cmp-utils-keymap:_)'), 'i')
+    vim.fn.feedkeys(keymap.t('<Plug>(cmp-utils-keymap:_)'), 't')
   end)
   return keymap.t('<Ignore>')
 end)
