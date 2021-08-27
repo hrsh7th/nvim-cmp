@@ -21,6 +21,13 @@ describe('utils.str', function()
     assert.are.equal(str.remove_suffix('log()${0:placeholder}', '${0}'), 'log()${0:placeholder}')
   end)
 
+  it('escape', function()
+    assert.are.equal(str.escape('plain', {}), 'plain')
+    assert.are.equal(str.escape('plain\\', {}), 'plain\\\\')
+    assert.are.equal(str.escape('plain\\"', {}), 'plain\\\\"')
+    assert.are.equal(str.escape('pla"in', { '"' }), 'pla\\"in')
+  end)
+
 end)
 
 

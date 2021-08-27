@@ -1,4 +1,5 @@
 local misc = require('cmp.utils.misc')
+local str = require('cmp.utils.str')
 local cache = require('cmp.utils.cache')
 
 local keymap = {}
@@ -130,7 +131,7 @@ keymap.listen = setmetatable({
       existing = existing,
       callback = callback,
     })
-    vim.api.nvim_buf_set_keymap(0, mode, keys, ('v:lua.cmp.utils.keymap.expr("%s", "%s")'):format(mode, keymap.escape(keys)), {
+    vim.api.nvim_buf_set_keymap(0, mode, keys, ('v:lua.cmp.utils.keymap.expr("%s", "%s")'):format(mode, str.escape(keymap.escape(keys), { '"' })), {
       expr = true,
       nowait = true,
       noremap = true,

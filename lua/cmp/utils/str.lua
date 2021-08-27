@@ -156,6 +156,26 @@ str.oneline = function(text)
   return text
 end
 
-return str
+---Escape special chars
+---@param text string
+---@param chars string[]
+---@return string
+str.escape = function(text, chars)
+  table.insert(chars, '\\')
+  local escaped = {}
+  local i = 1
+  while i <= #text do
+    local c = string.sub(text, i, i)
+    if vim.tbl_contains(chars, c) then
+      table.insert(escaped, '\\')
+      table.insert(escaped, c)
+    else
+      table.insert(escaped, c)
+    end
+    i = i + 1
+  end
+  return table.concat(escaped, '')
+end
 
+return str
 
