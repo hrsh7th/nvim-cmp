@@ -48,8 +48,15 @@ end
 core.get_context = function(option)
   local prev = core.context:clone()
   prev.prev_context = nil
-  core.context = context.new(prev, option)
+  local ctx = context.new(prev, option)
+  core.set_context(ctx)
   return core.context
+end
+
+---Set new context
+---@param ctx cmp.Context
+core.set_context = function(ctx)
+  core.context = ctx
 end
 
 ---Get sources that sorted by priority
@@ -149,6 +156,8 @@ end
 ---Invoke completion
 ---@param ctx cmp.Context
 core.complete = function(ctx)
+  core.set_context(ctx)
+
   local callback = function()
     local new = context.new(ctx)
     if new:changed(new.prev_context) then

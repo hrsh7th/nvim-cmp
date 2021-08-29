@@ -26,9 +26,9 @@ end
 ---@param c cmp.ConfigSchema
 ---@param bufnr number|nil
 config.set_buffer = function(c, bufnr)
+  local revision = (config.buffers[bufnr] or {}).revision or 1
   config.buffers[bufnr] = c
-  config.buffers[bufnr].revision = config.buffers[bufnr].revision or 1
-  config.buffers[bufnr].revision = config.buffers[bufnr].revision + 1
+  config.buffers[bufnr].revision = revision + 1
 end
 
 ---@return cmp.ConfigSchema
