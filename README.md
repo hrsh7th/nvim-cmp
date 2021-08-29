@@ -212,7 +212,7 @@ source README which defines the source name as `buffer`.
 
 Which events should trigger `autocompletion`.
 
-If you set this to empty or `nil`, `nvim-cmp` will not perform completion
+If you set this to empty or `false`, `nvim-cmp` will not perform completion
 automatically. You can still use manual completion though (like omni-completion
 via the `cmp.mapping.complete` function).
 
