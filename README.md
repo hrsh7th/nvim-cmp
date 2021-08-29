@@ -80,6 +80,10 @@ lua <<EOF
     },
     mapping = {
       ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+    },
+    sources = {
+      { name = '...' },
+      ...
     }
   })
 EOF
@@ -122,6 +126,9 @@ lua <<EOF
   }
 EOF
 ```
+
+The configuration options will be merged with the default config.
+If you want to remove the option, You can set the `false` instead.
 
 #### mapping (type: table<string, fun(fallback: function)>)
 
@@ -212,7 +219,7 @@ source README which defines the source name as `buffer`.
 
 Which events should trigger `autocompletion`.
 
-If you set this to empty or `false`, `nvim-cmp` will not perform completion
+If you set this to `false`, `nvim-cmp` will not perform completion
 automatically. You can still use manual completion though (like omni-completion
 via the `cmp.mapping.complete` function).
 
