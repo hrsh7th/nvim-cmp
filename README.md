@@ -397,13 +397,15 @@ cmp.setup {
 I've optimized `nvim-cmp` as much as possible, but there are currently some known / unfixable issues.
 
 1. `cmp-buffer` source and too large buffer
-
 The `cmp-buffer` source makes index of the current buffer so if the current buffer is too large, will be slowdown main UI thread.
 
 1. some language servers
-
 For example, `typescript-language-server` will returns 15k items to the client.
 In such case, the time near the 100ms will be consumed just to parse payloads as JSON.
+
+1. You set `vim.lsp.set_log_level` up by yourself.
+This setting will cause the filesystem operation for each LSP payloads.
+This will extremely slow down nvim-cmp (and other LSP related features.)
 
 #### How to setup supertab-like mapping?
 
