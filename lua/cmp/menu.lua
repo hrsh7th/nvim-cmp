@@ -208,12 +208,18 @@ end
 ---Get current selected entry
 ---@return cmp.Entry|nil
 menu.get_selected_entry = function(self)
-  local info = vim.fn.complete_info({ 'items', 'selected' })
-  if info.selected == -1 then
-    return nil
+  local e = self:get_active_entry()
+  if e then
+    return e
   end
 
-  local completed_item = info.items[math.max(info.selected, 0) + 1] or {}
+  local selected = vim.fn.complete_info({ 'selected' }).selected
+  if selected == -1 then
+    return nil
+  end
+  local items = vim.fn.complete_info({ 'items' }).items
+
+  local completed_item = items[math.max(selected, 0) + 1] or {}
   if not completed_item.user_data then
     return nil
   end
