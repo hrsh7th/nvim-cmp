@@ -38,6 +38,11 @@ misc.merge = function(v1, v2)
   if v1 == nil then
     return v2
   end
+
+  -- treat false as {} if the default value is table.
+  if merge2 and v1 == false then
+    return {}
+  end
   return v1
 end
 
