@@ -33,17 +33,19 @@ Setup
 
 ## Install
 
-First, You should install `nvim-cmp` itself and completion sources by your
-favourite plugin manager.
+First, You should install `nvim-cmp` itself and completion sources and snippet engine by your favourite plugin manager.
 
-The `nvim-cmp` sources can be found in
-[here](https://github.com/topics/nvim-cmp).
+The `nvim-cmp` sources can be found in [here](https://github.com/topics/nvim-cmp).
 
 Using [vim-plug](https://github.com/junegunn/vim-plug):
 
 ```viml
 " Install nvim-cmp
 Plug 'hrsh7th/nvim-cmp'
+
+" Install snippet engine (This example installs [hrsh7th/vim-vsnip](https://github.com/hrsh7th/vim-vsnip))
+Plug 'hrsh7th/vim-vsnip'
+
 " Install the buffer completion source
 Plug 'hrsh7th/cmp-buffer'
 ```
@@ -55,6 +57,7 @@ Using [packer.nvim](https://github.com/wbthomason/packer.nvim):
 use {
   "hrsh7th/nvim-cmp",
   requires = {
+    "hrsh7th/vim-vsnip",
     "hrsh7th/cmp-buffer",
   }
 }
@@ -62,43 +65,27 @@ use {
 
 ## Basic Configuration
 
+First, You must set `snippet engine` up. See README.md of your choosen snippet engine.
+
 To use `nvim-cmp` with the default configuration:
 
 ```viml
 lua <<EOF
-  local cmp = require'cmp'.setup()
+  local cmp = require'cmp'
+  cmp.setup({
+    snippet = {
+      expand = function(args)
+        vim.fn["vsnip#anonymous"](args.body)
+      end,
+    },
+    mapping = {
+      ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+    }
+  })
 EOF
 ```
 
 The default configuration can be found in [here](./lua/cmp/config/default.lua)
-
-To configure with suggested key mappings and the `hrsh7th/cmp-buffer` source:
-
-```viml
-lua <<EOF
-  local cmp = require('cmp')
-  cmp.setup {
-    -- You can set mappings if you want
-    mapping = {
-      ['<C-p>'] = cmp.mapping.select_prev_item(),
-      ['<C-n>'] = cmp.mapping.select_next_item(),
-      ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-      ['<C-f>'] = cmp.mapping.scroll_docs(4),
-      ['<C-Space>'] = cmp.mapping.complete(),
-      ['<C-e>'] = cmp.mapping.close(),
-      ['<CR>'] = cmp.mapping.confirm({
-        behavior = cmp.ConfirmBehavior.Insert,
-        select = true,
-      })
-    },
-
-    -- You should specify your *installed* sources.
-    sources = {
-      { name = 'buffer' },
-    },
-  }
-EOF
-```
 
 Advanced Configuration
 ====================
@@ -152,8 +139,6 @@ You can configure `nvim-cmp` to use these `cmd.mappings` like this:
 
 ```lua
 mapping = {
-  ['<C-p>'] = cmp.mapping.select_prev_item(),
-  ['<C-n>'] = cmp.mapping.select_next_item(),
   ['<C-d>'] = cmp.mapping.scroll_docs(-4),
   ['<C-f>'] = cmp.mapping.scroll_docs(4),
   ['<C-Space>'] = cmp.mapping.complete(),
@@ -179,8 +164,8 @@ You can specify your own custom mapping function.
 
 ```lua
 local check_back_space = function()
-    local col = vim.fn.col('.') - 1
-    return col == 0 or vim.fn.getline('.'):sub(col, col):match('%s')
+  local col = vim.fn.col('.') - 1
+  return col == 0 or vim.fn.getline('.'):sub(col, col):match('%s')
 end
 
 mapping = {
@@ -212,8 +197,8 @@ lua filetype.
 " Setup buffer configuration (nvim-lua source only enables in Lua filetype).
 autocmd FileType lua lua require'cmp'.setup.buffer {
 \   sources = {
-\     { name = 'buffer' },
 \     { name = 'nvim_lua' },
+\     { name = 'buffer' },
 \   },
 \ }
 ```
@@ -425,9 +410,6 @@ In such case, the time near the 100ms will be consumed just to parse payloads as
 This is supertab-like mapping for [LuaSnip](https://github.com/L3MON4D3/LuaSnip)
 
 ```lua
-local t = function(str)
-  return vim.api.nvim_replace_termcodes(str, true, true, true)
-end
 local check_back_space = function()
   local col = vim.fn.col '.' - 1
   return col == 0 or vim.fn.getline('.'):sub(col, col):match '%s' ~= nil
@@ -436,13 +418,13 @@ local luasnip = require("luasnip")
 
 -- supertab-like mapping
 mapping = {
-  ["<tab>"] = cmp.mapping(function(fallback)
+  ["<Tab>"] = cmp.mapping(function(fallback)
     if vim.fn.pumvisible() == 1 then
-      vim.fn.feedkeys(t("<C-n>"), "n")
+      vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<C-n>"), "n")
     elseif luasnip.expand_or_jumpable() then
-      vim.fn.feedkeys(t("<Plug>luasnip-expand-or-jump"), "")
+      vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-expand-or-jump"), "")
     elseif check_back_space() then
-      vim.fn.feedkeys(t("<tab>"), "n")
+      vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Tab>"), "n")
     else
       fallback()
     end
@@ -450,11 +432,11 @@ mapping = {
     "i",
     "s",
   }),
-  ["<S-tab>"] = cmp.mapping(function(fallback)
+  ["<S-Tab>"] = cmp.mapping(function(fallback)
     if vim.fn.pumvisible() == 1 then
-      vim.fn.feedkeys(t("<C-p>"), "n")
+      vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<C-p>"), "n")
     elseif luasnip.jumpable(-1) then
-      vim.fn.feedkeys(t("<Plug>luasnip-jump-prev"), "")
+      vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-jump-prev"), "")
     else
       fallback()
     end
@@ -471,9 +453,8 @@ mapping = {
 formatting = {
   format = function(entry, vim_item)
     -- fancy icons and a name of kind
-    vim_item.kind = require("lspkind").presets.default[vim_item.kind]
-      .. " "
-      .. vim_item.kind
+    vim_item.kind = require("lspkind").presets.default[vim_item.kind] .. " " .. vim_item.kind
+
     -- set a name for each source
     vim_item.menu = ({
       buffer = "[Buffer]",
@@ -486,6 +467,7 @@ formatting = {
   end,
 },
 ```
+
 
 Source creation
 ====================
