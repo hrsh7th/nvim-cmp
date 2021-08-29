@@ -206,7 +206,10 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
   debug.log('entry.confirm', e:get_completion_item())
 
   local ctx = context.new()
-  keymap.feedkeys(keymap.t('<C-g>U' .. string.rep('<BS>', str.chars(ctx.cursor_line, e.context.cursor.col, ctx.cursor.col - 1))), 'n', function()
+  local keys = {}
+  table.insert(keys, keymap.t(string.rep('<BS>', ctx.cursor.character - e:get_insert_range().start.character)))
+  table.insert(keys, string.sub(e.context.cursor_before_line, e:get_offset()))
+  keymap.feedkeys(table.concat(keys, ''), 'n', function()
     --@see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/suggestController.ts#L334
     if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) == 0 then
       local pre = context.new()
