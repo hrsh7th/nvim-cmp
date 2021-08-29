@@ -405,7 +405,7 @@ In such case, the time near the 100ms will be consumed just to parse payloads as
 
 1. You set `vim.lsp.set_log_level` up by yourself.
 This setting will cause the filesystem operation for each LSP payloads.
-This will extremely slow down nvim-cmp (and other LSP related features.)
+This will extremely slow down nvim-cmp (and other LSP related features).
 
 #### How to setup supertab-like mapping?
 
