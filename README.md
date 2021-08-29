@@ -352,6 +352,40 @@ Specify preselect mode. The following modes are available.
 Default: `cmp.PreselectMode.Item`
 
 
+Programatic API
+====================
+
+You can use the following APIs.
+
+#### `cmp.confirm({ select = boolean, behavior = cmp.ConfirmBehavior.{Insert,Replace} })`
+
+Confirm current selected item if possible.
+
+#### `cmp.complete()`
+
+Invoke manual completion.
+
+#### `cmp.close()`
+
+Close current completion menu.
+
+#### `cmp.abort()`
+
+Close current completion menu and restore current line (similar to native `<C-e>` behavior).
+
+#### `cmp.select_next_item()`
+
+Select next completion item if possible.
+
+#### `cmp.select_prev_item()`
+
+Select prev completion item if possible.
+
+#### `cmp.scroll_docs(delta)`
+
+Scroll documentation window if possible.
+
+
 FAQ
 ====================
 
