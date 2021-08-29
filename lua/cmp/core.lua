@@ -18,6 +18,8 @@ core.SOURCE_TIMEOUT = 500
 ---Suspending state.
 core.suspending = false
 
+core.INLINE_PREVIEW_NS = vim.api.nvim_create_namespace('cmp:INLINE_PREVIEW_NS');
+
 ---@type cmp.Menu
 core.menu = menu.new({
   on_select = function(e)
@@ -26,6 +28,34 @@ core.menu = menu.new({
     end
   end,
 })
+
+core.inline_preview = function(e)
+  vim.api.nvim_buf_clear_namespace(0, core.INLINE_PREVIEW_NS, 0, -1)
+  if not e then
+    return
+  end
+  local ctx = context.new()
+  if ctx.cursor_after_line ~= '' then
+    return
+  end
+
+  local diff = ctx.cursor.col - e:get_offset()
+  local text = string.sub(vim.lsp.util.parse_snippet(str.oneline(e:get_insert_text())), diff + 1)
+  if #text > 0 then
+    vim.api.nvim_buf_set_extmark(
+      ctx.bufnr,
+      core.INLINE_PREVIEW_NS,
+      ctx.cursor.row - 1,
+      ctx.cursor.col - 1,
+      {
+        virt_text = { { text, 'Comment' } },
+        virt_text_pos = 'overlay',
+        virt_text_win_col = ctx.cursor.col - 1,
+        hl_mode = 'blend',
+      }
+    )
+  end
+end
 
 ---@type table<number, cmp.Source>
 core.sources = {}
@@ -226,6 +256,9 @@ core.filter = async.throttle(function()
   end
 
   core.menu:update(ctx, core.get_sources())
+  vim.schedule(function()
+    core.inline_preview(core.menu:get_first_entry())
+  end)
 end, 50)
 
 ---Confirm completion.
@@ -339,6 +372,7 @@ core.reset = function()
     s:reset()
   end
   core.menu:reset()
+  core.inline_preview()
 
   core.get_context() -- To prevent new event
 end
