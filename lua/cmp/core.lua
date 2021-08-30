@@ -40,7 +40,11 @@ core.inline_preview = function(e)
   end
 
   local diff = ctx.cursor.col - e:get_offset()
-  local text = string.sub(vim.lsp.util.parse_snippet(str.oneline(e:get_insert_text())), diff + 1)
+  local text = e:get_insert_text()
+  if e.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
+    text = vim.lsp.util.parse_snippet(text)
+  end
+  text = string.sub(str.oneline(text), diff + 1)
   if #text > 0 then
     vim.api.nvim_buf_set_extmark(
       ctx.bufnr,
@@ -48,10 +52,13 @@ core.inline_preview = function(e)
       ctx.cursor.row - 1,
       ctx.cursor.col - 1,
       {
+        end_line = ctx.cursor.row - 1,
+        end_col = ctx.cursor.col - 1,
+        right_gravity = false,
+        end_right_gravity = false,
         virt_text = { { text, 'Comment' } },
         virt_text_pos = 'overlay',
         virt_text_win_col = ctx.cursor.col - 1,
-        hl_mode = 'blend',
       }
     )
   end
