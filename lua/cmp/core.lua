@@ -59,6 +59,8 @@ core.inline_preview = function(e)
         virt_text = { { text, 'Comment' } },
         virt_text_pos = 'overlay',
         virt_text_win_col = ctx.cursor.col - 1,
+        hl_mode = 'combine',
+        priority = 0,
       }
     )
   end
