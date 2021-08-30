@@ -263,9 +263,6 @@ core.filter = async.throttle(function()
   end
 
   core.menu:update(ctx, core.get_sources())
-  vim.schedule(function()
-    core.inline_preview(core.menu:get_first_entry())
-  end)
 end, 50)
 
 ---Confirm completion.
@@ -379,7 +376,6 @@ core.reset = function()
     s:reset()
   end
   core.menu:reset()
-  core.inline_preview()
 
   core.get_context() -- To prevent new event
 end
