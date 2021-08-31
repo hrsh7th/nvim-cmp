@@ -22,8 +22,8 @@ describe('misc', function()
         b = 1
       }
     })
-    assert.are.equal(merged.a, false)
-
+    assert.are.equal(type(merged.a), 'table')
+    assert.are.equal(vim.tbl_isempty(merged.a), true)
   end)
 end)
 

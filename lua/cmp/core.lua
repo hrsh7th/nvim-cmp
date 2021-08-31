@@ -48,8 +48,15 @@ end
 core.get_context = function(option)
   local prev = core.context:clone()
   prev.prev_context = nil
-  core.context = context.new(prev, option)
+  local ctx = context.new(prev, option)
+  core.set_context(ctx)
   return core.context
+end
+
+---Set new context
+---@param ctx cmp.Context
+core.set_context = function(ctx)
+  core.context = ctx
 end
 
 ---Get sources that sorted by priority
@@ -149,6 +156,8 @@ end
 ---Invoke completion
 ---@param ctx cmp.Context
 core.complete = function(ctx)
+  core.set_context(ctx)
+
   local callback = function()
     local new = context.new(ctx)
     if new:changed(new.prev_context) then
@@ -197,7 +206,10 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
   debug.log('entry.confirm', e:get_completion_item())
 
   local ctx = context.new()
-  keymap.feedkeys(keymap.t('<C-g>U' .. string.rep('<BS>', str.chars(ctx.cursor_line, e.context.cursor.col, ctx.cursor.col - 1))), 'n', function()
+  local restore = {}
+  table.insert(restore, keymap.t(string.rep('<C-g>U<Left><Del>', ctx.cursor.character - misc.to_utfindex(e.context.cursor_before_line, e:get_offset()))))
+  table.insert(restore, string.sub(e.context.cursor_before_line, e:get_offset()))
+  keymap.feedkeys(table.concat(restore, ''), 'n', function()
     --@see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/suggestController.ts#L334
     if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) == 0 then
       local pre = context.new()
@@ -246,10 +258,10 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
 
     local keys = {}
     if e.context.cursor.character < completion_item.textEdit.range['end'].character then
-      table.insert(keys, keymap.t(string.rep('<C-g>U<Right><BS>', completion_item.textEdit.range['end'].character - e.context.cursor.character)))
+      table.insert(keys, keymap.t(string.rep('<Del>', completion_item.textEdit.range['end'].character - e.context.cursor.character)))
     end
     if completion_item.textEdit.range.start.character < e.context.cursor.character then
-      table.insert(keys, keymap.t(string.rep('<BS>', e.context.cursor.character - completion_item.textEdit.range.start.character)))
+      table.insert(keys, keymap.t(string.rep('<C-g>U<Left><Del>', e.context.cursor.character - completion_item.textEdit.range.start.character)))
     end
 
     if is_snippet then
