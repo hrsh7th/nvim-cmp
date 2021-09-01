@@ -1,6 +1,6 @@
 local debug = require('cmp.utils.debug')
 local char = require('cmp.utils.char')
-local str = require('cmp.utils.str')
+local pattern = require('cmp.utils.pattern')
 local async = require('cmp.utils.async')
 local keymap = require('cmp.utils.keymap')
 local context = require('cmp.context')
@@ -130,27 +130,47 @@ end
 
 ---Check auto-completion
 core.on_change = function(event)
-  local ctx = core.get_context({ reason = types.cmp.ContextReason.Auto })
+  core.autoindent(event, function()
+    local ctx = core.get_context({ reason = types.cmp.ContextReason.Auto })
 
-  -- Skip autocompletion when the item is selected manually.
-  if ctx.pumvisible and not vim.tbl_isempty(vim.v.completed_item) then
-    return
-  end
-
-  debug.log(('ctx: `%s`'):format(ctx.cursor_before_line))
-  if ctx:changed(ctx.prev_context) then
-    debug.log('changed')
-    core.menu:restore(ctx)
-
-    if vim.tbl_contains(config.get().completion.autocomplete or {}, event) then
-      core.complete(ctx)
-    else
-      core.filter.timeout = 50
-      core.filter()
+    -- Skip autocompletion when the item is selected manually.
+    if ctx.pumvisible and not vim.tbl_isempty(vim.v.completed_item) then
+      return
     end
-  else
-    debug.log('unchanged')
+
+    debug.log(('ctx: `%s`'):format(ctx.cursor_before_line))
+    if ctx:changed(ctx.prev_context) then
+      debug.log('changed')
+      core.menu:restore(ctx)
+
+      if vim.tbl_contains(config.get().completion.autocomplete or {}, event) then
+        core.complete(ctx)
+      else
+        core.filter.timeout = 50
+        core.filter()
+      end
+    else
+      debug.log('unchanged')
+    end
+  end)
+end
+
+---Check autoindent
+---@param event cmp.TriggerEvent
+---@param callback function
+core.autoindent = function(event, callback)
+  if event == types.cmp.TriggerEvent.TextChanged then
+    local ctx = context.new()
+    local prefix = pattern.matchstr('[^[:blank:]]\\+$', ctx.cursor_before_line)
+    if prefix then
+      for _, key in ipairs(vim.split(vim.bo.indentkeys, ',')) do
+        if vim.tbl_contains({ '=' .. prefix, '0=' .. prefix }, key) then
+          return keymap.feedkeys(keymap.t('<C-f>'), 'n', callback)
+        end
+      end
+    end
   end
+  callback()
 end
 
 ---Invoke completion

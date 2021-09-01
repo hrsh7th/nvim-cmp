@@ -17,5 +17,13 @@ pattern.offset = function(p, text)
   return nil, nil
 end
 
+pattern.matchstr = function(p, text)
+  local s, e = pattern.offset(p, text)
+  if s then
+    return string.sub(text, s, e)
+  end
+  return nil
+end
+
 return pattern
 
