@@ -65,7 +65,10 @@ use {
 
 ## Basic Configuration
 
-First, You must set `snippet engine` up. See README.md of your choosen snippet engine.
+First, You should do the following steps.
+
+- You must set `snippet engine` up. See README.md of your choosen snippet engine.
+- Remove `longuest` from `completeopt`. See `:help completeopt`.
 
 To use `nvim-cmp` with the default configuration:
 
