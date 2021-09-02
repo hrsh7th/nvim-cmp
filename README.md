@@ -33,9 +33,9 @@ Setup
 
 ## Install
 
-First, You should install `nvim-cmp` itself and completion sources and snippet engine by your favourite plugin manager.
+First, You should install `nvim-cmp` itself and completion sources and snippet engine with your favourite plugin manager.
 
-The `nvim-cmp` sources can be found in [here](https://github.com/topics/nvim-cmp).
+The `nvim-cmp` sources can be found [here](https://github.com/topics/nvim-cmp).
 
 Using [vim-plug](https://github.com/junegunn/vim-plug):
 
@@ -65,7 +65,7 @@ use {
 
 ## Basic Configuration
 
-First, You should do the following steps.
+First, you should do the following steps.
 
 - You must set `snippet engine` up. See README.md of your choosen snippet engine.
 - Remove `longest` from `completeopt`. See `:help completeopt`.
@@ -92,7 +92,7 @@ lua <<EOF
 EOF
 ```
 
-The default configuration can be found in [here](./lua/cmp/config/default.lua)
+The default configuration can be found [here](./lua/cmp/config/default.lua)
 
 Advanced Configuration
 ====================
@@ -131,7 +131,7 @@ EOF
 ```
 
 The configuration options will be merged with the default config.
-If you want to remove the option, You can set the `false` instead.
+If you want to remove an option, you can set it to `false` instead.
 
 #### mapping (type: table<string, fun(fallback: function)>)
 
@@ -440,20 +440,20 @@ cmp.setup {
 
 I've optimized `nvim-cmp` as much as possible, but there are currently some known / unfixable issues.
 
-1. `cmp-buffer` source and too large buffer
-The `cmp-buffer` source makes index of the current buffer so if the current buffer is too large, will be slowdown main UI thread.
+1. `cmp-buffer` source and too large buffer.
+The `cmp-buffer` source makes an index of the current buffer so if the current buffer is too large, it will slowdown the main UI thread.
 
-1. some language servers
+1. Some language servers.
 For example, `typescript-language-server` will returns 15k items to the client.
-In such case, the time near the 100ms will be consumed just to parse payloads as JSON.
+In such a case, it will take 100ms just to parse payloads as JSON.
 
 1. You set `vim.lsp.set_log_level` up by yourself.
-This setting will cause the filesystem operation for each LSP payloads.
-This will extremely slow down nvim-cmp (and other LSP related features).
+This setting will cause the filesystem operation for each LSP payload.
+This will greatly slow down nvim-cmp (and other LSP related features).
 
 #### How to setup supertab-like mapping?
 
-This is supertab-like mapping for [LuaSnip](https://github.com/L3MON4D3/LuaSnip)
+This is a supertab-like mapping for [LuaSnip](https://github.com/L3MON4D3/LuaSnip)
 
 ```lua
 local check_back_space = function()
@@ -522,7 +522,7 @@ formatting = {
 Source creation
 ====================
 
-Warning: If the LSP spec is changed, nvim-comp will keep up to it without announcement.
+Warning: If the LSP spec is changed, nvim-comp will keep up to it without an announcement.
 
 If you publish `nvim-cmp` source to GitHub, please add `nvim-cmp` topic for the repo.
 
