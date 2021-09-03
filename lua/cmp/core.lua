@@ -266,7 +266,15 @@ core.filter = async.throttle(function()
     end
   end
 
+  local prev = core.menu:get_first_entry()
   core.menu:update(ctx, core.get_sources())
+  local next = core.menu:get_first_entry()
+
+  local prev_word = prev and prev:get_word()
+  local next_word = next and next:get_word()
+  if prev_word ~= next_word then
+    vim.cmd [[redraw!]]
+  end
 end, 50)
 
 ---Confirm completion.
