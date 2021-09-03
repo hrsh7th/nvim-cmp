@@ -62,7 +62,7 @@ return function()
     },
 
     experimental = {
-      inline_preview = true,
+      inline_preview = false,
     },
 
     sources = {},
