@@ -90,7 +90,7 @@ cmp.PreselectMode.None = 'none'
 ---@field on_confirm_done function(e: cmp.Entry)
 
 ---@class cmp.ExperimentalConfig
----@field public inline_preview boolean
+---@field public ghost_text boolean
 
 ---@class cmp.SourceConfig
 ---@field public name string

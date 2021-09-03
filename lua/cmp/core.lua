@@ -19,12 +19,12 @@ core.SOURCE_TIMEOUT = 500
 ---Suspending state.
 core.suspending = false
 
-core.INLINE_PREVIEW_NS = vim.api.nvim_create_namespace('cmp:INLINE_PREVIEW_NS');
+core.GHOST_TEXT_NS = vim.api.nvim_create_namespace('cmp:GHOST_TEXT');
 
-vim.api.nvim_set_decoration_provider(core.INLINE_PREVIEW_NS, {
+vim.api.nvim_set_decoration_provider(core.GHOST_TEXT_NS, {
   on_win = function()
-    if config.get().experimental.inline_preview then
-      core.inline_preview(core.menu:get_first_entry())
+    if config.get().experimental.ghost_text then
+      core.ghost_text(core.menu:get_first_entry())
     end
   end,
 })
@@ -38,10 +38,13 @@ core.menu = menu.new({
   end,
 })
 
-core.inline_preview = function(e)
+---Show ghost text if possible
+---@param e cmp.Entry
+core.ghost_text = function(e)
   if not e then
     return
   end
+
   local ctx = context.new()
   if ctx.cursor_after_line ~= '' then
     return
@@ -56,7 +59,7 @@ core.inline_preview = function(e)
   if #text > 0 then
     vim.api.nvim_buf_set_extmark(
       ctx.bufnr,
-      core.INLINE_PREVIEW_NS,
+      core.GHOST_TEXT_NS,
       ctx.cursor.row - 1,
       ctx.cursor.col - 1,
       {
