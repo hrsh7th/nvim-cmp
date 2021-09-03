@@ -238,6 +238,17 @@ The source specific keyword_length for override.
 
 The source specific maximum item count.
 
+#### preselect (type: cmp.PreselectMode)
+
+Specify preselect mode. The following modes are available.
+
+- cmp.Preselect.Item
+  - If the item has `preselect = true`, `nvim-cmp` will preselect it.
+- cmp.Preselect.None
+  - Disable preselect feature.
+
+Default: `cmp.PreselectMode.Item`
+
 #### completion.autocomplete (type: cmp.TriggerEvent[])
 
 Which events should trigger `autocompletion`.
@@ -274,63 +285,15 @@ vim's `completeopt` setting. Warning: Be careful when changing this value.
 
 Default: `menu,menuone,noselect`
 
-#### documentation (type: false | cmp.DocumentationConfig)
-
-A documentation configuration or false to disable feature.
-
-#### documentation.border (type: string[])
-
-Border characters used for documentation window.
-
-#### documentation.winhighlight (type: string)
-
-A neovim's `winhighlight` option for documentation window.
-
-#### documentation.maxwidth (type: number)
-
-The documentation window's max width.
-
-#### documentation.maxheight (type: number)
-
-The documentation window's max height.
-
 #### confirmation.default_behavior (type: cmp.ConfirmBehavior)
 
 A default `cmp.ConfirmBehavior` value when to use confirmed by commitCharacters
 
 Default: `cmp.ConfirmBehavior.Insert`
 
-#### formatting.deprecated (type: boolean)
+#### confirmation.get_commit_characters (type: fun(commit_characters: string[]): string[])
 
-Specify deprecated candidate should be marked as deprecated or not.
-
-Default: `true`
-
-#### formatting.format (type: fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem)
-
-A function to customize completion menu.
-
-The return value is defined by vim. See `:help complete-items`.
-
-You can display the fancy icons to completion-menu with [lspkind-nvim](https://github.com/onsails/lspkind-nvim).
-
-Please see [FAQ](#how-to-show-name-of-item-kind-and-source-like-compe) if you would like to show symbol-text (e.g. function) and source (e.g. LSP) like compe.
-
-```lua
-local lspkind = require('lspkind')
-cmp.setup {
-  formatting = {
-    format = function(entry, vim_item)
-      vim_item.kind = lspkind.presets.default[vim_item.kind]
-      return vim_item
-    end
-  }
-}
-```
-
-#### event.on_confirm_done (type: fun(entry: cmp.Entry))
-
-A callback function called when the item is confirmed.
+The function to resolve commit_characters.
 
 #### sorting.priority_weight (type: number)
 
@@ -363,16 +326,57 @@ Default:
 }
 ```
 
-#### preselect (type: cmp.PreselectMode)
+#### documentation (type: false | cmp.DocumentationConfig)
 
-Specify preselect mode. The following modes are available.
+A documentation configuration or false to disable feature.
 
-- cmp.Preselect.Item
-  - If the item has `preselect = true`, `nvim-cmp` will preselect it.
-- cmp.Preselect.None
-  - Disable preselect feature.
+#### documentation.border (type: string[])
 
-Default: `cmp.PreselectMode.Item`
+Border characters used for documentation window.
+
+#### documentation.winhighlight (type: string)
+
+A neovim's `winhighlight` option for documentation window.
+
+#### documentation.maxwidth (type: number)
+
+The documentation window's max width.
+
+#### documentation.maxheight (type: number)
+
+The documentation window's max height.
+
+#### formatting.deprecated (type: boolean)
+
+Specify deprecated candidate should be marked as deprecated or not.
+
+Default: `true`
+
+#### formatting.format (type: fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem)
+
+A function to customize completion menu.
+
+The return value is defined by vim. See `:help complete-items`.
+
+You can display the fancy icons to completion-menu with [lspkind-nvim](https://github.com/onsails/lspkind-nvim).
+
+Please see [FAQ](#how-to-show-name-of-item-kind-and-source-like-compe) if you would like to show symbol-text (e.g. function) and source (e.g. LSP) like compe.
+
+```lua
+local lspkind = require('lspkind')
+cmp.setup {
+  formatting = {
+    format = function(entry, vim_item)
+      vim_item.kind = lspkind.presets.default[vim_item.kind]
+      return vim_item
+    end
+  }
+}
+```
+
+#### event.on_confirm_done (type: fun(entry: cmp.Entry))
+
+A callback function called when the item is confirmed.
 
 #### experimental.ghost_text (type: boolean)
 

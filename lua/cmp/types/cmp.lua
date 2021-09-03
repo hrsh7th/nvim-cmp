@@ -74,6 +74,7 @@ cmp.PreselectMode.None = 'none'
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior
+---@field public get_commit_characters fun(commit_characters: string[]): string[]
 
 ---@class cmp.SortingConfig
 ---@field public priority_weight number

@@ -35,6 +35,9 @@ return function()
 
     confirmation = {
       default_behavior = types.cmp.ConfirmBehavior.Insert,
+      get_commit_characters = function(commit_characters)
+        return commit_characters
+      end
     },
 
     sorting = {

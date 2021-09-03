@@ -24,7 +24,7 @@ core.GHOST_TEXT_NS = vim.api.nvim_create_namespace('cmp:GHOST_TEXT')
 ---@type cmp.Menu
 core.menu = menu.new({
   on_select = function(e)
-    for _, c in ipairs(e:get_commit_characters()) do
+    for _, c in ipairs(config.get().confirmation.get_commit_characters(e:get_commit_characters())) do
       keymap.listen('i', c, core.on_keymap)
     end
     core.ghost_text(e)
@@ -144,7 +144,7 @@ core.on_keymap = function(keys, fallback)
   --Commit character. NOTE: This has a lot of cmp specific implementation to make more user-friendly.
   local chars = keymap.t(keys)
   local e = core.menu:get_selected_entry()
-  if e and vim.tbl_contains(e:get_commit_characters(), chars) then
+  if e and vim.tbl_contains(config.get().confirmation.get_commit_characters(e:get_commit_characters()), chars) then
     local is_printable = char.is_printable(string.byte(chars, 1))
     core.confirm(e, {
       behavior = is_printable and 'insert' or 'replace',
