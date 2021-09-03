@@ -21,26 +21,20 @@ core.suspending = false
 
 core.GHOST_TEXT_NS = vim.api.nvim_create_namespace('cmp:GHOST_TEXT')
 
-vim.api.nvim_set_decoration_provider(core.GHOST_TEXT_NS, {
-  on_win = function()
-    if config.get().experimental.ghost_text then
-      core.ghost_text(core.menu:get_first_entry())
-    end
-  end,
-})
-
 ---@type cmp.Menu
 core.menu = menu.new({
   on_select = function(e)
     for _, c in ipairs(e:get_commit_characters()) do
       keymap.listen('i', c, core.on_keymap)
     end
+    core.ghost_text(e)
   end,
 })
 
 ---Show ghost text if possible
 ---@param e cmp.Entry
 core.ghost_text = function(e)
+  vim.api.nvim_buf_clear_namespace(0, core.GHOST_TEXT_NS, 0, -1)
   if not e then
     return
   end
@@ -58,12 +52,11 @@ core.ghost_text = function(e)
   text = string.sub(str.oneline(text), diff + 1)
   if #text > 0 then
     vim.api.nvim_buf_set_extmark(ctx.bufnr, core.GHOST_TEXT_NS, ctx.cursor.row - 1, ctx.cursor.col - 1, {
+      right_gravity = false,
       virt_text = { { text, 'Comment' } },
       virt_text_pos = 'overlay',
       virt_text_win_col = ctx.virtcol - 1,
-      hl_mode = 'combine',
-      priority = 0,
-      ephemeral = true,
+      priority = 1,
     })
   end
 end
@@ -198,6 +191,7 @@ core.on_change = function(event)
     if ctx:changed(ctx.prev_context) then
       debug.log('changed')
       core.menu:restore(ctx)
+      core.ghost_text(core.menu:get_first_entry())
 
       if vim.tbl_contains(config.get().completion.autocomplete or {}, event) then
         core.complete(ctx)
@@ -266,15 +260,8 @@ core.filter = async.throttle(function()
     end
   end
 
-  local prev = core.menu:get_first_entry()
   core.menu:update(ctx, core.get_sources())
-  local next = core.menu:get_first_entry()
-
-  local prev_word = prev and prev:get_word()
-  local next_word = next and next:get_word()
-  if prev_word ~= next_word then
-    vim.cmd [[redraw!]]
-  end
+  core.ghost_text(core.menu:get_first_entry())
 end, 50)
 
 ---Confirm completion.
@@ -390,6 +377,7 @@ core.reset = function()
   core.menu:reset()
 
   core.get_context() -- To prevent new event
+  core.ghost_text(nil)
 end
 
 return core
