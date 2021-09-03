@@ -35,6 +35,11 @@ core.menu = menu.new({
 ---@param e cmp.Entry
 core.ghost_text = function(e)
   vim.api.nvim_buf_clear_namespace(0, core.GHOST_TEXT_NS, 0, -1)
+
+  if not config.get().experimental.ghost_text then
+    return
+  end
+
   if not e then
     return
   end
