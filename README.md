@@ -354,6 +354,12 @@ Specify preselect mode. The following modes are available.
 
 Default: `cmp.PreselectMode.Item`
 
+#### experimental.inline_preview (type: boolean)
+
+Specify inline_preview enables or not.
+
+Default: `false`
+
 
 Programatic API
 ====================
