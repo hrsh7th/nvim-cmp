@@ -40,20 +40,20 @@ config.get = function()
   end)
 end
 
----Return source option
+---Return source config
 ---@param name string
----@return table
-config.get_source_option = function(name)
+---@return cmp.SourceConfig
+config.get_source_config = function(name)
   local global = config.global
   local buffer = config.buffers[vim.api.nvim_get_current_buf()] or { revision = 1 }
   return config.cache:ensure({ 'get_source_config', global.revision or 0, buffer.revision or 0, name }, function()
     local c = config.get()
     for _, s in ipairs(c.sources) do
       if s.name == name then
-        if type(s.opts) == 'table' then
-          return s.opts
+        if type(s.opts) ~= 'table' then
+          s.opts = {}
         end
-        return {}
+        return s
       end
     end
     return nil

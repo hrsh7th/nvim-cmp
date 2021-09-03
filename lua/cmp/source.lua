@@ -62,15 +62,9 @@ source.reset = function(self)
 end
 
 ---Return source option
----@return table
-source.get_option = function(self)
-  return config.get_source_option(self.name)
-end
-
----Return the source has items or not.
----@return boolean
-source.has_items = function(self)
-  return self.offset ~= -1
+---@return cmp.SourceConfig
+source.get_config = function(self)
+  return config.get_source_config(self.name)
 end
 
 ---Get fetching time
@@ -85,7 +79,7 @@ end
 ---@param ctx cmp.Context
 ---@return cmp.Entry[]
 source.get_entries = function(self, ctx)
-  if not self:has_items() then
+  if self.offset == -1 then
     return {}
   end
 
@@ -101,7 +95,7 @@ source.get_entries = function(self, ctx)
     return nil
   end)()
 
-  return self.cache:ensure({ 'get_entries', self.revision, ctx.cursor_before_line }, function()
+  local entries = self.cache:ensure({ 'get_entries', self.revision, ctx.cursor_before_line }, function()
     debug.log(self:get_debug_name(), 'filter', #(prev_entries or self.entries))
 
     local inputs = {}
@@ -118,8 +112,19 @@ source.get_entries = function(self, ctx)
         table.insert(entries, e)
       end
     end
+
     return entries
   end)
+
+  local max_item_count = self:get_config().max_item_count
+  local limited_entries = {}
+  for _, e in ipairs(entries) do
+    table.insert(limited_entries, e)
+    if max_item_count and #limited_entries >= max_item_count then
+      break
+    end
+  end
+  return limited_entries
 end
 
 ---Get default insert range
@@ -185,12 +190,26 @@ end
 ---Get keyword_pattern
 ---@return string
 source.get_keyword_pattern = function(self)
+  local c = self:get_config()
+  if c.keyword_pattern then
+    return c.keyword_pattern
+  end
   if self.source.get_keyword_pattern then
     return self.source:get_keyword_pattern({
-      option = self:get_option(),
+      option = self:get_config().opts,
     })
   end
   return config.get().completion.keyword_pattern
+end
+
+---Get keyword_length
+---@return number
+source.get_keyword_length = function(self)
+  local c = self:get_config()
+  if c.keyword_length then
+    return c.keyword_length
+  end
+  return config.get().completion.keyword_length or 1
 end
 
 ---Get trigger_characters
@@ -199,7 +218,7 @@ source.get_trigger_characters = function(self)
   local trigger_characters = {}
   if self.source.get_trigger_characters then
     trigger_characters = self.source:get_trigger_characters({
-      option = self:get_option(),
+      option = self:get_config().opts,
     }) or {}
   end
   if config.get().completion.get_trigger_characters then
@@ -247,7 +266,7 @@ source.complete = function(self, ctx, callback)
         triggerCharacter = before_char_iw,
       }
     elseif ctx:get_reason() ~= types.cmp.ContextReason.TriggerOnly then
-      if config.get().completion.keyword_length <= (ctx.cursor.col - offset) then
+      if self:get_keyword_length() <= (ctx.cursor.col - offset) then
         if self.incomplete and self.context.cursor.col ~= ctx.cursor.col then
           completion_context = {
             triggerKind = types.lsp.CompletionTriggerKind.TriggerForIncompleteCompletions,
@@ -285,7 +304,7 @@ source.complete = function(self, ctx, callback)
     {
       context = ctx,
       offset = self.offset,
-      option = self:get_option(),
+      option = self:get_config().opts,
       completion_context = completion_context,
     },
     self.complete_dedup(vim.schedule_wrap(function(response)

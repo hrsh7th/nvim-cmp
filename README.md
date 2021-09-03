@@ -193,7 +193,7 @@ mapping = {
 }
 ```
 
-#### sources (type: table<string>)
+#### sources (type: table<cmp.SourceConfig>)
 
 Globals source lists are listed in the `source` table. These are applied to all
 buffers. The order of the sources list helps define the source priority, see
@@ -217,6 +217,26 @@ Note that the source name isn't necessarily the source repository name.
 Source names are defined in the source repository README files. For
 example look at the [hrsh7th/cmp-buffer](https://github.com/hrsh7th/cmp-buffer)
 source README which defines the source name as `buffer`.
+
+#### sources[number].name (type: string)
+
+The source name.
+
+#### sources[number].opts (type: table)
+
+The source customization options. It is defined by each source.
+
+#### sources[number].keyword_pattern (type: string)
+
+The source specific keyword_pattern for override.
+
+#### sources[number].keyword_length (type: number)
+
+The source specific keyword_length for override.
+
+#### sources[number].max_item_count (type: number)
+
+The source specific maximum item count.
 
 #### completion.autocomplete (type: cmp.TriggerEvent[])
 
