@@ -50,22 +50,39 @@ keymap.to_keymap = function(s)
 end
 
 ---Feedkeys with callback
-keymap.feedkeys = function(keys, mode, callback)
-  if #keys ~= 0 then
-    vim.fn.feedkeys(keys, mode)
-  end
-  if callback then
-    local wait
-    wait = vim.schedule_wrap(function()
-      if vim.fn.getchar(1) == 0 then
-        callback()
+keymap.feedkeys = setmetatable({
+  callbacks = {}
+}, {
+  __call = function(self, keys, mode, callback)
+    if #keys ~= 0 then
+      vim.api.nvim_feedkeys(keys, mode, true)
+    end
+    if callback then
+      if vim.fn.reg_recording() == '' then
+        local id = misc.id('cmp.utils.keymap.feedkeys')
+        self.callbacks[id] = callback
+        vim.api.nvim_feedkeys(keymap.t('<Cmd>call v:lua.cmp.utils.keymap.feedkeys.run(%s)<CR>'):format(id), 'n', true)
       else
-        vim.defer_fn(wait, 1)
+        -- Does not feed extra keys if macro recording.
+        local wait
+        wait = vim.schedule_wrap(function()
+          if vim.fn.getchar(1) == 0 then
+            return callback()
+          end
+          vim.defer_fn(wait, 1)
+        end)
+        wait()
       end
-    end)
-    wait()
+    end
   end
-end
+})
+misc.set(_G, { 'cmp', 'utils', 'keymap', 'feedkeys', 'run' }, function(id)
+  if keymap.feedkeys.callbacks[id] then
+    keymap.feedkeys.callbacks[id]()
+    keymap.feedkeys.callbacks[id] = nil
+  end
+  return ''
+end)
 
 ---Register keypress handler.
 keymap.listen = setmetatable({
@@ -110,7 +127,7 @@ keymap.listen = setmetatable({
       existing = existing,
       callback = callback,
     })
-    vim.api.nvim_buf_set_keymap(0, mode, keys, ('v:lua.cmp.utils.keymap.expr("%s", "%s")'):format(mode, str.escape(keymap.escape(keys), { '"' })), {
+    vim.api.nvim_buf_set_keymap(0, mode, keys, ('v:lua.cmp.utils.keymap.listen.expr("%s", "%s")'):format(mode, str.escape(keymap.escape(keys), { '"' })), {
       expr = true,
       nowait = true,
       noremap = true,
@@ -118,7 +135,7 @@ keymap.listen = setmetatable({
     })
   end,
 })
-misc.set(_G, { 'cmp', 'utils', 'keymap', 'expr' }, function(mode, keys)
+misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'expr' }, function(mode, keys)
   local bufnr = vim.api.nvim_get_current_buf()
 
   local existing = keymap.listen.cache:get({ mode, bufnr, keys }).existing
