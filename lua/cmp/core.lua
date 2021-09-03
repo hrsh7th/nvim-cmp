@@ -19,7 +19,7 @@ core.SOURCE_TIMEOUT = 500
 ---Suspending state.
 core.suspending = false
 
-core.GHOST_TEXT_NS = vim.api.nvim_create_namespace('cmp:GHOST_TEXT');
+core.GHOST_TEXT_NS = vim.api.nvim_create_namespace('cmp:GHOST_TEXT')
 
 vim.api.nvim_set_decoration_provider(core.GHOST_TEXT_NS, {
   on_win = function()
@@ -57,20 +57,14 @@ core.ghost_text = function(e)
   end
   text = string.sub(str.oneline(text), diff + 1)
   if #text > 0 then
-    vim.api.nvim_buf_set_extmark(
-      ctx.bufnr,
-      core.GHOST_TEXT_NS,
-      ctx.cursor.row - 1,
-      ctx.cursor.col - 1,
-      {
-        virt_text = { { text, 'Comment' } },
-        virt_text_pos = 'overlay',
-        virt_text_win_col = ctx.virtcol - 1,
-        hl_mode = 'combine',
-        priority = 0,
-        ephemeral = true,
-      }
-    )
+    vim.api.nvim_buf_set_extmark(ctx.bufnr, core.GHOST_TEXT_NS, ctx.cursor.row - 1, ctx.cursor.col - 1, {
+      virt_text = { { text, 'Comment' } },
+      virt_text_pos = 'overlay',
+      virt_text_win_col = ctx.virtcol - 1,
+      hl_mode = 'combine',
+      priority = 0,
+      ephemeral = true,
+    })
   end
 end
 
@@ -79,7 +73,6 @@ core.sources = {}
 
 ---@type cmp.Context
 core.context = context.new()
-
 
 ---Register source
 ---@param s cmp.Source
