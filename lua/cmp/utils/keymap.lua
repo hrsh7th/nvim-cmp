@@ -50,43 +50,22 @@ keymap.to_keymap = function(s)
 end
 
 ---Feedkeys with callback
-keymap.feedkeys = setmetatable({
-  callbacks = {},
-}, {
-  __call = function(self, keys, mode, callback)
-    if #keys ~= 0 then
-      vim.fn.feedkeys(keys, mode)
-    end
-
-    if callback then
-      local current_mode = string.sub(vim.api.nvim_get_mode().mode, 1, 1)
-      local ctrl_r = current_mode == 'i'
-      local id = misc.id('cmp.utils.keymap.feedkeys')
-      local cb = ('<Plug>(cmp-utils-keymap-feedkeys:%s)'):format(id)
-      self.callbacks[id] = function()
-        self.callbacks[id] = nil
-        vim.api.nvim_buf_del_keymap(0, current_mode, cb)
+keymap.feedkeys = function(keys, mode, callback)
+  if #keys ~= 0 then
+    vim.fn.feedkeys(keys, mode)
+  end
+  if callback then
+    local wait
+    wait = vim.schedule_wrap(function()
+      if vim.fn.getchar(1) == 0 then
         callback()
-        return ''
+      else
+        vim.defer_fn(wait, 1)
       end
-
-      local rhs = ctrl_r and '<C-r>=v:lua.cmp.utils.keymap.feedkeys.run(%s)<CR>' or ':<C-u>v:lua.cmp.utils.keymap.feedkeys.run(%s)<CR>'
-      vim.api.nvim_buf_set_keymap(0, current_mode, cb, string.format(rhs, id), {
-        expr = not ctrl_r,
-        noremap = true,
-        nowait = true,
-        silent = true,
-      })
-      vim.fn.feedkeys(keymap.t(cb), '')
-    end
+    end)
+    wait()
   end
-})
-misc.set(_G, { 'cmp', 'utils', 'keymap', 'feedkeys', 'run' }, function(id)
-  if keymap.feedkeys.callbacks[id] then
-    return keymap.feedkeys.callbacks[id]()
-  end
-  return ''
-end)
+end
 
 ---Register keypress handler.
 keymap.listen = setmetatable({
