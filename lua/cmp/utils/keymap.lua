@@ -147,7 +147,7 @@ misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'expr' }, function(mode, keys
       script = existing.script ~= 0,
       silent = true,
     })
-    vim.fn.feedkeys(keymap.t('<Plug>(cmp-utils-keymap:_)'), 't')
+    vim.fn.feedkeys(keymap.t('<Plug>(cmp-utils-keymap:_)'), '')
   end)
   return keymap.t('<Ignore>')
 end)
