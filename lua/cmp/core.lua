@@ -1,5 +1,6 @@
 local debug = require('cmp.utils.debug')
 local char = require('cmp.utils.char')
+local str = require('cmp.utils.str')
 local pattern = require('cmp.utils.pattern')
 local async = require('cmp.utils.async')
 local keymap = require('cmp.utils.keymap')
