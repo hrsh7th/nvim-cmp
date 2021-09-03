@@ -1,5 +1,6 @@
 local debug = require('cmp.utils.debug')
 local char = require('cmp.utils.char')
+local str = require('cmp.utils.str')
 local pattern = require('cmp.utils.pattern')
 local async = require('cmp.utils.async')
 local keymap = require('cmp.utils.keymap')
@@ -18,6 +19,16 @@ core.SOURCE_TIMEOUT = 500
 ---Suspending state.
 core.suspending = false
 
+core.GHOST_TEXT_NS = vim.api.nvim_create_namespace('cmp:GHOST_TEXT');
+
+vim.api.nvim_set_decoration_provider(core.GHOST_TEXT_NS, {
+  on_win = function()
+    if config.get().experimental.ghost_text then
+      core.ghost_text(core.menu:get_first_entry())
+    end
+  end,
+})
+
 ---@type cmp.Menu
 core.menu = menu.new({
   on_select = function(e)
@@ -26,6 +37,43 @@ core.menu = menu.new({
     end
   end,
 })
+
+---Show ghost text if possible
+---@param e cmp.Entry
+core.ghost_text = function(e)
+  if not e then
+    return
+  end
+
+  local ctx = context.new()
+  if ctx.cursor_after_line ~= '' then
+    return
+  end
+
+  local diff = ctx.cursor.col - e:get_offset()
+  local text = e:get_insert_text()
+  if e.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
+    text = vim.lsp.util.parse_snippet(text)
+  end
+  text = string.sub(str.oneline(text), diff + 1)
+  if #text > 0 then
+    vim.api.nvim_buf_set_extmark(
+      ctx.bufnr,
+      core.GHOST_TEXT_NS,
+      ctx.cursor.row - 1,
+      ctx.cursor.col - 1,
+      {
+        right_gravity = true,
+        virt_text = { { text, 'Comment' } },
+        virt_text_pos = 'overlay',
+        virt_text_win_col = ctx.cursor.col - 1,
+        hl_mode = 'blend',
+        priority = 0,
+        ephemeral = true,
+      }
+    )
+  end
+end
 
 ---@type table<number, cmp.Source>
 core.sources = {}

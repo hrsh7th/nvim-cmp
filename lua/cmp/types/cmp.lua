@@ -57,6 +57,7 @@ cmp.PreselectMode.None = 'none'
 ---@field public event cmp.EventConfig
 ---@field public mapping table<string, fun(core: cmp.Core, fallback: function)>
 ---@field public sources cmp.SourceConfig[]
+---@field public experimental cmp.ExperimentalConfig
 
 ---@class cmp.CompletionConfig
 ---@field public autocomplete cmp.TriggerEvent[]
@@ -87,6 +88,9 @@ cmp.PreselectMode.None = 'none'
 
 ---@class cmp.EventConfig
 ---@field on_confirm_done function(e: cmp.Entry)
+
+---@class cmp.ExperimentalConfig
+---@field public ghost_text boolean
 
 ---@class cmp.SourceConfig
 ---@field public name string

@@ -61,6 +61,10 @@ return function()
       end
     },
 
+    experimental = {
+      ghost_text = false,
+    },
+
     sources = {},
   }
 end

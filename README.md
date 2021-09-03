@@ -354,6 +354,12 @@ Specify preselect mode. The following modes are available.
 
 Default: `cmp.PreselectMode.Item`
 
+#### experimental.ghost_text (type: boolean)
+
+Specify whether to display ghost text.
+
+Default: `false`
+
 
 Programatic API
 ====================
