@@ -193,58 +193,39 @@ end
 ---Geta current active entry
 ---@return cmp.Entry|nil
 menu.get_active_entry = function(self)
-  local completed_item = vim.v.completed_item or {}
-  if vim.fn.pumvisible() == 0 or not completed_item.user_data then
+  if vim.fn.pumvisible() == 0 or not (vim.v.completed_item or {}).user_data then
     return nil
   end
-
-  local id = completed_item.user_data.cmp
-  if id then
-    return self.entry_map[id]
-  end
-  return nil
+  return self:get_selected_entry()
 end
 
 ---Get current selected entry
 ---@return cmp.Entry|nil
 menu.get_selected_entry = function(self)
-  local e = self:get_active_entry()
-  if e then
-    return e
+  if not self:is_valid_mode() then
+    return nil
   end
 
   local selected = vim.fn.complete_info({ 'selected' }).selected
   if selected == -1 then
     return nil
   end
-  local items = vim.fn.complete_info({ 'items' }).items
-
-  local completed_item = items[math.max(selected, 0) + 1] or {}
-  if not completed_item.user_data then
-    return nil
-  end
-
-  local id = completed_item.user_data.cmp
-  if id then
-    return self.entry_map[id]
-  end
-  return nil
+  return self.entries[math.max(selected, 0) + 1]
 end
 
 ---Get first entry
 ---@param self cmp.Entry|nil
 menu.get_first_entry = function(self)
-  local info = vim.fn.complete_info({ 'items' })
-  local completed_item = info.items[1] or {}
-  if not completed_item.user_data then
+  if not self:is_valid_mode() then
     return nil
   end
+  return self.entries[1]
+end
 
-  local id = completed_item.user_data.cmp
-  if id then
-    return self.entry_map[id]
-  end
-  return nil
+---Return the completion menu is visible or not.
+---@return boolean
+menu.is_valid_mode = function()
+  return vim.fn.complete_info({ 'mode' }).mode == 'eval'
 end
 
 return menu

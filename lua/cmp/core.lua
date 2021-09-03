@@ -20,6 +20,14 @@ core.suspending = false
 
 core.INLINE_PREVIEW_NS = vim.api.nvim_create_namespace('cmp:INLINE_PREVIEW_NS');
 
+vim.api.nvim_set_decoration_provider(core.INLINE_PREVIEW_NS, {
+  on_win = function()
+    if config.get().experimental.inline_preview then
+      core.inline_preview(core.menu:get_first_entry())
+    end
+  end,
+})
+
 ---@type cmp.Menu
 core.menu = menu.new({
   on_select = function(e)
@@ -30,7 +38,6 @@ core.menu = menu.new({
 })
 
 core.inline_preview = function(e)
-  vim.api.nvim_buf_clear_namespace(0, core.INLINE_PREVIEW_NS, 0, -1)
   if not e then
     return
   end
@@ -52,15 +59,13 @@ core.inline_preview = function(e)
       ctx.cursor.row - 1,
       ctx.cursor.col - 1,
       {
-        end_line = ctx.cursor.row - 1,
-        end_col = ctx.cursor.col - 1,
-        right_gravity = false,
-        end_right_gravity = false,
+        right_gravity = true,
         virt_text = { { text, 'Comment' } },
         virt_text_pos = 'overlay',
         virt_text_win_col = ctx.cursor.col - 1,
-        hl_mode = 'combine',
+        hl_mode = 'blend',
         priority = 0,
+        ephemeral = true,
       }
     )
   end

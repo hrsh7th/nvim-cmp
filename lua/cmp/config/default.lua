@@ -61,6 +61,10 @@ return function()
       end
     },
 
+    experimental = {
+      inline_preview = true,
+    },
+
     sources = {},
   }
 end
