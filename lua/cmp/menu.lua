@@ -3,7 +3,7 @@ local types = require('cmp.types')
 local async = require('cmp.utils.async')
 local float = require('cmp.float')
 local config = require('cmp.config')
-local autocmd = require('cmp.autocmd')
+local autocmd = require('cmp.utils.autocmd')
 local check = require('cmp.utils.check')
 
 ---@class cmp.MenuOption

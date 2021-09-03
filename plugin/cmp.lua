@@ -3,18 +3,15 @@ if vim.g.loaded_cmp then
 end
 vim.g.loaded_cmp = true
 
-local cmp = require'cmp'
-local misc = require'cmp.utils.misc'
-
 -- TODO: https://github.com/neovim/neovim/pull/14661
 vim.cmd [[
   augroup cmp
     autocmd!
-    autocmd InsertEnter * lua require'cmp.autocmd'.emit('InsertEnter')
-    autocmd InsertLeave * lua require'cmp.autocmd'.emit('InsertLeave')
-    autocmd TextChangedI,TextChangedP * lua require'cmp.autocmd'.emit('TextChanged')
-    autocmd CompleteChanged * lua require'cmp.autocmd'.emit('CompleteChanged')
-    autocmd CompleteDone * lua require'cmp.autocmd'.emit('CompleteDone')
+    autocmd InsertEnter * lua require'cmp.utils.autocmd'.emit('InsertEnter')
+    autocmd InsertLeave * lua require'cmp.utils.autocmd'.emit('InsertLeave')
+    autocmd TextChangedI,TextChangedP * lua require'cmp.utils.autocmd'.emit('TextChanged')
+    autocmd CompleteChanged * lua require'cmp.utils.autocmd'.emit('CompleteChanged')
+    autocmd CompleteDone * lua require'cmp.utils.autocmd'.emit('CompleteDone')
   augroup END
 ]]
 

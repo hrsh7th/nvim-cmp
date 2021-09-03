@@ -2,7 +2,7 @@ local core = require('cmp.core')
 local keymap = require('cmp.utils.keymap')
 local source = require('cmp.source')
 local config = require('cmp.config')
-local autocmd = require('cmp.autocmd')
+local autocmd = require('cmp.utils.autocmd')
 
 local cmp = {}
 
@@ -14,7 +14,7 @@ cmp.lsp = require('cmp.types.lsp')
 cmp.vim = require('cmp.types.vim')
 
 ---Export mapping
-cmp.mapping = require('cmp.mapping')
+cmp.mapping = require('cmp.config.mapping')
 
 ---Register completion sources
 ---@param name string
