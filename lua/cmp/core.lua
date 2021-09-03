@@ -63,11 +63,10 @@ core.ghost_text = function(e)
       ctx.cursor.row - 1,
       ctx.cursor.col - 1,
       {
-        right_gravity = true,
         virt_text = { { text, 'Comment' } },
         virt_text_pos = 'overlay',
         virt_text_win_col = ctx.cursor.col - 1,
-        hl_mode = 'blend',
+        hl_mode = 'combine',
         priority = 0,
         ephemeral = true,
       }
@@ -80,6 +79,7 @@ core.sources = {}
 
 ---@type cmp.Context
 core.context = context.new()
+
 
 ---Register source
 ---@param s cmp.Source

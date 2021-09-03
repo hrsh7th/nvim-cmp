@@ -16,7 +16,6 @@ local check = require('cmp.utils.check')
 ---@field public on_select fun(e: cmp.Entry)
 ---@field public items vim.CompletedItem[]
 ---@field public entries cmp.Entry[]
----@field public entry_map table<number, cmp.Entry>
 ---@field public selected_entry cmp.Entry|nil
 ---@field public context cmp.Context
 ---@field public resolve_dedup fun(callback: function)
@@ -59,7 +58,6 @@ menu.reset = function(self)
   self.offset = nil
   self.items = {}
   self.entries = {}
-  self.entry_map = {}
   self.context = nil
   self.preselect = 0
   self:close()
@@ -71,7 +69,6 @@ end
 ---@return cmp.Menu
 menu.update = check.wrap(function(self, ctx, sources)
   local entries = {}
-  local entry_map = {}
 
   -- check the source triggered by character
   local has_triggered_by_symbol_source = false
@@ -95,7 +92,6 @@ menu.update = check.wrap(function(self, ctx, sources)
         for _, e in ipairs(s:get_entries(ctx)) do
           e.score = e.score + priority
           table.insert(entries, e)
-          entry_map[e.id] = e
           offset = math.min(offset, e:get_offset())
         end
       end
@@ -114,25 +110,18 @@ menu.update = check.wrap(function(self, ctx, sources)
 
   -- create vim items.
   local items = {}
-  local abbrs = {}
   local preselect = 0
-  for _, e in ipairs(entries) do
-    local item = e:get_vim_item(offset)
-    if not abbrs[item.abbr] or item.dup == 1 then
-      table.insert(items, item)
-      abbrs[item.abbr] = true
-
-      if preselect == 0 and e.completion_item.preselect and config.get().preselect ~= types.cmp.PreselectMode.None then
-        preselect = #items
-      end
+  for i, e in ipairs(entries) do
+    if preselect == 0 and e.completion_item.preselect and config.get().preselect ~= types.cmp.PreselectMode.None then
+      preselect = i
     end
+    table.insert(items, e:get_vim_item(offset))
   end
 
   -- save recent pum state.
   self.offset = offset
   self.items = items
   self.entries = entries
-  self.entry_map = entry_map
   self.preselect = preselect
   self.context = ctx
   self:show()
