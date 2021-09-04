@@ -16,6 +16,7 @@ local check = require('cmp.utils.check')
 ---@field public on_select fun(e: cmp.Entry)
 ---@field public items vim.CompletedItem[]
 ---@field public entries cmp.Entry[]
+---@field public deduped_entries cmp.Entry[]
 ---@field public selected_entry cmp.Entry|nil
 ---@field public context cmp.Context
 ---@field public resolve_dedup fun(callback: function)
@@ -58,6 +59,7 @@ menu.reset = function(self)
   self.offset = nil
   self.items = {}
   self.entries = {}
+  self.deduped_entries = {}
   self.context = nil
   self.preselect = 0
   self:close()
@@ -110,18 +112,28 @@ menu.update = check.wrap(function(self, ctx, sources)
 
   -- create vim items.
   local items = {}
+  local deduped_entries = {}
+  local deduped_words = {}
   local preselect = 0
-  for i, e in ipairs(entries) do
-    if preselect == 0 and e.completion_item.preselect and config.get().preselect ~= types.cmp.PreselectMode.None then
-      preselect = i
+  for _, e in ipairs(entries) do
+    local item = e:get_vim_item(offset)
+    if item.dup == 1 or not deduped_words[item.word] then
+      deduped_words[item.word] = true
+      -- We have done deduplication already, no need to force Vim to repeat it.
+      item.dup = nil
+      table.insert(items, item)
+      table.insert(deduped_entries, e)
+      if preselect == 0 and e.completion_item.preselect and config.get().preselect ~= types.cmp.PreselectMode.None then
+        preselect = #deduped_entries
+      end
     end
-    table.insert(items, e:get_vim_item(offset))
   end
 
   -- save recent pum state.
   self.offset = offset
   self.items = items
   self.entries = entries
+  self.deduped_entries = deduped_entries
   self.preselect = preselect
   self.context = ctx
   self:show()
@@ -142,11 +154,11 @@ end)
 
 ---Show completion item
 menu.show = function(self)
-  if #self.entries == 0 then
+  if #self.deduped_entries == 0 then
     self:close()
     return
   end
-  debug.log('menu.show', #self.entries)
+  debug.log('menu.show', #self.deduped_entries)
 
   local completeopt = vim.o.completeopt
   if self.preselect == 1 then
@@ -199,7 +211,7 @@ menu.get_selected_entry = function(self)
   if selected == -1 then
     return nil
   end
-  return self.entries[math.max(selected, 0) + 1]
+  return self.deduped_entries[math.max(selected, 0) + 1]
 end
 
 ---Get first entry
@@ -208,7 +220,7 @@ menu.get_first_entry = function(self)
   if not self:is_valid_mode() then
     return nil
   end
-  return self.entries[1]
+  return self.deduped_entries[1]
 end
 
 ---Return the completion menu is visible or not.
