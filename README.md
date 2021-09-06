@@ -174,18 +174,18 @@ You can specify your own custom mapping function.
 
 ```lua
 local check_back_space = function()
-  local col = vim.fn.col('.') - 1
-  return col == 0 or vim.fn.getline('.'):sub(col, col):match('%s')
+  local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+  return col == 0 or vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match('%s') ~= nil
 end
 
 mapping = {
   ['<Tab>'] = function(fallback)
     if vim.fn.pumvisible() == 1 then
-      vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-n>', true, true, true), 'n')
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-n>', true, true, true), 'n', true)
     elseif check_back_space() then
-      vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Tab>', true, true, true), 'n')
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Tab>', true, true, true), 'n', true)
     elseif vim.fn['vsnip#available']() == 1 then
-      vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>(vsnip-expand-or-jump)', true, true, true), '')
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Plug>(vsnip-expand-or-jump)', true, true, true), '', true)
     else
       fallback()
     end
@@ -496,9 +496,9 @@ end
 mapping = {
   ["<Tab>"] = cmp.mapping(function(fallback)
     if vim.fn.pumvisible() == 1 then
-      vim.fn.feedkeys(t("<C-n>"), "n")
+      vim.api.nvim_feedkeys(t("<C-n>"), "n", true)
     elseif luasnip.expand_or_jumpable() then
-      vim.fn.feedkeys(t("<Plug>luasnip-expand-or-jump"), "")
+      vim.api.nvim_feedkeys(t("<Plug>luasnip-expand-or-jump"), "", true)
     else
       fallback()
     end
@@ -508,9 +508,9 @@ mapping = {
   }),
   ["<S-Tab>"] = cmp.mapping(function(fallback)
     if vim.fn.pumvisible() == 1 then
-      vim.fn.feedkeys(t("<C-p>"), "n")
+      vim.api.nvim_feedkeys(t("<C-p>"), "n", true)
     elseif luasnip.jumpable(-1) then
-      vim.fn.feedkeys(t("<Plug>luasnip-jump-prev"), "")
+      vim.api.nvim_feedkeys(t("<Plug>luasnip-jump-prev"), "", true)
     else
       fallback()
     end
