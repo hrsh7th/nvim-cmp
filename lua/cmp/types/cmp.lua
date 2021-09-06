@@ -49,7 +49,7 @@ cmp.PreselectMode.None = 'none'
 ---@field private revision number
 ---@field public preselect cmp.PreselectMode
 ---@field public completion cmp.CompletionConfig
----@field public documentation cmp.DocumentationConfig
+---@field public documentation cmp.DocumentationConfig|"false"
 ---@field public confirmation cmp.ConfirmationConfig
 ---@field public sorting cmp.SortingConfig
 ---@field public formatting cmp.FormattingConfig
@@ -91,7 +91,10 @@ cmp.PreselectMode.None = 'none'
 ---@field on_confirm_done function(e: cmp.Entry)
 
 ---@class cmp.ExperimentalConfig
----@field public ghost_text boolean
+---@field public ghost_text cmp.GhostTextConfig|"false"
+
+---@class cmp.GhostTextConfig
+---@field hl_group string
 
 ---@class cmp.SourceConfig
 ---@field public name string
