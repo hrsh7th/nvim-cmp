@@ -16,10 +16,10 @@ vim.cmd [[
 ]]
 
 if vim.fn.hlexists('CmpDocumentation') == 0 then
-  vim.cmd [[highlight link CmpDocumentation NormalFloat]]
+  vim.api.nvim_command [[highlight link CmpDocumentation NormalFloat]]
 end
 
 if vim.fn.hlexists('CmpDocumentationBorder') == 0 then
-  vim.cmd [[highlight link CmpDocumentationBorder NormalFloat]]
+  vim.api.nvim_command [[highlight link CmpDocumentationBorder NormalFloat]]
 end
 
