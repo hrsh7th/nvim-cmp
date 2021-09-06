@@ -385,6 +385,14 @@ Specify whether to display ghost text.
 Default: `false`
 
 
+#### experimental.ghost_text.hl_group (type: string)
+
+Specify the hightlight group used for ghost text.
+
+Default: `Comment`
+
+
+
 Programatic API
 ====================
 
