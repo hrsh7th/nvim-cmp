@@ -309,7 +309,7 @@ source.complete = function(self, ctx, callback)
     },
     self.complete_dedup(vim.schedule_wrap(function(response)
       self.revision = self.revision + 1
-      if (misc.safe(response) and misc.safe(response.items) or misc.safe(response)) ~= nil then
+      if #((response or {}).items or response or {}) > 0 then
         debug.log(self:get_debug_name(), 'retrieve', #(response.items or response))
         self.status = source.SourceStatus.COMPLETED
         self.incomplete = response.isIncomplete or false
@@ -321,7 +321,7 @@ source.complete = function(self, ctx, callback)
         end
       else
         debug.log(self:get_debug_name(), 'continue', 'nil')
-        if prev_status == source.SourceStatus.WAITING then
+        if completion_context.triggerKind == types.lsp.CompletionTriggerKind.TriggerCharacter then
           self:reset()
         end
         self.status = prev_status
