@@ -120,7 +120,7 @@ menu.update = check.wrap(function(self, ctx, sources)
     if item.dup == 1 or not deduped_words[item.word] then
       deduped_words[item.word] = true
       -- We have done deduplication already, no need to force Vim to repeat it.
-      item.dup = nil
+      item.dup = 1
       table.insert(items, item)
       table.insert(deduped_entries, e)
       if preselect == 0 and e.completion_item.preselect and config.get().preselect ~= types.cmp.PreselectMode.None then
