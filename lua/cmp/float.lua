@@ -125,7 +125,7 @@ float.scroll = function(self, delta)
 
     vim.defer_fn(function()
       vim.api.nvim_buf_call(buf, function()
-        vim.cmd('normal! ' .. top .. 'zt')
+        vim.api.nvim_command('normal! ' .. top .. 'zt')
       end)
     end, 0)
   end
