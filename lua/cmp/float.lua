@@ -26,6 +26,15 @@ float.show = function(self, e)
     return
   end
 
+  local pum = vim.fn.pum_getpos() or {}
+  if not pum.col then
+    return self:close()
+  end
+
+  local right_space = vim.o.columns - (pum.col + pum.width + (pum.scrollbar and 1 or 0)) - 1
+  local left_space = pum.col - 1
+  local maxwidth = math.min(documentation.maxwidth, math.max(left_space, right_space))
+
   -- update buffer content if needed.
   if not self.entry or e.id ~= self.entry.id then
     local documents = e:get_documentation()
@@ -37,28 +46,21 @@ float.show = function(self, e)
     self.buf = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_buf_set_option(self.buf, 'bufhidden', 'wipe')
     vim.lsp.util.stylize_markdown(self.buf, documents, {
-      max_width = documentation.maxwidth,
+      max_width = maxwidth,
       max_height = documentation.maxheight,
     })
   end
 
   local width, height = vim.lsp.util._make_floating_popup_size(vim.api.nvim_buf_get_lines(self.buf, 0, -1, false), {
-    max_width = documentation.maxwidth,
+    max_width = maxwidth,
     max_height = documentation.maxheight,
   })
   if width <= 0 or height <= 0 then
     return self:close()
   end
 
-  local pum = vim.fn.pum_getpos() or {}
-  if not pum.col then
-    return self:close()
-  end
-
   local right_col = pum.col + pum.width + (pum.scrollbar and 1 or 0)
-  local right_space = vim.o.columns - right_col - 1
   local left_col = pum.col - width - 3 -- TODO: Why is this needed -3?
-  local left_space = pum.col - 1
 
   local col
   if right_space >= width and left_space >= width then
