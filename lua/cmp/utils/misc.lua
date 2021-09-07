@@ -38,6 +38,12 @@ misc.merge = function(v1, v2)
   if v1 == nil then
     return v2
   end
+  if v1 == true then
+    if merge2 then
+      return v2
+    end
+    return {}
+  end
 
   return v1
 end
