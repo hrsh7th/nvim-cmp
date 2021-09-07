@@ -552,7 +552,7 @@ formatting = {
 Source creation
 ====================
 
-Warning: If the LSP spec is changed, nvim-comp will keep up to it without an announcement.
+Warning: If the LSP spec is changed, nvim-cmp will keep up to it without an announcement.
 
 If you publish `nvim-cmp` source to GitHub, please add `nvim-cmp` topic for the repo.
 
