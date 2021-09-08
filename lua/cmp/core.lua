@@ -296,7 +296,7 @@ core.confirm = function(e, option, callback)
   table.insert(confirm, e:get_word())
   keymap.feedkeys(table.concat(confirm, ''), 'nt', function()
     local restore = {}
-    table.insert(restore, keymap.t(string.rep('<BS>', vim.fn.strchars(e:get_word()))))
+    table.insert(restore, keymap.t(string.rep('<C-g>U<Left><Del>', vim.fn.strchars(e:get_word()))))
     table.insert(restore, string.sub(e.context.cursor_before_line, e:get_offset()))
     keymap.feedkeys(table.concat(restore, ''), 'n', function()
       --@see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/suggestController.ts#L334
@@ -347,6 +347,7 @@ core.confirm = function(e, option, callback)
 
       local keys = {}
       if e.context.cursor.character < completion_item.textEdit.range['end'].character then
+        print(completion_item.textEdit.range['end'].character - e.context.cursor.character)
         table.insert(keys, keymap.t(string.rep('<Del>', completion_item.textEdit.range['end'].character - e.context.cursor.character)))
       end
       if completion_item.textEdit.range.start.character < e.context.cursor.character then
@@ -355,7 +356,7 @@ core.confirm = function(e, option, callback)
 
       if is_snippet then
         table.insert(keys, keymap.t('<C-g>u') .. e:get_word() .. keymap.t('<C-g>u'))
-        table.insert(keys, keymap.t(string.rep('<BS>', vim.fn.strchars(e:get_word()))))
+        table.insert(keys, keymap.t(string.rep('<C-g>U<Left><Del>', vim.fn.strchars(e:get_word()))))
       else
         table.insert(keys, keymap.t('<C-g>u') .. completion_item.textEdit.newText .. keymap.t('<C-g>u'))
       end
