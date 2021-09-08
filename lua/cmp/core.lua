@@ -63,6 +63,7 @@ core.ghost_text = function(e)
       virt_text = { { text, c.hl_group or 'Comment' } },
       virt_text_pos = 'overlay',
       virt_text_win_col = ctx.virtcol - 1,
+      hl_mode = 'combine',
       priority = 1,
     })
   end
