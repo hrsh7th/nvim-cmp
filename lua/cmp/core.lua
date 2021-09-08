@@ -15,6 +15,7 @@ local types = require('cmp.types')
 local core = {}
 
 core.SOURCE_TIMEOUT = 500
+core.THROTTLE_TIME = 80
 
 ---Suspending state.
 core.suspending = false
@@ -202,7 +203,7 @@ core.on_change = function(event)
       if vim.tbl_contains(config.get().completion.autocomplete or {}, event) then
         core.complete(ctx)
       else
-        core.filter.timeout = 50
+        core.filter.timeout = core.THROTTLE_TIME
         core.filter()
       end
     else
@@ -239,7 +240,7 @@ core.complete = function(ctx)
     if new:changed(new.prev_context) then
       core.complete(new)
     else
-      core.filter.timeout = 50
+      core.filter.timeout = core.THROTTLE_TIME
       core.filter()
     end
   end
@@ -247,7 +248,7 @@ core.complete = function(ctx)
     s:complete(ctx, callback)
   end
 
-  core.filter.timeout = ctx.pumvisible and 50 or 0
+  core.filter.timeout = ctx.pumvisible and core.THROTTLE_TIME or 0
   core.filter()
 end
 
@@ -273,7 +274,7 @@ core.filter = async.throttle(function()
 
   core.menu:update(ctx, sources)
   core.ghost_text(core.menu:get_first_entry())
-end, 50)
+end, core.THROTTLE_TIME)
 
 ---Confirm completion.
 ---@param e cmp.Entry
