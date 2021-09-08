@@ -151,7 +151,7 @@ misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(mode, keys)
       })
       keymap.feedkeys(keymap.t('<Plug>(cmp-utils-keymap-listen-run:_)'), '')
     elseif existing.noremap == 1 then
-      keymap.feedkeys(keymap.t(keys), 'n')
+      keymap.feedkeys(keymap.t(existing.rhs), 'n')
     else
       for i, keys_ in ipairs(vim.split(existing.rhs, existing.lhs, true)) do
         if i ~= 1 then
