@@ -127,27 +127,27 @@ keymap.listen = setmetatable({
       existing = existing,
       callback = callback,
     })
-    vim.api.nvim_buf_set_keymap(0, mode, keys, ('v:lua.cmp.utils.keymap.listen.expr("%s", "%s")'):format(mode, str.escape(keymap.escape(keys), { '"' })), {
-      expr = true,
+    vim.api.nvim_buf_set_keymap(0, mode, keys, ('<Cmd>call v:lua.cmp.utils.keymap.listen.run("%s", "%s")<CR>'):format(mode, str.escape(keymap.escape(keys), { '"' })), {
+      expr = false,
       nowait = true,
       noremap = true,
       silent = true,
     })
   end,
 })
-misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'expr' }, function(mode, keys)
+misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(mode, keys)
   local bufnr = vim.api.nvim_get_current_buf()
 
   local existing = keymap.listen.cache:get({ mode, bufnr, keys }).existing
   local callback = keymap.listen.cache:get({ mode, bufnr, keys }).callback
   callback(keys, function()
-    vim.api.nvim_buf_set_keymap(0, mode, '<Plug>(cmp-utils-keymap:_)', existing.rhs, {
+    vim.api.nvim_buf_set_keymap(0, mode, '<Plug>(cmp-utils-keymap-listen-run:_)', existing.rhs, {
       expr = existing.expr ~= 0,
       noremap = existing.noremap ~= 0,
       script = existing.script ~= 0,
       silent = true,
     })
-    vim.fn.feedkeys(keymap.t('<Plug>(cmp-utils-keymap:_)'), '')
+    vim.fn.feedkeys(keymap.t('<Plug>(cmp-utils-keymap-listen-run:_)'), '')
   end)
   return keymap.t('<Ignore>')
 end)

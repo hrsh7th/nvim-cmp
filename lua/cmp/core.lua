@@ -59,7 +59,7 @@ core.ghost_text = function(e)
   if #text > 0 then
     vim.api.nvim_buf_set_extmark(ctx.bufnr, core.GHOST_TEXT_NS, ctx.cursor.row - 1, ctx.cursor.col - 1, {
       right_gravity = false,
-      virt_text = { { text, c.hl_group } },
+      virt_text = { { text, c.hl_group or 'Comment' } },
       virt_text_pos = 'overlay',
       virt_text_win_col = ctx.virtcol - 1,
       priority = 1,
@@ -243,7 +243,7 @@ core.complete = function(ctx)
       core.filter()
     end
   end
-  for _, s in ipairs(core.get_sources()) do
+  for _, s in ipairs(core.get_sources({ source.SourceStatus.WAITING, source.SourceStatus.COMPLETED })) do
     s:complete(ctx, callback)
   end
 
@@ -256,17 +256,22 @@ core.filter = async.throttle(function()
   local ctx = core.get_context()
 
   -- To wait for processing source for that's timeout.
-  for _, s in ipairs(core.get_sources({ source.SourceStatus.FETCHING })) do
+  local sources = {}
+  for _, s in ipairs(core.get_sources()) do
     local time = core.SOURCE_TIMEOUT - s:get_fetching_time()
-    if time > 0 then
-      core.filter.stop()
-      core.filter.timeout = time + 1
-      core.filter()
-      return
+    if not s.incomplete and time > 0 then
+      if #sources == 0 then
+        core.filter.stop()
+        core.filter.timeout = time + 1
+        core.filter()
+        return
+      end
+      break
     end
+    table.insert(sources, s)
   end
 
-  core.menu:update(ctx, core.get_sources())
+  core.menu:update(ctx, sources)
   core.ghost_text(core.menu:get_first_entry())
 end, 50)
 
@@ -274,7 +279,7 @@ end, 50)
 ---@param e cmp.Entry
 ---@param option cmp.ConfirmOption
 ---@param callback function
-core.confirm = vim.schedule_wrap(function(e, option, callback)
+core.confirm = function(e, option, callback)
   if not (e and not e.confirmed) then
     return
   end
@@ -373,7 +378,7 @@ core.confirm = vim.schedule_wrap(function(e, option, callback)
       end)
     end)
   end)
-end)
+end
 
 ---Reset current completion state
 core.reset = function()
