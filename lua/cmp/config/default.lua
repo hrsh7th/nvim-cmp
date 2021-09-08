@@ -66,6 +66,7 @@ return function()
 
     experimental = {
       ghost_text = false,
+      ghost_text_highlight_group = "Comment",
     },
 
     sources = {},

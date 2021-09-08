@@ -36,8 +36,10 @@ core.menu = menu.new({
 core.ghost_text = function(e)
   vim.api.nvim_buf_clear_namespace(0, core.GHOST_TEXT_NS, 0, -1)
 
-  local c = config.get().experimental.ghost_text
-  if not c then
+  local experimental_cfg = config.get().experimental
+
+  local use_ghost_text = experimental_cfg.ghost_text
+  if not use_ghost_text then
     return
   end
 
@@ -59,9 +61,10 @@ core.ghost_text = function(e)
   if #text > 0 then
     vim.api.nvim_buf_set_extmark(ctx.bufnr, core.GHOST_TEXT_NS, ctx.cursor.row - 1, ctx.cursor.col - 1, {
       right_gravity = false,
-      virt_text = { { text, c.hl_group or "Comment" } },
+      virt_text = { { text, experimental_cfg.ghost_text_highlight_group } },
       virt_text_pos = 'overlay',
       virt_text_win_col = ctx.virtcol - 1,
+      hl_mode = 'combine',
       priority = 1,
     })
   end
