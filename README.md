@@ -486,10 +486,6 @@ This will greatly slow down nvim-cmp (and other LSP related features).
 This is a supertab-like mapping for [LuaSnip](https://github.com/L3MON4D3/LuaSnip)
 
 ```lua
-local check_back_space = function()
-  local col = vim.fn.col '.' - 1
-  return col == 0 or vim.fn.getline('.'):sub(col, col):match '%s' ~= nil
-end
 local luasnip = require("luasnip")
 
 local t = function(str)
@@ -503,8 +499,6 @@ mapping = {
       vim.fn.feedkeys(t("<C-n>"), "n")
     elseif luasnip.expand_or_jumpable() then
       vim.fn.feedkeys(t("<Plug>luasnip-expand-or-jump"), "")
-    elseif check_back_space() then
-      vim.fn.feedkeys(t("<Tab>"), "n")
     else
       fallback()
     end
