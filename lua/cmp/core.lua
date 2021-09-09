@@ -259,7 +259,7 @@ core.filter = async.throttle(function()
 
   -- To wait for processing source for that's timeout.
   local sources = {}
-  for _, s in ipairs(core.get_sources()) do
+  for _, s in ipairs(core.get_sources({ source.SourceStatus.FETCHING, source.SourceStatus.COMPLETED })) do
     local time = core.SOURCE_TIMEOUT - s:get_fetching_time()
     if not s.incomplete and time > 0 then
       if #sources == 0 then
