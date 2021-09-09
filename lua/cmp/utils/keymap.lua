@@ -172,7 +172,7 @@ misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(mode, keys)
   local callback = keymap.listen.cache:get({ mode, bufnr, keys }).callback
   callback(keys, function()
     local rhs = existing.rhs
-    if existing.noremap ~= 1 then
+    if existing.noremap == 0 then
       vim.api.nvim_buf_set_keymap(0, mode, '<Plug>(cmp-utils-keymap-listen-run:lhs)', existing.lhs, {
         expr = false,
         noremap = true,
