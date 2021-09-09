@@ -49,6 +49,35 @@ keymap.to_keymap = function(s)
   end)
 end
 
+--- Replace key in keys except in the <C-r> or <Cmd> sequence.
+keymap.replace = function(keys, key, rep)
+  local expr = false
+  local new_keys = {}
+  local i = 1
+  while i <= #keys do
+    if '<C-R>=' == string.sub(keys, i, i + #'<C-R>=' - 1) then
+      table.insert(new_keys, '<C-R>=')
+      expr = true
+      i = i + #'<C-R>='
+    elseif '<Cmd>' == string.sub(keys, i, i + #'<Cmd>' - 1) then
+      table.insert(new_keys, '<Cmd>')
+      expr = true
+      i = i + #'<Cmd>'
+    elseif expr and '<CR>' == string.sub(keys, i, i + #'<CR>' - 1) then
+      table.insert(new_keys, '<CR>')
+      i = i + #'<CR>'
+      expr = false
+    elseif not expr and key == string.sub(keys, i, i + #key - 1) then
+      table.insert(new_keys, rep)
+      i = i + #key
+    else
+      table.insert(new_keys, string.sub(keys, i, i))
+      i = i + 1
+    end
+  end
+  return table.concat(new_keys, '')
+end
+
 ---Feedkeys with callback
 keymap.feedkeys = setmetatable({
   callbacks = {}
@@ -149,8 +178,7 @@ misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(mode, keys)
         noremap = true,
         silent = true,
       })
-      -- TODO: Do not escape the keys inside <Cmd> ... <CR> / <C-r> = ... <CR>.
-      rhs = string.gsub(rhs, vim.pesc(existing.lhs), '<Plug>(cmp-utils-keymap-listen-run:lhs)')
+      rhs = keymap.replace(rhs, existing.lhs, '<Plug>(cmp-utils-keymap-listen-run:lhs)')
     end
     vim.api.nvim_buf_set_keymap(0, mode, '<Plug>(cmp-utils-keymap-listen-run:_)', rhs, {
       expr = existing.expr ~= 0,
