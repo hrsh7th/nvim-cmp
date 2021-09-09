@@ -122,7 +122,7 @@ keymap.listen = setmetatable({
     keys = keymap.to_keymap(keys)
 
     local bufnr = vim.api.nvim_get_current_buf()
-    if keymap.listen.cache:get({ mode, bufnr, keys }) then
+    if keymap.listen.cache:get({ 'listen', mode, bufnr, keys }) then
       return
     end
 
@@ -152,41 +152,50 @@ keymap.listen = setmetatable({
       noremap = 1,
     }
 
-    keymap.listen.cache:set({ mode, bufnr, keys }, {
-      mode = mode,
-      existing = existing,
-      callback = callback,
+    -- Keep existing mapping as Plug mapping.
+    local rhs = existing.rhs
+    if existing.noremap == 0 then
+      local fallback_lhs = ('<Plug>(cmp-utils-keymap-fallback-lhs:%s)'):format(existing.lhs)
+      vim.api.nvim_buf_set_keymap(0, mode, fallback_lhs, existing.lhs, {
+        expr = false,
+        noremap = true,
+        silent = true,
+      })
+      rhs = keymap.replace(rhs, existing.lhs, fallback_lhs)
+    end
+
+    local fallback = ('<Plug>(cmp-utils-keymap-listen-fallback:%s)'):format(misc.id('cmp.utils.keymap.listen.fallback'))
+    vim.api.nvim_buf_set_keymap(0, mode, fallback, rhs, {
+      expr = existing.expr ~= 0,
+      noremap = existing.noremap ~= 0,
+      script = existing.script ~= 0,
+      silent = true,
     })
+
+    -- Hijack mapping
     vim.api.nvim_buf_set_keymap(0, mode, keys, ('<Cmd>call v:lua.cmp.utils.keymap.listen.run("%s", "%s")<CR>'):format(mode, str.escape(keymap.escape(keys), { '"' })), {
       expr = false,
       nowait = true,
       noremap = true,
       silent = true,
     })
+
+    -- Save state.
+    keymap.listen.cache:set({ 'listen', mode, bufnr, keys }, {
+      mode = mode,
+      existing = existing,
+      callback = callback,
+      fallback = fallback,
+    })
   end,
 })
 misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(mode, keys)
   local bufnr = vim.api.nvim_get_current_buf()
 
-  local existing = keymap.listen.cache:get({ mode, bufnr, keys }).existing
-  local callback = keymap.listen.cache:get({ mode, bufnr, keys }).callback
+  local fallback = keymap.listen.cache:get({ 'listen', mode, bufnr, keys }).fallback
+  local callback = keymap.listen.cache:get({ 'listen', mode, bufnr, keys }).callback
   callback(keys, function()
-    local rhs = existing.rhs
-    if existing.noremap == 0 then
-      vim.api.nvim_buf_set_keymap(0, mode, '<Plug>(cmp-utils-keymap-listen-run:lhs)', existing.lhs, {
-        expr = false,
-        noremap = true,
-        silent = true,
-      })
-      rhs = keymap.replace(rhs, existing.lhs, '<Plug>(cmp-utils-keymap-listen-run:lhs)')
-    end
-    vim.api.nvim_buf_set_keymap(0, mode, '<Plug>(cmp-utils-keymap-listen-run:_)', rhs, {
-      expr = existing.expr ~= 0,
-      noremap = existing.noremap ~= 0,
-      script = existing.script ~= 0,
-      silent = true,
-    })
-    keymap.feedkeys(keymap.t('<Plug>(cmp-utils-keymap-listen-run:_)'), '')
+    keymap.feedkeys(keymap.t(fallback), 't')
   end)
   return keymap.t('<Ignore>')
 end)
