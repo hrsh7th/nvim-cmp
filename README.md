@@ -483,43 +483,7 @@ This will greatly slow down nvim-cmp (and other LSP related features).
 
 #### How to setup supertab-like mapping?
 
-This is a supertab-like mapping for [LuaSnip](https://github.com/L3MON4D3/LuaSnip)
-
-```lua
-local luasnip = require("luasnip")
-
-local t = function(str)
-    return vim.api.nvim_replace_termcodes(str, true, true, true)
-end
-
--- supertab-like mapping
-mapping = {
-  ["<Tab>"] = cmp.mapping(function(fallback)
-    if vim.fn.pumvisible() == 1 then
-      vim.api.nvim_feedkeys(t("<C-n>"), "n", true)
-    elseif luasnip.expand_or_jumpable() then
-      vim.api.nvim_feedkeys(t("<Plug>luasnip-expand-or-jump"), "", true)
-    else
-      fallback()
-    end
-  end, {
-    "i",
-    "s",
-  }),
-  ["<S-Tab>"] = cmp.mapping(function(fallback)
-    if vim.fn.pumvisible() == 1 then
-      vim.api.nvim_feedkeys(t("<C-p>"), "n", true)
-    elseif luasnip.jumpable(-1) then
-      vim.api.nvim_feedkeys(t("<Plug>luasnip-jump-prev"), "", true)
-    else
-      fallback()
-    end
-  end, {
-    "i",
-    "s",
-  }),
-}
-```
+You can found the solution in [Example mappings](https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings).
 
 #### How to show name of item kind and source (like compe)?
 
