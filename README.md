@@ -313,16 +313,18 @@ to return something other than `nil` takes precedence.
 
 Each function must return `boolean|nil`.
 
+You can use the preset functions from `cmp.config.compare.*`.
+
 Default:
 ```lua
 {
-  compare.offset,
-  compare.exact,
-  compare.score,
-  compare.kind,
-  compare.sort_text,
-  compare.length,
-  compare.order,
+  cmp.config.compare.offset,
+  cmp.config.compare.exact,
+  cmp.config.compare.score,
+  cmp.config.compare.kind,
+  cmp.config.compare.sort_text,
+  cmp.config.compare.length,
+  cmp.config.compare.order,
 }
 ```
 

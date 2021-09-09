@@ -13,6 +13,10 @@ end
 cmp.lsp = require('cmp.types.lsp')
 cmp.vim = require('cmp.types.vim')
 
+---Export default config presets.
+cmp.config = {}
+cmp.config.compare = require('cmp.config.compare')
+
 ---Export mapping
 cmp.mapping = require('cmp.config.mapping')
 
