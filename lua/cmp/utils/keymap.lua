@@ -142,24 +142,23 @@ misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(mode, keys)
   local existing = keymap.listen.cache:get({ mode, bufnr, keys }).existing
   local callback = keymap.listen.cache:get({ mode, bufnr, keys }).callback
   callback(keys, function()
-    if existing.expr == 1 or existing.script == 1 then
-      vim.api.nvim_buf_set_keymap(0, mode, '<Plug>(cmp-utils-keymap-listen-run:_)', existing.rhs, {
-        expr = existing.expr ~= 0,
-        noremap = existing.noremap ~= 0,
-        script = existing.script ~= 0,
+    local rhs = existing.rhs
+    if existing.noremap ~= 1 then
+      vim.api.nvim_buf_set_keymap(0, mode, '<Plug>(cmp-utils-keymap-listen-run:lhs)', existing.lhs, {
+        expr = false,
+        noremap = true,
         silent = true,
       })
-      keymap.feedkeys(keymap.t('<Plug>(cmp-utils-keymap-listen-run:_)'), '')
-    elseif existing.noremap == 1 then
-      keymap.feedkeys(keymap.t(existing.rhs), 'n')
-    else
-      for i, keys_ in ipairs(vim.split(existing.rhs, existing.lhs, true)) do
-        if i ~= 1 then
-          keymap.feedkeys(keymap.t(existing.lhs), 'n')
-        end
-        keymap.feedkeys(keymap.t(keys_), '')
-      end
+      -- TODO: Do not escape the keys inside <Cmd> ... <CR> / <C-r> = ... <CR>.
+      rhs = string.gsub(rhs, vim.pesc(existing.lhs), '<Plug>(cmp-utils-keymap-listen-run:lhs)')
     end
+    vim.api.nvim_buf_set_keymap(0, mode, '<Plug>(cmp-utils-keymap-listen-run:_)', rhs, {
+      expr = existing.expr ~= 0,
+      noremap = existing.noremap ~= 0,
+      script = existing.script ~= 0,
+      silent = true,
+    })
+    keymap.feedkeys(keymap.t('<Plug>(cmp-utils-keymap-listen-run:_)'), '')
   end)
   return keymap.t('<Ignore>')
 end)
