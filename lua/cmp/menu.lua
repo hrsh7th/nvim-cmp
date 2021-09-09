@@ -163,7 +163,7 @@ menu.show = function(self)
 
   local completeopt = vim.o.completeopt
   if self.preselect == 1 then
-    vim.opt.completeopt = {'menuone', 'noinsert'}
+    vim.opt.completeopt = { 'menuone', 'noinsert' }
   else
     vim.opt.completeopt = config.get().completion.completeopt
   end
