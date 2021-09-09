@@ -63,7 +63,7 @@ end
 ---Select next item if possible
 cmp.select_next_item = function()
   if vim.fn.pumvisible() == 1 then
-    vim.fn.feedkeys(keymap.t('<C-n>'), 'n')
+    vim.api.nvim_feedkeys(keymap.t('<C-n>'), 'n', true)
     return true
   else
     return false
@@ -73,7 +73,7 @@ end
 ---Select prev item if possible
 cmp.select_prev_item = function()
   if vim.fn.pumvisible() == 1 then
-    vim.fn.feedkeys(keymap.t('<C-p>'), 'n')
+    vim.api.nvim_feedkeys(keymap.t('<C-p>'), 'n', true)
     return true
   else
     return false

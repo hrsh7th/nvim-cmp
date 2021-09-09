@@ -48,7 +48,8 @@ menu.close = function(self)
     debug.log('menu.close', vim.fn.pumvisible())
     if vim.fn.pumvisible() == 1 then
       -- TODO: Is it safe to call...?
-      vim.fn.complete(#vim.fn.getline('.') + 1, {})
+      local line = vim.api.nvim_win_get_cursor(0)[1]
+      vim.fn.complete(#vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1] + 1, {})
     end
     self:unselect()
   end)
@@ -162,15 +163,15 @@ menu.show = function(self)
 
   local completeopt = vim.o.completeopt
   if self.preselect == 1 then
-    vim.cmd('set completeopt=menuone,noinsert')
+    vim.opt.completeopt = {'menuone', 'noinsert'}
   else
-    vim.cmd('set completeopt=' .. config.get().completion.completeopt)
+    vim.opt.completeopt = config.get().completion.completeopt
   end
   vim.fn.complete(self.offset, self.items)
   if self.preselect > 1 then
     vim.api.nvim_select_popupmenu_item(self.preselect - 1, false, false, {})
   end
-  vim.cmd('set completeopt=' .. completeopt)
+  vim.opt.completeopt = completeopt
 end
 
 ---Select current item
