@@ -1,5 +1,5 @@
-local types = require'cmp.types'
-local misc  = require 'cmp.utils.misc'
+local types = require('cmp.types')
+local misc = require('cmp.utils.misc')
 
 local compare = {}
 
@@ -85,4 +85,3 @@ compare.order = function(entry1, entry2)
 end
 
 return compare
-

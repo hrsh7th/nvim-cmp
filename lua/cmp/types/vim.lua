@@ -15,4 +15,3 @@
 ---@class vim.Range
 ---@field public start vim.Position
 ---@field public end vim.Position
-

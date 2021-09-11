@@ -1,7 +1,6 @@
-local str = require "cmp.utils.str"
+local str = require('cmp.utils.str')
 
 describe('utils.str', function()
-
   it('get_word', function()
     assert.are.equal(str.get_word('print'), 'print')
     assert.are.equal(str.get_word('$variable'), '$variable')
@@ -27,7 +26,4 @@ describe('utils.str', function()
     assert.are.equal(str.escape('plain\\"', {}), 'plain\\\\"')
     assert.are.equal(str.escape('pla"in', { '"' }), 'pla\\"in')
   end)
-
 end)
-
-

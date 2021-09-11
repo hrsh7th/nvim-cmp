@@ -1,15 +1,15 @@
-local context = require'cmp.context'
-local source  = require 'cmp.source'
+local context = require('cmp.context')
+local source = require('cmp.source')
 local types = require('cmp.types')
 
 local spec = {}
 
 spec.before = function()
-  vim.cmd [[
+  vim.cmd([[
     bdelete!
     enew!
     setlocal virtualedit=all
-  ]]
+  ]])
 end
 
 spec.state = function(text, row, col)
@@ -17,8 +17,7 @@ spec.state = function(text, row, col)
   vim.fn.cursor(row, col)
   local ctx = context.empty()
   local s = source.new('spec', {
-    complete = function()
-    end
+    complete = function() end,
   })
   return {
     context = function()
@@ -46,9 +45,8 @@ spec.state = function(text, row, col)
       ctx = context.new(ctx, { reason = types.cmp.ContextReason.Manual })
       s:complete(ctx, function() end)
       return ctx
-    end
+    end,
   }
 end
 
 return spec
-

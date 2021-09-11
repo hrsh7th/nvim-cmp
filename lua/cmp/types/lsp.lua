@@ -1,5 +1,4 @@
-
-local misc = require "cmp.utils.misc"
+local misc = require('cmp.utils.misc')
 ---@see https://microsoft.github.io/language-server-protocol/specifications/specification-current/
 ---@class lsp
 local lsp = {}
@@ -18,7 +17,7 @@ lsp.Position.to_vim = function(buf, position)
   if #lines > 0 then
     return {
       row = position.line + 1,
-      col = misc.to_vimindex(lines[1], position.character)
+      col = misc.to_vimindex(lines[1], position.character),
     }
   end
   return {
@@ -196,4 +195,3 @@ lsp.CompletionItemKind = vim.tbl_add_reverse_lookup(lsp.CompletionItemKind)
 ---@field public dup boolean|nil
 
 return lsp
-

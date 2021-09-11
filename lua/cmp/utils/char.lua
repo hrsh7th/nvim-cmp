@@ -110,4 +110,3 @@ char.match = function(byte1, byte2)
 end
 
 return char
-

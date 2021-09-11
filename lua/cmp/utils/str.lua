@@ -1,5 +1,5 @@
-local char = require'cmp.utils.char'
-local pattern = require 'cmp.utils.pattern'
+local char = require('cmp.utils.char')
+local pattern = require('cmp.utils.pattern')
 
 local str = {}
 
@@ -179,4 +179,3 @@ str.escape = function(text, chars)
 end
 
 return str
-
