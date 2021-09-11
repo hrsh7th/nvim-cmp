@@ -1,7 +1,6 @@
-local async = require "cmp.utils.async"
+local async = require('cmp.utils.async')
 
 describe('utils.async', function()
-
   it('throttle', function()
     local count = 0
     local now
@@ -13,14 +12,18 @@ describe('utils.async', function()
     now = vim.loop.now()
     f.timeout = 100
     f()
-    vim.wait(1000, function() return count == 1 end)
+    vim.wait(1000, function()
+      return count == 1
+    end)
     assert.is.truthy(math.abs(f.timeout - (vim.loop.now() - now)) < 10)
 
     -- 2. delay for 500ms
     now = vim.loop.now()
     f.timeout = 500
     f()
-    vim.wait(1000, function() return count == 2 end)
+    vim.wait(1000, function()
+      return count == 2
+    end)
     assert.is.truthy(math.abs(f.timeout - (vim.loop.now() - now)) < 10)
 
     -- 4. delay for 500ms and wait 100ms (remain 400ms)
@@ -32,9 +35,9 @@ describe('utils.async', function()
     now = vim.loop.now()
     f.timeout = 100
     f()
-    vim.wait(1000, function() return count == 3 end)
+    vim.wait(1000, function()
+      return count == 3
+    end)
     assert.is.truthy(math.abs(vim.loop.now() - now) < 10)
   end)
-
 end)
-

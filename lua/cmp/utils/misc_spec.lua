@@ -8,21 +8,20 @@ describe('misc', function()
   it('merge', function()
     local merged
     merged = misc.merge({
-      a = {}
+      a = {},
     }, {
       a = {
-        b = 1
-      }
+        b = 1,
+      },
     })
     assert.are.equal(merged.a.b, 1)
     merged = misc.merge({
-      a = false
+      a = false,
     }, {
       a = {
-        b = 1
-      }
+        b = 1,
+      },
     })
     assert.are.equal(merged.a, false)
   end)
 end)
-

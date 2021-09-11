@@ -1,9 +1,9 @@
-local spec = require'cmp.utils.spec'
-local lsp = require'cmp.types.lsp'
+local spec = require('cmp.utils.spec')
+local lsp = require('cmp.types.lsp')
 
-describe('types.lsp', function ()
+describe('types.lsp', function()
   before_each(spec.before)
-  describe('Position', function ()
+  describe('Position', function()
     vim.fn.setline('1', {
       'あいうえお',
       'かきくけこ',
@@ -44,4 +44,3 @@ describe('types.lsp', function ()
     assert.are.equal(lsp_position.character, 5)
   end)
 end)
-

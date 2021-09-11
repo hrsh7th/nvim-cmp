@@ -54,4 +54,3 @@ cache.key = function(_, key)
 end
 
 return cache
-

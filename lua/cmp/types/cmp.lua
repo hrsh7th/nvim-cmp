@@ -104,4 +104,3 @@ cmp.PreselectMode.None = 'none'
 ---@field public max_item_count number
 
 return cmp
-

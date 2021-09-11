@@ -26,7 +26,7 @@ keymap.escape = function(keys)
   while i <= #keys do
     if string.sub(keys, i, i) == '<' then
       if not vim.tbl_contains({ '<lt>', '<Lt>', '<lT>', '<LT>' }, string.sub(keys, i, i + 3)) then
-        keys = string.sub(keys, 1, i -1) .. '<LT>' ..  string.sub(keys, i + 1)
+        keys = string.sub(keys, 1, i - 1) .. '<LT>' .. string.sub(keys, i + 1)
         i = i + 3
       end
     end
@@ -80,7 +80,7 @@ end
 
 ---Feedkeys with callback
 keymap.feedkeys = setmetatable({
-  callbacks = {}
+  callbacks = {},
 }, {
   __call = function(self, keys, mode, callback)
     if #keys ~= 0 then
@@ -104,7 +104,7 @@ keymap.feedkeys = setmetatable({
         wait()
       end
     end
-  end
+  end,
 })
 misc.set(_G, { 'cmp', 'utils', 'keymap', 'feedkeys', 'run' }, function(id)
   if keymap.feedkeys.callbacks[id] then
@@ -201,4 +201,3 @@ misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(mode, keys)
 end)
 
 return keymap
-

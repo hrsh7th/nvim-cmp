@@ -15,7 +15,7 @@ return function()
       keyword_length = 1,
       get_trigger_characters = function(trigger_characters)
         return trigger_characters
-      end
+      end,
     },
 
     snippet = {
@@ -37,7 +37,7 @@ return function()
       default_behavior = types.cmp.ConfirmBehavior.Insert,
       get_commit_characters = function(commit_characters)
         return commit_characters
-      end
+      end,
     },
 
     sorting = {
@@ -50,7 +50,7 @@ return function()
         compare.sort_text,
         compare.length,
         compare.order,
-      }
+      },
     },
 
     event = {},
@@ -61,7 +61,7 @@ return function()
       deprecated = true,
       format = function(_, vim_item)
         return vim_item
-      end
+      end,
     },
 
     experimental = {
@@ -71,4 +71,3 @@ return function()
     sources = {},
   }
 end
-

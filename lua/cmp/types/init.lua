@@ -5,4 +5,3 @@ types.lsp = require('cmp.types.lsp')
 types.vim = require('cmp.types.vim')
 
 return types
-

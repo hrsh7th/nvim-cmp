@@ -26,4 +26,3 @@ pattern.matchstr = function(p, text)
 end
 
 return pattern
-
