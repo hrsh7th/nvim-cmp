@@ -47,6 +47,7 @@ cmp.PreselectMode.None = 'none'
 
 ---@class cmp.ConfigSchema
 ---@field private revision number
+---@field public enabled fun():boolean|boolean
 ---@field public preselect cmp.PreselectMode
 ---@field public completion cmp.CompletionConfig
 ---@field public documentation cmp.DocumentationConfig|"false"

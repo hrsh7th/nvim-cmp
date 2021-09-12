@@ -173,24 +173,30 @@ mapping = {
 You can specify your own custom mapping function.
 
 ```lua
-local check_back_space = function()
-  local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-  return col == 0 or vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match('%s') ~= nil
-end
-
 mapping = {
   ['<Tab>'] = function(fallback)
-    if vim.fn.pumvisible() == 1 then
-      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-n>', true, true, true), 'n', true)
-    elseif check_back_space() then
-      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Tab>', true, true, true), 'n', true)
-    elseif vim.fn['vsnip#available']() == 1 then
-      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Plug>(vsnip-expand-or-jump)', true, true, true), '', true)
+    if ...some_condition... then
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('...', true, true, true), 'n', true)
     else
-      fallback()
+      fallback() -- The fallback function is treated as original mapped key. In this case, it might be `<Tab>`.
     end
   end,
 }
+```
+
+#### enabled (type: fun(): boolean|boolean)
+
+The function or boolean value to specify all cmp's features enabled or not.
+
+Default:
+
+```lua
+function()
+  local enabled = true
+  enabled = enabled and vim.api.nvim_buf_get_option(0, 'buftype') ~= 'prompt'
+  enabled = enabled and string.sub(vim.api.nvim_get_mode().mode, 1, 1) == 'i'
+  return enabled
+end
 ```
 
 #### sources (type: table<cmp.SourceConfig>)
@@ -468,24 +474,28 @@ cmp.setup {
 }
 ```
 
+#### How to disable nvim-cmp on the specific buffer?
+
+You can specify `enabled = false` like this.
+
+```vim
+autocmd FileType TelescopePrompt lua require('cmp').setup.buffer { enabled = false }
+```
+
 #### nvim-cmp is slow.
 
 I've optimized `nvim-cmp` as much as possible, but there are currently some known / unfixable issues.
 
 1. `cmp-buffer` source and too large buffer.
-The `cmp-buffer` source makes an index of the current buffer so if the current buffer is too large, it will slowdown the main UI thread.
+  The `cmp-buffer` source makes an index of the current buffer so if the current buffer is too large, it will slowdown the main UI thread.
 
 1. Some language servers.
-For example, `typescript-language-server` will returns 15k items to the client.
-In such a case, it will take 100ms just to parse payloads as JSON.
+  For example, `typescript-language-server` will returns 15k items to the client.
+  In such a case, it will take 100ms just to parse payloads as JSON.
 
 1. You set `vim.lsp.set_log_level` up by yourself.
-This setting will cause the filesystem operation for each LSP payload.
-This will greatly slow down nvim-cmp (and other LSP related features).
-
-#### How to setup supertab-like mapping?
-
-You can found the solution in [Example mappings](https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings).
+  This setting will cause the filesystem operation for each LSP payload.
+  This will greatly slow down nvim-cmp (and other LSP related features).
 
 #### How to show name of item kind and source (like compe)?
 
@@ -507,6 +517,10 @@ formatting = {
   end,
 },
 ```
+
+#### How to setup supertab-like mapping?
+
+You can found the solution in [Example mappings](https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings).
 
 
 Source creation

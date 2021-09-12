@@ -126,16 +126,25 @@ cmp.setup = setmetatable({
 
 ---Handle events
 autocmd.subscribe('InsertEnter', function()
-  core.prepare()
-  core.on_change('InsertEnter')
+  -- Avoid unexpected mode detection (mode() function will returns `normal mode` on the InsertEnter event.)
+  vim.schedule(function()
+    if config.enabled() then
+      core.prepare()
+      core.on_change('InsertEnter')
+    end
+  end)
 end)
 
 autocmd.subscribe('TextChanged', function()
-  core.on_change('TextChanged')
+  if config.enabled() then
+    core.on_change('TextChanged')
+  end
 end)
 
 autocmd.subscribe('InsertLeave', function()
-  core.reset()
+  if config.enabled() then
+    core.reset()
+  end
 end)
 
 return cmp

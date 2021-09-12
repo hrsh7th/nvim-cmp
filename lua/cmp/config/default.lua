@@ -6,6 +6,12 @@ local WIDE_HEIGHT = 40
 ---@return cmp.ConfigSchema
 return function()
   return {
+    enabled = function()
+      local enabled = true
+      enabled = enabled and vim.api.nvim_buf_get_option(0, 'buftype') ~= 'prompt'
+      enabled = enabled and string.sub(vim.api.nvim_get_mode().mode, 1, 1) == 'i'
+      return enabled
+    end,
     completion = {
       autocomplete = {
         types.cmp.TriggerEvent.TextChanged,

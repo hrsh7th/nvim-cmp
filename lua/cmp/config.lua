@@ -40,6 +40,15 @@ config.get = function()
   end)
 end
 
+---Return cmp is enabled or not.
+config.enabled = function()
+  local enabled = config.get().enabled
+  if type(enabled) == 'function' then
+    return enabled()
+  end
+  return not not enabled
+end
+
 ---Return source config
 ---@param name string
 ---@return cmp.SourceConfig
