@@ -192,10 +192,7 @@ Default:
 
 ```lua
 function()
-  local enabled = true
-  enabled = enabled and vim.api.nvim_buf_get_option(0, 'buftype') ~= 'prompt'
-  enabled = enabled and string.sub(vim.api.nvim_get_mode().mode, 1, 1) == 'i'
-  return enabled
+  return vim.api.nvim_buf_get_option(0, 'buftype') ~= 'prompt'
 end
 ```
 
