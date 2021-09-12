@@ -49,35 +49,6 @@ keymap.to_keymap = function(s)
   end)
 end
 
---- Replace key in keys except in the <C-r> or <Cmd> sequence.
-keymap.replace = function(keys, key, rep)
-  local expr = false
-  local new_keys = {}
-  local i = 1
-  while i <= #keys do
-    if '<C-R>=' == string.sub(keys, i, i + #'<C-R>=' - 1) then
-      table.insert(new_keys, '<C-R>=')
-      expr = true
-      i = i + #'<C-R>='
-    elseif '<Cmd>' == string.sub(keys, i, i + #'<Cmd>' - 1) then
-      table.insert(new_keys, '<Cmd>')
-      expr = true
-      i = i + #'<Cmd>'
-    elseif expr and '<CR>' == string.sub(keys, i, i + #'<CR>' - 1) then
-      table.insert(new_keys, '<CR>')
-      i = i + #'<CR>'
-      expr = false
-    elseif not expr and key == string.sub(keys, i, i + #key - 1) then
-      table.insert(new_keys, rep)
-      i = i + #key
-    else
-      table.insert(new_keys, string.sub(keys, i, i))
-      i = i + 1
-    end
-  end
-  return table.concat(new_keys, '')
-end
-
 ---Feedkeys with callback
 keymap.feedkeys = setmetatable({
   callbacks = {},
@@ -118,70 +89,60 @@ end)
 keymap.listen = setmetatable({
   cache = cache.new(),
 }, {
-  __call = function(_, mode, keys, callback)
+  __call = function(self, mode, keys, callback)
     keys = keymap.to_keymap(keys)
 
     local bufnr = vim.api.nvim_get_current_buf()
-    if keymap.listen.cache:get({ 'listen', mode, bufnr, keys }) then
+    if keymap.listen.cache:get({ mode, bufnr, keys }) then
       return
     end
 
-    local existing = nil
-    for _, map in ipairs(vim.api.nvim_buf_get_keymap(0, mode)) do
-      if existing then
-        break
-      end
-      if keymap.t(map.lhs) == keymap.t(keys) then
-        existing = map
-      end
-    end
-    for _, map in ipairs(vim.api.nvim_get_keymap(mode)) do
-      if existing then
-        break
-      end
-      if keymap.t(map.lhs) == keymap.t(keys) then
-        existing = map
-        break
-      end
-    end
-    existing = existing or {
+    local existing = {
       lhs = keys,
       rhs = keys,
       expr = 0,
       nowait = 0,
       noremap = 1,
     }
+    for _, map in ipairs(keymap._getmaps(mode)) do
+      if map.lhs == keys then
+        existing = map
+        break
+      end
+    end
 
-    -- Keep existing mapping as Plug mapping.
+    -- Keep existing mapping as <Plug> mapping. We escape fisrt recursive key sequence. See `:help recursive_mapping`)
     local rhs = existing.rhs
     if existing.noremap == 0 then
-      local fallback_lhs = ('<Plug>(cmp-utils-keymap-fallback-lhs:%s)'):format(existing.lhs)
+      local fallback_lhs = ('<Plug>(cmp-utils-keymap-listen-lhs:%s)'):format(misc.id('cmp.utils.keymap.listen.lhs'))
       vim.api.nvim_buf_set_keymap(0, mode, fallback_lhs, existing.lhs, {
         expr = false,
         noremap = true,
         silent = true,
+        nowait = true,
       })
-      rhs = keymap.replace(rhs, existing.lhs, fallback_lhs)
+      rhs = string.gsub(rhs, '^' .. vim.pesc(existing.lhs), fallback_lhs)
     end
 
-    local fallback = ('<Plug>(cmp-utils-keymap-listen-fallback:%s)'):format(misc.id('cmp.utils.keymap.listen.fallback'))
+    local fallback = ('<Plug>(cmp-utils-keymap-listen-rhs:%s)'):format(misc.id('cmp.utils.keymap.listen.rhs'))
     vim.api.nvim_buf_set_keymap(0, mode, fallback, rhs, {
       expr = existing.expr ~= 0,
       noremap = existing.noremap ~= 0,
       script = existing.script ~= 0,
       silent = true,
+      nowait = true,
     })
 
     -- Hijack mapping
     vim.api.nvim_buf_set_keymap(0, mode, keys, ('<Cmd>call v:lua.cmp.utils.keymap.listen.run("%s", "%s")<CR>'):format(mode, str.escape(keymap.escape(keys), { '"' })), {
       expr = false,
-      nowait = true,
       noremap = true,
       silent = true,
+      nowait = true,
     })
 
     -- Save state.
-    keymap.listen.cache:set({ 'listen', mode, bufnr, keys }, {
+    self.cache:set({ mode, bufnr, keys }, {
       mode = mode,
       existing = existing,
       callback = callback,
@@ -191,13 +152,26 @@ keymap.listen = setmetatable({
 })
 misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(mode, keys)
   local bufnr = vim.api.nvim_get_current_buf()
-
-  local fallback = keymap.listen.cache:get({ 'listen', mode, bufnr, keys }).fallback
-  local callback = keymap.listen.cache:get({ 'listen', mode, bufnr, keys }).callback
+  local fallback = keymap.listen.cache:get({ mode, bufnr, keys }).fallback
+  local callback = keymap.listen.cache:get({ mode, bufnr, keys }).callback
   callback(keys, function()
     keymap.feedkeys(keymap.t(fallback), 't')
   end)
   return keymap.t('<Ignore>')
 end)
+
+---Get all available key mappings.
+---@param mode string
+---@return table[]
+keymap._getmaps = function(mode)
+  local maps = {}
+  for _, map in ipairs(vim.api.nvim_buf_get_keymap(0, mode)) do
+    table.insert(maps, map)
+  end
+  for _, map in ipairs(vim.api.nvim_get_keymap(mode)) do
+    table.insert(maps, map)
+  end
+  return maps
+end
 
 return keymap

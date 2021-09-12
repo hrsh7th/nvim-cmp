@@ -348,7 +348,6 @@ core.confirm = function(e, option, callback)
 
       local keys = {}
       if e.context.cursor.character < completion_item.textEdit.range['end'].character then
-        print(completion_item.textEdit.range['end'].character - e.context.cursor.character)
         table.insert(keys, keymap.t(string.rep('<Del>', completion_item.textEdit.range['end'].character - e.context.cursor.character)))
       end
       if completion_item.textEdit.range.start.character < e.context.cursor.character then
