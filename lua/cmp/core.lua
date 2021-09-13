@@ -292,11 +292,6 @@ core.confirm = function(e, option, callback)
   local suspending = core.suspend()
   local ctx = core.get_context()
 
-  -- Try to resolve for only 100ms.
-  async.sync(function(done)
-    e:resolve(done)
-  end, 100)
-
   -- Simulate `<C-y>` behavior.
   local confirm = {}
   table.insert(confirm, keymap.t(string.rep('<C-g>U<Left><Del>', ctx.cursor.character - misc.to_utfindex(e.context.cursor_before_line, e:get_offset()))))
