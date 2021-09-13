@@ -307,7 +307,6 @@ core.confirm = function(e, option, callback)
     table.insert(restore, keymap.t(string.rep('<C-g>U<Left><Del>', vim.fn.strchars(e:get_word()))))
     table.insert(restore, string.sub(e.context.cursor_before_line, e:get_offset()))
     keymap.feedkeys(table.concat(restore, ''), 'n', function()
-
       --@see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/suggestController.ts#L334
       if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) == 0 then
         local pre = context.new()

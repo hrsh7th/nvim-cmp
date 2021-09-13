@@ -607,5 +607,38 @@ function source:execute(completion_item, callback)
   callback(completion_item)
 end
 
-return source
+require('cmp').register_source(source.new())
+```
+
+You can also create source by Vim script like this (This is useful to support callback style plugins).
+
+- If you want to return `boolean`, you must return `v:true`/`v:false`. It doesn't `0`/`1`.
+
+```vim
+let s:source = {}
+
+function! s:source.new() abort
+  return extend(deepcopy(s:source))
+endfunction
+
+" The other APIs are also available.
+
+function! s:source.complete(params, callback) abort
+  call a:callback({
+  \   { 'label': 'January' },
+  \   { 'label': 'February' },
+  \   { 'label': 'March' },
+  \   { 'label': 'April' },
+  \   { 'label': 'May' },
+  \   { 'label': 'June' },
+  \   { 'label': 'July' },
+  \   { 'label': 'August' },
+  \   { 'label': 'September' },
+  \   { 'label': 'October' },
+  \   { 'label': 'November' },
+  \   { 'label': 'December' },
+  \ })
+endfunction
+
+call cmp#register_source('month', s:source.new())
 ```

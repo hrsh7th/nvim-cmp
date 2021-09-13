@@ -11,7 +11,7 @@ end
 ---@param callback function
 ---@return number
 vim_source.to_callback = setmetatable({
-  callbacks = {}
+  callbacks = {},
 }, {
   __call = function(self, callback)
     local id = misc.id('cmp.vim_source.to_callback')
@@ -20,7 +20,7 @@ vim_source.to_callback = setmetatable({
       self.callbacks[id] = nil
     end
     return id
-  end
+  end,
 })
 
 ---Convert to serializable args.
@@ -36,7 +36,7 @@ end
 
 ---@param id number
 ---@param methods string[]
-vim_source.new = function (bridge_id, methods)
+vim_source.new = function(bridge_id, methods)
   local self = {}
   for _, method in ipairs(methods) do
     self[method] = (function(m)
@@ -49,4 +49,3 @@ vim_source.new = function (bridge_id, methods)
 end
 
 return vim_source
-
