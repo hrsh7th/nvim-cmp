@@ -17,26 +17,34 @@ describe('keymap', function()
     assert.are.equal(keymap.escape('<LT>C-d>'), '<LT>C-d>')
   end)
 
-  it('_evacuate', function()
-    local s = function(cmd, keys, buf)
-      spec.before()
-      vim.cmd(cmd)
-      local existing = vim.tbl_filter(function(map)
-        return map.lhs == keys
-      end, keymap._getmaps('i'))[1] or {
-        lhs = keys,
-        rhs = keys,
-        expr = 0,
-        nowait = 0,
-        noremap = 1,
-      }
-      local fallback = keymap._evacuate('i', existing)
+  describe('evacuate', function()
+
+    before_each(spec.before)
+
+    it('expr & register', function()
+      vim.api.nvim_buf_set_keymap(0, 'i', '(', [['<C-r>="("<CR>']], {
+        expr = true,
+        noremap = false,
+      })
+      local fallback = keymap.evacuate('i', '(')
       vim.api.nvim_feedkeys('i' .. keymap.t(fallback), 'x', true)
-      assert.are.same(vim.api.nvim_buf_get_lines(0, 0, -1, true), buf)
-    end
-    s([[]], '(', { '(' })
-    s([[imap <expr> ( '<C-r>="("<CR>']], '(', { '(' })
-    s([[imap ( (]], '(', { '(' })
+      assert.are.same({ '(' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
+    end)
+
+    it('recursive & <Plug> (tpope/vim-endwise)', function()
+      vim.api.nvim_buf_set_keymap(0, 'i', '<Plug>(paren-close)', [[)<Left>]], {
+        expr = false,
+        noremap = true,
+      })
+      vim.api.nvim_buf_set_keymap(0, 'i', '(', [[(<Plug>(paren-close)]], {
+        expr = false,
+        noremap = false,
+      })
+      local fallback = keymap.evacuate('i', '(')
+      vim.api.nvim_feedkeys('i' .. keymap.t(fallback), 'x', true)
+      assert.are.same({ '()' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
+    end)
+
   end)
 
 end)

@@ -93,25 +93,11 @@ keymap.listen = setmetatable({
     keys = keymap.to_keymap(keys)
 
     local bufnr = vim.api.nvim_get_current_buf()
-    if keymap.listen.cache:get({ mode, bufnr, keys }) then
+    if self.cache:get({ mode, bufnr, keys }) then
       return
     end
 
-    local existing = {
-      lhs = keys,
-      rhs = keys,
-      expr = 0,
-      nowait = 0,
-      noremap = 1,
-    }
-    for _, map in ipairs(keymap._getmaps(mode)) do
-      if map.lhs == keys then
-        existing = map
-        break
-      end
-    end
-
-    local fallback = keymap._evacuate(mode, existing)
+    local fallback = keymap.evacuate(mode, keys)
     vim.api.nvim_buf_set_keymap(0, mode, keys, ('<Cmd>call v:lua.cmp.utils.keymap.listen.run("%s", "%s")<CR>'):format(mode, str.escape(keymap.escape(keys), { '"' })), {
       expr = false,
       noremap = true,
@@ -120,7 +106,6 @@ keymap.listen = setmetatable({
     })
     self.cache:set({ mode, bufnr, keys }, {
       mode = mode,
-      existing = existing,
       callback = callback,
       fallback = fallback,
     })
@@ -138,9 +123,10 @@ end)
 
 ---Evacuate existing key mapping
 ---@param mode string
----@param map table
+---@param lhs string
 ---@return string
-keymap._evacuate = function(mode, map)
+keymap.evacuate = function(mode, lhs)
+  local map = keymap.find_map_by_lhs(mode, lhs)
   -- Keep existing mapping as <Plug> mapping. We escape fisrt recursive key sequence. See `:help recursive_mapping`)
   local rhs = map.rhs
   if map.noremap == 0 then
@@ -165,18 +151,30 @@ keymap._evacuate = function(mode, map)
   return fallback
 end
 
----Get all available key mappings.
+---Get specific key mapping
 ---@param mode string
----@return table[]
-keymap._getmaps = function(mode)
-  local maps = {}
+---@param lhs string
+---@return table
+keymap.find_map_by_lhs = function(mode, lhs)
   for _, map in ipairs(vim.api.nvim_buf_get_keymap(0, mode)) do
-    table.insert(maps, map)
+    if map.lhs == lhs then
+      return map
+    end
   end
   for _, map in ipairs(vim.api.nvim_get_keymap(mode)) do
-    table.insert(maps, map)
+    if map.lhs == lhs then
+      return map
+    end
   end
-  return maps
+  return {
+    lhs = lhs,
+    rhs = lhs,
+    expr = 0,
+    script = 0,
+    noremap = 1,
+    nowait = 0,
+    silent = 1,
+  }
 end
 
 return keymap
