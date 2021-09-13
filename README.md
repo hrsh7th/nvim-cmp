@@ -544,15 +544,15 @@ source.new = function()
   return self
 end
 
----Return the source name for some information.
-function source:get_debug_name = function()
-  return 'example'
-end
-
 ---Return the source is available or not.
 ---@return boolean
 function source:is_available()
   return true
+end
+
+---Return the source name for some information.
+source:get_debug_name = function()
+  return 'example'
 end
 
 ---Return keyword pattern which will be used...

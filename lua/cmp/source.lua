@@ -48,7 +48,6 @@ end
 ---Reset current completion state
 ---@return boolean
 source.reset = function(self)
-  debug.log(self:get_debug_name(), 'source.reset')
   self.cache:clear()
   self.revision = self.revision + 1
   self.context = context.empty()
