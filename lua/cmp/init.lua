@@ -142,9 +142,7 @@ autocmd.subscribe('TextChanged', function()
 end)
 
 autocmd.subscribe('InsertLeave', function()
-  if config.enabled() then
-    core.reset()
-  end
+  core.reset()
 end)
 
 return cmp
