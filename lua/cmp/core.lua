@@ -123,7 +123,7 @@ end
 core.get_sources = function(statuses)
   local sources = {}
   for _, c in pairs(config.get().sources) do
-    s = core.sources_by_name[c.name]
+    local s = core.sources_by_name[c.name]
     if s then
       if not statuses or vim.tbl_contains(statuses, s.status) then
         if s:is_available() then
