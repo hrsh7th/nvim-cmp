@@ -111,37 +111,13 @@ keymap.listen = setmetatable({
       end
     end
 
-    -- Keep existing mapping as <Plug> mapping. We escape fisrt recursive key sequence. See `:help recursive_mapping`)
-    local rhs = existing.rhs
-    if existing.noremap == 0 then
-      local fallback_lhs = ('<Plug>(cmp-utils-keymap-listen-lhs:%s)'):format(misc.id('cmp.utils.keymap.listen.lhs'))
-      vim.api.nvim_buf_set_keymap(0, mode, fallback_lhs, existing.lhs, {
-        expr = false,
-        noremap = true,
-        silent = true,
-        nowait = true,
-      })
-      rhs = string.gsub(rhs, '^' .. vim.pesc(existing.lhs), fallback_lhs)
-    end
-
-    local fallback = ('<Plug>(cmp-utils-keymap-listen-rhs:%s)'):format(misc.id('cmp.utils.keymap.listen.rhs'))
-    vim.api.nvim_buf_set_keymap(0, mode, fallback, rhs, {
-      expr = existing.expr ~= 0,
-      noremap = existing.noremap ~= 0,
-      script = existing.script ~= 0,
-      silent = true,
-      nowait = true,
-    })
-
-    -- Hijack mapping
+    local fallback = keymap._evacuate(mode, existing)
     vim.api.nvim_buf_set_keymap(0, mode, keys, ('<Cmd>call v:lua.cmp.utils.keymap.listen.run("%s", "%s")<CR>'):format(mode, str.escape(keymap.escape(keys), { '"' })), {
       expr = false,
       noremap = true,
       silent = true,
       nowait = true,
     })
-
-    -- Save state.
     self.cache:set({ mode, bufnr, keys }, {
       mode = mode,
       existing = existing,
@@ -159,6 +135,35 @@ misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(mode, keys)
   end)
   return keymap.t('<Ignore>')
 end)
+
+---Evacuate existing key mapping
+---@param mode string
+---@param map table
+---@return string
+keymap._evacuate = function(mode, map)
+  -- Keep existing mapping as <Plug> mapping. We escape fisrt recursive key sequence. See `:help recursive_mapping`)
+  local rhs = map.rhs
+  if map.noremap == 0 then
+    local fallback_lhs = ('<Plug>(cmp-utils-keymap-listen-lhs:%s)'):format(misc.id('cmp.utils.keymap.listen.lhs'))
+    vim.api.nvim_buf_set_keymap(0, mode, fallback_lhs, map.lhs, {
+      expr = false,
+      noremap = true,
+      silent = true,
+      nowait = true,
+    })
+    rhs = string.gsub(rhs, '^' .. vim.pesc(map.lhs), fallback_lhs)
+  end
+
+  local fallback = ('<Plug>(cmp-utils-keymap-listen-rhs:%s)'):format(misc.id('cmp.utils.keymap.listen.rhs'))
+  vim.api.nvim_buf_set_keymap(0, mode, fallback, rhs, {
+    expr = map.expr ~= 0,
+    noremap = map.noremap ~= 0,
+    script = map.script ~= 0,
+    silent = true,
+    nowait = true,
+  })
+  return fallback
+end
 
 ---Get all available key mappings.
 ---@param mode string
