@@ -18,7 +18,6 @@ describe('keymap', function()
   end)
 
   describe('evacuate', function()
-
     before_each(spec.before)
 
     it('expr & register', function()
@@ -44,7 +43,5 @@ describe('keymap', function()
       vim.api.nvim_feedkeys('i' .. keymap.t(fallback), 'x', true)
       assert.are.same({ '()' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
     end)
-
   end)
-
 end)
