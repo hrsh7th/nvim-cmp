@@ -118,7 +118,11 @@ misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(mode, keys)
   local fallback = keymap.listen.cache:get({ mode, bufnr, keys }).fallback
   local callback = keymap.listen.cache:get({ mode, bufnr, keys }).callback
   callback(keys, function()
-    keymap.feedkeys(keymap.t(fallback), 't')
+    if keymap.find_map_by_lhs(mode, fallback) then
+      keymap.feedkeys(keymap.t(fallback), 't')
+    else
+      keymap.feedkeys(keymap.t(keys), 'nt')
+    end
   end)
   return keymap.t('<Ignore>')
 end)
