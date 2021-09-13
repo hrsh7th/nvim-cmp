@@ -55,4 +55,15 @@ async.dedup = function()
   end
 end
 
+---Convert async process as sync
+async.sync = function(runner, timeout)
+  local done = false
+  runner(function()
+    done = true
+  end)
+  vim.wait(timeout, function()
+    return done
+  end, 10, false)
+end
+
 return async

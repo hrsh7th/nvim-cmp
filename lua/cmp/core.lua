@@ -238,7 +238,7 @@ core.complete = function(ctx)
 
   local callback = function()
     local new = context.new(ctx)
-    if new:changed(new.prev_context) then
+    if new:changed(new.prev_context) and ctx == core.context then
       core.complete(new)
     else
       core.filter.timeout = core.THROTTLE_TIME
@@ -292,14 +292,22 @@ core.confirm = function(e, option, callback)
   local suspending = core.suspend()
   local ctx = core.get_context()
 
+  -- Try to resolve for only 100ms.
+  async.sync(function(done)
+    e:resolve(done)
+  end, 100)
+
+  -- Simulate `<C-y>` behavior.
   local confirm = {}
   table.insert(confirm, keymap.t(string.rep('<C-g>U<Left><Del>', ctx.cursor.character - misc.to_utfindex(e.context.cursor_before_line, e:get_offset()))))
   table.insert(confirm, e:get_word())
   keymap.feedkeys(table.concat(confirm, ''), 'nt', function()
+    -- Restore to the requested state.
     local restore = {}
     table.insert(restore, keymap.t(string.rep('<C-g>U<Left><Del>', vim.fn.strchars(e:get_word()))))
     table.insert(restore, string.sub(e.context.cursor_before_line, e:get_offset()))
     keymap.feedkeys(table.concat(restore, ''), 'n', function()
+
       --@see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/suggestController.ts#L334
       if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) == 0 then
         local pre = context.new()
@@ -344,8 +352,6 @@ core.confirm = function(e, option, callback)
         completion_item.textEdit.range = e:get_insert_range()
       end
 
-      local is_snippet = completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet
-
       local keys = {}
       if e.context.cursor.character < completion_item.textEdit.range['end'].character then
         table.insert(keys, keymap.t(string.rep('<Del>', completion_item.textEdit.range['end'].character - e.context.cursor.character)))
@@ -354,6 +360,7 @@ core.confirm = function(e, option, callback)
         table.insert(keys, keymap.t(string.rep('<C-g>U<Left><Del>', e.context.cursor.character - completion_item.textEdit.range.start.character)))
       end
 
+      local is_snippet = completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet
       if is_snippet then
         table.insert(keys, keymap.t('<C-g>u') .. e:get_word() .. keymap.t('<C-g>u'))
         table.insert(keys, keymap.t(string.rep('<C-g>U<Left><Del>', vim.fn.strchars(e:get_word()))))
