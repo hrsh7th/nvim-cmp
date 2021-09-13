@@ -36,12 +36,12 @@ end
 
 ---@param id number
 ---@param methods string[]
-vim_source.new = function (id, methods)
-  local self = setmetatable({}, { __index = vim_source })
+vim_source.new = function (bridge_id, methods)
+  local self = {}
   for _, method in ipairs(methods) do
     self[method] = (function(m)
       return function(_, ...)
-        return vim.fn['cmp#_method'](id, m, vim_source.to_args({ ... }))
+        return vim.fn['cmp#_method'](bridge_id, m, vim_source.to_args({ ... }))
       end
     end)(method)
   end

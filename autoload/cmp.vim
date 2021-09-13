@@ -47,9 +47,9 @@ endfunction
 "
 " cmp#_method
 "
-function! cmp#_method(id, method, args) abort
+function! cmp#_method(bridge_id, method, args) abort
   try
-    let l:source = s:sources[a:id]
+    let l:source = s:sources[a:bridge_id]
     if a:method ==# 'is_available'
       return l:source[a:method]()
     elseif a:method ==# 'get_debug_name'
