@@ -53,7 +53,7 @@ misc.id = setmetatable({
   group = {},
 }, {
   __call = function(_, group)
-    misc.id.group[group] = misc.id.group[group] or 0
+    misc.id.group[group] = misc.id.group[group] or vim.loop.now()
     misc.id.group[group] = misc.id.group[group] + 1
     return misc.id.group[group]
   end,

@@ -92,8 +92,8 @@ keymap.listen = setmetatable({
   __call = function(self, mode, keys, callback)
     keys = keymap.to_keymap(keys)
 
-    local origin = keymap.find_map_by_lhs(mode, keys)
-    if string.match(origin.rhs, '^.*' .. vim.pesc('v:lua.cmp.utils.keymap.listen.run') .. '.*$') then
+    local existing = keymap.find_map_by_lhs(mode, keys)
+    if string.match(existing.rhs, '^.*' .. vim.pesc('v:lua.cmp.utils.keymap.listen.run') .. '.*$') then
       return
     end
 
@@ -110,6 +110,7 @@ keymap.listen = setmetatable({
       mode = mode,
       callback = callback,
       fallback = fallback,
+      existing = existing,
     })
   end,
 })
@@ -118,11 +119,7 @@ misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(mode, keys)
   local fallback = keymap.listen.cache:get({ mode, bufnr, keys }).fallback
   local callback = keymap.listen.cache:get({ mode, bufnr, keys }).callback
   callback(keys, function()
-    if keymap.find_map_by_lhs(mode, fallback) then
-      keymap.feedkeys(keymap.t(fallback), 't')
-    else
-      keymap.feedkeys(keymap.t(keys), 'nt')
-    end
+    keymap.feedkeys(keymap.t(fallback), 'i')
   end)
   return keymap.t('<Ignore>')
 end)
@@ -133,10 +130,11 @@ end)
 ---@return string
 keymap.evacuate = function(mode, lhs)
   local map = keymap.find_map_by_lhs(mode, lhs)
+
   -- Keep existing mapping as <Plug> mapping. We escape fisrt recursive key sequence. See `:help recursive_mapping`)
   local rhs = map.rhs
   if map.noremap == 0 then
-    local fallback_lhs = ('<Plug>(cmp-utils-keymap-listen-lhs:%s)'):format(misc.id('cmp.utils.keymap.listen.lhs'))
+    local fallback_lhs = ('<Plug>(cmp-utils-keymap-listen-lhs:%s)'):format(map.lhs)
     vim.api.nvim_buf_set_keymap(0, mode, fallback_lhs, map.lhs, {
       expr = false,
       noremap = true,
@@ -146,7 +144,7 @@ keymap.evacuate = function(mode, lhs)
     rhs = string.gsub(rhs, '^' .. vim.pesc(map.lhs), fallback_lhs)
   end
 
-  local fallback = ('<Plug>(cmp-utils-keymap-listen-rhs:%s)'):format(misc.id('cmp.utils.keymap.listen.rhs'))
+  local fallback = ('<Plug>(cmp-utils-keymap-listen-rhs:%s)'):format(map.lhs)
   vim.api.nvim_buf_set_keymap(0, mode, fallback, rhs, {
     expr = map.expr ~= 0,
     noremap = map.noremap ~= 0,
