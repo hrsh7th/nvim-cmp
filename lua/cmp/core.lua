@@ -72,6 +72,9 @@ end
 ---@type table<number, cmp.Source>
 core.sources = {}
 
+---@type table<string, cmp.Source>
+core.sources_by_name = {}
+
 ---@type cmp.Context
 core.context = context.new()
 
@@ -79,11 +82,13 @@ core.context = context.new()
 ---@param s cmp.Source
 core.register_source = function(s)
   core.sources[s.id] = s
+  core.sources_by_name[s.name] = s
 end
 
 ---Unregister source
 ---@param source_id string
 core.unregister_source = function(source_id)
+  core.sources_by_name[core.sources[source_id]] = nil
   core.sources[source_id] = nil
 end
 
@@ -118,12 +123,11 @@ end
 core.get_sources = function(statuses)
   local sources = {}
   for _, c in pairs(config.get().sources) do
-    for _, s in pairs(core.sources) do
-      if c.name == s.name then
-        if not statuses or vim.tbl_contains(statuses, s.status) then
-          if s:is_available() then
-            table.insert(sources, s)
-          end
+    local s = core.sources_by_name[c.name]
+    if s then
+      if not statuses or vim.tbl_contains(statuses, s.status) then
+        if s:is_available() then
+          table.insert(sources, s)
         end
       end
     end
