@@ -92,10 +92,9 @@ end
 ---@param source_id string
 core.unregister_source = function(source_id)
   local name = core.sources[source_id].name
-  core.sources_by_name[name] = vim.tbl_filter(
-    function (source)
-      return source.id ~= source_id
-    end, core.sources_by_name[name])
+  core.sources_by_name[name] = vim.tbl_filter(function(s)
+    return s.id ~= source_id
+  end, core.sources_by_name[name])
   core.sources[source_id] = nil
 end
 
