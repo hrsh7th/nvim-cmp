@@ -13,6 +13,7 @@ Can be used. Feedback wanted!
 Concept
 ====================
 
+- No flicker
 - Works properly
 - Fully customizable via Lua functions
 - Fully supported LSP's Completion capabilities
