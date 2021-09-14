@@ -13,8 +13,7 @@ Can be used. Feedback wanted!
 Concept
 ====================
 
-- Provides a completion engine to handle completion sources
-- Support pairs-wise plugin automatically
+- Works properly
 - Fully customizable via Lua functions
 - Fully supported LSP's Completion capabilities
   - Snippets
@@ -26,6 +25,7 @@ Concept
   - Execute commands (Some LSP server needs it to auto-importing. e.g. `sumneko_lua` or `purescript-language-server`)
   - Preselect
   - CompletionItemTags
+- Support pairs-wise plugin automatically
 
 
 Setup
