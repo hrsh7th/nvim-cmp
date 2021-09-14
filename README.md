@@ -484,16 +484,19 @@ autocmd FileType TelescopePrompt lua require('cmp').setup.buffer { enabled = fal
 
 I've optimized `nvim-cmp` as much as possible, but there are currently some known / unfixable issues.
 
-1. `cmp-buffer` source and too large buffer.
-  The `cmp-buffer` source makes an index of the current buffer so if the current buffer is too large, it will slowdown the main UI thread.
+**`cmp-buffer` source and too large buffer**
 
-1. Some language servers.
-  For example, `typescript-language-server` will returns 15k items to the client.
-  In such a case, it will take 100ms just to parse payloads as JSON.
+The `cmp-buffer` source makes an index of the current buffer so if the current buffer is too large, it will slowdown the main UI thread.
 
-1. You set `vim.lsp.set_log_level` up by yourself.
-  This setting will cause the filesystem operation for each LSP payload.
-  This will greatly slow down nvim-cmp (and other LSP related features).
+**Slow language server**
+
+For example, `typescript-language-server` will returns 15k items to the client.
+In such a case, it will take 100ms just to parse payloads as JSON.
+
+**`vim.lsp.set_log_level`**
+
+This setting will cause the filesystem operation for each LSP payload.
+This will greatly slow down nvim-cmp (and other LSP related features).
 
 #### How to show name of item kind and source (like compe)?
 
@@ -552,7 +555,7 @@ function source:is_available()
 end
 
 ---Return the source name for some information.
-source:get_debug_name = function()
+function source:get_debug_name()
   return 'example'
 end
 
