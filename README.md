@@ -13,8 +13,7 @@ Can be used. Feedback wanted!
 Concept
 ====================
 
-- Provides a completion engine to handle completion sources
-- Support pairs-wise plugin automatically
+- Works properly
 - Fully customizable via Lua functions
 - Fully supported LSP's Completion capabilities
   - Snippets
@@ -26,6 +25,7 @@ Concept
   - Execute commands (Some LSP server needs it to auto-importing. e.g. `sumneko_lua` or `purescript-language-server`)
   - Preselect
   - CompletionItemTags
+- Support pairs-wise plugin automatically
 
 
 Setup
@@ -544,15 +544,15 @@ source.new = function()
   return self
 end
 
----Return the source name for some information.
-function source:get_debug_name = function()
-  return 'example'
-end
-
 ---Return the source is available or not.
 ---@return boolean
 function source:is_available()
   return true
+end
+
+---Return the source name for some information.
+source:get_debug_name = function()
+  return 'example'
 end
 
 ---Return keyword pattern which will be used...
@@ -607,5 +607,38 @@ function source:execute(completion_item, callback)
   callback(completion_item)
 end
 
-return source
+require('cmp').register_source(source.new())
+```
+
+You can also create source by Vim script like this (This is useful to support callback style plugins).
+
+- If you want to return `boolean`, you must return `v:true`/`v:false`. It doesn't `0`/`1`.
+
+```vim
+let s:source = {}
+
+function! s:source.new() abort
+  return extend(deepcopy(s:source))
+endfunction
+
+" The other APIs are also available.
+
+function! s:source.complete(params, callback) abort
+  call a:callback({
+  \   { 'label': 'January' },
+  \   { 'label': 'February' },
+  \   { 'label': 'March' },
+  \   { 'label': 'April' },
+  \   { 'label': 'May' },
+  \   { 'label': 'June' },
+  \   { 'label': 'July' },
+  \   { 'label': 'August' },
+  \   { 'label': 'September' },
+  \   { 'label': 'October' },
+  \   { 'label': 'November' },
+  \   { 'label': 'December' },
+  \ })
+endfunction
+
+call cmp#register_source('month', s:source.new())
 ```

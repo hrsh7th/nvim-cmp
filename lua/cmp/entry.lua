@@ -309,10 +309,16 @@ end
 ---Get resolved completion item if possible.
 ---@return lsp.CompletionItem
 entry.get_completion_item = function(self)
-  if self.resolved_completion_item then
-    return self.resolved_completion_item
-  end
-  return self.completion_item
+  return self.cache:ensure({ 'get_completion_item', (self.resolved_completion_item and 1 or 0) }, function()
+    if self.resolved_completion_item then
+      local completion_item = misc.copy(self.completion_item)
+      completion_item.detail = self.resolved_completion_item.detail or completion_item.detail
+      completion_item.documentation = self.resolved_completion_item.documentation or completion_item.documentation
+      completion_item.additionalTextEdits = self.resolved_completion_item.additionalTextEdits or completion_item.additionalTextEdits
+      return completion_item
+    end
+    return self.completion_item
+  end)
 end
 
 ---Create documentation
