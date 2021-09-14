@@ -72,7 +72,7 @@ end
 ---@type table<number, cmp.Source>
 core.sources = {}
 
----@type table<string, table<cmp.Source>>
+---@type table<string, cmp.Source[]>
 core.sources_by_name = {}
 
 ---@type cmp.Context
@@ -82,7 +82,7 @@ core.context = context.new()
 ---@param s cmp.Source
 core.register_source = function(s)
   core.sources[s.id] = s
-  if not vim.tbl_contains(core.sources_by_name, s.name) then
+  if not core.sources_by_name[s.name] then
     core.sources_by_name[s.name] = {}
   end
   table.insert(core.sources_by_name[s.name], s)
