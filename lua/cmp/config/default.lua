@@ -19,6 +19,7 @@ return function()
       get_trigger_characters = function(trigger_characters)
         return trigger_characters
       end,
+      prepreview = false,
     },
 
     snippet = {

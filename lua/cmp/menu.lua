@@ -208,8 +208,10 @@ menu.get_selected_entry = function(self)
   end
 
   local selected = vim.fn.complete_info({ 'selected' }).selected
-  if selected == -1 then
-    return nil
+  if not config.get().completion.prepreview then
+    if selected == -1 then
+      return nil
+    end
   end
   return self.deduped_entries[math.max(selected, 0) + 1]
 end
