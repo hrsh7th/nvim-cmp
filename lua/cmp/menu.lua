@@ -32,6 +32,9 @@ menu.new = function(opts)
   self:reset()
   autocmd.subscribe('CompleteChanged', function()
     local e = self:get_selected_entry()
+    if not e and config.get().completion.prepreview then
+      e = self:get_first_entry()
+    end
     if e then
       self:select(e)
     else
@@ -40,6 +43,7 @@ menu.new = function(opts)
   end)
   return self
 end
+
 
 ---Close menu
 menu.close = function(self)
@@ -180,6 +184,10 @@ menu.select = function(self, e)
   e:resolve(self.resolve_dedup(vim.schedule_wrap(function()
     if self:get_selected_entry() == e then
       self.float:show(e)
+    elseif config.get().completion.prepreview then
+      if self:get_first_entry() == e then
+        self.float:show(e)
+      end
     end
   end)))
 
@@ -208,11 +216,11 @@ menu.get_selected_entry = function(self)
   end
 
   local selected = vim.fn.complete_info({ 'selected' }).selected
-  if not config.get().completion.prepreview then
-    if selected == -1 then
-      return nil
-    end
+  if selected == -1 then
+    return nil
   end
+
+  -- end
   return self.deduped_entries[math.max(selected, 0) + 1]
 end
 
