@@ -19,7 +19,6 @@ return function()
       get_trigger_characters = function(trigger_characters)
         return trigger_characters
       end,
-      prepreview = false,
     },
 
     snippet = {
@@ -70,6 +69,7 @@ return function()
 
     experimental = {
       ghost_text = false,
+      active_preview = false,
     },
 
     sources = {},

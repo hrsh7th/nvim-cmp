@@ -32,7 +32,7 @@ menu.new = function(opts)
   self:reset()
   autocmd.subscribe('CompleteChanged', function()
     local e = self:get_selected_entry()
-    if not e and config.get().completion.prepreview then
+    if not e and config.get().experimental.active_preview then
       e = self:get_first_entry()
     end
     if e then
@@ -184,7 +184,7 @@ menu.select = function(self, e)
   e:resolve(self.resolve_dedup(vim.schedule_wrap(function()
     if self:get_selected_entry() == e then
       self.float:show(e)
-    elseif config.get().completion.prepreview then
+    elseif config.get().experimental.active_preview then
       if self:get_first_entry() == e then
         self.float:show(e)
       end
