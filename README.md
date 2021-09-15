@@ -246,9 +246,9 @@ The source specific maximum item count.
 
 Specify preselect mode. The following modes are available.
 
-- cmp.Preselect.Item
+- `cmp.PreselectMode.Item`
   - If the item has `preselect = true`, `nvim-cmp` will preselect it.
-- cmp.Preselect.None
+- `cmp.PreselectMode.None`
   - Disable preselect feature.
 
 Default: `cmp.PreselectMode.Item`
