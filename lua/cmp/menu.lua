@@ -44,7 +44,6 @@ menu.new = function(opts)
   return self
 end
 
-
 ---Close menu
 menu.close = function(self)
   vim.schedule(function()
@@ -219,8 +218,6 @@ menu.get_selected_entry = function(self)
   if selected == -1 then
     return nil
   end
-
-  -- end
   return self.deduped_entries[math.max(selected, 0) + 1]
 end
 
