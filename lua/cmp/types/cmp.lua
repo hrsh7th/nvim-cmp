@@ -63,10 +63,10 @@ cmp.PreselectMode.None = 'none'
 ---@class cmp.CompletionConfig
 ---@field public autocomplete cmp.TriggerEvent[]
 ---@field public completeopt string
----@field public prepreview boolean
 ---@field public keyword_pattern string
 ---@field public keyword_length number
 ---@field public get_trigger_characters fun(trigger_characters: string[]): string[]
+---@field public prepreview boolean
 
 ---@class cmp.DocumentationConfig
 ---@field public border string[]
