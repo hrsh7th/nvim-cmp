@@ -138,7 +138,7 @@ cmp.status = function()
   end
 
   if #kinds.available > 0 then
-    vim.api.nvim_echo({ { '# available\n', 'Special' } }, false, {})
+    vim.api.nvim_echo({ { '# ready\n', 'Special' } }, false, {})
     for _, name in ipairs(kinds.available) do
       vim.api.nvim_echo({ { ('- %s\n'):format(name), 'Normal' } }, false, {})
     end
@@ -146,7 +146,7 @@ cmp.status = function()
   end
 
   if #kinds.unavailable > 0 then
-    vim.api.nvim_echo({ { '# unavailable\n', 'Comment' } }, false, {})
+    vim.api.nvim_echo({ { '# can\'t work\n', 'Comment' } }, false, {})
     for _, name in ipairs(kinds.unavailable) do
       vim.api.nvim_echo({ { ('- %s\n'):format(name), 'Normal' } }, false, {})
     end
@@ -162,7 +162,7 @@ cmp.status = function()
   end
 
   if #kinds.invalid > 0 then
-    vim.api.nvim_echo({ { '# not exists\n', 'ErrorMsg' } }, false, {})
+    vim.api.nvim_echo({ { '# invalid sources\n', 'ErrorMsg' } }, false, {})
     for _, name in ipairs(kinds.invalid) do
       vim.api.nvim_echo({ { ('- %s\n'):format(name), 'Normal' } }, false, {})
     end
