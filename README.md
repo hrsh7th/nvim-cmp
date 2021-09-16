@@ -356,7 +356,9 @@ The documentation window's max height.
 
 Specify deprecated candidate should be marked as deprecated or not.
 
-Default: `true`
+This option is useful but disabled by default because sometimes, this option can break your terminal appearance.
+
+Default: `false`
 
 #### formatting.format (type: fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem)
 
