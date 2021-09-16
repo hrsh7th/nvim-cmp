@@ -15,3 +15,5 @@ vim.cmd [[
   augroup END
 ]]
 
+vim.cmd [[inoremap <silent> <Plug>(cmp-autoindent) <C-o>:normal!==<CR>]]
+

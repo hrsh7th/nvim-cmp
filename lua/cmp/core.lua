@@ -232,7 +232,7 @@ core.autoindent = function(event, callback)
     if prefix then
       for _, key in ipairs(vim.split(vim.bo.indentkeys, ',')) do
         if vim.tbl_contains({ '=' .. prefix, '0=' .. prefix }, key) then
-          return keymap.feedkeys(keymap.t('<C-f>'), 'n', callback)
+          return keymap.feedkeys(keymap.t('<Plug>(cmp-autoindent)'), 'n', callback)
         end
       end
     end
