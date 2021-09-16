@@ -100,6 +100,7 @@ cmp.PreselectMode.None = 'none'
 ---@class cmp.SourceConfig
 ---@field public name string
 ---@field public opts table
+---@field public priority number|nil
 ---@field public keyword_pattern string
 ---@field public keyword_length number
 ---@field public max_item_count number

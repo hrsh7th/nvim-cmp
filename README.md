@@ -230,6 +230,11 @@ The source name.
 
 The source customization options. It is defined by each source.
 
+#### sources[number].priority (type: number|nil)
+
+The manually specified source priority.
+If you don't specifies it, The source priority will determine by the default algorithm (see `sorting.priority_weight`).
+
 #### sources[number].keyword_pattern (type: string)
 
 The source specific keyword_pattern for override.
