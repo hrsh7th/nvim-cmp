@@ -110,6 +110,65 @@ cmp.confirm = function(option)
   end
 end
 
+---Show status
+cmp.status = function()
+  local kinds = {}
+  kinds.available = {}
+  kinds.unavailable = {}
+  kinds.installed = {}
+  kinds.invalid = {}
+  local names = {}
+  for _, s in pairs(core.sources) do
+    names[s.name] = true
+
+    if config.get_source_config(s.name) then
+      if s:is_available() then
+        table.insert(kinds.available, s:get_debug_name())
+      else
+        table.insert(kinds.unavailable, s:get_debug_name())
+      end
+    else
+      table.insert(kinds.installed, s:get_debug_name())
+    end
+  end
+  for _, s in ipairs(config.get().sources) do
+    if not names[s.name] then
+      table.insert(kinds.invalid, s.name)
+    end
+  end
+
+  if #kinds.available > 0 then
+    vim.api.nvim_echo({ { '# available\n', 'Special' } }, false, {})
+    for _, name in ipairs(kinds.available) do
+      vim.api.nvim_echo({ { ('- %s\n'):format(name), 'Normal' } }, false, {})
+    end
+    vim.api.nvim_echo({ { '\n', 'Normal' } }, false, {})
+  end
+
+  if #kinds.unavailable > 0 then
+    vim.api.nvim_echo({ { '# unavailable\n', 'Comment' } }, false, {})
+    for _, name in ipairs(kinds.unavailable) do
+      vim.api.nvim_echo({ { ('- %s\n'):format(name), 'Normal' } }, false, {})
+    end
+    vim.api.nvim_echo({ { '\n', 'Normal' } }, false, {})
+  end
+
+  if #kinds.installed > 0 then
+    vim.api.nvim_echo({ { '# not configured\n', 'WarningMsg' } }, false, {})
+    for _, name in ipairs(kinds.installed) do
+      vim.api.nvim_echo({ { ('- %s\n'):format(name), 'Normal' } }, false, {})
+    end
+    vim.api.nvim_echo({ { '\n', 'Normal' } }, false, {})
+  end
+
+  if #kinds.invalid > 0 then
+    vim.api.nvim_echo({ { '# not exists\n', 'ErrorMsg' } }, false, {})
+    for _, name in ipairs(kinds.invalid) do
+      vim.api.nvim_echo({ { ('- %s\n'):format(name), 'Normal' } }, false, {})
+    end
+  end
+end
+
 ---@type cmp.Setup
 cmp.setup = setmetatable({
   global = function(c)

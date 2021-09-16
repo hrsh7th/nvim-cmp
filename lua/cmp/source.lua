@@ -175,7 +175,7 @@ source.get_debug_name = function(self)
   if self.source.get_debug_name then
     name = self.source:get_debug_name()
   end
-  return name .. '(' .. self.id .. ')'
+  return name
 end
 
 ---Return the source is available or not.

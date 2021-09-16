@@ -17,3 +17,5 @@ vim.cmd [[
 
 vim.cmd [[inoremap <silent> <Plug>(cmp-autoindent) <C-o>:normal!==<CR>]]
 
+vim.cmd [[command! CmpStatus lua require('cmp').status()]]
+

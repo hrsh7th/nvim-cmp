@@ -65,7 +65,7 @@ config.get_source_config = function(name)
         return s
       end
     end
-    return {}
+    return nil
   end)
 end
 
