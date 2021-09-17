@@ -65,6 +65,12 @@ context.new = function(prev_context, option)
   return self
 end
 
+---Return the context is invalid or not.
+---@return boolean
+context.invalid = function(self)
+  return string.sub(self.mode, 1, 1) ~= 'i'
+end
+
 ---Return context creation reason.
 ---@return cmp.ContextReason
 context.get_reason = function(self)

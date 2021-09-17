@@ -243,6 +243,10 @@ end
 ---Invoke completion
 ---@param ctx cmp.Context
 core.complete = function(ctx)
+  if ctx:invalid() then
+    return
+  end
+
   core.set_context(ctx)
 
   local callback = function()
@@ -265,6 +269,9 @@ end
 ---Update completion menu
 core.filter = async.throttle(function()
   local ctx = core.get_context()
+  if ctx:invalid() then
+    return
+  end
 
   -- To wait for processing source for that's timeout.
   local sources = {}
