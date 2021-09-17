@@ -138,31 +138,32 @@ cmp.status = function()
   end
 
   if #kinds.available > 0 then
-    vim.api.nvim_echo({ { '# ready\n', 'Special' } }, false, {})
+    vim.api.nvim_echo({ { '\n', 'Normal' } }, false, {})
+    vim.api.nvim_echo({ { '# ready source names\n', 'Special' } }, false, {})
     for _, name in ipairs(kinds.available) do
       vim.api.nvim_echo({ { ('- %s\n'):format(name), 'Normal' } }, false, {})
     end
-    vim.api.nvim_echo({ { '\n', 'Normal' } }, false, {})
   end
 
   if #kinds.unavailable > 0 then
-    vim.api.nvim_echo({ { '# unavailable\n', 'Comment' } }, false, {})
+    vim.api.nvim_echo({ { '\n', 'Normal' } }, false, {})
+    vim.api.nvim_echo({ { '# unavailable source names\n', 'Comment' } }, false, {})
     for _, name in ipairs(kinds.unavailable) do
       vim.api.nvim_echo({ { ('- %s\n'):format(name), 'Normal' } }, false, {})
     end
-    vim.api.nvim_echo({ { '\n', 'Normal' } }, false, {})
   end
 
   if #kinds.installed > 0 then
-    vim.api.nvim_echo({ { '# not configured\n', 'WarningMsg' } }, false, {})
+    vim.api.nvim_echo({ { '\n', 'Normal' } }, false, {})
+    vim.api.nvim_echo({ { '# unused source names\n', 'WarningMsg' } }, false, {})
     for _, name in ipairs(kinds.installed) do
       vim.api.nvim_echo({ { ('- %s\n'):format(name), 'Normal' } }, false, {})
     end
-    vim.api.nvim_echo({ { '\n', 'Normal' } }, false, {})
   end
 
   if #kinds.invalid > 0 then
-    vim.api.nvim_echo({ { '# invalid sources\n', 'ErrorMsg' } }, false, {})
+    vim.api.nvim_echo({ { '\n', 'Normal' } }, false, {})
+    vim.api.nvim_echo({ { '# unknown source names\n', 'ErrorMsg' } }, false, {})
     for _, name in ipairs(kinds.invalid) do
       vim.api.nvim_echo({ { ('- %s\n'):format(name), 'Normal' } }, false, {})
     end
