@@ -32,107 +32,94 @@ Concept
 Setup
 ====================
 
-## Install
+### Recommended Configuration
 
-First, You should install `nvim-cmp` itself and completion sources and snippet engine with your favourite plugin manager.
-
-The `nvim-cmp` sources can be found [here](https://github.com/topics/nvim-cmp).
-
-Using [vim-plug](https://github.com/junegunn/vim-plug):
+This example configuration is using `vim-plug`.
 
 ```viml
-" Install nvim-cmp
+call plug#begin(s:plug_dir)
+Plug 'neovim/nvim-lspconfig'
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'hrsh7th/cmp-buffer'
 Plug 'hrsh7th/nvim-cmp'
 
-" Install snippet engine (This example installs [hrsh7th/vim-vsnip](https://github.com/hrsh7th/vim-vsnip))
+" For vsnip user.
+Plug 'hrsh7th/cmp-vsnip'
 Plug 'hrsh7th/vim-vsnip'
 
-" Install the buffer completion source
-Plug 'hrsh7th/cmp-buffer'
-```
+" For luasnip user.
+" Plug 'L3MON4D3/LuaSnip'
+" Plug 'saadparwaiz1/cmp_luasnip'
 
-Using [packer.nvim](https://github.com/wbthomason/packer.nvim):
+" For ultisnips user.
+" Plug 'SirVer/ultisnips'
+" Plug 'quangnguyen30192/cmp-nvim-ultisnips'
 
-```lua
--- Install nvim-cmp, and buffer source as a dependency
-use {
-  "hrsh7th/nvim-cmp",
-  requires = {
-    "hrsh7th/vim-vsnip",
-    "hrsh7th/cmp-buffer",
-  }
-}
-```
+call plug#end()
 
-## Basic Configuration
+set completeopt=menu,menuone,noselect
 
-First, you should do the following steps.
-
-- You must set `snippet engine` up. See README.md of your choosen snippet engine.
-- Remove `longest` from `completeopt`. See `:help completeopt`.
-
-To use `nvim-cmp` with the default configuration:
-
-```viml
 lua <<EOF
+  -- Setup nvim-cmp.
   local cmp = require'cmp'
+
   cmp.setup({
     snippet = {
       expand = function(args)
-        vim.fn["vsnip#anonymous"](args.body)
+        -- For `vsnip` user.
+        vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` user.
+
+        -- For `luasnip` user.
+        -- require('luasnip').lsp_expand(args.body)
+
+        -- For `ultisnips` user.
+        -- vim.fn["vsnip#anonymous"](args.body)
       end,
     },
     mapping = {
-      ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+      ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+      ['<C-f>'] = cmp.mapping.scroll_docs(4),
+      ['<C-Space>'] = cmp.mapping.complete(),
+      ['<C-e>'] = cmp.mapping.close(),
+      ['<CR>'] = cmp.mapping.confirm({ select = true }),
     },
     sources = {
-      { name = '...' },
-      ...
+      { name = 'nvim_lsp' },
+
+      -- For vsnip user.
+      { name = 'vsnip' },
+
+      -- For luasnip user.
+      -- { name = 'luasnip' },
+
+      -- For ultisnips user.
+      -- { name = 'ultisnips' },
+
+      { name = 'buffer' },
     }
   })
-EOF
-```
 
-The default configuration can be found [here](./lua/cmp/config/default.lua)
-
-Advanced Configuration
-====================
-
-```viml
-lua <<EOF
-  local cmp = require'cmp'
-  cmp.setup {
-    ...
-    completion = {
-      autocomplete = { ... },
-    },
-    ...
-    snippet = {
-      ...
-    },
-    ...
-    preselect = ...,
-    ...
-    documentation = {
-      ...
-    },
-    ...
-
-    sorting = {
-      priority_weight = 2.,
-      comparators = { ... },
-    },
-    mapping = {
-      ...
-    },
-    sources = { ... },
-    ...
+  -- Setup lspconfig.
+  require('lspconfig')[%YOUR_LSP_SERVER%].setup {
+    cpabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
   }
 EOF
 ```
 
-The configuration options will be merged with the default config.
+### I want to see  more sources!
+
+You can see the all of `nvim-cmp` sources [here](https://github.com/topics/nvim-cmp).
+
+
+Configuration options
+====================
+
+You can specify the following configuration options via `cmp.setup { ... }`.
+
+The configuration options will be merged with the [default config](./lua/cmp/config/default.lua).
+
 If you want to remove an option, you can set it to `false` instead.
+
 
 #### mapping (type: table<string, fun(fallback: function)>)
 
