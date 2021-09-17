@@ -146,7 +146,7 @@ cmp.status = function()
   end
 
   if #kinds.unavailable > 0 then
-    vim.api.nvim_echo({ { '# can\'t work\n', 'Comment' } }, false, {})
+    vim.api.nvim_echo({ { '# unavailable\n', 'Comment' } }, false, {})
     for _, name in ipairs(kinds.unavailable) do
       vim.api.nvim_echo({ { ('- %s\n'):format(name), 'Normal' } }, false, {})
     end
