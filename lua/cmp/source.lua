@@ -63,7 +63,7 @@ end
 ---Return source option
 ---@return cmp.SourceConfig
 source.get_config = function(self)
-  return config.get_source_config(self.name)
+  return config.get_source_config(self.name) or {}
 end
 
 ---Get fetching time
@@ -175,7 +175,7 @@ source.get_debug_name = function(self)
   if self.source.get_debug_name then
     name = self.source:get_debug_name()
   end
-  return name .. '(' .. self.id .. ')'
+  return name
 end
 
 ---Return the source is available or not.

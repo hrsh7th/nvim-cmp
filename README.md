@@ -398,6 +398,14 @@ Specify whether to display ghost text.
 Default: `false`
 
 
+Commands
+====================
+
+#### `CmpStatus`
+
+Show the source statuses
+
+
 Programatic API
 ====================
 
@@ -434,6 +442,10 @@ Scroll documentation window if possible.
 
 FAQ
 ====================
+
+#### I can't get the specific source working.
+
+You should check `:CmpStatus` command's output. Probably, your specified source name is wrong.
 
 #### What is the `pairs-wise plugin automatically supported`?
 
