@@ -112,6 +112,8 @@ end
 
 ---Show status
 cmp.status = function()
+  vim.cmd [[doautocmd InsertEnter]]
+
   local kinds = {}
   kinds.available = {}
   kinds.unavailable = {}
