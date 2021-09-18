@@ -314,9 +314,11 @@ source.complete = function(self, ctx, callback)
         self.incomplete = response.isIncomplete or false
         self.entries = {}
         for i, item in ipairs(response.items or response) do
-          local e = entry.new(ctx, self, item)
-          self.entries[i] = e
-          self.offset = math.min(self.offset, e:get_offset())
+          if (misc.safe(item) or {}).label then
+            local e = entry.new(ctx, self, item)
+            self.entries[i] = e
+            self.offset = math.min(self.offset, e:get_offset())
+          end
         end
       else
         debug.log(self:get_debug_name(), 'continue', 'nil')
