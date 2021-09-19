@@ -1,5 +1,6 @@
 local debug = require('cmp.utils.debug')
 local fancy = require('cmp.menu.fancy')
+local native = require('cmp.menu.native')
 local types = require('cmp.types')
 local async = require('cmp.utils.async')
 local float = require('cmp.float')
@@ -161,7 +162,9 @@ menu.select = function(self, e)
   -- Documentation (always invoke to follow to the pum position)
   e:resolve(self.resolve_dedup(vim.schedule_wrap(function()
     if self:get_selected_entry() == e then
-      self.float:show(e)
+      if self.menu:visible() then
+        self.float:show(e, self.menu:info())
+      end
     end
   end)))
 

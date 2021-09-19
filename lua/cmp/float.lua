@@ -17,7 +17,7 @@ end
 
 ---Show floating window
 ---@param e cmp.Entry
-float.show = function(self, e)
+float.show = function(self, e, view)
   float.close.stop()
 
   local documentation = config.get().documentation
@@ -25,13 +25,8 @@ float.show = function(self, e)
     return
   end
 
-  local pum = vim.fn.pum_getpos() or {}
-  if not pum.col then
-    return self:close()
-  end
-
-  local right_space = vim.o.columns - (pum.col + pum.width + (pum.scrollbar and 1 or 0)) - 1
-  local left_space = pum.col - 1
+  local right_space = vim.o.columns - (view.col + view.width) - 1
+  local left_space = view.col - 1
   local maxwidth = math.min(documentation.maxwidth, math.max(left_space, right_space))
 
   -- update buffer content if needed.
@@ -56,8 +51,8 @@ float.show = function(self, e)
     return self:close()
   end
 
-  local right_col = pum.col + pum.width + (pum.scrollbar and 1 or 0)
-  local left_col = pum.col - width - 3 -- TODO: Why is this needed -3?
+  local right_col = view.col + view.width
+  local left_col = view.col - width - 3 -- TODO: Why is this needed -3?
 
   local col
   if right_space >= width and left_space >= width then
@@ -74,12 +69,14 @@ float.show = function(self, e)
     return self:close()
   end
 
+  print(vim.inspect(documentation.border))
+
   self.window:open({
     relative = 'editor',
     style = 'minimal',
     width = width,
     height = height,
-    row = pum.row,
+    row = view.row,
     col = col,
     border = documentation.border,
   })

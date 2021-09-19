@@ -202,7 +202,7 @@ core.on_change = function(event)
     local ctx = core.get_context({ reason = types.cmp.ContextReason.Auto })
 
     -- Skip autocompletion when the item is selected manually.
-    if ctx.pumvisible and not vim.tbl_isempty(vim.v.completed_item) then
+    if core.menu:get_selected_entry() then
       return
     end
 

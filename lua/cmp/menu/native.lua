@@ -1,29 +1,41 @@
-local vimmenu = {}
+local native = {}
 
-vimmenu.new = function()
-  local self = setmetatable({}, { __index = vimmenu })
+native.new = function()
+  local self = setmetatable({}, { __index = native })
   self.offset = -1
   self.items = {}
   return self
 end
 
-vimmenu.show = function(self, offset, items)
+native.show = function(self, offset, items)
   self.offset = offset
   self.items = items
   vim.fn.complete(self.offset, self.items)
 end
 
-vimmenu.hide = function(self)
+native.hide = function(self)
+
   vim.fn.complete(-1, {})
 end
 
-vimmenu.visible = function(self)
+native.visible = function(self)
   return vim.fn.pumvisible() == 1
 end
 
-vimmenu.select_next_item = function(self)
+native.info = function(self)
+  local pum = vim.fn.pum_getpos()
+  return {
+    row = pum.row,
+    col = pum.col,
+    width = pum.width + (pum.scrollbar and 1 or 0),
+    height = pum.height,
+    off = (pum.scrollbar and 1 or 0),
+  }
+end
+
+native.select_next_item = function(self)
   if self:visible() then
-    local idx = vim.fn.complete_info({ 'selected' })
+    local idx = vim.fn.complete_info({ 'selected' }).selected
     if idx == -1 then
       vim.api.nvim_select_popupmenu_item(1, true, false, {})
     elseif idx < 0 then
@@ -36,9 +48,9 @@ vimmenu.select_next_item = function(self)
   end
 end
 
-vimmenu.select_prev_item = function(self)
+native.select_prev_item = function(self)
   if self:visible() then
-    local idx = vim.fn.complete_info({ 'selected' })
+    local idx = vim.fn.complete_info({ 'selected' }).selected
     if idx == -1 then
       vim.api.nvim_select_popupmenu_item(#self.items - 1, true, false, {})
     elseif idx < 0 then
@@ -51,17 +63,20 @@ vimmenu.select_prev_item = function(self)
   end
 end
 
-vimmenu.get_first_item = function(self)
-  if self.window:visible() then
+native.get_first_item = function(self)
+  if self:visible() then
     return self.items[1]
   end
 end
 
-vimmenu.get_selected_item = function(self)
-  if self.window:visible() and self.window:option('cursorline') then
-    return self.items[vim.api.nvim_win_get_cursor(self.window.win)[1]]
+native.get_selected_item = function(self)
+  if self:visible() then
+    local idx = vim.fn.complete_info({ 'selected' }).selected
+    if idx ~= -1 then
+      return self.items[math.max(idx + 1, 1)]
+    end
   end
 end
 
-return vimmenu
+return native
 
