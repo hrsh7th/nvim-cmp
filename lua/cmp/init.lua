@@ -44,7 +44,7 @@ end
 
 ---Close current completion
 cmp.close = function()
-  if vim.fn.pumvisible() == 1 then
+  if core.menu.menu:visible() then
     core.reset()
     keymap.feedkeys(keymap.t('<C-e>'), 'n')
     return true
@@ -55,9 +55,9 @@ end
 
 ---Abort current completion
 cmp.abort = function()
-  if vim.fn.pumvisible() == 1 then
+  if core.menu.menu:visible() then
     keymap.feedkeys(keymap.t('<C-e>'), 'n', function()
-      core.reset()
+      core.menu.menu:close()
     end)
     return true
   else
@@ -67,8 +67,8 @@ end
 
 ---Select next item if possible
 cmp.select_next_item = function()
-  if vim.fn.pumvisible() == 1 then
-    vim.api.nvim_feedkeys(keymap.t('<C-n>'), 'n', true)
+  if core.menu.menu:visible() then
+    core.menu.menu:select_next_item()
     return true
   else
     return false
@@ -77,8 +77,8 @@ end
 
 ---Select prev item if possible
 cmp.select_prev_item = function()
-  if vim.fn.pumvisible() == 1 then
-    vim.api.nvim_feedkeys(keymap.t('<C-p>'), 'n', true)
+  if core.menu.menu:visible() then
+    core.menu.menu:select_prev_item()
     return true
   else
     return false

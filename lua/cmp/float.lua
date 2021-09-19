@@ -1,18 +1,17 @@
 local async = require('cmp.utils.async')
+local window = require('cmp.utils.window')
 local config = require('cmp.config')
 
 ---@class cmp.Float
 ---@field public entry cmp.Entry|nil
----@field public buf number|nil
----@field public win number|nil
+---@field public window cmp.Window
 local float = {}
 
 ---Create new floating window module
 float.new = function()
   local self = setmetatable({}, { __index = float })
   self.entry = nil
-  self.win = nil
-  self.buf = nil
+  self.window = window.new()
   return self
 end
 
@@ -43,15 +42,13 @@ float.show = function(self, e)
     end
 
     self.entry = e
-    self.buf = vim.api.nvim_create_buf(false, true)
-    vim.api.nvim_buf_set_option(self.buf, 'bufhidden', 'wipe')
-    vim.lsp.util.stylize_markdown(self.buf, documents, {
+    vim.lsp.util.stylize_markdown(self.window.buf, documents, {
       max_width = maxwidth,
       max_height = documentation.maxheight,
     })
   end
 
-  local width, height = vim.lsp.util._make_floating_popup_size(vim.api.nvim_buf_get_lines(self.buf, 0, -1, false), {
+  local width, height = vim.lsp.util._make_floating_popup_size(vim.api.nvim_buf_get_lines(self.window.buf, 0, -1, false), {
     max_width = maxwidth,
     max_height = documentation.maxheight,
   })
@@ -77,7 +74,7 @@ float.show = function(self, e)
     return self:close()
   end
 
-  local style = {
+  self.window:open({
     relative = 'editor',
     style = 'minimal',
     width = width,
@@ -85,39 +82,22 @@ float.show = function(self, e)
     row = pum.row,
     col = col,
     border = documentation.border,
-  }
-
-  if self.win and vim.api.nvim_win_is_valid(self.win) then
-    vim.api.nvim_win_set_buf(self.win, self.buf)
-    vim.api.nvim_win_set_config(self.win, style)
-  else
-    self.win = vim.api.nvim_open_win(self.buf, false, style)
-    vim.api.nvim_win_set_option(self.win, 'conceallevel', 2)
-    vim.api.nvim_win_set_option(self.win, 'concealcursor', 'n')
-    vim.api.nvim_win_set_option(self.win, 'winhighlight', config.get().documentation.winhighlight)
-    vim.api.nvim_win_set_option(self.win, 'foldenable', false)
-    vim.api.nvim_win_set_option(self.win, 'wrap', true)
-    vim.api.nvim_win_set_option(self.win, 'scrolloff', 0)
-  end
+  })
 end
 
 ---Close floating window
 float.close = async.throttle(
   vim.schedule_wrap(function(self)
-    if self:is_visible() then
-      vim.api.nvim_win_close(self.win, true)
-    end
+    self.window:close()
     self.entry = nil
-    self.buf = nil
-    self.win = nil
   end),
   20
 )
 
 float.scroll = function(self, delta)
   if self:is_visible() then
-    local info = vim.fn.getwininfo(self.win)[1] or {}
-    local buf = vim.api.nvim_win_get_buf(self.win)
+    local info = vim.fn.getwininfo(self.window.win)[1] or {}
+    local buf = vim.api.nvim_win_get_buf(self.window.win)
     local top = info.topline or 1
     top = top + delta
     top = math.max(top, 1)
@@ -132,7 +112,7 @@ float.scroll = function(self, delta)
 end
 
 float.is_visible = function(self)
-  return self.win and vim.api.nvim_win_is_valid(self.win)
+  return self.window:visible()
 end
 
 return float

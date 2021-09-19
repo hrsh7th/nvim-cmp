@@ -1,4 +1,5 @@
 local debug = require('cmp.utils.debug')
+local fancy = require('cmp.menu.fancy')
 local types = require('cmp.types')
 local async = require('cmp.utils.async')
 local float = require('cmp.float')
@@ -15,7 +16,7 @@ local autocmd = require('cmp.utils.autocmd')
 ---@field public on_select fun(e: cmp.Entry)
 ---@field public items vim.CompletedItem[]
 ---@field public entries cmp.Entry[]
----@field public deduped_entries cmp.Entry[]
+---@field public entries_map table<string, cmp.Entry>
 ---@field public selected_entry cmp.Entry|nil
 ---@field public context cmp.Context
 ---@field public resolve_dedup fun(callback: function)
@@ -27,6 +28,7 @@ local menu = {}
 menu.new = function(opts)
   local self = setmetatable({}, { __index = menu })
   self.float = float.new()
+  self.menu = fancy.new()
   self.resolve_dedup = async.dedup()
   self.on_select = opts.on_select or function() end
   self:reset()
@@ -44,11 +46,9 @@ end
 ---Close menu
 menu.close = function(self)
   vim.schedule(function()
-    debug.log('menu.close', vim.fn.pumvisible())
-    if vim.fn.pumvisible() == 1 then
-      -- TODO: Is it safe to call...?
-      local line = vim.api.nvim_win_get_cursor(0)[1]
-      vim.fn.complete(#vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1] + 1, {})
+    debug.log('menu.close', self.menu:visible())
+    if self.menu:visible() then
+      self.menu:hide()
     end
     self:unselect()
   end)
@@ -59,7 +59,7 @@ menu.reset = function(self)
   self.offset = nil
   self.items = {}
   self.entries = {}
-  self.deduped_entries = {}
+  self.entries_map = {}
   self.context = nil
   self.preselect = 0
   self:close()
@@ -112,7 +112,6 @@ menu.update = function(self, ctx, sources)
 
   -- create vim items.
   local items = {}
-  local deduped_entries = {}
   local deduped_words = {}
   local preselect = 0
   for _, e in ipairs(entries) do
@@ -122,9 +121,9 @@ menu.update = function(self, ctx, sources)
       -- We have done deduplication already, no need to force Vim to repeat it.
       item.dup = 1
       table.insert(items, item)
-      table.insert(deduped_entries, e)
+      self.entries_map[item.user_data] = e
       if preselect == 0 and e.completion_item.preselect and config.get().preselect ~= types.cmp.PreselectMode.None then
-        preselect = #deduped_entries
+        preselect = #items
       end
     end
   end
@@ -133,7 +132,6 @@ menu.update = function(self, ctx, sources)
   self.offset = offset
   self.items = items
   self.entries = entries
-  self.deduped_entries = deduped_entries
   self.preselect = preselect
   self.context = ctx
   self:show()
@@ -154,23 +152,7 @@ end
 
 ---Show completion item
 menu.show = function(self)
-  if #self.deduped_entries == 0 then
-    self:close()
-    return
-  end
-  debug.log('menu.show', #self.deduped_entries)
-
-  local completeopt = vim.o.completeopt
-  if self.preselect == 1 then
-    vim.opt.completeopt = { 'menuone', 'noinsert' }
-  else
-    vim.opt.completeopt = config.get().completion.completeopt
-  end
-  vim.fn.complete(self.offset, self.items)
-  if self.preselect > 1 then
-    vim.api.nvim_select_popupmenu_item(self.preselect - 1, false, false, {})
-  end
-  vim.opt.completeopt = completeopt
+  self.menu:show(self.offset, self.items)
 end
 
 ---Select current item
@@ -194,7 +176,7 @@ end
 ---Geta current active entry
 ---@return cmp.Entry|nil
 menu.get_active_entry = function(self)
-  if vim.fn.pumvisible() == 0 or not (vim.v.completed_item or {}).user_data then
+  if not self.menu:visible() then
     return nil
   end
   return self:get_selected_entry()
@@ -203,24 +185,19 @@ end
 ---Get current selected entry
 ---@return cmp.Entry|nil
 menu.get_selected_entry = function(self)
-  if not self:is_valid_mode() then
-    return nil
+  local item = self.menu:get_selected_item()
+  if item then
+    return self.entries_map[item.user_data]
   end
-
-  local selected = vim.fn.complete_info({ 'selected' }).selected
-  if selected == -1 then
-    return nil
-  end
-  return self.deduped_entries[math.max(selected, 0) + 1]
 end
 
 ---Get first entry
 ---@param self cmp.Entry|nil
 menu.get_first_entry = function(self)
-  if not self:is_valid_mode() then
-    return nil
+  local item = self.menu:get_first_item()
+  if item then
+    return self.entries_map[item.user_data]
   end
-  return self.deduped_entries[1]
 end
 
 ---Return the completion menu is visible or not.
