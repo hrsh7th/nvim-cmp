@@ -142,7 +142,7 @@ end
 ---Keypress handler
 core.on_keymap = function(keys, fallback)
   for key, action in pairs(config.get().mapping) do
-    if key == keys then
+    if keymap.equals(key, keys) then
       if type(action) == 'function' then
         action(fallback)
       else

@@ -54,30 +54,7 @@ end
 ---@param b string
 ---@return boolean
 keymap.equals = function(a, b)
-  return keymap.to_upper(a) == keymap.to_upper(b)
-end
-
----Return upper case key sequence.
----@param keys string
----@return string
-keymap.to_upper = function(keys)
-  local result = {}
-  local ctrl = false
-  for i = 1, #keys do
-    local c = string.sub(keys, i, i)
-    if c == '<' then
-      table.insert(result, c)
-      ctrl = true
-    elseif ctrl and c ~= '>' then
-      table.insert(result, string.upper(c))
-    elseif ctrl and c == '>' then
-      table.insert(result, c)
-      ctrl = false
-    else
-      table.insert(result, c)
-    end
-  end
-  return table.concat(result, '')
+  return keymap.t(a) == keymap.t(b)
 end
 
 ---Feedkeys with callback
@@ -121,7 +98,7 @@ keymap.listen = setmetatable({
   cache = cache.new(),
 }, {
   __call = function(self, mode, keys, callback)
-    keys = keymap.to_upper(keymap.to_keymap(keys))
+    keys = keymap.to_keymap(keys)
 
     local existing = keymap.find_map_by_lhs(mode, keys)
     if string.match(existing.rhs, '^.*' .. vim.pesc('v:lua.cmp.utils.keymap.listen.run') .. '.*$') then
@@ -193,21 +170,17 @@ end
 keymap.find_map_by_lhs = function(mode, lhs)
   for _, map in ipairs(vim.api.nvim_buf_get_keymap(0, mode)) do
     if keymap.equals(map.lhs, lhs) then
-      map.lhs = keymap.to_upper(map.lhs)
-      map.rhs = keymap.to_upper(map.rhs)
       return map
     end
   end
   for _, map in ipairs(vim.api.nvim_get_keymap(mode)) do
     if keymap.equals(map.lhs, lhs) then
-      map.lhs = keymap.to_upper(map.lhs)
-      map.rhs = keymap.to_upper(map.rhs)
       return map
     end
   end
   return {
-    lhs = keymap.to_upper(lhs),
-    rhs = keymap.to_upper(lhs),
+    lhs = lhs,
+    rhs = lhs,
     expr = 0,
     script = 0,
     noremap = 1,
