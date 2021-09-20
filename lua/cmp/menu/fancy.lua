@@ -14,15 +14,13 @@ fancy.new = function()
   self.window:option('winhighlight', 'NormalFloat:Pmenu,FloatBorder:Normal,CursorLine:PmenuSel')
   self.offset = -1
   self.items = {}
+  self.selected = false
   return self
 end
 
 fancy.show = function(self, offset, items)
   self.offset = offset
   self.items = items
-  if not self:visible() then
-    self.prefix = string.sub(vim.api.nvim_get_current_line(), self.offset, vim.api.nvim_win_get_cursor(0)[2] - 1)
-  end
 
   vim.api.nvim_buf_set_lines(self.window.buf, 0, -1, false, {})
   if #items > 0 then
@@ -54,6 +52,10 @@ fancy.show = function(self, offset, items)
       width = math.max(#lines[i], width)
     end
 
+    local height = #items
+    height = math.min(height, vim.api.nvim_get_option('pumheight') or #items)
+    height = math.min(height, (vim.o.lines - 1) - vim.fn.winline() - 1)
+
     vim.api.nvim_buf_set_lines(self.window.buf, 0, -1, false, lines)
     self.window:open({
       relative = 'cursor',
@@ -61,7 +63,7 @@ fancy.show = function(self, offset, items)
       row = 1,
       col = offset - vim.api.nvim_win_get_cursor(0)[2] - 1,
       width = width,
-      height = math.min(#items, vim.api.nvim_get_option('pumheight') or #items),
+      height = height,
     })
     self.window:option('cursorline', false)
     vim.api.nvim_win_set_cursor(self.window.win, { 1, 0 })
@@ -72,6 +74,7 @@ end
 
 fancy.hide = function(self)
   self.window:close()
+  self.selected = false
 end
 
 fancy.visible = function(self)
@@ -84,9 +87,11 @@ end
 
 fancy.select_next_item = function(self)
   if self.window:visible() then
+    self.selected = true
     local cursor = vim.api.nvim_win_get_cursor(self.window.win)[1]
     local word = self.prefix
     if not self.window:option('cursorline') then
+      self.prefix = string.sub(vim.api.nvim_get_current_line(), self.offset, vim.api.nvim_win_get_cursor(0)[2])
       self.window:option('cursorline', true)
       vim.api.nvim_win_set_cursor(self.window.win, { 1, 0 })
       word = self.items[1].word
@@ -99,18 +104,18 @@ fancy.select_next_item = function(self)
       word = self.items[cursor + 1].word
     end
     if vim.fn.getchar(1) == 0 then
-      self:insert(word, function()
-        vim.cmd [[doautocmd CompleteChanged]]
-      end)
+      self:insert(word)
     end
   end
 end
 
 fancy.select_prev_item = function(self)
   if self.window:visible() then
+    self.selected = true
     local cursor = vim.api.nvim_win_get_cursor(self.window.win)[1]
     local word = self.prefix
     if not self.window:option('cursorline') then
+      self.prefix = string.sub(vim.api.nvim_get_current_line(), self.offset, vim.api.nvim_win_get_cursor(0)[2])
       self.window:option('cursorline', true)
       vim.api.nvim_win_set_cursor(self.window.win, { #self.items, 0 })
       word = self.items[#self.items].word
@@ -123,11 +128,13 @@ fancy.select_prev_item = function(self)
       word = self.items[cursor - 1].word
     end
     if vim.fn.getchar(1) == 0 then
-      self:insert(word, function()
-        vim.cmd [[doautocmd CompleteChanged]]
-      end)
+      self:insert(word)
     end
   end
+end
+
+fancy.is_active = function(self)
+  return self.selected
 end
 
 fancy.get_first_item = function(self)
@@ -142,11 +149,10 @@ fancy.get_selected_item = function(self)
   end
 end
 
-fancy.insert = function(self, word, callback)
-  local keys = {}
-  table.insert(keys, string.rep('<C-g>U<Left><Del>', 1 + vim.api.nvim_win_get_cursor(0)[2] - self.offset))
-  table.insert(keys, word)
-  keymap.feedkeys(keymap.t(table.concat(keys, '')), 'n', callback)
+fancy.insert = function(self, word)
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  vim.api.nvim_buf_set_text(0, cursor[1] - 1, self.offset - 1, cursor[1] - 1, cursor[2], { word })
+  vim.api.nvim_win_set_cursor(0, { cursor[1], self.offset + #word - 1 })
 end
 
 return fancy

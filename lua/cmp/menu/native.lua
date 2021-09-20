@@ -63,6 +63,10 @@ native.select_prev_item = function(self)
   end
 end
 
+native.is_active = function()
+  return not vim.tbl_isempty(vim.v.completed_item)
+end
+
 native.get_first_item = function(self)
   if self:visible() then
     return self.items[1]
