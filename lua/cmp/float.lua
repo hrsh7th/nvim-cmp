@@ -69,8 +69,6 @@ float.show = function(self, e, view)
     return self:close()
   end
 
-  print(vim.inspect(documentation.border))
-
   self.window:open({
     relative = 'editor',
     style = 'minimal',
