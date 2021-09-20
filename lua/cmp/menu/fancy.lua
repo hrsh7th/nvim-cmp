@@ -1,4 +1,5 @@
 local keymap = require('cmp.utils.keymap')
+local autocmd = require('cmp.utils.autocmd')
 local window = require "cmp.utils.window"
 
 local fancy = {}
@@ -14,7 +15,14 @@ fancy.new = function()
   self.window:option('winhighlight', 'NormalFloat:Pmenu,FloatBorder:Normal,CursorLine:PmenuSel')
   self.offset = -1
   self.items = {}
-  self.selected = false
+
+  autocmd.subscribe('InsertCharPre', function()
+    if self:visible() then
+      self.window:option('cursorline', false)
+      vim.api.nvim_win_set_cursor(self.window.win, { 1, 0 })
+    end
+  end)
+
   return self
 end
 
@@ -74,7 +82,6 @@ end
 
 fancy.hide = function(self)
   self.window:close()
-  self.selected = false
 end
 
 fancy.visible = function(self)
@@ -87,7 +94,6 @@ end
 
 fancy.select_next_item = function(self)
   if self.window:visible() then
-    self.selected = true
     local cursor = vim.api.nvim_win_get_cursor(self.window.win)[1]
     local word = self.prefix
     if not self.window:option('cursorline') then
@@ -103,15 +109,13 @@ fancy.select_next_item = function(self)
       vim.api.nvim_win_set_cursor(self.window.win, { cursor + 1, 0 })
       word = self.items[cursor + 1].word
     end
-    if vim.fn.getchar(1) == 0 then
-      self:insert(word)
-    end
+    self:insert(word)
+    vim.cmd [[doautocmd CompleteChanged]]
   end
 end
 
 fancy.select_prev_item = function(self)
   if self.window:visible() then
-    self.selected = true
     local cursor = vim.api.nvim_win_get_cursor(self.window.win)[1]
     local word = self.prefix
     if not self.window:option('cursorline') then
@@ -127,14 +131,13 @@ fancy.select_prev_item = function(self)
       vim.api.nvim_win_set_cursor(self.window.win, { cursor - 1, 0 })
       word = self.items[cursor - 1].word
     end
-    if vim.fn.getchar(1) == 0 then
-      self:insert(word)
-    end
+    self:insert(word)
+    vim.cmd [[doautocmd CompleteChanged]]
   end
 end
 
 fancy.is_active = function(self)
-  return self.selected
+  return not not self:get_selected_item()
 end
 
 fancy.get_first_item = function(self)
