@@ -10,6 +10,7 @@ local types = require('cmp.types')
 ---@field public cache cmp.Cache
 ---@field public score number
 ---@field public exact boolean
+---@field public matches table
 ---@field public context cmp.Context
 ---@field public source cmp.Source
 ---@field public source_offset number
@@ -32,6 +33,8 @@ entry.new = function(ctx, source, completion_item)
   self.id = misc.id('entry')
   self.cache = cache.new()
   self.score = 0
+  self.exact = false
+  self.matches = {}
   self.context = ctx
   self.source = source
   self.source_offset = source.request_offset
