@@ -117,6 +117,7 @@ menu.update = function(self, ctx, sources)
   local preselect = 0
   for _, e in ipairs(entries) do
     local item = e:get_vim_item(offset)
+    item.matches = e.matches
     if item.dup == 1 or not deduped_words[item.word] then
       deduped_words[item.word] = true
       -- We have done deduplication already, no need to force Vim to repeat it.

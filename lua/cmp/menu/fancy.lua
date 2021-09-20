@@ -4,6 +4,8 @@ local window = require "cmp.utils.window"
 
 local fancy = {}
 
+fancy.ns = vim.api.nvim_create_namespace('cmp.menu.fancy')
+
 fancy.new = function()
   local self = setmetatable({}, { __index = fancy })
   self.window = window.new()
@@ -15,6 +17,7 @@ fancy.new = function()
   self.window:option('winhighlight', 'NormalFloat:Pmenu,FloatBorder:Normal,CursorLine:PmenuSel')
   self.offset = -1
   self.items = {}
+  self.marks = {}
 
   autocmd.subscribe('InsertCharPre', function()
     if self:visible() then
@@ -23,19 +26,58 @@ fancy.new = function()
     end
   end)
 
+  vim.api.nvim_set_decoration_provider(fancy.ns, {
+    on_win = function(_, winid)
+      return winid == self.window.win
+    end,
+    on_line = function(_, winid, bufnr, row)
+      if winid == self.window.win then
+        local mark = self.marks[row + 1]
+        vim.api.nvim_buf_set_extmark(bufnr, fancy.ns, row, mark[1][1][1], {
+          end_line = row,
+          end_col = mark[1][1][2],
+          hl_group = mark[1][2],
+          ephemeral = true,
+        })
+        vim.api.nvim_buf_set_extmark(bufnr, fancy.ns, row, mark[2][1][1], {
+          end_line = row,
+          end_col = mark[2][1][2],
+          hl_group = mark[2][2],
+          ephemeral = true,
+        })
+        vim.api.nvim_buf_set_extmark(bufnr, fancy.ns, row, mark[3][1][1], {
+          end_line = row,
+          end_col = mark[3][1][2],
+          hl_group = mark[3][2],
+          ephemeral = true,
+        })
+        local item = self.items[row + 1]
+        for _, m in ipairs(item.matches or {}) do
+          vim.api.nvim_buf_set_extmark(bufnr, fancy.ns, row, m.word_match_start - 1, {
+            end_line = row,
+            end_col = m.word_match_end,
+            hl_group = 'Special',
+            ephemeral = true,
+          })
+        end
+      end
+    end
+  })
+
   return self
 end
 
 fancy.show = function(self, offset, items)
   self.offset = offset
   self.items = items
+  self.marks = {}
 
   vim.api.nvim_buf_set_lines(self.window.buf, 0, -1, false, {})
   if #items > 0 then
-    local labels = { bytes = 0, items = {} }
+    local words = { bytes = 0, items = {} }
     for i, item in ipairs(items) do
-      labels.items[i] = item.abbr or item.word
-      labels.bytes = math.max(labels.bytes, #labels.items[i])
+      words.items[i] = item.abbr or item.word
+      words.bytes = math.max(words.bytes, #words.items[i])
     end
     local kinds = { bytes = 0, items = {} }
     for i, item in ipairs(items) do
@@ -51,12 +93,15 @@ fancy.show = function(self, offset, items)
     local lines = {}
     local width = 1
     for i = 1, #items do
-      lines[i] = string.format(
-        '%s %s %s',
-        labels.items[i] .. string.rep(' ', labels.bytes - #labels.items[i]),
-        kinds.items[i] .. string.rep(' ', kinds.bytes - #kinds.items[i]),
-        menus.items[i] .. string.rep(' ', menus.bytes - #menus.items[i])
-      )
+      local word_part = words.items[i] .. string.rep(' ', 1 + words.bytes - #words.items[i])
+      local kind_part = kinds.items[i] .. string.rep(' ', 1 + kinds.bytes - #kinds.items[i])
+      local menu_part = menus.items[i] .. string.rep(' ', 1 + menus.bytes - #menus.items[i])
+      lines[i] = string.format('%s%s%s', word_part, kind_part, menu_part)
+      self.marks[i] = {
+        { { 0, #words.items[i] }, 'Pmenu' },
+        { { #word_part, #word_part + #kinds.items[i] }, 'Pmenu' },
+        { { #word_part + #kind_part, #word_part + #kind_part + #menus.items[i] }, 'Comment' },
+      }
       width = math.max(#lines[i], width)
     end
 

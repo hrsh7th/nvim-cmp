@@ -78,12 +78,12 @@ end
 matcher.match = function(input, word, words)
   -- Empty input
   if #input == 0 then
-    return matcher.PREFIX_FACTOR + matcher.NOT_FUZZY_FACTOR
+    return matcher.PREFIX_FACTOR + matcher.NOT_FUZZY_FACTOR, {}
   end
 
   -- Ignore if input is long than word
   if #input > #word then
-    return 0
+    return 0, {}
   end
 
   --- Gather matched regions
@@ -107,7 +107,7 @@ matcher.match = function(input, word, words)
   end
 
   if #matches == 0 then
-    return 0
+    return 0, {}
   end
 
   -- Add prefix bonus
@@ -143,12 +143,12 @@ matcher.match = function(input, word, words)
   -- Check remaining input as fuzzy
   if matches[#matches].input_match_end < #input then
     if matcher.fuzzy(input, word, matches) then
-      return score
+      return score, matches
     end
-    return 0
+    return 0, {}
   end
 
-  return score + matcher.NOT_FUZZY_FACTOR
+  return score + matcher.NOT_FUZZY_FACTOR, matches
 end
 
 --- fuzzy
@@ -178,16 +178,30 @@ matcher.fuzzy = function(input, word, matches)
   local matched = false
   local word_offset = 0
   local word_index = last_match.word_match_end + 1
+  local input_match_start = -1
+  local input_match_end = -1
+  local word_match_start = -1
   while word_offset + word_index <= #word and input_index <= #input do
     if char.match(string.byte(word, word_index + word_offset), string.byte(input, input_index)) then
+      if not matched then
+        input_match_start = input_index
+        word_match_start = word_index + word_offset
+      end
       matched = true
       input_index = input_index + 1
     elseif matched then
       input_index = last_input_index
+      input_match_end = input_index - 1
     end
     word_offset = word_offset + 1
   end
   if input_index > #input then
+    table.insert(matches, {
+      input_match_start = input_match_start,
+      input_match_end = input_match_end,
+      word_match_start = word_match_start,
+      word_match_end = word_index + word_offset - 1,
+    })
     return true
   end
   return false
