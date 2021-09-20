@@ -1,4 +1,5 @@
 local keymap = require('cmp.utils.keymap')
+local config = require('cmp.config')
 local autocmd = require('cmp.utils.autocmd')
 local window = require "cmp.utils.window"
 
@@ -14,7 +15,7 @@ fancy.new = function()
   self.window:option('foldenable', false)
   self.window:option('wrap', true)
   self.window:option('scrolloff', 0)
-  self.window:option('winhighlight', 'NormalFloat:Pmenu,FloatBorder:Normal,CursorLine:PmenuSel')
+  self.window:option('winhighlight', 'NormalFloat:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel')
   self.offset = -1
   self.items = {}
   self.marks = {}
@@ -53,10 +54,11 @@ fancy.new = function()
         })
         local item = self.items[row + 1]
         for _, m in ipairs(item.matches or {}) do
-          vim.api.nvim_buf_set_extmark(bufnr, fancy.ns, row, m.word_match_start - 1, {
+          vim.api.nvim_buf_set_extmark(bufnr, fancy.ns, row, m.word_match_start, {
             end_line = row,
-            end_col = m.word_match_end,
-            hl_group = 'Special',
+            end_col = m.word_match_end + 1,
+            hl_group = 'Normal',
+            hl_mode = 'replace',
             ephemeral = true,
           })
         end
@@ -76,7 +78,7 @@ fancy.show = function(self, offset, items)
   if #items > 0 then
     local words = { bytes = 0, items = {} }
     for i, item in ipairs(items) do
-      words.items[i] = item.abbr or item.word
+      words.items[i] = ' ' .. (item.abbr or item.word)
       words.bytes = math.max(words.bytes, #words.items[i])
     end
     local kinds = { bytes = 0, items = {} }
@@ -98,8 +100,8 @@ fancy.show = function(self, offset, items)
       local menu_part = menus.items[i] .. string.rep(' ', 1 + menus.bytes - #menus.items[i])
       lines[i] = string.format('%s%s%s', word_part, kind_part, menu_part)
       self.marks[i] = {
-        { { 0, #words.items[i] }, 'Pmenu' },
-        { { #word_part, #word_part + #kinds.items[i] }, 'Pmenu' },
+        { { 0, #words.items[i] }, 'Comment' },
+        { { #word_part, #word_part + #kinds.items[i] }, 'Special' },
         { { #word_part + #kind_part, #word_part + #kind_part + #menus.items[i] }, 'Comment' },
       }
       width = math.max(#lines[i], width)
@@ -109,7 +111,12 @@ fancy.show = function(self, offset, items)
     height = math.min(height, vim.api.nvim_get_option('pumheight') or #items)
     height = math.min(height, (vim.o.lines - 1) - vim.fn.winline() - 1)
 
-    vim.api.nvim_buf_set_lines(self.window.buf, 0, -1, false, lines)
+    local ok = pcall(function()
+      return vim.api.nvim_buf_set_lines(self.window.buf, 0, -1, false, lines)
+    end)
+    if not ok then
+      print(vim.inspect(lines))
+    end
     self.window:open({
       relative = 'cursor',
       style = 'minimal',
