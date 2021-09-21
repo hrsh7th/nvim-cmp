@@ -74,24 +74,24 @@ items_view.open = function(self, offset, entries)
       if item.dup == 1 or not dedup[item.abbr] then
         dedup[item.abbr] = true
         abbrs.texts[i] = string.rep(' ', ABBR_MARGIN) .. item.abbr
-        abbrs.width = math.max(abbrs.width, vim.fn.strdisplaywidth(abbrs.texts[i]))
+        abbrs.width = math.max(abbrs.width, vim.fn.strchars(abbrs.texts[i]))
         kinds.texts[i] = (item.kind or '')
-        kinds.width = math.max(kinds.width, vim.fn.strdisplaywidth(kinds.texts[i]))
-        menus.texts[i] = (item.menu or '') .. ' '
-        menus.width = math.max(menus.width, vim.fn.strdisplaywidth(menus.texts[i]))
+        kinds.width = math.max(kinds.width, vim.fn.strchars(kinds.texts[i]))
+        menus.texts[i] = (item.menu or '')
+        menus.width = math.max(menus.width, vim.fn.strchars(menus.texts[i]))
         table.insert(self.entries, e)
       end
     end
 
     local lines = {}
-    local width = 1
+    local width = 0
     for i = 1, #self.entries do
       self.marks[i] = {}
       local off = 0
       local parts = {}
       for _, part in ipairs({ abbrs, kinds, menus }) do
         if #part.texts[i] > 0 then
-          local w = vim.fn.strdisplaywidth(part.texts[i])
+          local w = vim.fn.strchars(part.texts[i])
           table.insert(parts, part.texts[i] .. string.rep(' ', part.width - w))
           table.insert(self.marks[i], {
             col = off,
@@ -102,7 +102,7 @@ items_view.open = function(self, offset, entries)
         end
       end
       lines[i] = table.concat(parts, ' ')
-      width = math.max(#lines[i], width)
+      width = math.max(width, vim.fn.strchars(lines[i]))
     end
     vim.api.nvim_buf_set_lines(self.items_win.buf, 0, -1, false, lines)
 
@@ -117,7 +117,7 @@ items_view.open = function(self, offset, entries)
       style = 'minimal',
       row = vim.fn.screenrow(),
       col = vim.fn.screencol() - 1 - delta - ABBR_MARGIN,
-      width = width,
+      width = width + 1,
       height = height,
     })
     if self.items_win:visible() then
