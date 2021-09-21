@@ -4,6 +4,7 @@ end
 vim.g.loaded_cmp = true
 
 local misc = require('cmp.utils.misc')
+local highlight = require('cmp.utils.highlight')
 
 -- TODO: https://github.com/neovim/neovim/pull/14661
 vim.cmd [[
@@ -17,6 +18,18 @@ vim.cmd [[
     autocmd CompleteDone * lua require'cmp.utils.autocmd'.emit('CompleteDone')
   augroup END
 ]]
+
+
+highlight.inherit('CmpMatch', 'Normal', {
+  gui = 'bold',
+  guibg = 'NONE',
+  ctermbg = 'NONE',
+})
+highlight.inherit('CmpMatchFuzzy', 'Normal', {
+  gui = 'NONE',
+  guibg = 'NONE',
+  ctermbg = 'NONE',
+})
 
 vim.cmd [[command! CmpStatus lua require('cmp').status()]]
 
