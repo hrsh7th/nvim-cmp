@@ -114,8 +114,8 @@ fancy.show = function(self, offset, items)
     self.menu_win:open({
       relative = 'editor',
       style = 'minimal',
-      row = vim.fn.winline() + 1,
-      col = vim.fn.wincol() - 1,
+      row = vim.fn.screenrow(),
+      col = vim.fn.screencol() - 1,
       width = width,
       height = height,
     })
