@@ -44,4 +44,3 @@ event.emit = function(self, name, ...)
 end
 
 return event
-

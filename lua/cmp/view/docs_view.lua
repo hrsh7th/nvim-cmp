@@ -111,4 +111,3 @@ docs_view.visible = function(self)
 end
 
 return docs_view
-

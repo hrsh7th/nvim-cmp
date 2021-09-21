@@ -1,4 +1,4 @@
-local cache = require "cmp.utils.cache"
+local cache = require('cmp.utils.cache')
 
 ---@class cmp.WindowStyle
 ---@field public relative string
@@ -226,7 +226,7 @@ window.get_content_height = function(self)
     'get_content_height',
     self.style.width,
     self.buf,
-    vim.api.nvim_buf_get_changedtick(self.buf)
+    vim.api.nvim_buf_get_changedtick(self.buf),
   }, function()
     local height = 0
     for _, text in ipairs(vim.api.nvim_buf_get_lines(self.buf, 0, -1, false)) do
@@ -237,4 +237,3 @@ window.get_content_height = function(self)
 end
 
 return window
-

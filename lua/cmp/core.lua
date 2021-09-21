@@ -28,7 +28,9 @@ core.new = function()
   self.sources_by_name = {}
   self.context = context.new()
   self.view = view.new()
-  self.view.event:on('keymap', function(...) self:on_keymap(...) end)
+  self.view.event:on('keymap', function(...)
+    self:on_keymap(...)
+  end)
   return self
 end
 
