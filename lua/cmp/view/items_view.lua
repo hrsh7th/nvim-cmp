@@ -104,8 +104,8 @@ items_view.open = function(self, offset, entries)
       width = math.max(#lines[i], width)
     end
 
-    local height = #self.entries
-    height = math.min(height, vim.api.nvim_get_option('pumheight') or height)
+    local height = vim.api.nvim_get_option('pumheight')
+    height = height == 0 and #self.entries or height
     height = math.min(height, (vim.o.lines - 1) - vim.fn.winline() - 1)
 
     vim.api.nvim_buf_set_lines(self.items_win.buf, 0, -1, false, lines)
@@ -117,8 +117,10 @@ items_view.open = function(self, offset, entries)
       width = width,
       height = height,
     })
-    vim.api.nvim_win_set_cursor(self.items_win.win, { 1, 0 })
-    self.items_win:option('cursorline', false)
+    if self.items_win:visible() then
+      vim.api.nvim_win_set_cursor(self.items_win.win, { 1, 0 })
+      self.items_win:option('cursorline', false)
+    end
   else
     self:close()
   end
