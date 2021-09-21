@@ -45,7 +45,7 @@ items_view.new = function()
           vim.api.nvim_buf_set_extmark(bufnr, items_view.ns, row, m.word_match_start, {
             end_line = row,
             end_col = m.word_match_end + 1,
-            hl_group = 'Normal',
+            hl_group = m.fuzzy and 'CmpMatchFuzzy' or 'CmpMatch',
             hl_mode = 'combine',
             ephemeral = true,
           })

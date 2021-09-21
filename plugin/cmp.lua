@@ -4,6 +4,7 @@ end
 vim.g.loaded_cmp = true
 
 local misc = require('cmp.utils.misc')
+local highlight = require('cmp.utils.highlight')
 
 -- TODO: https://github.com/neovim/neovim/pull/14661
 vim.cmd [[
@@ -28,6 +29,17 @@ misc.set(_G, { 'cmp', 'autoindent' }, function()
   vim.o.startofline = startofline
   vim.o.virtualedit = virtualedit
 end)
+
+highlight.inherit('CmpMatch', 'Normal', {
+  gui = 'bold',
+  guibg = 'NONE',
+  ctermbg = 'NONE',
+})
+highlight.inherit('CmpMatchFuzzy', 'Normal', {
+  gui = 'NONE',
+  guibg = 'NONE',
+  ctermbg = 'NONE',
+})
 
 vim.cmd [[command! CmpStatus lua require('cmp').status()]]
 
