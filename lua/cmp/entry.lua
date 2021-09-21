@@ -195,7 +195,7 @@ entry.get_vim_item = function(self, suggest_offset)
   return self.cache:ensure({ 'get_vim_item', suggest_offset, self.resolved_completion_item and 1 or 0 }, function()
     local completion_item = self:get_completion_item()
     local word = self:get_word()
-    local abbr = str.trim(completion_item.label)
+    local abbr = str.oneline(str.trim(completion_item.label))
 
     -- ~ indicator
     if #(misc.safe(completion_item.additionalTextEdits) or {}) > 0 then
