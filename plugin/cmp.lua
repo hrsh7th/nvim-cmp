@@ -3,6 +3,8 @@ if vim.g.loaded_cmp then
 end
 vim.g.loaded_cmp = true
 
+local misc = require('cmp.utils.misc')
+
 -- TODO: https://github.com/neovim/neovim/pull/14661
 vim.cmd [[
   augroup cmp
@@ -15,7 +17,13 @@ vim.cmd [[
   augroup END
 ]]
 
-vim.cmd [[inoremap <silent> <Plug>(cmp-autoindent) <C-o>:normal!==<CR>]]
+vim.cmd [[inoremap <silent> <Plug>(cmp-autoindent) <Cmd>call v:lua.cmp.autoindent()<CR>]]
+misc.set(_G, { 'cmp', 'autoindent' }, function()
+  local startofline = vim.o.startofline
+  vim.o.startofline = false
+  vim.cmd [[normal! ==]]
+  vim.o.startofline = startofline
+end)
 
 vim.cmd [[command! CmpStatus lua require('cmp').status()]]
 
