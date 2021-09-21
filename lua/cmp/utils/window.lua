@@ -1,4 +1,5 @@
 ---@class cmp.WindowStyle
+---@field public relative string
 ---@field public row number
 ---@field public col number
 ---@field public width number
@@ -7,6 +8,11 @@
 ---@class cmp.Window
 ---@field public buf number
 ---@field public win number|nil
+---@field public sbuf1 number
+---@field public swin1 number|nil
+---@field public sbuf2 number
+---@field public swin2 number|nil
+---@field public style cmp.WindowStyle
 ---@field public opt table<string, any>
 local window = {}
 
@@ -16,6 +22,11 @@ window.new = function()
   local self = setmetatable({}, { __index = window })
   self.buf = vim.api.nvim_create_buf(false, true)
   self.win = nil
+  self.style = nil
+  self.sbuf1 = vim.api.nvim_create_buf(false, true)
+  self.swin1 = nil
+  self.sbuf2 = vim.api.nvim_create_buf(false, true)
+  self.swin2 = nil
   self.opt = {}
   return self
 end
@@ -38,6 +49,7 @@ end
 ---Open window
 ---@param style cmp.WindowStyle
 window.open = function(self, style)
+  self.style = style
   if self.win and vim.api.nvim_win_is_valid(self.win) then
     vim.api.nvim_win_set_buf(self.win, self.buf)
     vim.api.nvim_win_set_config(self.win, style)
@@ -47,15 +59,70 @@ window.open = function(self, style)
       vim.api.nvim_win_set_option(self.win, k, v)
     end
   end
+  self:update()
+end
+
+---Update
+window.update = function(self)
+  local total = vim.api.nvim_buf_line_count(self.buf)
+  if self.style.height < total then
+    local bar_height = math.ceil(self.style.height * (self.style.height / total))
+    local bar_offset = math.min(self.style.height - bar_height, math.floor(self.style.height * (vim.fn.getwininfo(self.win)[1].topline / total)))
+    local style1 = {}
+    style1.relative = 'editor'
+    style1.style = 'minimal'
+    style1.width = 1
+    style1.height = self.style.height
+    style1.row = self.style.row
+    style1.col = self.style.col + self.style.width
+    style1.zindex = 1
+    if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
+      vim.api.nvim_win_set_config(self.swin1, style1)
+    else
+      self.swin1 = vim.api.nvim_open_win(self.sbuf1, false, style1)
+      vim.api.nvim_win_set_option(self.swin1, 'winhighlight', 'Normal:PmenuSbar')
+    end
+    local style2 = {}
+    style2.relative = 'editor'
+    style2.style = 'minimal'
+    style2.width = 1
+    style2.height = bar_height
+    style2.row = self.style.row + bar_offset
+    style2.col = self.style.col + self.style.width
+    style2.zindex = 2
+    if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
+      vim.api.nvim_win_set_config(self.swin2, style2)
+    else
+      self.swin2 = vim.api.nvim_open_win(self.sbuf2, false, style2)
+      vim.api.nvim_win_set_option(self.swin2, 'winhighlight', 'Normal:PmenuSel')
+    end
+  else
+    if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
+      vim.api.nvim_win_close(self.swin1, false)
+      self.swin1 = nil
+    end
+    if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
+      vim.api.nvim_win_close(self.swin2, false)
+      self.swin2 = nil
+    end
+  end
 end
 
 ---Close window
 window.close = function(self)
   if self.win and vim.api.nvim_win_is_valid(self.win) then
-    if self:visible() then
+    if self.win and vim.api.nvim_win_is_valid(self.win) then
       vim.api.nvim_win_close(self.win, true)
+      self.win = nil
     end
-    self.win = nil
+    if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
+      vim.api.nvim_win_close(self.swin1, false)
+      self.swin1 = nil
+    end
+    if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
+      vim.api.nvim_win_close(self.swin2, false)
+      self.swin2 = nil
+    end
   end
 end
 
@@ -73,7 +140,6 @@ window.info = function(self)
     local c = vim.api.nvim_win_get_config(self.win)
     local o = 0
     if c.border then
-      print(vim.inspect(c.border))
       local multi = vim.api.nvim_get_option('ambiwidth') == 'double'
       if type(c.border) == 'string' then
         if c.border == 'single' then
@@ -98,14 +164,13 @@ window.info = function(self)
         end
       end
     end
-    local a = {
+    return {
       row = p[1],
-      col = p[2] - o,
-      width = w + o,
+      col = p[2] - math.floor(o / 2),
+      width = w + o + ((self.swin1 and vim.api.nvim_win_is_valid(self.swin1)) and 1 or 0),
       height = h,
       o = o,
     }
-    return a
   end
 end
 
