@@ -1,5 +1,5 @@
 local event = require('cmp.utils.event')
-local window = require "cmp.utils.window"
+local window = require('cmp.utils.window')
 
 ---@class cmp.ItemsView
 ---@field public items_win cmp.Window
@@ -50,7 +50,7 @@ items_view.new = function()
           })
         end
       end
-    end
+    end,
   })
 
   return self
@@ -63,9 +63,9 @@ items_view.open = function(self, offset, entries)
 
   if #entries > 0 then
     local dedup = {}
-    local abbrs = { hl_group = 'Comment', width = 0, texts = {} }
-    local kinds = { hl_group = 'Special', width = 0, texts = {} }
-    local menus = { hl_group = 'NonText', width = 0, texts = {} }
+    local abbrs = { hl_group = 'CmpAbbr', width = 0, texts = {} }
+    local kinds = { hl_group = 'CmpKind', width = 0, texts = {} }
+    local menus = { hl_group = 'CmpMenu', width = 0, texts = {} }
     for _, e in ipairs(entries) do
       local i = #self.entries + 1
       local item = e:get_vim_item(offset)
@@ -208,4 +208,3 @@ items_view.insert = function(self, word)
 end
 
 return items_view
-

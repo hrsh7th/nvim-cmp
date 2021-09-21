@@ -32,6 +32,19 @@ misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
+
+  highlight.inherit('CmpAbbr', 'Comment', {
+    guibg = 'NONE',
+    ctermbg = 'NONE',
+  })
+  highlight.inherit('CmpKind', 'Special', {
+    guibg = 'NONE',
+    ctermbg = 'NONE',
+  })
+  highlight.inherit('CmpMenu', 'Comment', {
+    guibg = 'NONE',
+    ctermbg = 'NONE',
+  })
 end)
 _G.cmp.plugin.colorscheme()
 

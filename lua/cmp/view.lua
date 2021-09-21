@@ -23,7 +23,9 @@ view.new = function()
   self.ghost_text_view = ghost_text_view.new()
   self.event = event.new()
 
-  self.items_view.event:on('change', function() self:on_item_change() end)
+  self.items_view.event:on('change', function()
+    self:on_item_change()
+  end)
 
   return self
 end
@@ -130,4 +132,3 @@ view.on_item_change = function(self)
 end
 
 return view
-
