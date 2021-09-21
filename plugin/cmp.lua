@@ -20,9 +20,12 @@ vim.cmd [[
 vim.cmd [[inoremap <silent> <Plug>(cmp-autoindent) <Cmd>call v:lua.cmp.autoindent()<CR>]]
 misc.set(_G, { 'cmp', 'autoindent' }, function()
   local startofline = vim.o.startofline
+  local virtualedit = vim.o.virtualedit
   vim.o.startofline = false
+  vim.o.virtualedit = 'all'
   vim.cmd [[normal! ==]]
   vim.o.startofline = startofline
+  vim.o.virtualedit = virtualedit
 end)
 
 vim.cmd [[command! CmpStatus lua require('cmp').status()]]
