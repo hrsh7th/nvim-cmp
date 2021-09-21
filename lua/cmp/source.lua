@@ -307,9 +307,11 @@ source.complete = function(self, ctx, callback)
       completion_context = completion_context,
     },
     self.complete_dedup(vim.schedule_wrap(function(response)
-      self.revision = self.revision + 1
       if #((response or {}).items or response or {}) > 0 then
         debug.log(self:get_debug_name(), 'retrieve', #(response.items or response))
+        local old_offset = self.offset
+        local old_entries = self.entries
+
         self.status = source.SourceStatus.COMPLETED
         self.incomplete = response.isIncomplete or false
         self.entries = {}
@@ -319,6 +321,12 @@ source.complete = function(self, ctx, callback)
             self.entries[i] = e
             self.offset = math.min(self.offset, e:get_offset())
           end
+        end
+        self.revision = self.revision + 1
+        if #self:get_entries(ctx) == 0 then
+          self.offset = old_offset
+          self.entries = old_entries
+          self.revision = self.revision + 1
         end
       else
         debug.log(self:get_debug_name(), 'continue', 'nil')
