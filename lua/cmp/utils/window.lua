@@ -150,7 +150,7 @@ end
 
 ---Return the scrollbar will shown or not.
 window.has_scrollbar = function(self)
-  return self.style.height < self:get_content_height()
+  return (self.style.height or 0) < self:get_content_height()
 end
 
 ---Return win info.
@@ -213,7 +213,7 @@ end
 ---Get scroll height.
 ---@return number
 window.get_content_height = function(self)
-  return self.cache:ensure({ 'get_content_height', self:option('wrap') and 1 or 0, self.buf, vim.api.nvim_buf_get_changedtick(self.buf) }, function()
+  return self.cache:ensure({ 'get_content_height', self:option('wrap') and 1 or 0, self.style.width, self.buf, vim.api.nvim_buf_get_changedtick(self.buf) }, function()
     if not self:option('wrap') then
       return vim.api.nvim_buf_line_count(self.buf)
     end

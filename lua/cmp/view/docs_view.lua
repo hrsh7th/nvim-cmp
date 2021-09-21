@@ -2,28 +2,30 @@ local async = require('cmp.utils.async')
 local window = require('cmp.utils.window')
 local config = require('cmp.config')
 
----@class cmp.Float
----@field public entry cmp.Entry|nil
+---@class cmp.DocsView
 ---@field public window cmp.Window
-local float = {}
+local docs_view = {}
 
 ---Create new floating window module
-float.new = function()
-  local self = setmetatable({}, { __index = float })
+docs_view.new = function()
+  local self = setmetatable({}, { __index = docs_view })
   self.entry = nil
   self.window = window.new()
   self.window:option('scrolloff', 0)
   return self
 end
 
----Show floating window
+---Open documentation window
 ---@param e cmp.Entry
-float.show = function(self, e, view)
-  float.close.stop()
-
+---@param view cmp.WindowStyle
+docs_view.open = function(self, e, view)
   local documentation = config.get().documentation
   if not documentation then
     return
+  end
+
+  if not e then
+    return self:close()
   end
 
   local right_space = vim.o.columns - (view.col + view.width) - 1
@@ -56,11 +58,9 @@ float.show = function(self, e, view)
   local left_col = view.col - width - 2
 
   local col
-  local left = false
   if right_space >= width and left_space >= width then
     if right_space < left_space then
       col = left_col
-      left = true
     else
       col = right_col
     end
@@ -68,13 +68,12 @@ float.show = function(self, e, view)
     col = right_col
   elseif left_space >= width then
     col = left_col
-    left = true
   else
     return self:close()
   end
 
   self.window:option('winhighlight', documentation.winhighlight)
-  local style = {
+  self.window:open({
     relative = 'editor',
     style = 'minimal',
     width = width,
@@ -82,25 +81,17 @@ float.show = function(self, e, view)
     row = view.row,
     col = col,
     border = documentation.border,
-  }
-  self.window:set_style(style)
-  if left and self.window:has_scrollbar() then
-    style.col = col - 1
-  end
-  self.window:open(style)
+  })
 end
 
 ---Close floating window
-float.close = async.throttle(
-  vim.schedule_wrap(function(self)
-    self.window:close()
-    self.entry = nil
-  end),
-  20
-)
+docs_view.close = function(self)
+  self.window:close()
+  self.entry = nil
+end
 
-float.scroll = function(self, delta)
-  if self:is_visible() then
+docs_view.scroll = function(self, delta)
+  if self:visible() then
     local info = vim.fn.getwininfo(self.window.win)[1] or {}
     local top = info.topline or 1
     top = top + delta
@@ -116,8 +107,9 @@ float.scroll = function(self, delta)
   end
 end
 
-float.is_visible = function(self)
+docs_view.visible = function(self)
   return self.window:visible()
 end
 
-return float
+return docs_view
+
