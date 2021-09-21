@@ -53,10 +53,10 @@ end
 ---Set style.
 ---@param style cmp.WindowStyle
 window.set_style = function(self, style)
-  if vim.o.columns and vim.o.columns < style.col + style.width then
+  if vim.o.columns and vim.o.columns <= style.col + style.width then
     style.width = vim.o.columns - style.col - 1
   end
-  if vim.o.lines and vim.o.lines < style.row + style.height then
+  if vim.o.lines and vim.o.lines <= style.row + style.height then
     style.height = vim.o.lines - style.row - 1
   end
   self.style = style
