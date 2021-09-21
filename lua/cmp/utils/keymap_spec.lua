@@ -43,5 +43,28 @@ describe('keymap', function()
       vim.api.nvim_feedkeys('i' .. keymap.t(fallback), 'x', true)
       assert.are.same({ '()' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
     end)
+
+    describe('expr & recursive', function()
+      before_each(spec.before)
+
+      it('true', function()
+        vim.api.nvim_buf_set_keymap(0, 'i', '<Tab>', [[v:true ? '<C-r>="foobar"<CR>' : '<Tab>aiueo']], {
+          expr = true,
+          noremap = false,
+        })
+        local fallback = keymap.evacuate('i', '<Tab>')
+        vim.api.nvim_feedkeys('i' .. keymap.t(fallback), 'x', true)
+        assert.are.same({ 'foobar' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
+      end)
+      it('false', function()
+        vim.api.nvim_buf_set_keymap(0, 'i', '<Tab>', [[v:false ? '<C-r>="foobar"<CR>' : '<Tab>aiueo']], {
+          expr = true,
+          noremap = false,
+        })
+        local fallback = keymap.evacuate('i', '<Tab>')
+        vim.api.nvim_feedkeys('i' .. keymap.t(fallback), 'x', true)
+        assert.are.same({ '\taiueo' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
+      end)
+    end)
   end)
 end)

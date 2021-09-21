@@ -142,17 +142,14 @@ keymap.evacuate = function(mode, lhs)
   -- Keep existing mapping as <Plug> mapping. We escape fisrt recursive key sequence. See `:help recursive_mapping`)
   local rhs = map.rhs
   if map.noremap == 0 then
-    local fallback_lhs = ('<Plug>(cmp-utils-keymap-listen-lhs:%s)'):format(map.lhs)
-    vim.api.nvim_buf_set_keymap(0, mode, fallback_lhs, map.lhs, {
-      expr = false,
-      noremap = true,
-      silent = true,
-      nowait = true,
-    })
-    rhs = string.gsub(rhs, '^' .. vim.pesc(map.lhs), fallback_lhs)
+    if map.expr == 1 then
+      rhs = string.format('v:lua.cmp.utils.keymap.evacuate.expr("%s", "%s", "%s")', mode, str.escape(keymap.escape(lhs), { '"' }), str.escape(keymap.escape(rhs), { '"' }))
+    else
+      rhs = keymap.recursive(mode, lhs, rhs)
+    end
   end
 
-  local fallback = ('<Plug>(cmp-utils-keymap-listen-rhs:%s)'):format(map.lhs)
+  local fallback = ('<Plug>(cmp-utils-keymap-evacuate-rhs:%s)'):format(map.lhs)
   vim.api.nvim_buf_set_keymap(0, mode, fallback, rhs, {
     expr = map.expr ~= 0,
     noremap = map.noremap ~= 0,
@@ -161,6 +158,28 @@ keymap.evacuate = function(mode, lhs)
     nowait = true,
   })
   return fallback
+end
+misc.set(_G, { 'cmp', 'utils', 'keymap', 'evacuate', 'expr' }, function(mode, lhs, rhs)
+  return keymap.t(keymap.recursive(mode, lhs, vim.api.nvim_eval(rhs)))
+end)
+
+---Solve recursive mapping
+---@param mode string
+---@param lhs string
+---@param rhs string
+---@return string
+keymap.recursive = function(mode, lhs, rhs)
+  local fallback_lhs = ('<Plug>(cmp-utils-keymap-listen-lhs:%s)'):format(lhs)
+  local new_rhs = string.gsub(rhs, '^' .. vim.pesc(lhs), fallback_lhs)
+  if new_rhs ~= rhs then
+    vim.api.nvim_buf_set_keymap(0, mode, fallback_lhs, lhs, {
+      expr = false,
+      noremap = true,
+      silent = true,
+      nowait = true,
+    })
+  end
+  return new_rhs
 end
 
 ---Get specific key mapping
