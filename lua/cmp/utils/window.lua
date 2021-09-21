@@ -66,6 +66,11 @@ end
 ---@param style cmp.WindowStyle
 window.open = function(self, style)
   self:set_style(style)
+
+  if self.style.width < 1 or self.style.height < 1 then
+    return
+  end
+
   if self.win and vim.api.nvim_win_is_valid(self.win) then
     vim.api.nvim_win_set_buf(self.win, self.buf)
     vim.api.nvim_win_set_config(self.win, style)
