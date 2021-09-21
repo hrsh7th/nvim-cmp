@@ -9,30 +9,30 @@ fancy.ns = vim.api.nvim_create_namespace('cmp.menu.fancy')
 
 fancy.new = function()
   local self = setmetatable({}, { __index = fancy })
-  self.window = window.new()
-  self.window:option('conceallevel', 2)
-  self.window:option('concealcursor', 'n')
-  self.window:option('foldenable', false)
-  self.window:option('wrap', true)
-  self.window:option('scrolloff', 0)
-  self.window:option('winhighlight', 'NormalFloat:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel')
+  self.menu_win = window.new()
+  self.menu_win:option('conceallevel', 2)
+  self.menu_win:option('concealcursor', 'n')
+  self.menu_win:option('foldenable', false)
+  self.menu_win:option('wrap', true)
+  self.menu_win:option('scrolloff', 0)
+  self.menu_win:option('winhighlight', 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel')
   self.offset = -1
   self.items = {}
   self.marks = {}
 
   autocmd.subscribe('InsertCharPre', function()
     if self:visible() then
-      self.window:option('cursorline', false)
-      vim.api.nvim_win_set_cursor(self.window.win, { 1, 0 })
+      self.menu_win:option('cursorline', false)
+      vim.api.nvim_win_set_cursor(self.menu_win.win, { 1, 0 })
     end
   end)
 
   vim.api.nvim_set_decoration_provider(fancy.ns, {
     on_win = function(_, winid)
-      return winid == self.window.win
+      return winid == self.menu_win.win
     end,
     on_line = function(_, winid, bufnr, row)
-      if winid == self.window.win then
+      if winid == self.menu_win.win then
         local mark = self.marks[row + 1]
         vim.api.nvim_buf_set_extmark(bufnr, fancy.ns, row, mark[1][1][1], {
           end_line = row,
@@ -74,7 +74,6 @@ fancy.show = function(self, offset, items)
   self.items = items
   self.marks = {}
 
-  vim.api.nvim_buf_set_lines(self.window.buf, 0, -1, false, {})
   if #items > 0 then
     local words = { bytes = 0, items = {} }
     for i, item in ipairs(items) do
@@ -111,79 +110,77 @@ fancy.show = function(self, offset, items)
     height = math.min(height, vim.api.nvim_get_option('pumheight') or #items)
     height = math.min(height, (vim.o.lines - 1) - vim.fn.winline() - 1)
 
-    local ok = pcall(function()
-      return vim.api.nvim_buf_set_lines(self.window.buf, 0, -1, false, lines)
-    end)
-    if not ok then
-      print(vim.inspect(lines))
-    end
-    self.window:open({
-      relative = 'cursor',
+    vim.api.nvim_buf_set_lines(self.menu_win.buf, 0, -1, false, lines)
+    self.menu_win:open({
+      relative = 'editor',
       style = 'minimal',
-      row = 1,
-      col = offset - vim.api.nvim_win_get_cursor(0)[2] - 1,
+      row = vim.fn.winline() + 1,
+      col = vim.fn.wincol() - 1,
       width = width,
       height = height,
     })
-    self.window:option('cursorline', false)
-    vim.api.nvim_win_set_cursor(self.window.win, { 1, 0 })
+    vim.api.nvim_win_set_cursor(self.menu_win.win, { 1, 0 })
+    self.menu_win:option('cursorline', false)
   else
-    self.window:close()
+    self:hide()
   end
+  vim.cmd [[doautocmd CompleteChanged]]
 end
 
 fancy.hide = function(self)
-  self.window:close()
+  self.menu_win:close()
 end
 
 fancy.visible = function(self)
-  return self.window:visible()
+  return self.menu_win:visible()
 end
 
 fancy.info = function(self)
-  return self.window:info()
+  return self.menu_win:info()
 end
 
 fancy.select_next_item = function(self)
-  if self.window:visible() then
-    local cursor = vim.api.nvim_win_get_cursor(self.window.win)[1]
+  if self.menu_win:visible() then
+    local cursor = vim.api.nvim_win_get_cursor(self.menu_win.win)[1]
     local word = self.prefix
-    if not self.window:option('cursorline') then
+    if not self.menu_win:option('cursorline') then
       self.prefix = string.sub(vim.api.nvim_get_current_line(), self.offset, vim.api.nvim_win_get_cursor(0)[2])
-      self.window:option('cursorline', true)
-      vim.api.nvim_win_set_cursor(self.window.win, { 1, 0 })
+      self.menu_win:option('cursorline', true)
+      vim.api.nvim_win_set_cursor(self.menu_win.win, { 1, 0 })
       word = self.items[1].word
     elseif cursor == #self.items then
-      self.window:option('cursorline', false)
-      vim.api.nvim_win_set_cursor(self.window.win, { 1, 0 })
+      self.menu_win:option('cursorline', false)
+      vim.api.nvim_win_set_cursor(self.menu_win.win, { 1, 0 })
     else
-      self.window:option('cursorline', true)
-      vim.api.nvim_win_set_cursor(self.window.win, { cursor + 1, 0 })
+      self.menu_win:option('cursorline', true)
+      vim.api.nvim_win_set_cursor(self.menu_win.win, { cursor + 1, 0 })
       word = self.items[cursor + 1].word
     end
     self:insert(word)
+    self.menu_win:update()
     vim.cmd [[doautocmd CompleteChanged]]
   end
 end
 
 fancy.select_prev_item = function(self)
-  if self.window:visible() then
-    local cursor = vim.api.nvim_win_get_cursor(self.window.win)[1]
+  if self.menu_win:visible() then
+    local cursor = vim.api.nvim_win_get_cursor(self.menu_win.win)[1]
     local word = self.prefix
-    if not self.window:option('cursorline') then
+    if not self.menu_win:option('cursorline') then
       self.prefix = string.sub(vim.api.nvim_get_current_line(), self.offset, vim.api.nvim_win_get_cursor(0)[2])
-      self.window:option('cursorline', true)
-      vim.api.nvim_win_set_cursor(self.window.win, { #self.items, 0 })
+      self.menu_win:option('cursorline', true)
+      vim.api.nvim_win_set_cursor(self.menu_win.win, { #self.items, 0 })
       word = self.items[#self.items].word
     elseif cursor == 1 then
-      self.window:option('cursorline', false)
-      vim.api.nvim_win_set_cursor(self.window.win, { 1, 0 })
+      self.menu_win:option('cursorline', false)
+      vim.api.nvim_win_set_cursor(self.menu_win.win, { 1, 0 })
     else
-      self.window:option('cursorline', true)
-      vim.api.nvim_win_set_cursor(self.window.win, { cursor - 1, 0 })
+      self.menu_win:option('cursorline', true)
+      vim.api.nvim_win_set_cursor(self.menu_win.win, { cursor - 1, 0 })
       word = self.items[cursor - 1].word
     end
     self:insert(word)
+    self.menu_win:update()
     vim.cmd [[doautocmd CompleteChanged]]
   end
 end
@@ -193,14 +190,14 @@ fancy.is_active = function(self)
 end
 
 fancy.get_first_item = function(self)
-  if self.window:visible() then
+  if self.menu_win:visible() then
     return self.items[1]
   end
 end
 
 fancy.get_selected_item = function(self)
-  if self.window:visible() and self.window:option('cursorline') then
-    return self.items[vim.api.nvim_win_get_cursor(self.window.win)[1]]
+  if self.menu_win:visible() and self.menu_win:option('cursorline') then
+    return self.items[vim.api.nvim_win_get_cursor(self.menu_win.win)[1]]
   end
 end
 
