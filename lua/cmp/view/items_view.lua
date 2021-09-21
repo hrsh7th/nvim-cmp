@@ -102,18 +102,19 @@ items_view.open = function(self, offset, entries)
       lines[i] = table.concat(parts, ' ')
       width = math.max(#lines[i], width)
     end
+    vim.api.nvim_buf_set_lines(self.items_win.buf, 0, -1, false, lines)
 
     local height = vim.api.nvim_get_option('pumheight')
     height = height == 0 and #self.entries or height
     height = math.min(height, #self.entries)
     height = math.min(height, (vim.o.lines - 1) - vim.fn.winline() - 1)
 
-    vim.api.nvim_buf_set_lines(self.items_win.buf, 0, -1, false, lines)
+    local delta = vim.api.nvim_win_get_cursor(0)[2] + 1 - self.offset
     self.items_win:open({
       relative = 'editor',
       style = 'minimal',
       row = vim.fn.screenrow(),
-      col = vim.fn.screencol() - 1,
+      col = vim.fn.screencol() - 1 - delta,
       width = width,
       height = height,
     })
