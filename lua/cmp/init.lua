@@ -44,6 +44,11 @@ cmp.complete = function()
   return true
 end
 
+---Return view is visible or not.
+cmp.visible = function()
+  return cmp.core.view:visible()
+end
+
 ---Close current completion
 cmp.close = function()
   if cmp.core.view:visible() then
