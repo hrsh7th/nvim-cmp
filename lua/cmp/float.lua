@@ -56,9 +56,11 @@ float.show = function(self, e, view)
   local left_col = view.col - width - 2
 
   local col
+  local left = false
   if right_space >= width and left_space >= width then
     if right_space < left_space then
       col = left_col
+      left = true
     else
       col = right_col
     end
@@ -66,12 +68,13 @@ float.show = function(self, e, view)
     col = right_col
   elseif left_space >= width then
     col = left_col
+    left = true
   else
     return self:close()
   end
 
   self.window:option('winhighlight', documentation.winhighlight)
-  self.window:open({
+  local style = {
     relative = 'editor',
     style = 'minimal',
     width = width,
@@ -79,8 +82,12 @@ float.show = function(self, e, view)
     row = view.row,
     col = col,
     border = documentation.border,
-  })
-  self.window:update()
+  }
+  self.window:set_style(style)
+  if left and self.window:has_scrollbar() then
+    style.col = col - 1
+  end
+  self.window:open(style)
 end
 
 ---Close floating window

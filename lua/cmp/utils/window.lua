@@ -1,3 +1,5 @@
+local cache = require "cmp.utils.cache"
+
 ---@class cmp.WindowStyle
 ---@field public relative string
 ---@field public row number
@@ -14,6 +16,7 @@
 ---@field public swin2 number|nil
 ---@field public style cmp.WindowStyle
 ---@field public opt table<string, any>
+---@field public cache cmp.Cache
 local window = {}
 
 ---new
@@ -27,6 +30,7 @@ window.new = function()
   self.swin1 = nil
   self.sbuf2 = vim.api.nvim_create_buf(false, true)
   self.swin2 = nil
+  self.cache = cache.new()
   self.opt = {}
   return self
 end
@@ -46,9 +50,9 @@ window.option = function(self, key, value)
   end
 end
 
----Open window
+---Set style.
 ---@param style cmp.WindowStyle
-window.open = function(self, style)
+window.set_style = function(self, style)
   if vim.o.columns and vim.o.columns < style.col + style.width then
     style.width = vim.o.columns - style.col - 1
   end
@@ -56,6 +60,12 @@ window.open = function(self, style)
     style.height = vim.o.lines - style.row - 1
   end
   self.style = style
+end
+
+---Open window
+---@param style cmp.WindowStyle
+window.open = function(self, style)
+  self:set_style(style)
   if self.win and vim.api.nvim_win_is_valid(self.win) then
     vim.api.nvim_win_set_buf(self.win, self.buf)
     vim.api.nvim_win_set_config(self.win, style)
@@ -70,8 +80,8 @@ end
 
 ---Update
 window.update = function(self)
-  local total = self:get_content_height()
-  if self.style.height < total then
+  if self:has_scrollbar() then
+    local total = self:get_content_height()
     local info = self:info()
     local bar_height = math.ceil(info.height * (info.height / total))
     local bar_offset = math.min(info.height - bar_height, math.floor(info.height * (vim.fn.getwininfo(self.win)[1].topline / total)))
@@ -81,7 +91,7 @@ window.update = function(self)
     style1.width = 1
     style1.height = info.height
     style1.row = info.row
-    style1.col = info.col + info.width - (info.scrollbar and 1 or 0)
+    style1.col = info.col + info.width - (info.has_scrollbar and 1 or 0)
     style1.zindex = 1
     if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
       vim.api.nvim_win_set_config(self.swin1, style1)
@@ -95,7 +105,7 @@ window.update = function(self)
     style2.width = 1
     style2.height = bar_height
     style2.row = info.row + bar_offset
-    style2.col = info.col + info.width - (info.scrollbar and 1 or 0)
+    style2.col = info.col + info.width - (info.has_scrollbar and 1 or 0)
     style2.zindex = 2
     if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
       vim.api.nvim_win_set_config(self.swin2, style2)
@@ -138,22 +148,27 @@ window.visible = function(self)
   return self.win and vim.api.nvim_win_is_valid(self.win)
 end
 
----Return win info.
-window.info = function(self)
-  if self:visible() then
-    local border_width = self:get_border_width()
-    local scrollbar = (self.swin1 and vim.api.nvim_win_is_valid(self.swin1))
-    return {
-      row = self.style.row,
-      col = self.style.col,
-      width = self.style.width + border_width + (scrollbar and 1 or 0),
-      height = self.style.height,
-      border_width = border_width,
-      scrollbar = scrollbar,
-    }
-  end
+---Return the scrollbar will shown or not.
+window.has_scrollbar = function(self)
+  return self.style.height < self:get_content_height()
 end
 
+---Return win info.
+window.info = function(self)
+  local border_width = self:get_border_width()
+  local has_scrollbar = self:has_scrollbar()
+  return {
+    row = self.style.row,
+    col = self.style.col,
+    width = self.style.width + border_width + (has_scrollbar and 1 or 0),
+    height = self.style.height,
+    border_width = border_width,
+    has_scrollbar = has_scrollbar,
+  }
+end
+
+---Get border width
+---@return number
 window.get_border_width = function(self)
   local border = self.style.border
   if type(border) == 'table' then
@@ -195,8 +210,10 @@ window.get_border_width = function(self)
   return w
 end
 
+---Get scroll height.
+---@return number
 window.get_content_height = function(self)
-  if self:visible() then
+  return self.cache:ensure({ 'get_content_height', self:option('wrap') and 1 or 0, self.buf, vim.api.nvim_buf_get_changedtick(self.buf) }, function()
     if not self:option('wrap') then
       return vim.api.nvim_buf_line_count(self.buf)
     end
@@ -205,8 +222,7 @@ window.get_content_height = function(self)
       height = height + math.ceil(math.max(1, vim.fn.strdisplaywidth(text)) / self.style.width)
     end
     return height
-  end
-  return 0
+  end)
 end
 
 return window
