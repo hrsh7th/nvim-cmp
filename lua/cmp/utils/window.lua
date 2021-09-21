@@ -218,10 +218,16 @@ end
 ---Get scroll height.
 ---@return number
 window.get_content_height = function(self)
-  return self.cache:ensure({ 'get_content_height', self:option('wrap') and 1 or 0, self.style.width, self.buf, vim.api.nvim_buf_get_changedtick(self.buf) }, function()
-    if not self:option('wrap') then
-      return vim.api.nvim_buf_line_count(self.buf)
-    end
+  if not self:option('wrap') then
+    return vim.api.nvim_buf_line_count(self.buf)
+  end
+
+  return self.cache:ensure({
+    'get_content_height',
+    self.style.width,
+    self.buf,
+    vim.api.nvim_buf_get_changedtick(self.buf)
+  }, function()
     local height = 0
     for _, text in ipairs(vim.api.nvim_buf_get_lines(self.buf, 0, -1, false)) do
       height = height + math.ceil(math.max(1, vim.fn.strdisplaywidth(text)) / self.style.width)
