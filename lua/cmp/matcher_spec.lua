@@ -23,6 +23,9 @@ describe('matcher', function()
     assert.is.truthy(matcher.match('my_', 'my_awesome_variable') > matcher.match('my_', 'completion_matching_strategy_list'))
     assert.is.truthy(matcher.match('luacon', 'lua_context') > matcher.match('luacon', 'LuaContext'))
     assert.is.truthy(matcher.match('call', 'calc') == 0)
+
+    assert.is.truthy(matcher.match('vi', 'void#') >= 1)
+    assert.is.truthy(matcher.match('vo', 'void#') >= 1)
   end)
 
   it('debug', function()
