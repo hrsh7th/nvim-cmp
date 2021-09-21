@@ -9,6 +9,8 @@ local window = require('cmp.utils.window')
 ---@field public event cmp.Event
 local items_view = {}
 
+local ABBR_MARGIN = 1
+
 items_view.ns = vim.api.nvim_create_namespace('cmp.menu.fancy')
 
 items_view.new = function()
@@ -71,7 +73,7 @@ items_view.open = function(self, offset, entries)
       local item = e:get_vim_item(offset)
       if item.dup == 1 or not dedup[item.abbr] then
         dedup[item.abbr] = true
-        abbrs.texts[i] = ' ' .. item.abbr
+        abbrs.texts[i] = string.rep(' ', ABBR_MARGIN) .. item.abbr
         abbrs.width = math.max(abbrs.width, vim.fn.strdisplaywidth(abbrs.texts[i]))
         kinds.texts[i] = (item.kind or '')
         kinds.width = math.max(kinds.width, vim.fn.strdisplaywidth(kinds.texts[i]))
@@ -114,7 +116,7 @@ items_view.open = function(self, offset, entries)
       relative = 'editor',
       style = 'minimal',
       row = vim.fn.screenrow(),
-      col = vim.fn.screencol() - 1 - delta,
+      col = vim.fn.screencol() - 1 - delta - ABBR_MARGIN,
       width = width,
       height = height,
     })
