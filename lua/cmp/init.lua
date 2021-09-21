@@ -68,7 +68,9 @@ end
 ---Select next item if possible
 cmp.select_next_item = function()
   if core.menu.menu:visible() then
+    local release = core.suspend()
     core.menu.menu:select_next_item()
+    vim.schedule(release)
     return true
   else
     return false
@@ -78,7 +80,9 @@ end
 ---Select prev item if possible
 cmp.select_prev_item = function()
   if core.menu.menu:visible() then
+    local release = core.suspend()
     core.menu.menu:select_prev_item()
+    vim.schedule(release)
     return true
   else
     return false
