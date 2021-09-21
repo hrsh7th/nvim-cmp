@@ -22,7 +22,7 @@ window.new = function()
   local self = setmetatable({}, { __index = window })
   self.buf = vim.api.nvim_create_buf(false, true)
   self.win = nil
-  self.style = nil
+  self.style = {}
   self.sbuf1 = vim.api.nvim_create_buf(false, true)
   self.swin1 = nil
   self.sbuf2 = vim.api.nvim_create_buf(false, true)
@@ -49,6 +49,9 @@ end
 ---Open window
 ---@param style cmp.WindowStyle
 window.open = function(self, style)
+  if vim.o.lines and vim.o.lines < style.row + style.height then
+    style.height = vim.o.lines - style.row - 1
+  end
   self.style = style
   if self.win and vim.api.nvim_win_is_valid(self.win) then
     vim.api.nvim_win_set_buf(self.win, self.buf)
@@ -64,17 +67,18 @@ end
 
 ---Update
 window.update = function(self)
-  local total = vim.api.nvim_buf_line_count(self.buf)
+  local total = self:get_content_height()
   if self.style.height < total then
-    local bar_height = math.ceil(self.style.height * (self.style.height / total))
-    local bar_offset = math.min(self.style.height - bar_height, math.floor(self.style.height * (vim.fn.getwininfo(self.win)[1].topline / total)))
+    local info = self:info()
+    local bar_height = math.ceil(info.height * (info.height / total))
+    local bar_offset = math.min(info.height - bar_height, math.floor(info.height * (vim.fn.getwininfo(self.win)[1].topline / total)))
     local style1 = {}
     style1.relative = 'editor'
     style1.style = 'minimal'
     style1.width = 1
-    style1.height = self.style.height
-    style1.row = self.style.row
-    style1.col = self.style.col + self.style.width
+    style1.height = info.height
+    style1.row = info.row
+    style1.col = info.col + info.width - (info.scrollbar and 1 or 0)
     style1.zindex = 1
     if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
       vim.api.nvim_win_set_config(self.swin1, style1)
@@ -87,8 +91,8 @@ window.update = function(self)
     style2.style = 'minimal'
     style2.width = 1
     style2.height = bar_height
-    style2.row = self.style.row + bar_offset
-    style2.col = self.style.col + self.style.width
+    style2.row = info.row + bar_offset
+    style2.col = info.col + info.width - (info.scrollbar and 1 or 0)
     style2.zindex = 2
     if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
       vim.api.nvim_win_set_config(self.swin2, style2)
@@ -134,44 +138,69 @@ end
 ---Return win info.
 window.info = function(self)
   if self:visible() then
-    local p = vim.api.nvim_win_get_position(self.win)
-    local w = vim.api.nvim_win_get_width(self.win)
-    local h = vim.api.nvim_win_get_height(self.win)
-    local c = vim.api.nvim_win_get_config(self.win)
-    local o = 0
-    if c.border then
-      local multi = vim.api.nvim_get_option('ambiwidth') == 'double'
-      if type(c.border) == 'string' then
-        if c.border == 'single' then
-          o = 2
-        elseif c.border == 'solid' then
-          o = 2
-        elseif c.border == 'double' then
-          o = 2 * (multi and 2 or 1)
-        elseif c.border == 'rounded' then
-          o = 2 * (multi and 2 or 1)
-        elseif c.border == 'shadow' then
-          o = 1
-        end
-      elseif type(c.border) == 'table' then
-        local b4 = type(c.border[1]) == 'table' and c.border[4][1] or c.border[4]
-        if #b4 > 0 then
-          o = o + vim.fn.strdisplaywidth(b4) > 1 and multi and 2 or 1
-        end
-        local b8 = type(c.border[8]) == 'table' and c.border[8][1] or c.border[8]
-        if #b8 > 0 then
-          o = o + vim.fn.strdisplaywidth(b8) > 1 and multi and 2 or 1
-        end
-      end
-    end
+    local border_width = self:get_border_width()
+    local scrollbar = (self.swin1 and vim.api.nvim_win_is_valid(self.swin1))
     return {
-      row = p[1],
-      col = p[2] - math.floor(o / 2),
-      width = w + o + ((self.swin1 and vim.api.nvim_win_is_valid(self.swin1)) and 1 or 0),
-      height = h,
-      o = o,
+      row = self.style.row,
+      col = self.style.col,
+      width = self.style.width + border_width + (scrollbar and 1 or 0),
+      height = self.style.height,
+      border_width = border_width,
+      scrollbar = scrollbar,
     }
   end
+end
+
+window.get_border_width = function(self)
+  local border = self.style.border
+  if type(border) == 'table' then
+    local new_border = {}
+    while #new_border < 8 do
+      for _, b in ipairs(border) do
+        table.insert(new_border, b)
+      end
+    end
+    border = new_border
+  end
+
+  local w = 0
+  if border then
+    local multi = vim.api.nvim_get_option('ambiwidth') == 'double'
+    if type(border) == 'string' then
+      if border == 'single' then
+        w = 2
+      elseif border == 'solid' then
+        w = 2
+      elseif border == 'double' then
+        w = 2 * (multi and 2 or 1)
+      elseif border == 'rounded' then
+        w = 2 * (multi and 2 or 1)
+      elseif border == 'shadow' then
+        w = 1
+      end
+    elseif type(border) == 'table' then
+      local b4 = type(border[4]) == 'table' and border[4][1] or border[4]
+      if #b4 > 0 then
+        w = w + (multi and vim.fn.strdisplaywidth(b4) > 1 and 2 or 1)
+      end
+      local b8 = type(border[8]) == 'table' and border[8][1] or border[8]
+      if #b8 > 0 then
+        w = w + (multi and vim.fn.strdisplaywidth(b8) > 1 and 2 or 1)
+      end
+    end
+  end
+  return w
+end
+
+window.get_content_height = function(self)
+  if self:visible() then
+    local height = 0
+    for _, text in ipairs(vim.api.nvim_buf_get_lines(self.buf, 0, -1, false)) do
+      height = height + math.ceil(math.max(1, vim.fn.strdisplaywidth(text)) / self.style.width)
+    end
+    return height
+  end
+  return 0
 end
 
 return window

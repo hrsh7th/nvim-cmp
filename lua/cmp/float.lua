@@ -12,6 +12,7 @@ float.new = function()
   local self = setmetatable({}, { __index = float })
   self.entry = nil
   self.window = window.new()
+  self.window:option('scrolloff', 0)
   return self
 end
 
@@ -69,6 +70,7 @@ float.show = function(self, e, view)
     return self:close()
   end
 
+  self.window:option('winhighlight', documentation.winhighlight)
   self.window:open({
     relative = 'editor',
     style = 'minimal',
@@ -78,6 +80,7 @@ float.show = function(self, e, view)
     col = col,
     border = documentation.border,
   })
+  self.window:update()
 end
 
 ---Close floating window
@@ -92,15 +95,15 @@ float.close = async.throttle(
 float.scroll = function(self, delta)
   if self:is_visible() then
     local info = vim.fn.getwininfo(self.window.win)[1] or {}
-    local buf = vim.api.nvim_win_get_buf(self.window.win)
     local top = info.topline or 1
     top = top + delta
     top = math.max(top, 1)
-    top = math.min(top, vim.api.nvim_buf_line_count(buf) - info.height + 1)
+    top = math.min(top, self.window:get_content_height() - info.height + 1)
 
     vim.defer_fn(function()
-      vim.api.nvim_buf_call(buf, function()
+      vim.api.nvim_buf_call(self.window.buf, function()
         vim.api.nvim_command('normal! ' .. top .. 'zt')
+        self.window:update()
       end)
     end, 0)
   end
