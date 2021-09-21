@@ -13,7 +13,7 @@ fancy.new = function()
   self.menu_win:option('conceallevel', 2)
   self.menu_win:option('concealcursor', 'n')
   self.menu_win:option('foldenable', false)
-  self.menu_win:option('wrap', true)
+  self.menu_win:option('wrap', false)
   self.menu_win:option('scrolloff', 0)
   self.menu_win:option('winhighlight', 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel')
   self.offset = -1
@@ -33,32 +33,21 @@ fancy.new = function()
     end,
     on_line = function(_, winid, bufnr, row)
       if winid == self.menu_win.win then
-        local mark = self.marks[row + 1]
-        vim.api.nvim_buf_set_extmark(bufnr, fancy.ns, row, mark[1][1][1], {
-          end_line = row,
-          end_col = mark[1][1][2],
-          hl_group = mark[1][2],
-          ephemeral = true,
-        })
-        vim.api.nvim_buf_set_extmark(bufnr, fancy.ns, row, mark[2][1][1], {
-          end_line = row,
-          end_col = mark[2][1][2],
-          hl_group = mark[2][2],
-          ephemeral = true,
-        })
-        vim.api.nvim_buf_set_extmark(bufnr, fancy.ns, row, mark[3][1][1], {
-          end_line = row,
-          end_col = mark[3][1][2],
-          hl_group = mark[3][2],
-          ephemeral = true,
-        })
-        local item = self.items[row + 1]
-        for _, m in ipairs(item.matches or {}) do
+        for _, mark in ipairs(self.marks[row + 1]) do
+          vim.api.nvim_buf_set_extmark(bufnr, fancy.ns, row, mark.col, {
+            end_line = row,
+            end_col = mark.col + mark.length,
+            hl_group = mark.hl_group,
+            hl_mode = 'combine',
+            ephemeral = true,
+          })
+        end
+        for _, m in ipairs(self.items[row + 1].matches or {}) do
           vim.api.nvim_buf_set_extmark(bufnr, fancy.ns, row, m.word_match_start, {
             end_line = row,
             end_col = m.word_match_end + 1,
             hl_group = 'Normal',
-            hl_mode = 'replace',
+            hl_mode = 'combine',
             ephemeral = true,
           })
         end
@@ -75,34 +64,37 @@ fancy.show = function(self, offset, items)
   self.marks = {}
 
   if #items > 0 then
-    local words = { bytes = 0, items = {} }
+    local words = { hl_group = 'Comment', width = 0, items = {} }
+    local kinds = { hl_group = 'Special', width = 0, items = {} }
+    local menus = { hl_group = 'NonText', width = 0, items = {} }
     for i, item in ipairs(items) do
-      words.items[i] = ' ' .. (item.abbr or item.word)
-      words.bytes = math.max(words.bytes, #words.items[i])
-    end
-    local kinds = { bytes = 0, items = {} }
-    for i, item in ipairs(items) do
+      words.items[i] = ' ' .. item.abbr
+      words.width = math.max(words.width, vim.fn.strdisplaywidth(words.items[i]))
       kinds.items[i] = (item.kind or '')
-      kinds.bytes = math.max(kinds.bytes, #kinds.items[i])
-    end
-    local menus = { bytes = 0, items = {} }
-    for i, item in ipairs(items) do
-      menus.items[i] = (item.menu or '')
-      menus.bytes = math.max(menus.bytes, #menus.items[i])
+      kinds.width = math.max(kinds.width, vim.fn.strdisplaywidth(kinds.items[i]))
+      menus.items[i] = (item.menu or '') .. ' '
+      menus.width = math.max(menus.width, vim.fn.strdisplaywidth(menus.items[i]))
     end
 
     local lines = {}
     local width = 1
     for i = 1, #items do
-      local word_part = words.items[i] .. string.rep(' ', 1 + words.bytes - #words.items[i])
-      local kind_part = kinds.items[i] .. string.rep(' ', 1 + kinds.bytes - #kinds.items[i])
-      local menu_part = menus.items[i] .. string.rep(' ', 1 + menus.bytes - #menus.items[i])
-      lines[i] = string.format('%s%s%s', word_part, kind_part, menu_part)
-      self.marks[i] = {
-        { { 0, #words.items[i] }, 'Comment' },
-        { { #word_part, #word_part + #kinds.items[i] }, 'Special' },
-        { { #word_part + #kind_part, #word_part + #kind_part + #menus.items[i] }, 'Comment' },
-      }
+      self.marks[i] = {}
+      local off = 0
+      local parts = {}
+      for _, part in ipairs({ words, kinds, menus }) do
+        if #part.items[i] > 0 then
+          local w = vim.fn.strdisplaywidth(part.items[i])
+          table.insert(parts, part.items[i] .. string.rep(' ', part.width - w))
+          table.insert(self.marks[i], {
+            col = off,
+            length = #part.items[i],
+            hl_group = part.hl_group,
+          })
+          off = off + #parts[#parts] + 1
+        end
+      end
+      lines[i] = table.concat(parts, ' ')
       width = math.max(#lines[i], width)
     end
 

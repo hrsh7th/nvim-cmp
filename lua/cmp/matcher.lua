@@ -201,6 +201,7 @@ matcher.fuzzy = function(input, word, matches)
       input_match_end = input_match_end,
       word_match_start = word_match_start,
       word_match_end = word_index + word_offset - 1,
+      fuzzy = true,
     })
     return true
   end
@@ -250,6 +251,7 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
           word_match_start = word_index,
           word_match_end = word_index + word_offset - 1,
           strict_match = strict_match_count == input_index - input_match_start,
+          fuzzy = false,
         }
       else
         return nil
@@ -266,6 +268,7 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
       word_match_start = word_index,
       word_match_end = word_index + word_offset - 1,
       strict_match = strict_match_count == input_index - input_match_start,
+      fuzzy = false,
     }
   end
 

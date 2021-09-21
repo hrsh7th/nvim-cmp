@@ -53,7 +53,7 @@ float.show = function(self, e, view)
   end
 
   local right_col = view.col + view.width
-  local left_col = view.col - width - 3 -- TODO: Why is this needed -3?
+  local left_col = view.col - width - 2
 
   local col
   if right_space >= width and left_space >= width then
