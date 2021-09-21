@@ -106,6 +106,7 @@ items_view.open = function(self, offset, entries)
 
     local height = vim.api.nvim_get_option('pumheight')
     height = height == 0 and #self.entries or height
+    height = math.min(height, #self.entries)
     height = math.min(height, (vim.o.lines - 1) - vim.fn.winline() - 1)
 
     vim.api.nvim_buf_set_lines(self.items_win.buf, 0, -1, false, lines)
