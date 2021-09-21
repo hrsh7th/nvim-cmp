@@ -1,5 +1,4 @@
 local event = require('cmp.utils.event')
-local autocmd = require('cmp.utils.autocmd')
 local window = require "cmp.utils.window"
 
 ---@class cmp.ItemsView

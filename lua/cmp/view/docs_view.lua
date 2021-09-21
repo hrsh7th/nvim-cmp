@@ -1,4 +1,3 @@
-local async = require('cmp.utils.async')
 local window = require('cmp.utils.window')
 local config = require('cmp.config')
 

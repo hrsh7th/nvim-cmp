@@ -16,20 +16,24 @@ vim.cmd [[
     autocmd TextChangedI,TextChangedP * lua require'cmp.utils.autocmd'.emit('TextChanged')
     autocmd CompleteChanged * lua require'cmp.utils.autocmd'.emit('CompleteChanged')
     autocmd CompleteDone * lua require'cmp.utils.autocmd'.emit('CompleteDone')
+    autocmd ColorScheme * call v:lua.cmp.plugin.colorscheme()
   augroup END
 ]]
 
 
-highlight.inherit('CmpMatch', 'Normal', {
-  gui = 'bold',
-  guibg = 'NONE',
-  ctermbg = 'NONE',
-})
-highlight.inherit('CmpMatchFuzzy', 'Normal', {
-  gui = 'NONE',
-  guibg = 'NONE',
-  ctermbg = 'NONE',
-})
+misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
+  highlight.inherit('CmpMatch', 'Normal', {
+    gui = 'bold',
+    guibg = 'NONE',
+    ctermbg = 'NONE',
+  })
+  highlight.inherit('CmpMatchFuzzy', 'Normal', {
+    gui = 'NONE',
+    guibg = 'NONE',
+    ctermbg = 'NONE',
+  })
+end)
+_G.cmp.plugin.colorscheme()
 
 vim.cmd [[command! CmpStatus lua require('cmp').status()]]
 
