@@ -73,7 +73,7 @@ lua <<EOF
         -- require('luasnip').lsp_expand(args.body)
 
         -- For `ultisnips` user.
-        -- vim.fn["vsnip#anonymous"](args.body)
+        -- vim.fn["UtiliSnips#Anon"](args.body)
       end,
     },
     mapping = {
