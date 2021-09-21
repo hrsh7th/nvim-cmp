@@ -34,7 +34,7 @@ vim_source.to_args = function(args)
   return args
 end
 
----@param id number
+---@param bridge_id number
 ---@param methods string[]
 vim_source.new = function(bridge_id, methods)
   local self = {}

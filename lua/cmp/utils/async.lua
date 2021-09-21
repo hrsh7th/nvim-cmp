@@ -39,6 +39,8 @@ async.throttle = function(fn, timeout)
   })
 end
 
+---@alias cmp.AsyncDedup fun(callback: function): function
+
 ---Create deduplicated callback
 ---@return function
 async.dedup = function()

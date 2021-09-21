@@ -24,6 +24,9 @@ end
 ---Emit autocmd
 ---@param event string
 autocmd.emit = function(event)
+  if false then
+    return
+  end
   debug.log(' ')
   debug.log(string.format('>>> %s', event))
   autocmd.events[event] = autocmd.events[event] or {}
