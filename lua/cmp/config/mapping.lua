@@ -45,7 +45,6 @@ mapping.scroll_docs = function(delta)
     end
   end
 end
-mapping.scroll = misc.deprecated(mapping.scroll_docs, '`cmp.mapping.scroll` is deprecated. Please change it to `cmp.mapping.scroll_docs` instead.')
 
 ---Select next completion item.
 mapping.select_next_item = function()
@@ -55,7 +54,6 @@ mapping.select_next_item = function()
     end
   end
 end
-mapping.next_item = misc.deprecated(mapping.select_next_item, '`cmp.mapping.next_item` is deprecated. Please change it to `cmp.mapping.select_next_item` instead.')
 
 ---Select prev completion item.
 mapping.select_prev_item = function()
@@ -65,7 +63,6 @@ mapping.select_prev_item = function()
     end
   end
 end
-mapping.prev_item = misc.deprecated(mapping.select_prev_item, '`cmp.mapping.prev_item` is deprecated. Please change it to `cmp.mapping.select_prev_item` instead.')
 
 ---Confirm selection
 mapping.confirm = function(option)

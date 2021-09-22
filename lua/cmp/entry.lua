@@ -188,6 +188,12 @@ entry.get_insert_text = function(self)
   end)
 end
 
+---Return the item is deprecated or not.
+---@return boolean
+entry.is_deprecated = function(self)
+  return self.completion_item.deprecated or vim.tbl_contains(self.completion_item.tags or {}, types.lsp.CompletionItemTag.Deprecated)
+end
+
 ---Make vim.CompletedItem
 ---@param suggest_offset number
 ---@return vim.CompletedItem
@@ -204,13 +210,6 @@ entry.get_vim_item = function(self, suggest_offset)
       local insert_text = self:get_insert_text()
       if word ~= insert_text then
         abbr = abbr .. '~'
-      end
-    end
-
-    -- deprecated
-    if config.get().formatting.deprecated then
-      if completion_item.deprecated or vim.tbl_contains(completion_item.tags or {}, types.lsp.CompletionItemTag.Deprecated) then
-        abbr = str.strikethrough(abbr)
       end
     end
 
