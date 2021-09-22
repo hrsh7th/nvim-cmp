@@ -46,7 +46,7 @@ items_view.new = function()
           vim.api.nvim_buf_set_extmark(bufnr, items_view.ns, row, m.word_match_start, {
             end_line = row,
             end_col = m.word_match_end + 1,
-            hl_group = m.fuzzy and 'CmpMatchFuzzy' or 'CmpMatch',
+            hl_group = m.fuzzy and 'CmpItemAbbrMatchFuzzy' or 'CmpItemAbbrMatch',
             hl_mode = 'combine',
             ephemeral = true,
           })
@@ -65,9 +65,9 @@ items_view.open = function(self, offset, entries)
 
   if #entries > 0 then
     local dedup = {}
-    local abbrs = { hl_group = 'CmpAbbr', width = 0, texts = {} }
-    local kinds = { hl_group = 'CmpKind', width = 0, texts = {} }
-    local menus = { hl_group = 'CmpMenu', width = 0, texts = {} }
+    local abbrs = { hl_group = 'CmpItemAbbr', width = 0, texts = {} }
+    local kinds = { hl_group = 'CmpItemKind', width = 0, texts = {} }
+    local menus = { hl_group = 'CmpItemMenu', width = 0, texts = {} }
     for _, e in ipairs(entries) do
       local i = #self.entries + 1
       local item = e:get_vim_item(offset)
@@ -89,14 +89,14 @@ items_view.open = function(self, offset, entries)
       self.marks[i] = {}
       local off = 0
       local parts = {}
-      for _, part in ipairs({ abbrs, kinds, menus }) do
+      for j, part in ipairs({ abbrs, kinds, menus }) do
         if #part.texts[i] > 0 then
           local w = vim.fn.strchars(part.texts[i])
           table.insert(parts, part.texts[i] .. string.rep(' ', part.width - w))
           table.insert(self.marks[i], {
             col = off,
             length = #part.texts[i],
-            hl_group = part.hl_group,
+            hl_group = j == 1 and self.entries[i]:is_deprecated() and 'CmpItemAbbrDeprecated' or part.hl_group,
           })
           off = off + #parts[#parts] + 1
         end

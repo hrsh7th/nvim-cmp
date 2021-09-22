@@ -224,7 +224,7 @@ core.complete = function(self, ctx)
     s:complete(ctx, callback)
   end
 
-  self.filter.timeout = ctx.pumvisible and THROTTLE_TIME or 0
+  self.filter.timeout = self.view:visible() and THROTTLE_TIME or 0
   self:filter()
 end
 

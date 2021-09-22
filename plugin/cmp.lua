@@ -22,26 +22,31 @@ vim.cmd [[
 
 
 misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
-  highlight.inherit('CmpMatch', 'Normal', {
+  highlight.inherit('CmpItemAbbrMatch', 'Normal', {
     gui = 'bold',
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
-  highlight.inherit('CmpMatchFuzzy', 'Normal', {
+  highlight.inherit('CmpItemAbbrMatchFuzzy', 'Normal', {
     gui = 'NONE',
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
 
-  highlight.inherit('CmpAbbr', 'Comment', {
+  highlight.inherit('CmpItemAbbr', 'Comment', {
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
-  highlight.inherit('CmpKind', 'Special', {
+  highlight.inherit('CmpItemAbbrDeprecated', 'NonText', {
+    gui = 'strikethrough',
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
-  highlight.inherit('CmpMenu', 'Comment', {
+  highlight.inherit('CmpItemKind', 'Special', {
+    guibg = 'NONE',
+    ctermbg = 'NONE',
+  })
+  highlight.inherit('CmpItemMenu', 'Comment', {
     guibg = 'NONE',
     ctermbg = 'NONE',
   })

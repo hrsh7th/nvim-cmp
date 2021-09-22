@@ -82,7 +82,6 @@ cmp.PreselectMode.None = 'none'
 ---@field public comparators function[]
 
 ---@class cmp.FormattingConfig
----@field public deprecated boolean
 ---@field public format fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem
 
 ---@class cmp.SnippetConfig
