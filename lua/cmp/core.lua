@@ -269,6 +269,9 @@ core.confirm = function(self, e, option, callback)
   local release = self:suspend()
   local ctx = self:get_context()
 
+  -- Close menus.
+  self.view:close()
+
   -- Simulate `<C-y>` behavior.
   local confirm = {}
   table.insert(confirm, keymap.t(string.rep('<C-g>U<Left><Del>', ctx.cursor.character - misc.to_utfindex(e.context.cursor_before_line, e:get_offset()))))
