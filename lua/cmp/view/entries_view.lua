@@ -9,7 +9,7 @@ local window = require('cmp.utils.window')
 ---@field public event cmp.Event
 local entries_view = {}
 
-entries_view.ns = vim.api.nvim_create_namespace('cmp.menu.fancy')
+entries_view.ns = vim.api.nvim_create_namespace('cmp.view.entries_view')
 
 entries_view.new = function()
   local self = setmetatable({}, { __index = entries_view })
@@ -63,21 +63,31 @@ entries_view.open = function(self, offset, entries)
 
   if #entries > 0 then
     local dedup = {}
-    local abbrs = { hl_group = 'CmpItemAbbr', width = 0, texts = {} }
-    local kinds = { hl_group = 'CmpItemKind', width = 0, texts = {} }
-    local menus = { hl_group = 'CmpItemMenu', width = 0, texts = {} }
+    local abbrs = { width = 0, texts = {}, widths = {}, hl_groups = {} }
+    local kinds = { width = 0, texts = {}, widths = {}, hl_groups = {} }
+    local menus = { width = 0, texts = {}, widths = {}, hl_groups = {} }
     for _, e in ipairs(entries) do
       local i = #self.entries + 1
       local item = e:get_vim_item(offset)
       if item.dup == 1 or not dedup[item.abbr] then
         dedup[item.abbr] = true
-        abbrs.texts[i] = item.abbr
-        abbrs.width = math.max(abbrs.width, vim.fn.strchars(abbrs.texts[i]))
-        kinds.texts[i] = (item.kind or '')
-        kinds.width = math.max(kinds.width, vim.fn.strchars(kinds.texts[i]))
-        menus.texts[i] = (item.menu or '')
-        menus.width = math.max(menus.width, vim.fn.strchars(menus.texts[i]))
+
         table.insert(self.entries, e)
+
+        abbrs.texts[i] = item.abbr
+        abbrs.hl_groups[i] = e:is_deprecated() and 'CmpItemAbbrDeprecated' or 'CmpItemAbbr'
+        abbrs.widths[i] = vim.str_utfindex(abbrs.texts[i])
+        abbrs.width = math.max(abbrs.width, abbrs.widths[i])
+
+        kinds.texts[i] = (item.kind or '')
+        kinds.hl_groups[i] = 'CmpItemKind'
+        kinds.widths[i] = vim.str_utfindex(kinds.texts[i])
+        kinds.width = math.max(kinds.width, kinds.widths[i])
+
+        menus.texts[i] = (item.menu or '')
+        menus.widths[i] = vim.str_utfindex(kinds.texts[i])
+        menus.width = math.max(kinds.width, kinds.widths[i])
+        menus.hl_groups[i] = 'CmpItemMenu'
       end
     end
 
@@ -87,16 +97,16 @@ entries_view.open = function(self, offset, entries)
       self.marks[i] = {}
       local off = 1
       local parts = { '' }
-      for j, part in ipairs({ abbrs, kinds, menus }) do
+      for _, part in ipairs({ abbrs, kinds, menus }) do
         if #part.texts[i] > 0 then
-          local w = vim.fn.strchars(part.texts[i])
-          table.insert(parts, part.texts[i] .. string.rep(' ', part.width - w))
+          local text = part.texts[i] .. string.rep(' ', part.width - part.widths[i])
+          table.insert(parts, text)
           table.insert(self.marks[i], {
             col = off,
             length = #part.texts[i],
-            hl_group = j == 1 and self.entries[i]:is_deprecated() and 'CmpItemAbbrDeprecated' or part.hl_group,
+            hl_group = part.hl_groups[i],
           })
-          off = off + #parts[#parts] + 1
+          off = off + #text + 1
         end
       end
       table.insert(parts, '')
@@ -108,7 +118,11 @@ entries_view.open = function(self, offset, entries)
     local height = vim.api.nvim_get_option('pumheight')
     height = height == 0 and #self.entries or height
     height = math.min(height, #self.entries)
-    height = math.min(height, (vim.o.lines - 1) - vim.fn.winline() - 1)
+    height = math.min(height, vim.o.lines - vim.fn.screenrow())
+
+    if width < 1 or height < 1 then
+      return
+    end
 
     local delta = vim.api.nvim_win_get_cursor(0)[2] + 1 - self.offset
     self.entries_win:open({
@@ -119,10 +133,8 @@ entries_view.open = function(self, offset, entries)
       width = width,
       height = height,
     })
-    if self.entries_win:visible() then
-      vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
-      self.entries_win:option('cursorline', false)
-    end
+    vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
+    self.entries_win:option('cursorline', false)
   else
     self:close()
   end
@@ -185,10 +197,6 @@ entries_view.select_prev_item = function(self)
     self.entries_win:update()
     self.event:emit('change')
   end
-end
-
-entries_view.active = function(self)
-  return not not self:get_selected_entry()
 end
 
 entries_view.get_first_entry = function(self)
