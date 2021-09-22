@@ -2,14 +2,14 @@ local config = require('cmp.config')
 local async = require('cmp.utils.async')
 local event = require('cmp.utils.event')
 local keymap = require('cmp.utils.keymap')
-local items_view = require('cmp.view.items_view')
 local docs_view = require('cmp.view.docs_view')
+local entries_view = require('cmp.view.entries_view')
 local ghost_text_view = require('cmp.view.ghost_text_view')
 
 ---@class cmp.View
 ---@field public event cmp.Event
 ---@field public resolve_dedup cmp.AsyncDedup
----@field public items_view cmp.ItemsView
+---@field public entries_view cmp.EntriesView
 ---@field public docs_view cmp.DocsView
 ---@field public ghost_text_view cmp.GhostTextView
 local view = {}
@@ -18,13 +18,13 @@ local view = {}
 view.new = function()
   local self = setmetatable({}, { __index = view })
   self.resolve_dedup = async.dedup()
-  self.items_view = items_view.new()
+  self.entries_view = entries_view.new()
   self.docs_view = docs_view.new()
   self.ghost_text_view = ghost_text_view.new()
   self.event = event.new()
 
-  self.items_view.event:on('change', function()
-    self:on_item_change()
+  self.entries_view.event:on('change', function()
+    self:on_entry_change()
   end)
 
   return self
@@ -75,18 +75,18 @@ view.open = function(self, ctx, sources)
   end)
 
   -- open
-  self.items_view:open(offset, entries)
+  self.entries_view:open(offset, entries)
 end
 
 ---Close menu
 view.close = function(self)
-  self.items_view:close()
+  self.entries_view:close()
   self.docs_view:close()
   self.ghost_text_view:hide()
 end
 
 view.visible = function(self)
-  return self.items_view:visible()
+  return self.entries_view:visible()
 end
 
 view.scroll_docs = function(self, delta)
@@ -94,27 +94,27 @@ view.scroll_docs = function(self, delta)
 end
 
 view.select_next_item = function(self)
-  self.items_view:select_next_item()
+  self.entries_view:select_next_item()
 end
 
 view.select_prev_item = function(self)
-  self.items_view:select_prev_item()
+  self.entries_view:select_prev_item()
 end
 
 ---Get current selected entry
 ---@return cmp.Entry|nil
 view.get_selected_entry = function(self)
-  return self.items_view:get_selected_entry()
+  return self.entries_view:get_selected_entry()
 end
 
 ---Get first entry
 ---@param self cmp.Entry|nil
 view.get_first_entry = function(self)
-  return self.items_view:get_first_entry()
+  return self.entries_view:get_first_entry()
 end
 
----On item change
-view.on_item_change = function(self)
+---On entry change
+view.on_entry_change = function(self)
   local e = self:get_selected_entry()
   if e then
     for _, c in ipairs(config.get().confirmation.get_commit_characters(e:get_commit_characters())) do
@@ -123,7 +123,7 @@ view.on_item_change = function(self)
       end)
     end
     e:resolve(self.resolve_dedup(function()
-      self.docs_view:open(e, self.items_view:info())
+      self.docs_view:open(e, self.entries_view:info())
     end))
   else
     self.docs_view:close()
