@@ -64,7 +64,7 @@ end
 cmp.abort = function()
   if cmp.core.view:visible() then
     keymap.feedkeys(keymap.t('<C-e>'), 'n', function()
-      cmp.core.view:close()
+      cmp.core:reset()
     end)
     return true
   else
