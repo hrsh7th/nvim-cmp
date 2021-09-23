@@ -36,6 +36,7 @@ native_entries_view.open = function(self, offset, entries)
   else
     self:close()
   end
+  vim.cmd [[doautocmd CompleteChanged]]
 end
 
 native_entries_view.close = function(_)

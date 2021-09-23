@@ -27,9 +27,7 @@ ghost_text_view.show = function(_, e)
   end
 
   local cursor = vim.api.nvim_win_get_cursor(0)
-  local current_line = vim.api.nvim_get_current_line()
-  local after = string.sub(current_line, cursor[2] + 1)
-  if after ~= '' then
+  if string.sub(vim.api.nvim_get_current_line(), cursor[2] + 1) ~= '' then
     return
   end
 
