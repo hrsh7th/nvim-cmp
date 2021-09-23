@@ -32,6 +32,7 @@ window.new = function()
   self.swin2 = nil
   self.cache = cache.new()
   self.opt = {}
+  self.id = 0
   return self
 end
 
@@ -65,6 +66,8 @@ end
 ---Open window
 ---@param style cmp.WindowStyle
 window.open = function(self, style)
+  self.id = self.id + 1
+
   self:set_style(style)
 
   if self.style.width < 1 or self.style.height < 1 then
@@ -132,20 +135,25 @@ end
 
 ---Close window
 window.close = function(self)
-  if self.win and vim.api.nvim_win_is_valid(self.win) then
-    if self.win and vim.api.nvim_win_is_valid(self.win) then
-      vim.api.nvim_win_close(self.win, true)
-      self.win = nil
+  local id = self.id
+  vim.schedule(function()
+    if id == self.id then
+      if self.win and vim.api.nvim_win_is_valid(self.win) then
+        if self.win and vim.api.nvim_win_is_valid(self.win) then
+          vim.api.nvim_win_close(self.win, true)
+          self.win = nil
+        end
+        if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
+          vim.api.nvim_win_close(self.swin1, false)
+          self.swin1 = nil
+        end
+        if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
+          vim.api.nvim_win_close(self.swin2, false)
+          self.swin2 = nil
+        end
+      end
     end
-    if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
-      vim.api.nvim_win_close(self.swin1, false)
-      self.swin1 = nil
-    end
-    if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
-      vim.api.nvim_win_close(self.swin2, false)
-      self.swin2 = nil
-    end
-  end
+  end)
 end
 
 ---Return the window is visible or not.

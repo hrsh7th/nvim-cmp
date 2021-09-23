@@ -111,7 +111,7 @@ entries_view.open = function(self, offset, entries)
       end
       table.insert(parts, '')
       lines[i] = table.concat(parts, ' ')
-      width = math.max(width, vim.fn.strchars(lines[i]))
+      width = math.max(width, vim.str_utfindex(lines[i]))
     end
     vim.api.nvim_buf_set_lines(self.entries_win.buf, 0, -1, false, lines)
 
@@ -132,6 +132,7 @@ entries_view.open = function(self, offset, entries)
       col = vim.fn.screencol() - 1 - delta - 1,
       width = width,
       height = height,
+      zindex = 1001
     })
     vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
     self.entries_win:option('cursorline', false)
