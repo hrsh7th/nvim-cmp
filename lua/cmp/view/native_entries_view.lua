@@ -17,6 +17,13 @@ native_entries_view.new = function()
   return self
 end
 
+native_entries_view.ready = function(self)
+  if vim.fn.pumvisible() == 0 then
+    return true
+  end
+  return vim.fn.complete_info({ 'mode' }).mode == 'eval' and #self.entries > 0
+end
+
 native_entries_view.open = function(self, offset, entries)
   self.offset = offset
   self.entries = {}

@@ -56,6 +56,10 @@ custom_entries_view.new = function()
   return self
 end
 
+custom_entries_view.ready = function()
+  return vim.fn.pumvisible() == 0
+end
+
 custom_entries_view.open = function(self, offset, entries)
   self.offset = offset
   self.entries = {}
@@ -224,6 +228,7 @@ custom_entries_view.get_selected_entry = function(self)
 end
 
 custom_entries_view.insert = function(self, word)
+  vim.cmd [[undojoin]]
   local cursor = vim.api.nvim_win_get_cursor(0)
   vim.api.nvim_buf_set_text(0, cursor[1] - 1, self.offset - 1, cursor[1] - 1, cursor[2], { word })
   vim.api.nvim_win_set_cursor(0, { cursor[1], self.offset + #word - 1 })

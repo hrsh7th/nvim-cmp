@@ -153,6 +153,7 @@ core.on_change = function(self, event)
   local ignore = false
   ignore = ignore or self.suspending
   ignore = ignore or (vim.fn.pumvisible() == 1 and (vim.v.completed_item).word)
+  ignore = ignore or not self.view:ready()
   if ignore then
     self:get_context({ reason = types.cmp.ContextReason.Auto })
     return
