@@ -3,6 +3,11 @@
 A completion engine plugin for neovim written in Lua.
 Completion sources are installed from external repositories and "sourced".
 
+Readme!
+====================
+
+nvim-cmp's breaking change are [here](https://github.com/hrsh7th/nvim-cmp/issues/231).
+
 
 Status
 ====================
