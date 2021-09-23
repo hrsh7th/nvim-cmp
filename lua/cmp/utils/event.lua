@@ -35,6 +35,11 @@ event.off = function(self, name, callback)
   end
 end
 
+---Remove all events
+event.clear = function(self)
+  self.events = {}
+end
+
 ---Emit event
 ---@param name string
 event.emit = function(self, name, ...)

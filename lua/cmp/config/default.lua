@@ -67,6 +67,7 @@ return function()
     },
 
     experimental = {
+      custom_menu = true,
       ghost_text = false,
     },
 
