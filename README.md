@@ -409,6 +409,34 @@ Autocmds
 
 Invoke after nvim-cmp setup.
 
+Highlights
+====================
+
+※ The following highlights are used only when enabling `experimental.cusom_menu = true`.
+
+#### `CmpItemAbbr`
+
+The abbr field.
+
+#### `CmpItemAbbrDeprecated`
+
+The deprecated item's abbr field.
+
+#### `CmpItemAbbrMatch`
+
+The matched characters highlight.
+
+#### `CmpItemAbbrMatchFuzzy`
+
+The fuzzy matched characters highlight.
+
+#### `CmpItemKind`
+
+The kind field.
+
+#### `CmpItemMenu`
+
+The menu field.
 
 Programatic API
 ====================
