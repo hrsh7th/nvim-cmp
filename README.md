@@ -397,6 +397,12 @@ Specify whether to display ghost text.
 
 Default: `false`
 
+#### experimental.disables_insert_on_selection (type: boolean)
+
+Disables insertion on `select_prev_item()` and `select_next_item()`
+if `experimental.ghost_text` is set to `true` it would refresh the ghost text on next/prev item if this is setted to true
+
+Default: `false`
 
 Commands
 ====================

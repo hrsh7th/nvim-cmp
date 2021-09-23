@@ -93,8 +93,10 @@ cmp.PreselectMode.None = 'none'
 ---@class cmp.ExperimentalConfig
 ---@field public custom_menu boolean
 ---@field public ghost_text cmp.GhostTextConfig|"false"
+---@field public disables_insert_on_selection cmp.DisablesInsertOnSelectionConfig|"false"
 
 ---@class cmp.GhostTextConfig
+---@class cmp.DisablesInsertOnSelectionConfig
 ---@field hl_group string
 
 ---@class cmp.SourceConfig

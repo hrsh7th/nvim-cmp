@@ -1,3 +1,4 @@
+local config = require('cmp.config')
 local event = require('cmp.utils.event')
 local window = require('cmp.utils.window')
 local ghost_text_view = require('cmp.view.ghost_text_view')
@@ -175,42 +176,63 @@ end
 custom_entries_view.select_next_item = function(self)
   if self.entries_win:visible() then
     local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
-    local e
+    local word = self.prefix
+    local entry
     if not self.entries_win:option('cursorline') then
       self.prefix = string.sub(vim.api.nvim_get_current_line(), self.offset, vim.api.nvim_win_get_cursor(0)[2])
       self.entries_win:option('cursorline', true)
       vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
-      e = self.entries[1]
+      word = self.entries[1]:get_word()
+      entry = self.entries[1]
     elseif cursor == #self.entries then
       self.entries_win:option('cursorline', false)
       vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
     else
       self.entries_win:option('cursorline', true)
       vim.api.nvim_win_set_cursor(self.entries_win.win, { cursor + 1, 0 })
-      e = self.entries[cursor + 1]
+      word = self.entries[cursor + 1]:get_word()
+      entry = self.entries[cursor + 1]
     end
-    self.ghost_text_view:show(e or self:get_first_entry())
+
+    local c = config.get().experimental.disables_insert_on_selection
+    if c then
+        self.ghost_text_view:show(entry or self:get_first_entry())
+    else
+        self:insert(word)
+        self.entries_win:update()
+        self.event:emit('change')
+    end
   end
 end
 
 custom_entries_view.select_prev_item = function(self)
   if self.entries_win:visible() then
     local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
-    local e
+    local word = self.prefix
+    local entry
     if not self.entries_win:option('cursorline') then
       self.prefix = string.sub(vim.api.nvim_get_current_line(), self.offset, vim.api.nvim_win_get_cursor(0)[2])
       self.entries_win:option('cursorline', true)
       vim.api.nvim_win_set_cursor(self.entries_win.win, { #self.entries, 0 })
-      e = self.entries[#self.entries]
+      word = self.entries[#self.entries]:get_word()
+      entry = self.entries[#self.entries]
     elseif cursor == 1 then
       self.entries_win:option('cursorline', false)
       vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
     else
       self.entries_win:option('cursorline', true)
       vim.api.nvim_win_set_cursor(self.entries_win.win, { cursor - 1, 0 })
-      e = self.entries[cursor - 1]
+      word = self.entries[cursor - 1]:get_word()
+      entry = self.entries[cursor - 1]
     end
-    self.ghost_text_view:show(e or self:get_first_entry())
+    local c = config.get().experimental.disables_insert_on_selection
+    if c then
+        self.ghost_text_view:show(entry or self:get_first_entry())
+    else
+        self:insert(word)
+        self.entries_win:update()
+        self.event:emit('change')
+    end
   end
 end
 
