@@ -381,7 +381,7 @@ If you want to use this, please understand the following pros/cons.
 
 **Cons**
 - vim's `pumvisible` and `complete_info` function does not work as expected.
-
+- This feature is still under development
 
 #### experimental.ghost_text (type: cmp.GhostTextConfig | false)
 
