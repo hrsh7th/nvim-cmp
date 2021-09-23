@@ -38,9 +38,10 @@ native_entries_view.open = function(self, offset, entries)
   end
 end
 
-native_entries_view.close = function(self)
-  if self:visible() then
+native_entries_view.close = function(_)
+  if string.sub(vim.api.nvim_get_mode().mode, 1, 1) == 'i' then
     vim.fn.complete(1, {})
+    keymap.feedkeys(keymap.t('<C-e>'), 'n')
   end
 end
 
