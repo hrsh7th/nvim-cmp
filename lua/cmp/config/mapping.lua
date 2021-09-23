@@ -47,18 +47,18 @@ mapping.scroll_docs = function(delta)
 end
 
 ---Select next completion item.
-mapping.select_next_item = function()
+mapping.select_next_item = function(option)
   return function(fallback)
-    if not require('cmp').select_next_item() then
+    if not require('cmp').select_next_item(option) then
       fallback()
     end
   end
 end
 
 ---Select prev completion item.
-mapping.select_prev_item = function()
+mapping.select_prev_item = function(option)
   return function(fallback)
-    if not require('cmp').select_prev_item() then
+    if not require('cmp').select_prev_item(option) then
       fallback()
     end
   end

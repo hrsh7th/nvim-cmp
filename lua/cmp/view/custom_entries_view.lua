@@ -1,4 +1,3 @@
-local config = require('cmp.config')
 local event = require('cmp.utils.event')
 local window = require('cmp.utils.window')
 local ghost_text_view = require('cmp.view.ghost_text_view')
@@ -140,7 +139,7 @@ custom_entries_view.open = function(self, offset, entries)
       col = vim.fn.screencol() - 1 - delta - 1,
       width = width,
       height = height,
-      zindex = 1001
+      zindex = 1001,
     })
     vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
     self.entries_win:option('cursorline', false)
@@ -173,7 +172,7 @@ custom_entries_view.preselect = function(self, idx)
   end
 end
 
-custom_entries_view.select_next_item = function(self)
+custom_entries_view.select_next_item = function(self, option)
   if self.entries_win:visible() then
     local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
     local word = self.prefix
@@ -194,18 +193,17 @@ custom_entries_view.select_next_item = function(self)
       entry = self.entries[cursor + 1]
     end
 
-    local c = config.get().experimental.disables_insert_on_selection
-    if c then
-        self.ghost_text_view:show(entry or self:get_first_entry())
+    if option.disables_insert_on_selection then
+      self.ghost_text_view:show(entry or self:get_first_entry())
     else
-        self:insert(word)
-        self.entries_win:update()
-        self.event:emit('change')
+      self:_insert(word)
     end
+    self.entries_win:update()
+    self.event:emit('change')
   end
 end
 
-custom_entries_view.select_prev_item = function(self)
+custom_entries_view.select_prev_item = function(self, option)
   if self.entries_win:visible() then
     local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
     local word = self.prefix
@@ -225,14 +223,13 @@ custom_entries_view.select_prev_item = function(self)
       word = self.entries[cursor - 1]:get_word()
       entry = self.entries[cursor - 1]
     end
-    local c = config.get().experimental.disables_insert_on_selection
-    if c then
-        self.ghost_text_view:show(entry or self:get_first_entry())
+    if option.disables_insert_on_selection then
+      self.ghost_text_view:show(entry or self:get_first_entry())
     else
-        self:insert(word)
-        self.entries_win:update()
-        self.event:emit('change')
+      self:_insert(word)
     end
+    self.entries_win:update()
+    self.event:emit('change')
   end
 end
 

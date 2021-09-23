@@ -130,8 +130,8 @@ If you want to remove an option, you can set it to `false` instead.
 
 Built in helper `cmd.mappings` are:
 
-- *cmp.mapping.select_prev_item()*
-- *cmp.mapping.select_next_item()*
+- *cmp.mapping.select_prev_item({ disable_insert_on_selection = boolean })*
+- *cmp.mapping.select_next_item({ disable_insert_on_selection = boolean })*
 - *cmp.mapping.scroll_docs(number)*
 - *cmp.mapping.complete()*
 - *cmp.mapping.close()*
@@ -397,13 +397,6 @@ Specify whether to display ghost text.
 
 Default: `false`
 
-#### experimental.disables_insert_on_selection (type: boolean)
-
-Disables insertion on `select_prev_item()` and `select_next_item()`
-if `experimental.ghost_text` is set to `true` it would refresh the ghost text on next/prev item if this is setted to true
-
-Default: `false`
-
 Commands
 ====================
 
@@ -461,11 +454,11 @@ Close current completion menu.
 
 Close current completion menu and restore current line (similar to native `<C-e>` behavior).
 
-#### `cmp.select_next_item()`
+#### `cmp.select_next_item({ disable_insert_on_selection = boolean })`
 
 Select next completion item if possible.
 
-#### `cmp.select_prev_item()`
+#### `cmp.select_prev_item({ disable_insert_on_selection = boolean })`
 
 Select prev completion item if possible.
 
