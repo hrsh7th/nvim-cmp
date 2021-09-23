@@ -223,15 +223,6 @@ custom_entries_view.get_selected_entry = function(self)
   end
 end
 
-custom_entries_view.get_active_entry = function(self)
-  if self:visible() then
-    local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)
-    if cursor[2] == 0 then
-      return self:get_selected_entry()
-    end
-  end
-end
-
 custom_entries_view.insert = function(self, word)
   local cursor = vim.api.nvim_win_get_cursor(0)
   vim.api.nvim_buf_set_text(0, cursor[1] - 1, self.offset - 1, cursor[1] - 1, cursor[2], { word })
