@@ -392,6 +392,13 @@ Commands
 
 Show the source statuses
 
+Autocmds
+====================
+
+#### `cmp#ready`
+
+Invoke after nvim-cmp setup.
+
 
 Programatic API
 ====================

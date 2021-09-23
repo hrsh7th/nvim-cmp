@@ -30,3 +30,5 @@ end)
 
 vim.cmd [[command! CmpStatus lua require('cmp').status()]]
 
+vim.cmd [[doautocmd <nomodeline> User cmp#ready]]
+
