@@ -150,7 +150,7 @@ end
 
 ---Check auto-completion
 core.on_change = function(self, event)
-  if self.suspending then
+  if self.suspending or self.view:active() then
     return
   end
 

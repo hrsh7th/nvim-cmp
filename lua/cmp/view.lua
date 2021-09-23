@@ -4,6 +4,7 @@ local event = require('cmp.utils.event')
 local keymap = require('cmp.utils.keymap')
 local docs_view = require('cmp.view.docs_view')
 local entries_view = require('cmp.view.entries_view')
+local native_entries_view = require('cmp.view.native_entries_view')
 local ghost_text_view = require('cmp.view.ghost_text_view')
 
 ---@class cmp.View
@@ -19,6 +20,7 @@ view.new = function()
   local self = setmetatable({}, { __index = view })
   self.resolve_dedup = async.dedup()
   self.entries_view = entries_view.new()
+  self.entries_view = native_entries_view.new()
   self.docs_view = docs_view.new()
   self.ghost_text_view = ghost_text_view.new()
   self.event = event.new()
@@ -87,6 +89,10 @@ end
 
 view.visible = function(self)
   return self.entries_view:visible()
+end
+
+view.active = function(self)
+  return self.entries_view:active()
 end
 
 view.scroll_docs = function(self, delta)
