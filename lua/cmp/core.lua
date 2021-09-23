@@ -150,7 +150,11 @@ end
 
 ---Check auto-completion
 core.on_change = function(self, event)
-  if self.suspending or self.view:active() then
+  local ignore = false
+  ignore = ignore or self.suspending
+  ignore = ignore or (vim.fn.pumvisible() == 1 and (vim.v.completed_item).word)
+  if ignore then
+    self:get_context({ reason = types.cmp.ContextReason.Auto })
     return
   end
 

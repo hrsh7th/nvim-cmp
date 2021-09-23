@@ -3,13 +3,13 @@ local async = require('cmp.utils.async')
 local event = require('cmp.utils.event')
 local keymap = require('cmp.utils.keymap')
 local docs_view = require('cmp.view.docs_view')
-local entries_view = require('cmp.view.entries_view')
+local custom_entries_view = require('cmp.view.custom_entries_view')
 local native_entries_view = require('cmp.view.native_entries_view')
 local ghost_text_view = require('cmp.view.ghost_text_view')
 
 ---@class cmp.View
 ---@field public event cmp.Event
----@field public resolve_dedup cmp.AsyncDedup
+---@field public change_dedup cmp.AsyncDedup
 ---@field public entries_view cmp.EntriesView
 ---@field public docs_view cmp.DocsView
 ---@field public ghost_text_view cmp.GhostTextView
@@ -18,8 +18,8 @@ local view = {}
 ---Create menu
 view.new = function()
   local self = setmetatable({}, { __index = view })
-  self.resolve_dedup = async.dedup()
-  self.entries_view = entries_view.new()
+  self.change_dedup = async.dedup()
+  self.entries_view = custom_entries_view.new()
   self.entries_view = native_entries_view.new()
   self.docs_view = docs_view.new()
   self.ghost_text_view = ghost_text_view.new()
@@ -91,10 +91,6 @@ view.visible = function(self)
   return self.entries_view:visible()
 end
 
-view.active = function(self)
-  return self.entries_view:active()
-end
-
 view.scroll_docs = function(self, delta)
   self.docs_view:scroll(delta)
 end
@@ -107,34 +103,42 @@ view.select_prev_item = function(self)
   self.entries_view:select_prev_item()
 end
 
----Get current selected entry
----@return cmp.Entry|nil
-view.get_selected_entry = function(self)
-  return self.entries_view:get_selected_entry()
-end
-
 ---Get first entry
 ---@param self cmp.Entry|nil
 view.get_first_entry = function(self)
   return self.entries_view:get_first_entry()
 end
 
+---Get current selected entry
+---@return cmp.Entry|nil
+view.get_selected_entry = function(self)
+  return self.entries_view:get_selected_entry()
+end
+
+view.get_active_entry = function(self)
+  return self.entries_view:get_active_entry()
+end
+
 ---On entry change
 view.on_entry_change = function(self)
   local e = self:get_selected_entry()
-  if e then
-    for _, c in ipairs(config.get().confirmation.get_commit_characters(e:get_commit_characters())) do
-      keymap.listen('i', c, function(...)
-        self.event:emit('keymap', ...)
-      end)
-    end
-    e:resolve(self.resolve_dedup(function()
-      self.docs_view:open(e, self.entries_view:info())
-    end))
-  else
-    self.docs_view:close()
-  end
   self.ghost_text_view:show(e or self:get_first_entry())
+
+  vim.schedule(self.change_dedup(function()
+    if e then
+      for _, c in ipairs(config.get().confirmation.get_commit_characters(e:get_commit_characters())) do
+        keymap.listen('i', c, function(...)
+          self.event:emit('keymap', ...)
+        end)
+      end
+      e:resolve(function()
+        self.docs_view:open(e, self.entries_view:info())
+      end)
+    else
+      self.docs_view:close()
+    end
+  end))
 end
 
 return view
+
