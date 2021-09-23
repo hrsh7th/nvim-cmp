@@ -43,6 +43,10 @@ return function()
       end,
     },
 
+    selection = {
+      default_behavior = types.cmp.SelectBehavior.Insert,
+    },
+
     sorting = {
       priority_weight = 2,
       comparators = {

@@ -130,8 +130,8 @@ If you want to remove an option, you can set it to `false` instead.
 
 Built in helper `cmd.mappings` are:
 
-- *cmp.mapping.select_prev_item({ disable_insert_on_selection = boolean })*
-- *cmp.mapping.select_next_item({ disable_insert_on_selection = boolean })*
+- *cmp.mapping.select_prev_item({ cmp.SelectBehavior.{Insert,Select} } })*
+- *cmp.mapping.select_next_item({ cmp.SelectBehavior.{Insert,Select} })*
 - *cmp.mapping.scroll_docs(number)*
 - *cmp.mapping.complete()*
 - *cmp.mapping.close()*
@@ -291,6 +291,12 @@ Default: `menu,menuone,noselect`
 A default `cmp.ConfirmBehavior` value when to use confirmed by commitCharacters
 
 Default: `cmp.ConfirmBehavior.Insert`
+
+#### selection.default_behavior (type: cmp.SelectBehavior)
+
+A default `cmp.SelectBehavior` value to use when selecting a menu value
+
+Default: `cmp.SelectBehavior.Insert`
 
 #### confirmation.get_commit_characters (type: fun(commit_characters: string[]): string[])
 
@@ -454,11 +460,11 @@ Close current completion menu.
 
 Close current completion menu and restore current line (similar to native `<C-e>` behavior).
 
-#### `cmp.select_next_item({ disable_insert_on_selection = boolean })`
+#### `cmp.select_next_item({ cmp.SelectBehavior.{Insert,Select} })`
 
 Select next completion item if possible.
 
-#### `cmp.select_prev_item({ disable_insert_on_selection = boolean })`
+#### `cmp.select_prev_item({ cmp.SelectBehavior.{Insert,Select} })`
 
 Select prev completion item if possible.
 
@@ -527,21 +533,37 @@ autocmd FileType TelescopePrompt lua require('cmp').setup.buffer { enabled = fal
 ```
 
 #### How to disable insert on select next/prev item
-You can change this behavior on the mapping.
+
+You can disable this changing the behavior to just select `cmp.SelectBehavior.Select` 
+
+passing the option on the mapping.
+
 ```lua
 cmp.setup {
   mapping = {
-    ["<C-p>"] = cmp.mapping.select_prev_item{ disables_insert_on_selection = true },
-    ["<C-n>"] = cmp.mapping.select_next_item{ disables_insert_on_selection = true },
+    ["<C-p>"] = cmp.mapping.select_prev_item{ behavior = cmp.SelectBehavior.Select },
+    ["<C-n>"] = cmp.mapping.select_next_item{ behavior = cmp.SelectBehavior.Select },
   },
 }
 ```
+
 Or when using the Programatic API.
+
 ```lua
-cmp.select_prev_item{ disables_insert_on_selection = true }
-cmp.select_next_item{ disables_insert_on_selection = true }
+cmp.select_prev_item{ behavior = cmp.SelectBehavior.Select },
+cmp.select_next_item{ behavior = cmp.SelectBehavior.Select },
 ```
 
+You may also change the selection default behavior
+
+```lua
+cmp.setup {
+  selection = {
+    default_behavior = cmp.SelectBehavior.Select,
+  },
+
+}
+```
 
 #### nvim-cmp is slow.
 

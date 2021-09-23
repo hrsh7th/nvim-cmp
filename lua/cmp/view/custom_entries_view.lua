@@ -1,10 +1,10 @@
 local event = require('cmp.utils.event')
 local window = require('cmp.utils.window')
-local ghost_text_view = require('cmp.view.ghost_text_view')
+local config = require('cmp.config')
+local cmp = require('cmp.types').cmp
 
 ---@class cmp.EntriesView
 ---@field public entries_win cmp.Window
----@field public ghost_text_view cmp.GhostTextView
 ---@field public offset number
 ---@field public entries cmp.Entry[]
 ---@field public marks table[]
@@ -16,7 +16,6 @@ custom_entries_view.ns = vim.api.nvim_create_namespace('cmp.view.custom_entries_
 custom_entries_view.new = function()
   local self = setmetatable({}, { __index = custom_entries_view })
   self.entries_win = window.new()
-  self.ghost_text_view = ghost_text_view.new()
   self.entries_win:option('conceallevel', 2)
   self.entries_win:option('concealcursor', 'n')
   self.entries_win:option('foldenable', false)
@@ -176,13 +175,11 @@ custom_entries_view.select_next_item = function(self, option)
   if self.entries_win:visible() then
     local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
     local word = self.prefix
-    local entry
     if not self.entries_win:option('cursorline') then
       self.prefix = string.sub(vim.api.nvim_get_current_line(), self.offset, vim.api.nvim_win_get_cursor(0)[2])
       self.entries_win:option('cursorline', true)
       vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
       word = self.entries[1]:get_word()
-      entry = self.entries[1]
     elseif cursor == #self.entries then
       self.entries_win:option('cursorline', false)
       vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
@@ -190,16 +187,8 @@ custom_entries_view.select_next_item = function(self, option)
       self.entries_win:option('cursorline', true)
       vim.api.nvim_win_set_cursor(self.entries_win.win, { cursor + 1, 0 })
       word = self.entries[cursor + 1]:get_word()
-      entry = self.entries[cursor + 1]
     end
-
-    if option.disables_insert_on_selection then
-      self.ghost_text_view:show(entry or self:get_first_entry())
-    else
-      self:_insert(word)
-    end
-    self.entries_win:update()
-    self.event:emit('change')
+    self:_select_behavior(word, option)
   end
 end
 
@@ -207,13 +196,11 @@ custom_entries_view.select_prev_item = function(self, option)
   if self.entries_win:visible() then
     local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
     local word = self.prefix
-    local entry
     if not self.entries_win:option('cursorline') then
       self.prefix = string.sub(vim.api.nvim_get_current_line(), self.offset, vim.api.nvim_win_get_cursor(0)[2])
       self.entries_win:option('cursorline', true)
       vim.api.nvim_win_set_cursor(self.entries_win.win, { #self.entries, 0 })
       word = self.entries[#self.entries]:get_word()
-      entry = self.entries[#self.entries]
     elseif cursor == 1 then
       self.entries_win:option('cursorline', false)
       vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
@@ -221,15 +208,8 @@ custom_entries_view.select_prev_item = function(self, option)
       self.entries_win:option('cursorline', true)
       vim.api.nvim_win_set_cursor(self.entries_win.win, { cursor - 1, 0 })
       word = self.entries[cursor - 1]:get_word()
-      entry = self.entries[cursor - 1]
     end
-    if option.disables_insert_on_selection then
-      self.ghost_text_view:show(entry or self:get_first_entry())
-    else
-      self:_insert(word)
-    end
-    self.entries_win:update()
-    self.event:emit('change')
+    self:_select_behavior(word, option)
   end
 end
 
@@ -250,6 +230,15 @@ custom_entries_view._insert = function(self, word)
   local cursor = vim.api.nvim_win_get_cursor(0)
   vim.api.nvim_buf_set_text(0, cursor[1] - 1, self.offset - 1, cursor[1] - 1, cursor[2], { word })
   vim.api.nvim_win_set_cursor(0, { cursor[1], self.offset + #word - 1 })
+end
+
+custom_entries_view._select_behavior = function(self, word, option)
+  local behavior = option.behavior or config.get().selection.default_behavior
+  if behavior == cmp.SelectBehavior.Insert then
+    self:_insert(word)
+  end
+  self.entries_win:update()
+  self.event:emit('change')
 end
 
 return custom_entries_view
