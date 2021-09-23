@@ -130,10 +130,6 @@ view.get_selected_entry = function(self)
   return self:get_entries_view():get_selected_entry()
 end
 
-view.get_active_entry = function(self)
-  return self:get_entries_view():get_active_entry()
-end
-
 ---On entry change
 view.on_entry_change = function(self)
   local e = self:get_selected_entry()

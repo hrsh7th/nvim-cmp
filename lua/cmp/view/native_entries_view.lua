@@ -89,13 +89,5 @@ native_entries_view.get_selected_entry = function(self)
   end
 end
 
-native_entries_view.get_active_entry = function(self)
-  if self:visible() then
-    if (vim.v.completed_item or {}).word then
-      return self:get_selected_entry()
-    end
-  end
-end
-
 return native_entries_view
 
