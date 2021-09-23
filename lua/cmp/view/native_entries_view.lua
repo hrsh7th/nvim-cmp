@@ -11,9 +11,9 @@ local native_entries_view = {}
 native_entries_view.new = function()
   local self = setmetatable({}, { __index = native_entries_view })
   self.event = event.new()
-  autocmd.subscribe('CompleteChanged', vim.schedule(function()
+  autocmd.subscribe('CompleteChanged', function()
     self.event:emit('change')
-  end))
+  end)
   return self
 end
 
@@ -46,10 +46,6 @@ end
 
 native_entries_view.visible = function(_)
   return vim.fn.pumvisible() == 1
-end
-
-native_entries_view.active = function(self)
-  return (vim.v.completed_item or {}).word and self:visible()
 end
 
 native_entries_view.info = function(self)
@@ -87,6 +83,14 @@ native_entries_view.get_selected_entry = function(self)
     local idx = vim.fn.complete_info({ 'selected' }).selected
     if idx > -1 then
       return self.entries[math.max(0, idx) + 1]
+    end
+  end
+end
+
+native_entries_view.get_active_entry = function(self)
+  if self:visible() then
+    if (vim.v.completed_item or {}).word then
+      return self:get_selected_entry()
     end
   end
 end
