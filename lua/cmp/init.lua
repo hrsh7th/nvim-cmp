@@ -46,6 +46,7 @@ end
 cmp.close = function()
   if vim.fn.pumvisible() == 1 then
     core.reset()
+    keymap.feedkeys(keymap.t('<C-e>'), 'n')
     return true
   else
     return false
