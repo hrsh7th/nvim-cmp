@@ -29,6 +29,10 @@ view.new = function()
   return self
 end
 
+view.ready = function(self)
+  return self:get_entries_view():ready()
+end
+
 view.get_entries_view = function(self)
   local c = config.get()
   self.native_entries_view.event:clear()
