@@ -9,8 +9,9 @@ local ghost_text_view = require('cmp.view.ghost_text_view')
 
 ---@class cmp.View
 ---@field public event cmp.Event
+---@field public native_entries_view cmp.EntriesView
+---@field public custom_entries_view cmp.EntriesView
 ---@field public change_dedup cmp.AsyncDedup
----@field public entries_view cmp.EntriesView
 ---@field public docs_view cmp.DocsView
 ---@field public ghost_text_view cmp.GhostTextView
 local view = {}
@@ -19,17 +20,31 @@ local view = {}
 view.new = function()
   local self = setmetatable({}, { __index = view })
   self.change_dedup = async.dedup()
-  self.entries_view = custom_entries_view.new()
-  self.entries_view = native_entries_view.new()
+  self.custom_entries_view = custom_entries_view.new()
+  self.native_entries_view = native_entries_view.new()
   self.docs_view = docs_view.new()
   self.ghost_text_view = ghost_text_view.new()
   self.event = event.new()
 
-  self.entries_view.event:on('change', function()
-    self:on_entry_change()
-  end)
-
   return self
+end
+
+view.get_entries_view = function(self)
+  local c = config.get()
+  self.native_entries_view.event:clear()
+  self.custom_entries_view.event:clear()
+
+  if c.experimental.custom_menu then
+    self.custom_entries_view.event:on('change', function()
+      self:on_entry_change()
+    end)
+    return self.custom_entries_view
+  else
+    self.native_entries_view.event:on('change', function()
+      self:on_entry_change()
+    end)
+    return self.native_entries_view
+  end
 end
 
 ---Open menu
@@ -77,18 +92,18 @@ view.open = function(self, ctx, sources)
   end)
 
   -- open
-  self.entries_view:open(offset, entries)
+  self:get_entries_view():open(offset, entries)
 end
 
 ---Close menu
 view.close = function(self)
-  self.entries_view:close()
+  self:get_entries_view():close()
   self.docs_view:close()
   self.ghost_text_view:hide()
 end
 
 view.visible = function(self)
-  return self.entries_view:visible()
+  return self:get_entries_view():visible()
 end
 
 view.scroll_docs = function(self, delta)
@@ -96,27 +111,27 @@ view.scroll_docs = function(self, delta)
 end
 
 view.select_next_item = function(self)
-  self.entries_view:select_next_item()
+  self:get_entries_view():select_next_item()
 end
 
 view.select_prev_item = function(self)
-  self.entries_view:select_prev_item()
+  self:get_entries_view():select_prev_item()
 end
 
 ---Get first entry
 ---@param self cmp.Entry|nil
 view.get_first_entry = function(self)
-  return self.entries_view:get_first_entry()
+  return self:get_entries_view():get_first_entry()
 end
 
 ---Get current selected entry
 ---@return cmp.Entry|nil
 view.get_selected_entry = function(self)
-  return self.entries_view:get_selected_entry()
+  return self:get_entries_view():get_selected_entry()
 end
 
 view.get_active_entry = function(self)
-  return self.entries_view:get_active_entry()
+  return self:get_entries_view():get_active_entry()
 end
 
 ---On entry change
@@ -132,7 +147,7 @@ view.on_entry_change = function(self)
         end)
       end
       e:resolve(function()
-        self.docs_view:open(e, self.entries_view:info())
+        self.docs_view:open(e, self:get_entries_view():info())
       end)
     else
       self.docs_view:close()

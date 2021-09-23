@@ -367,7 +367,23 @@ cmp.setup {
 
 A callback function called when the item is confirmed.
 
-#### experimental.ghost_text (type: boolean)
+#### experimental.custom_menu (type: boolean)
+
+Use floating window for completion menu.
+
+Default: `true`
+
+If you want to use this, please understand the following pros/cons.
+
+**Pros**
+- Fancy appearance
+- Performance improvements
+
+**Cons**
+- vim's `pumvisible` and `complete_info` function does not work as expected.
+
+
+#### experimental.ghost_text (type: cmp.GhostTextConfig | false)
 
 Specify whether to display ghost text.
 
