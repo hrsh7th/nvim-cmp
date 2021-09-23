@@ -186,7 +186,7 @@ custom_entries_view.select_next_item = function(self)
       vim.api.nvim_win_set_cursor(self.entries_win.win, { cursor + 1, 0 })
       word = self.entries[cursor + 1]:get_word()
     end
-    self:insert(word)
+    self:_insert(word)
     self.entries_win:update()
     self.event:emit('change')
   end
@@ -209,7 +209,7 @@ custom_entries_view.select_prev_item = function(self)
       vim.api.nvim_win_set_cursor(self.entries_win.win, { cursor - 1, 0 })
       word = self.entries[cursor - 1]:get_word()
     end
-    self:insert(word)
+    self:_insert(word)
     self.entries_win:update()
     self.event:emit('change')
   end
@@ -227,7 +227,7 @@ custom_entries_view.get_selected_entry = function(self)
   end
 end
 
-custom_entries_view.insert = function(self, word)
+custom_entries_view._insert = function(self, word)
   vim.cmd [[undojoin]]
   local cursor = vim.api.nvim_win_get_cursor(0)
   vim.api.nvim_buf_set_text(0, cursor[1] - 1, self.offset - 1, cursor[1] - 1, cursor[2], { word })
