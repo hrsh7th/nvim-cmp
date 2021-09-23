@@ -56,10 +56,11 @@ docs_view.open = function(self, e, view)
   local right_col = view.col + view.width
   local left_col = view.col - width - 2
 
-  local col
+  local col, left
   if right_space >= width and left_space >= width then
     if right_space < left_space then
       col = left_col
+      left = true
     else
       col = right_col
     end
@@ -67,12 +68,13 @@ docs_view.open = function(self, e, view)
     col = right_col
   elseif left_space >= width then
     col = left_col
+    left = true
   else
     return self:close()
   end
 
   self.window:option('winhighlight', documentation.winhighlight)
-  self.window:open({
+  self.window:set_style({
     relative = 'editor',
     style = 'minimal',
     width = width,
@@ -81,6 +83,10 @@ docs_view.open = function(self, e, view)
     col = col,
     border = documentation.border,
   })
+  if left and self.window:has_scrollbar() then
+    self.window.style.col = self.window.style.col - 1
+  end
+  self.window:open()
 end
 
 ---Close floating window

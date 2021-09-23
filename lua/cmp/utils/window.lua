@@ -68,7 +68,9 @@ end
 window.open = function(self, style)
   self.id = self.id + 1
 
-  self:set_style(style)
+  if style then
+    self:set_style(style)
+  end
 
   if self.style.width < 1 or self.style.height < 1 then
     return
@@ -76,9 +78,9 @@ window.open = function(self, style)
 
   if self.win and vim.api.nvim_win_is_valid(self.win) then
     vim.api.nvim_win_set_buf(self.win, self.buf)
-    vim.api.nvim_win_set_config(self.win, style)
+    vim.api.nvim_win_set_config(self.win, self.style)
   else
-    self.win = vim.api.nvim_open_win(self.buf, false, style)
+    self.win = vim.api.nvim_open_win(self.buf, false, self.style)
     for k, v in pairs(self.opt) do
       vim.api.nvim_win_set_option(self.win, k, v)
     end
