@@ -526,6 +526,23 @@ You can specify `enabled = false` like this.
 autocmd FileType TelescopePrompt lua require('cmp').setup.buffer { enabled = false }
 ```
 
+#### How to disable insert on select next/prev item
+You can change this behavior on the mapping.
+```lua
+cmp.setup {
+  mapping = {
+    ["<C-p>"] = cmp.mapping.select_prev_item{ disables_insert_on_selection = true },
+    ["<C-n>"] = cmp.mapping.select_next_item{ disables_insert_on_selection = true },
+  },
+}
+```
+Or when using the Programatic API.
+```lua
+cmp.select_prev_item{ disables_insert_on_selection = true }
+cmp.select_next_item{ disables_insert_on_selection = true }
+```
+
+
 #### nvim-cmp is slow.
 
 I've optimized `nvim-cmp` as much as possible, but there are currently some known / unfixable issues.
