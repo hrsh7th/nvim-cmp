@@ -1,4 +1,5 @@
 local event = require('cmp.utils.event')
+local autocmd = require('cmp.utils.autocmd')
 local window = require('cmp.utils.window')
 
 ---@class cmp.EntriesView
@@ -24,6 +25,12 @@ custom_entries_view.new = function()
   self.offset = -1
   self.entries = {}
   self.marks = {}
+
+  autocmd.subscribe('CompleteChanged', function()
+    if vim.fn.pumvisible() == 1 then
+      self:close()
+    end
+  end)
 
   vim.api.nvim_set_decoration_provider(custom_entries_view.ns, {
     on_win = function(_, winid)
