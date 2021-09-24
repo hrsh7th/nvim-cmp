@@ -1,4 +1,5 @@
 local compare = require('cmp.config.compare')
+local mapping = require('cmp.config.mapping')
 local types = require('cmp.types')
 
 local WIDE_HEIGHT = 40
@@ -43,10 +44,6 @@ return function()
       end,
     },
 
-    selection = {
-      default_behavior = types.cmp.SelectBehavior.Insert,
-    },
-
     sorting = {
       priority_weight = 2,
       comparators = {
@@ -62,7 +59,12 @@ return function()
 
     event = {},
 
-    mapping = {},
+    mapping = {
+      ['<Down>'] = mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Select }),
+      ['<Up>'] = mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Select }),
+      ['<C-n>'] = mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Insert }),
+      ['<C-p>'] = mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Insert }),
+    },
 
     formatting = {
       format = function(_, vim_item)

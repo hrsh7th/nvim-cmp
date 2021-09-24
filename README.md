@@ -72,7 +72,7 @@ lua <<EOF
     snippet = {
       expand = function(args)
         -- For `vsnip` user.
-        vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` user.
+        vim.fn["vsnip#anonymous"](args.body)
 
         -- For `luasnip` user.
         -- require('luasnip').lsp_expand(args.body)
@@ -142,6 +142,10 @@ You can configure `nvim-cmp` to use these `cmd.mappings` like this:
 
 ```lua
 mapping = {
+  ['<C-n>'] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert }),
+  ['<C-p>'] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }),
+  ['<Down>'] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+  ['<Up>'] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
   ['<C-d>'] = cmp.mapping.scroll_docs(-4),
   ['<C-f>'] = cmp.mapping.scroll_docs(4),
   ['<C-Space>'] = cmp.mapping.complete(),
@@ -291,12 +295,6 @@ Default: `menu,menuone,noselect`
 A default `cmp.ConfirmBehavior` value when to use confirmed by commitCharacters
 
 Default: `cmp.ConfirmBehavior.Insert`
-
-#### selection.default_behavior (type: cmp.SelectBehavior)
-
-A default `cmp.SelectBehavior` value to use when selecting a menu value
-
-Default: `cmp.SelectBehavior.Insert`
 
 #### confirmation.get_commit_characters (type: fun(commit_characters: string[]): string[])
 
@@ -534,39 +532,6 @@ You can specify `enabled = false` like this.
 
 ```vim
 autocmd FileType TelescopePrompt lua require('cmp').setup.buffer { enabled = false }
-```
-
-#### How to disable insert on select next/prev item
-
-You can disable this changing the behavior to just select `cmp.SelectBehavior.Select` 
-
-passing the option on the mapping.
-
-```lua
-cmp.setup {
-  mapping = {
-    ["<C-p>"] = cmp.mapping.select_prev_item{ behavior = cmp.SelectBehavior.Select },
-    ["<C-n>"] = cmp.mapping.select_next_item{ behavior = cmp.SelectBehavior.Select },
-  },
-}
-```
-
-Or when using the Programatic API.
-
-```lua
-cmp.select_prev_item{ behavior = cmp.SelectBehavior.Select },
-cmp.select_next_item{ behavior = cmp.SelectBehavior.Select },
-```
-
-You may also change the selection default behavior
-
-```lua
-cmp.setup {
-  selection = {
-    default_behavior = cmp.SelectBehavior.Select,
-  },
-
-}
 ```
 
 #### nvim-cmp is slow.

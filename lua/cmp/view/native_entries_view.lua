@@ -1,6 +1,7 @@
 local event = require "cmp.utils.event"
 local autocmd = require('cmp.utils.autocmd')
 local keymap = require('cmp.utils.keymap')
+local types = require('cmp.types')
 
 ---@class cmp.NativeEntriesView
 ---@field private offset number
@@ -69,15 +70,23 @@ native_entries_view.info = function(self)
   end
 end
 
-native_entries_view.select_next_item = function(self)
+native_entries_view.select_next_item = function(self, option)
   if self:visible() then
-    keymap.feedkeys(keymap.t('<C-n>'), 'n')
+    if (option.behavior or types.cmp.SelectBehavior.Insert) == types.cmp.SelectBehavior.Insert then
+      keymap.feedkeys(keymap.t('<C-n>'), 'n')
+    else
+      keymap.feedkeys(keymap.t('<Down>'), 'n')
+    end
   end
 end
 
-native_entries_view.select_prev_item = function(self)
+native_entries_view.select_prev_item = function(self, option)
   if self:visible() then
-    keymap.feedkeys(keymap.t('<C-p>'), 'n')
+    if (option.behavior or types.cmp.SelectBehavior.Insert) == types.cmp.SelectBehavior.Insert then
+      keymap.feedkeys(keymap.t('<C-p>'), 'n')
+    else
+      keymap.feedkeys(keymap.t('<Up>'), 'n')
+    end
   end
 end
 

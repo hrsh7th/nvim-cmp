@@ -60,7 +60,6 @@ cmp.PreselectMode.None = 'none'
 ---@field public completion cmp.CompletionConfig
 ---@field public documentation cmp.DocumentationConfig|"false"
 ---@field public confirmation cmp.ConfirmationConfig
----@field public selection cmp.SelectionConfig
 ---@field public sorting cmp.SortingConfig
 ---@field public formatting cmp.FormattingConfig
 ---@field public snippet cmp.SnippetConfig
@@ -85,9 +84,6 @@ cmp.PreselectMode.None = 'none'
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior
 ---@field public get_commit_characters fun(commit_characters: string[]): string[]
-
----@class cmp.SelectionConfig
----@field public default_behavior cmp.SelectBehavior
 
 ---@class cmp.SortingConfig
 ---@field public priority_weight number
