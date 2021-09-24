@@ -73,9 +73,10 @@ cmp.abort = function()
 end
 
 ---Select next item if possible
-cmp.select_next_item = function()
+cmp.select_next_item = function(option)
+  option = option or {}
   if cmp.core.view:visible() then
-    cmp.core.view:select_next_item()
+    cmp.core.view:select_next_item(option)
     cmp.core:get_context()
     return true
   else
@@ -84,9 +85,10 @@ cmp.select_next_item = function()
 end
 
 ---Select prev item if possible
-cmp.select_prev_item = function()
+cmp.select_prev_item = function(option)
+  option = option or {}
   if cmp.core.view:visible() then
-    cmp.core.view:select_prev_item()
+    cmp.core.view:select_prev_item(option)
     cmp.core:get_context()
     return true
   else

@@ -43,6 +43,10 @@ return function()
       end,
     },
 
+    selection = {
+      default_behavior = types.cmp.SelectBehavior.Insert,
+    },
+
     sorting = {
       priority_weight = 2,
       comparators = {
@@ -69,6 +73,7 @@ return function()
     experimental = {
       custom_menu = true,
       ghost_text = false,
+      disables_insert_on_selection = false
     },
 
     sources = {},

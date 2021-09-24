@@ -1,6 +1,8 @@
 local event = require('cmp.utils.event')
 local autocmd = require('cmp.utils.autocmd')
 local window = require('cmp.utils.window')
+local config = require('cmp.config')
+local cmp = require('cmp.types').cmp
 
 ---@class cmp.CustomEntriesView
 ---@field private entries_win cmp.Window
@@ -143,7 +145,7 @@ custom_entries_view.open = function(self, offset, entries)
       col = vim.fn.screencol() - 1 - delta - 1,
       width = width,
       height = height,
-      zindex = 1001
+      zindex = 1001,
     })
     vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
     self.entries_win:option('cursorline', false)
@@ -176,7 +178,7 @@ custom_entries_view.preselect = function(self, idx)
   end
 end
 
-custom_entries_view.select_next_item = function(self)
+custom_entries_view.select_next_item = function(self, option)
   if self.entries_win:visible() then
     local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
     local word = self.prefix
@@ -193,13 +195,11 @@ custom_entries_view.select_next_item = function(self)
       vim.api.nvim_win_set_cursor(self.entries_win.win, { cursor + 1, 0 })
       word = self.entries[cursor + 1]:get_word()
     end
-    self:_insert(word)
-    self.entries_win:update()
-    self.event:emit('change')
+    self:_select_behavior(word, option)
   end
 end
 
-custom_entries_view.select_prev_item = function(self)
+custom_entries_view.select_prev_item = function(self, option)
   if self.entries_win:visible() then
     local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
     local word = self.prefix
@@ -216,9 +216,7 @@ custom_entries_view.select_prev_item = function(self)
       vim.api.nvim_win_set_cursor(self.entries_win.win, { cursor - 1, 0 })
       word = self.entries[cursor - 1]:get_word()
     end
-    self:_insert(word)
-    self.entries_win:update()
-    self.event:emit('change')
+    self:_select_behavior(word, option)
   end
 end
 
@@ -239,6 +237,15 @@ custom_entries_view._insert = function(self, word)
   local cursor = vim.api.nvim_win_get_cursor(0)
   vim.api.nvim_buf_set_text(0, cursor[1] - 1, self.offset - 1, cursor[1] - 1, cursor[2], { word })
   vim.api.nvim_win_set_cursor(0, { cursor[1], self.offset + #word - 1 })
+end
+
+custom_entries_view._select_behavior = function(self, word, option)
+  local behavior = option.behavior or config.get().selection.default_behavior
+  if behavior == cmp.SelectBehavior.Insert then
+    self:_insert(word)
+  end
+  self.entries_win:update()
+  self.event:emit('change')
 end
 
 return custom_entries_view

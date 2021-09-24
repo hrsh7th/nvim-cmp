@@ -116,12 +116,12 @@ view.scroll_docs = function(self, delta)
   self.docs_view:scroll(delta)
 end
 
-view.select_next_item = function(self)
-  self:get_entries_view():select_next_item()
+view.select_next_item = function(self, option)
+  self:get_entries_view():select_next_item(option)
 end
 
-view.select_prev_item = function(self)
-  self:get_entries_view():select_prev_item()
+view.select_prev_item = function(self, option)
+  self:get_entries_view():select_prev_item(option)
 end
 
 ---Get first entry
