@@ -33,6 +33,8 @@ view.ready = function(self)
   return self:get_entries_view():ready()
 end
 
+---Return current configured entries_view
+---@return cmp.CustomEntriesView|cmp.NativeEntriesView
 view.get_entries_view = function(self)
   local c = config.get()
   self.native_entries_view.event:clear()

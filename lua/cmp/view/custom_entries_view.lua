@@ -2,11 +2,11 @@ local event = require('cmp.utils.event')
 local autocmd = require('cmp.utils.autocmd')
 local window = require('cmp.utils.window')
 
----@class cmp.EntriesView
----@field public entries_win cmp.Window
----@field public offset number
----@field public entries cmp.Entry[]
----@field public marks table[]
+---@class cmp.CustomEntriesView
+---@field private entries_win cmp.Window
+---@field private offset number
+---@field private entries cmp.Entry[]
+---@field private marks table[]
 ---@field public event cmp.Event
 local custom_entries_view = {}
 

@@ -3,8 +3,8 @@ local autocmd = require('cmp.utils.autocmd')
 local keymap = require('cmp.utils.keymap')
 
 ---@class cmp.NativeEntriesView
----@field public offset number
----@field public entries cmp.Entry[]
+---@field private offset number
+---@field private entries cmp.Entry[]
 ---@field public event cmp.Event
 local native_entries_view = {}
 
