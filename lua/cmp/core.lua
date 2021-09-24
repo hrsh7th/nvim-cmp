@@ -383,7 +383,7 @@ core.confirm = function(e, option, callback)
             insert_text_mode = completion_item.insertTextMode,
           })
         end
-        e:execute(function()
+        e:execute(vim.schedule_wrap(function()
           suspending()
 
           if config.get().event.on_confirm_done then
@@ -392,7 +392,7 @@ core.confirm = function(e, option, callback)
           if callback then
             callback()
           end
-        end)
+        end))
       end)
     end)
   end)
