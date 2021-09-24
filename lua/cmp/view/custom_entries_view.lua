@@ -28,11 +28,11 @@ custom_entries_view.new = function()
   self.entries = {}
   self.marks = {}
 
-  autocmd.subscribe('CompleteChanged', function()
-    if vim.fn.pumvisible() == 1 then
+  autocmd.subscribe('CompleteChanged', vim.schedule_wrap(function()
+    if self:visible() and vim.fn.pumvisible() == 1 then
       self:close()
     end
-  end)
+  end))
 
   vim.api.nvim_set_decoration_provider(custom_entries_view.ns, {
     on_win = function(_, winid)
@@ -79,6 +79,7 @@ custom_entries_view.open = function(self, offset, entries)
     local abbrs = { width = 0, texts = {}, widths = {}, hl_groups = {} }
     local kinds = { width = 0, texts = {}, widths = {}, hl_groups = {} }
     local menus = { width = 0, texts = {}, widths = {}, hl_groups = {} }
+    local preselect = 0
     for _, e in ipairs(entries) do
       local i = #self.entries + 1
       local item = e:get_vim_item(offset)
@@ -101,6 +102,10 @@ custom_entries_view.open = function(self, offset, entries)
         menus.widths[i] = vim.str_utfindex(kinds.texts[i])
         menus.width = math.max(kinds.width, kinds.widths[i])
         menus.hl_groups[i] = 'CmpItemMenu'
+
+        if preselect == 0 and e.completion_item.preselect then
+          preselect = i
+        end
       end
     end
 
@@ -147,8 +152,15 @@ custom_entries_view.open = function(self, offset, entries)
       height = height,
       zindex = 1001,
     })
-    vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
-    self.entries_win:option('cursorline', false)
+
+    if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
+      self:preselect(preselect)
+    elseif string.match(vim.o.completeopt, 'noinsert') then
+      self:preselect(1)
+    else
+      vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
+      self.entries_win:option('cursorline', false)
+    end
   else
     self:close()
   end
@@ -167,11 +179,11 @@ custom_entries_view.info = function(self)
   return self.entries_win:info()
 end
 
-custom_entries_view.preselect = function(self, idx)
+custom_entries_view.preselect = function(self, index)
   if self:visible() then
-    if idx <= #self.entries then
+    if index <= #self.entries then
       self.entries_win:option('cursorline', true)
-      vim.api.nvim_win_set_cursor(self.entries_win.win, { idx - 1, 1 })
+      vim.api.nvim_win_set_cursor(self.entries_win.win, { index, 1 })
       self.entries_win:update()
       self.event:emit('change')
     end
@@ -213,13 +225,14 @@ custom_entries_view.get_selected_entry = function(self)
 end
 
 custom_entries_view._select = function(self, cursor, option)
+  local is_insert = (option.behavior or types.cmp.SelectBehavior.Insert) == types.cmp.SelectBehavior.Insert
+
   if not self.entries_win:option('cursorline') then
     self.prefix = string.sub(vim.api.nvim_get_current_line(), self.offset, vim.api.nvim_win_get_cursor(0)[2])
   end
   self.entries_win:option('cursorline', cursor > 0)
-
-  local is_insert = (option.behavior or types.cmp.SelectBehavior.Insert) == types.cmp.SelectBehavior.Insert
   vim.api.nvim_win_set_cursor(self.entries_win.win, { math.max(cursor, 1), is_insert and 0 or 1 })
+
   if is_insert then
     self:_insert(self.entries[cursor] and self.entries[cursor]:get_word() or self.prefix)
   end

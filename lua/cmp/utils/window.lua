@@ -77,7 +77,6 @@ window.open = function(self, style)
   end
 
   if self.win and vim.api.nvim_win_is_valid(self.win) then
-    vim.api.nvim_win_set_buf(self.win, self.buf)
     vim.api.nvim_win_set_config(self.win, self.style)
   else
     self.win = vim.api.nvim_open_win(self.buf, false, self.style)

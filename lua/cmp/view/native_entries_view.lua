@@ -2,6 +2,7 @@ local event = require "cmp.utils.event"
 local autocmd = require('cmp.utils.autocmd')
 local keymap = require('cmp.utils.keymap')
 local types = require('cmp.types')
+local config = require('cmp.config')
 
 ---@class cmp.NativeEntriesView
 ---@field private offset number
@@ -30,6 +31,7 @@ native_entries_view.open = function(self, offset, entries)
   self.entries = {}
 
   if #entries > 0 then
+    local preselect = 0
     local dedup = {}
     local items = {}
     for _, e in ipairs(entries) do
@@ -38,9 +40,18 @@ native_entries_view.open = function(self, offset, entries)
         dedup[item.abbr] = true
         table.insert(self.entries, e)
         table.insert(items, item)
+        if preselect == 0 and e.completion_item.preselect then
+          preselect = #self.entries
+        end
       end
     end
     vim.fn.complete(self.offset, items)
+
+    if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
+      self:preselect(preselect)
+    elseif string.match(vim.o.completeopt, 'noinsert') then
+      self:preselect(1)
+    end
   else
     self:close()
   end
@@ -67,6 +78,14 @@ native_entries_view.info = function(self)
       row = info.row,
       col = info.col,
     }
+  end
+end
+
+native_entries_view.preselect = function(self, index)
+  if self:visible() then
+    if index <= #self.entries then
+      vim.api.nvim_select_popupmenu_item(index - 1, false, false, {})
+    end
   end
 end
 

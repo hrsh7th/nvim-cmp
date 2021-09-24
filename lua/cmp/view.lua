@@ -29,28 +29,10 @@ view.new = function()
   return self
 end
 
+---Return the view components are available or not.
+---@return boolean
 view.ready = function(self)
-  return self:get_entries_view():ready()
-end
-
----Return current configured entries_view
----@return cmp.CustomEntriesView|cmp.NativeEntriesView
-view.get_entries_view = function(self)
-  local c = config.get()
-  self.native_entries_view.event:clear()
-  self.custom_entries_view.event:clear()
-
-  if c.experimental.custom_menu then
-    self.custom_entries_view.event:on('change', function()
-      self:on_entry_change()
-    end)
-    return self.custom_entries_view
-  else
-    self.native_entries_view.event:on('change', function()
-      self:on_entry_change()
-    end)
-    return self.native_entries_view
-  end
+  return self:_get_entries_view():ready()
 end
 
 ---Open menu
@@ -98,63 +80,88 @@ view.open = function(self, ctx, sources)
   end)
 
   -- open
-  self:get_entries_view():open(offset, entries)
+  self:_get_entries_view():open(offset, entries)
 end
 
 ---Close menu
 view.close = function(self)
-  self:get_entries_view():close()
+  self:_get_entries_view():close()
   self.docs_view:close()
   self.ghost_text_view:hide()
 end
 
+---Return the view is visible or not.
+---@return boolean
 view.visible = function(self)
-  return self:get_entries_view():visible()
+  return self:_get_entries_view():visible()
 end
 
+---Scroll documentation window if possible.
+---@param delta number
 view.scroll_docs = function(self, delta)
   self.docs_view:scroll(delta)
 end
 
+---Select prev menu item.
+---@param option cmp.SelectOption
 view.select_next_item = function(self, option)
-  self:get_entries_view():select_next_item(option)
+  self:_get_entries_view():select_next_item(option)
 end
 
+---Select prev menu item.
+---@param option cmp.SelectOption
 view.select_prev_item = function(self, option)
-  self:get_entries_view():select_prev_item(option)
+  self:_get_entries_view():select_prev_item(option)
 end
 
 ---Get first entry
 ---@param self cmp.Entry|nil
 view.get_first_entry = function(self)
-  return self:get_entries_view():get_first_entry()
+  return self:_get_entries_view():get_first_entry()
 end
 
 ---Get current selected entry
 ---@return cmp.Entry|nil
 view.get_selected_entry = function(self)
-  return self:get_entries_view():get_selected_entry()
+  return self:_get_entries_view():get_selected_entry()
+end
+
+---Return current configured entries_view
+---@return cmp.CustomEntriesView|cmp.NativeEntriesView
+view._get_entries_view = function(self)
+  local c = config.get()
+  self.native_entries_view.event:clear()
+  self.custom_entries_view.event:clear()
+
+  if c.experimental.custom_menu then
+    self.custom_entries_view.event:on('change', function()
+      self:on_entry_change()
+    end)
+    return self.custom_entries_view
+  else
+    self.native_entries_view.event:on('change', function()
+      self:on_entry_change()
+    end)
+    return self.native_entries_view
+  end
 end
 
 ---On entry change
 view.on_entry_change = function(self)
   local e = self:get_selected_entry()
-  self.ghost_text_view:show(e or self:get_first_entry())
-
-  vim.schedule(self.change_dedup(function()
-    if e then
-      for _, c in ipairs(config.get().confirmation.get_commit_characters(e:get_commit_characters())) do
-        keymap.listen('i', c, function(...)
-          self.event:emit('keymap', ...)
-        end)
-      end
-      e:resolve(function()
-        self.docs_view:open(e, self:get_entries_view():info())
+  if e then
+    for _, c in ipairs(config.get().confirmation.get_commit_characters(e:get_commit_characters())) do
+      keymap.listen('i', c, function(...)
+        self.event:emit('keymap', ...)
       end)
-    else
-      self.docs_view:close()
     end
-  end))
+    e:resolve(function()
+      self.docs_view:open(e, self:_get_entries_view():info())
+    end)
+  else
+    self.docs_view:close()
+  end
+  self.ghost_text_view:show(e or self:get_first_entry())
 end
 
 return view
