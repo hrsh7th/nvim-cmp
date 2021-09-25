@@ -246,7 +246,7 @@ custom_entries_view._select = function(self, cursor, option)
   vim.api.nvim_win_set_cursor(self.entries_win.win, { math.max(cursor, 1), is_insert and 0 or 1 })
 
   if is_insert then
-    self:_insert(self.entries[cursor] and self.entries[cursor]:get_word() or self.prefix)
+    self:_insert(self.entries[cursor] and self.entries[cursor]:get_vim_item().word or self.prefix)
   end
   self.entries_win:update()
   self.event:emit('change')

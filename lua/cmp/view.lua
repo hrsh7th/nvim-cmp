@@ -10,8 +10,8 @@ local ghost_text_view = require('cmp.view.ghost_text_view')
 ---@class cmp.View
 ---@field public event cmp.Event
 ---@field private resolve_dedup cmp.AsyncDedup
----@field private native_entries_view cmp.EntriesView
----@field private custom_entries_view cmp.EntriesView
+---@field private native_entries_view cmp.NativeEntriesView
+---@field private custom_entries_view cmp.CustomEntriesView
 ---@field private change_dedup cmp.AsyncDedup
 ---@field private docs_view cmp.DocsView
 ---@field private ghost_text_view cmp.GhostTextView
@@ -140,16 +140,16 @@ view._get_entries_view = function(self)
   self.native_entries_view.event:clear()
   self.custom_entries_view.event:clear()
 
-  if c.experimental.custom_menu then
-    self.custom_entries_view.event:on('change', function()
-      self:on_entry_change()
-    end)
-    return self.custom_entries_view
-  else
+  if c.experimental.native_menu then
     self.native_entries_view.event:on('change', function()
       self:on_entry_change()
     end)
     return self.native_entries_view
+  else
+    self.custom_entries_view.event:on('change', function()
+      self:on_entry_change()
+    end)
+    return self.custom_entries_view
   end
 end
 

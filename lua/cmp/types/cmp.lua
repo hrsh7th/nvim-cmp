@@ -99,7 +99,7 @@ cmp.PreselectMode.None = 'none'
 ---@field on_confirm_done function(e: cmp.Entry)
 
 ---@class cmp.ExperimentalConfig
----@field public custom_menu boolean
+---@field public native_menu boolean
 ---@field public ghost_text cmp.GhostTextConfig|"false"
 
 ---@class cmp.GhostTextConfig

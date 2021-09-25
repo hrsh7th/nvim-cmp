@@ -376,21 +376,11 @@ cmp.setup {
 
 A callback function called when the item is confirmed.
 
-#### experimental.custom_menu (type: boolean)
+#### experimental.native_menu (type: boolean)
 
-Use floating window for completion menu.
+Use vim's native completion menu instead of custom floating menu.
 
-Default: `true`
-
-If you want to use this, please understand the following pros/cons.
-
-**Pros**
-- Fancy appearance
-- Performance improvements
-
-**Cons**
-- vim's `pumvisible` and `complete_info` function does not work as expected.
-- This feature is still under development
+Default: `false`
 
 #### experimental.ghost_text (type: cmp.GhostTextConfig | false)
 
