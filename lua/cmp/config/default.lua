@@ -73,7 +73,7 @@ return function()
     },
 
     experimental = {
-      native_menu = true,
+      native_menu = false,
       ghost_text = false,
     },
 
