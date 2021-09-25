@@ -159,8 +159,6 @@ custom_entries_view.open = function(self, offset, entries)
       self:preselect(preselect)
     elseif string.match(config.get().completion.completeopt, 'noinsert') then
       self:preselect(1)
-    else
-      self:_select(0, {})
     end
     self.event:emit('change')
   else
