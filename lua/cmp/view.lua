@@ -9,17 +9,18 @@ local ghost_text_view = require('cmp.view.ghost_text_view')
 
 ---@class cmp.View
 ---@field public event cmp.Event
----@field public native_entries_view cmp.EntriesView
----@field public custom_entries_view cmp.EntriesView
----@field public change_dedup cmp.AsyncDedup
----@field public docs_view cmp.DocsView
----@field public ghost_text_view cmp.GhostTextView
+---@field private resolve_dedup cmp.AsyncDedup
+---@field private native_entries_view cmp.EntriesView
+---@field private custom_entries_view cmp.EntriesView
+---@field private change_dedup cmp.AsyncDedup
+---@field private docs_view cmp.DocsView
+---@field private ghost_text_view cmp.GhostTextView
 local view = {}
 
 ---Create menu
 view.new = function()
   local self = setmetatable({}, { __index = view })
-  self.change_dedup = async.dedup()
+  self.resolve_dedup = async.dedup()
   self.custom_entries_view = custom_entries_view.new()
   self.native_entries_view = native_entries_view.new()
   self.docs_view = docs_view.new()
@@ -126,6 +127,12 @@ view.get_selected_entry = function(self)
   return self:_get_entries_view():get_selected_entry()
 end
 
+---Get current active entry
+---@return cmp.Entry|nil
+view.get_active_entry = function(self)
+  return self:_get_entries_view():get_active_entry()
+end
+
 ---Return current configured entries_view
 ---@return cmp.CustomEntriesView|cmp.NativeEntriesView
 view._get_entries_view = function(self)
@@ -155,9 +162,9 @@ view.on_entry_change = function(self)
         self.event:emit('keymap', ...)
       end)
     end
-    e:resolve(function()
+    e:resolve(vim.schedule_wrap(self.resolve_dedup(function()
       self.docs_view:open(e, self:_get_entries_view():info())
-    end)
+    end)))
   else
     self.docs_view:close()
   end

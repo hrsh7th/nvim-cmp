@@ -23,7 +23,7 @@ docs_view.open = function(self, e, view)
     return
   end
 
-  if not e then
+  if not e or not view then
     return self:close()
   end
 

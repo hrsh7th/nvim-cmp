@@ -152,19 +152,21 @@ custom_entries_view.open = function(self, offset, entries)
       height = height,
       zindex = 1001,
     })
+    self.entries_win:option('cursorline', false)
+    vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 1 })
 
     if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
       self:preselect(preselect)
-    elseif string.match(vim.o.completeopt, 'noinsert') then
+    elseif string.match(config.get().completion.completeopt, 'noinsert') then
       self:preselect(1)
     else
-      vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
-      self.entries_win:option('cursorline', false)
+      self:_select(0, {})
     end
+    self.event:emit('change')
   else
     self:close()
+    self.event:emit('change')
   end
-  self.event:emit('change')
 end
 
 custom_entries_view.close = function(self)
@@ -185,7 +187,6 @@ custom_entries_view.preselect = function(self, index)
       self.entries_win:option('cursorline', true)
       vim.api.nvim_win_set_cursor(self.entries_win.win, { index, 1 })
       self.entries_win:update()
-      self.event:emit('change')
     end
   end
 end
@@ -224,12 +225,23 @@ custom_entries_view.get_selected_entry = function(self)
   end
 end
 
+custom_entries_view.get_active_entry = function(self)
+  if self.entries_win:visible() and self.entries_win:option('cursorline') then
+    local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)
+    if cursor[2] == 0 then
+      return self:get_selected_entry()
+    end
+  end
+end
+
 custom_entries_view._select = function(self, cursor, option)
   local is_insert = (option.behavior or types.cmp.SelectBehavior.Insert) == types.cmp.SelectBehavior.Insert
-
-  if not self.entries_win:option('cursorline') then
-    self.prefix = string.sub(vim.api.nvim_get_current_line(), self.offset, vim.api.nvim_win_get_cursor(0)[2])
+  if is_insert then
+    if vim.api.nvim_win_get_cursor(self.entries_win.win)[2] == 1 then
+      self.prefix = string.sub(vim.api.nvim_get_current_line(), self.offset, vim.api.nvim_win_get_cursor(0)[2]) or ''
+    end
   end
+
   self.entries_win:option('cursorline', cursor > 0)
   vim.api.nvim_win_set_cursor(self.entries_win.win, { math.max(cursor, 1), is_insert and 0 or 1 })
 

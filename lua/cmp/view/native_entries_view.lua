@@ -19,11 +19,11 @@ native_entries_view.new = function()
   return self
 end
 
-native_entries_view.ready = function(self)
+native_entries_view.ready = function(_)
   if vim.fn.pumvisible() == 0 then
     return true
   end
-  return vim.fn.complete_info({ 'mode' }).mode == 'eval' and #self.entries > 0
+  return vim.fn.complete_info({ 'mode' }).mode == 'eval'
 end
 
 native_entries_view.open = function(self, offset, entries)
@@ -45,17 +45,17 @@ native_entries_view.open = function(self, offset, entries)
         end
       end
     end
+    local completeopt = vim.o.completeopt
+    vim.o.completeopt = preselect == 1 and 'menu,menuone,noinsert' or config.get().completion.completeopt
     vim.fn.complete(self.offset, items)
+    vim.o.completeopt = completeopt
 
-    if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
+    if preselect > 1 and config.get().preselect == types.cmp.PreselectMode.Item then
       self:preselect(preselect)
-    elseif string.match(vim.o.completeopt, 'noinsert') then
-      self:preselect(1)
     end
   else
     self:close()
   end
-  vim.cmd [[doautocmd CompleteChanged]]
 end
 
 native_entries_view.close = function(_)
@@ -121,6 +121,12 @@ native_entries_view.get_selected_entry = function(self)
     if idx > -1 then
       return self.entries[math.max(0, idx) + 1]
     end
+  end
+end
+
+native_entries_view.get_active_entry = function(self)
+  if self:visible() and (vim.v.completed_item or {}).word then
+    return self:get_selected_entry()
   end
 end
 

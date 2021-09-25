@@ -75,7 +75,6 @@ return function()
     experimental = {
       custom_menu = true,
       ghost_text = false,
-      disables_insert_on_selection = false
     },
 
     sources = {},

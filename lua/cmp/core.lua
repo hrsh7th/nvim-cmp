@@ -111,7 +111,7 @@ core.on_keymap = function(self, keys, fallback)
 
   --Commit character. NOTE: This has a lot of cmp specific implementation to make more user-friendly.
   local chars = keymap.t(keys)
-  local e = self.view:get_selected_entry()
+  local e = self.view:get_active_entry()
   if e and vim.tbl_contains(config.get().confirmation.get_commit_characters(e:get_commit_characters()), chars) then
     local is_printable = char.is_printable(string.byte(chars, 1))
     self:confirm(e, {
