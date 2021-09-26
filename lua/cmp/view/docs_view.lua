@@ -10,7 +10,11 @@ docs_view.new = function()
   local self = setmetatable({}, { __index = docs_view })
   self.entry = nil
   self.window = window.new()
+  self.window:option('conceallevel', 2)
+  self.window:option('concealcursor', 'n')
+  self.window:option('foldenable', false)
   self.window:option('scrolloff', 0)
+  self.window:option('wrap', true)
   return self
 end
 
