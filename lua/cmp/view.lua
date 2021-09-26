@@ -91,6 +91,13 @@ view.close = function(self)
   self.ghost_text_view:hide()
 end
 
+---Abort menu
+view.abort = function(self)
+  self:_get_entries_view():abort()
+  self.docs_view:close()
+  self.ghost_text_view:hide()
+end
+
 ---Return the view is visible or not.
 ---@return boolean
 view.visible = function(self)

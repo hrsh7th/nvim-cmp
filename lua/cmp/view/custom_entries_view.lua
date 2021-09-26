@@ -168,7 +168,18 @@ custom_entries_view.open = function(self, offset, entries)
 end
 
 custom_entries_view.close = function(self)
+  self.offset = -1
+  self.entries = {}
+  self.marks = {}
+  self.original = ''
   self.entries_win:close()
+end
+
+custom_entries_view.abort = function(self)
+  if self.prefix then
+    self:_insert(self.prefix)
+  end
+  self:close()
 end
 
 custom_entries_view.visible = function(self)

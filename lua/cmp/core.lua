@@ -373,7 +373,6 @@ core.reset = function(self)
   for _, s in pairs(self.sources) do
     s:reset()
   end
-  self.view:close()
   self:get_context() -- To prevent new event
 end
 

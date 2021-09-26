@@ -52,8 +52,10 @@ end
 ---Close current completion
 cmp.close = function()
   if cmp.core.view:visible() then
+    local release = cmp.core:suspend()
+    cmp.core.view:close()
     cmp.core:reset()
-    keymap.feedkeys(keymap.t('<C-e>'), 'n')
+    vim.schedule(release)
     return true
   else
     return false
@@ -63,9 +65,9 @@ end
 ---Abort current completion
 cmp.abort = function()
   if cmp.core.view:visible() then
-    keymap.feedkeys(keymap.t('<C-e>'), 'n', function()
-      cmp.core:reset()
-    end)
+    local release = cmp.core:suspend()
+    cmp.core.view:abort()
+    vim.schedule(release)
     return true
   else
     return false
@@ -76,8 +78,9 @@ end
 cmp.select_next_item = function(option)
   option = option or {}
   if cmp.core.view:visible() then
+    local release = cmp.core:suspend()
     cmp.core.view:select_next_item(option)
-    cmp.core:get_context()
+    vim.schedule(release)
     return true
   else
     return false
@@ -88,8 +91,9 @@ end
 cmp.select_prev_item = function(option)
   option = option or {}
   if cmp.core.view:visible() then
+    local release = cmp.core:suspend()
     cmp.core.view:select_prev_item(option)
-    cmp.core:get_context()
+    vim.schedule(release)
     return true
   else
     return false
@@ -218,6 +222,7 @@ end)
 
 autocmd.subscribe('InsertLeave', function()
   cmp.core:reset()
+  cmp.core.view:close()
 end)
 
 return cmp
