@@ -143,6 +143,7 @@ custom_entries_view.open = function(self, offset, entries)
     end
 
     local delta = vim.api.nvim_win_get_cursor(0)[2] + 1 - self.offset
+    self.entries_win:option('cursorline', false)
     self.entries_win:open({
       relative = 'editor',
       style = 'minimal',
@@ -152,7 +153,6 @@ custom_entries_view.open = function(self, offset, entries)
       height = height,
       zindex = 1001,
     })
-    self.entries_win:option('cursorline', false)
     vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 1 })
 
     if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then

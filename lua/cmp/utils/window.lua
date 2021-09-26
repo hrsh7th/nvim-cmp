@@ -106,7 +106,7 @@ window.update = function(self)
       vim.api.nvim_win_set_config(self.swin1, style1)
     else
       self.swin1 = vim.api.nvim_open_win(self.sbuf1, false, style1)
-      vim.api.nvim_win_set_option(self.swin1, 'winhighlight', 'Normal:PmenuSbar')
+      vim.api.nvim_win_set_option(self.swin1, 'winhighlight', 'Normal:PmenuSbar,NormalNC:PmenuSbar,NormalFloat:PmenuSbar')
     end
     local style2 = {}
     style2.relative = 'editor'
@@ -120,7 +120,7 @@ window.update = function(self)
       vim.api.nvim_win_set_config(self.swin2, style2)
     else
       self.swin2 = vim.api.nvim_open_win(self.sbuf2, false, style2)
-      vim.api.nvim_win_set_option(self.swin2, 'winhighlight', 'Normal:PmenuSel')
+      vim.api.nvim_win_set_option(self.swin2, 'winhighlight', 'Normal:PmenuThumb,NormalNC:PmenuThumb,NormalFloat:PmenuThumb')
     end
   else
     if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then

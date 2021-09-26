@@ -154,7 +154,7 @@ view._get_entries_view = function(self)
 end
 
 ---On entry change
-view.on_entry_change = function(self)
+view.on_entry_change = async.throttle(function(self)
   local e = self:get_selected_entry()
   if e then
     for _, c in ipairs(config.get().confirmation.get_commit_characters(e:get_commit_characters())) do
@@ -169,7 +169,7 @@ view.on_entry_change = function(self)
     self.docs_view:close()
   end
   self.ghost_text_view:show(e or self:get_first_entry())
-end
+end, 20)
 
 return view
 
