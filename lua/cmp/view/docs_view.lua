@@ -31,8 +31,8 @@ docs_view.open = function(self, e, view)
     return self:close()
   end
 
-  local right_space = vim.o.columns - (view.col + view.width) - 1
-  local left_space = view.col - 1
+  local right_space = vim.o.columns - (view.col + view.width) - 2
+  local left_space = view.col - 2
   local maxwidth = math.min(documentation.maxwidth, math.max(left_space, right_space))
 
   -- update buffer content if needed.
