@@ -64,6 +64,7 @@ return function()
       ['<Up>'] = mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Select }),
       ['<C-n>'] = mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Insert }),
       ['<C-p>'] = mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Insert }),
+      ['<C-c>'] = mapping.close(),
     },
 
     formatting = {
