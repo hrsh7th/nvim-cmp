@@ -35,29 +35,28 @@ custom_entries_view.new = function()
   end))
 
   vim.api.nvim_set_decoration_provider(custom_entries_view.ns, {
-    on_win = function(_, winid)
-      return winid == self.entries_win.win
-    end,
-    on_line = function(_, winid, bufnr, row)
-      if winid == self.entries_win.win then
-        for _, mark in ipairs(self.marks[row + 1]) do
-          vim.api.nvim_buf_set_extmark(bufnr, custom_entries_view.ns, row, mark.col, {
-            end_line = row,
-            end_col = mark.col + mark.length,
-            hl_group = mark.hl_group,
-            hl_mode = 'combine',
-            ephemeral = true,
-          })
-        end
-        for _, m in ipairs(self.entries[row + 1].matches or {}) do
-          vim.api.nvim_buf_set_extmark(bufnr, custom_entries_view.ns, row, m.word_match_start, {
-            end_line = row,
-            end_col = m.word_match_end + 1,
-            hl_group = m.fuzzy and 'CmpItemAbbrMatchFuzzy' or 'CmpItemAbbrMatch',
-            hl_mode = 'combine',
-            ephemeral = true,
-          })
-        end
+    on_line = function(_, win, bufnr, row)
+      if win ~= self.entries_win.win then
+        return
+      end
+
+      for _, mark in ipairs(self.marks[row + 1]) do
+        vim.api.nvim_buf_set_extmark(bufnr, custom_entries_view.ns, row, mark.col, {
+          end_line = row,
+          end_col = mark.col + mark.length,
+          hl_group = mark.hl_group,
+          hl_mode = 'combine',
+          ephemeral = true,
+        })
+      end
+      for _, m in ipairs(self.entries[row + 1].matches or {}) do
+        vim.api.nvim_buf_set_extmark(bufnr, custom_entries_view.ns, row, m.word_match_start, {
+          end_line = row,
+          end_col = m.word_match_end + 1,
+          hl_group = m.fuzzy and 'CmpItemAbbrMatchFuzzy' or 'CmpItemAbbrMatch',
+          hl_mode = 'combine',
+          ephemeral = true,
+        })
       end
     end,
   })

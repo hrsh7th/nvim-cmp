@@ -24,6 +24,8 @@ local window = {}
 window.new = function()
   local self = setmetatable({}, { __index = window })
   self.buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_option(self.buf, 'undolevels', -1)
+  vim.api.nvim_buf_set_option(self.buf, 'buftype', 'nofile')
   self.win = nil
   self.style = {}
   self.sbuf1 = vim.api.nvim_create_buf(false, true)

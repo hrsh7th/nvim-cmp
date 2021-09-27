@@ -43,6 +43,9 @@ docs_view.open = function(self, e, view)
     end
 
     self.entry = e
+    vim.api.nvim_buf_call(self.window.buf, function()
+      vim.cmd [[syntax clear]]
+    end)
     vim.lsp.util.stylize_markdown(self.window.buf, documents, {
       max_width = maxwidth,
       max_height = documentation.maxheight,
