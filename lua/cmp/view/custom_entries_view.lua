@@ -35,11 +35,10 @@ custom_entries_view.new = function()
   end))
 
   vim.api.nvim_set_decoration_provider(custom_entries_view.ns, {
-    on_line = function(_, win, bufnr, row)
-      if win ~= self.entries_win.win then
-        return
-      end
-
+    on_win = function(_, win)
+      return win == self.entries_win.win
+    end,
+    on_line = function(_, _, bufnr, row)
       for _, mark in ipairs(self.marks[row + 1]) do
         vim.api.nvim_buf_set_extmark(bufnr, custom_entries_view.ns, row, mark.col, {
           end_line = row,

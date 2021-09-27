@@ -15,11 +15,7 @@ ghost_text_view.new = function()
     on_win = function(_, win)
       return win == self.win
     end,
-    on_line = function(_, win)
-      if win ~= self.win then
-        return
-      end
-
+    on_line = function(_)
       local c = config.get().experimental.ghost_text
       if not c then
         return
