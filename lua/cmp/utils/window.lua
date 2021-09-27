@@ -65,9 +65,6 @@ window.set_style = function(self, style)
   end
   self.style = style
   self.style.zindex = self.style.zindex or 1
-  if self:has_scrollbar() and self:get_border_width() > 0 then
-    self.style.width = self.style.width + 1
-  end
 end
 
 ---Open window
@@ -99,7 +96,6 @@ window.update = function(self)
   if self:has_scrollbar() then
     local total = self:get_content_height()
     local info = self:info()
-    local has_border = info.border_width > 0
     local bar_height = math.ceil(info.height * (info.height / total))
     local bar_offset = math.min(info.height - bar_height, math.floor(info.height * (vim.fn.getwininfo(self.win)[1].topline / total)))
     local style1 = {}
@@ -107,8 +103,8 @@ window.update = function(self)
     style1.style = 'minimal'
     style1.width = 1
     style1.height = info.height
-    style1.row = info.row + (has_border and 1 or 0)
-    style1.col = info.col + info.width - (info.has_scrollbar and (has_border and 3 or 1) or 0)
+    style1.row = info.row
+    style1.col = info.col + info.width - (info.has_scrollbar and 1 or 0)
     style1.zindex = (self.style.zindex and (self.style.zindex + 1) or 1)
     if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
       vim.api.nvim_win_set_config(self.swin1, style1)
@@ -121,8 +117,8 @@ window.update = function(self)
     style2.style = 'minimal'
     style2.width = 1
     style2.height = bar_height
-    style2.row = info.row + bar_offset + (has_border and 1 or 0)
-    style2.col = info.col + info.width - (info.has_scrollbar and (has_border and 3 or 1) or 0)
+    style2.row = info.row + bar_offset
+    style2.col = info.col + info.width - (info.has_scrollbar and 1 or 0)
     style2.zindex = (self.style.zindex and (self.style.zindex + 2) or 2)
     if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
       vim.api.nvim_win_set_config(self.swin2, style2)
