@@ -60,6 +60,7 @@ end
 ghost_text_view.hide = function(self)
   self.win = nil
   self.entry = nil
+  vim.cmd([[redraw!]]) -- force invoke decoration provider.
 end
 
 return ghost_text_view

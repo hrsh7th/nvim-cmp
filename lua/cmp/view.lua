@@ -175,7 +175,13 @@ view.on_entry_change = async.throttle(function(self)
   else
     self.docs_view:close()
   end
-  self.ghost_text_view:show(e or self:get_first_entry())
+
+  e = e or self:get_first_entry()
+  if e then
+    self.ghost_text_view:show(e)
+  else
+    self.ghost_text_view:hide()
+  end
 end, 20)
 
 return view

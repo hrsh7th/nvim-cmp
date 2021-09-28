@@ -8,6 +8,7 @@ local mapping = setmetatable({}, {
     }
   end,
 })
+
 ---Invoke completion
 mapping.complete = function()
   return function(fallback)
