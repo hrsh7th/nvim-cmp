@@ -1,4 +1,4 @@
-local event = require "cmp.utils.event"
+local event = require('cmp.utils.event')
 local autocmd = require('cmp.utils.autocmd')
 local keymap = require('cmp.utils.keymap')
 local types = require('cmp.types')
@@ -137,4 +137,3 @@ native_entries_view.get_active_entry = function(self)
 end
 
 return native_entries_view
-

@@ -45,7 +45,7 @@ ghost_text_view.new = function()
           ephemeral = true,
         })
       end
-    end
+    end,
   })
   return self
 end
@@ -63,4 +63,3 @@ ghost_text_view.hide = function(self)
 end
 
 return ghost_text_view
-

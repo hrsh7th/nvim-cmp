@@ -28,11 +28,14 @@ custom_entries_view.new = function()
   self.entries = {}
   self.marks = {}
 
-  autocmd.subscribe('CompleteChanged', vim.schedule_wrap(function()
-    if self:visible() and vim.fn.pumvisible() == 1 then
-      self:close()
-    end
-  end))
+  autocmd.subscribe(
+    'CompleteChanged',
+    vim.schedule_wrap(function()
+      if self:visible() and vim.fn.pumvisible() == 1 then
+        self:close()
+      end
+    end)
+  )
 
   vim.api.nvim_set_decoration_provider(custom_entries_view.ns, {
     on_win = function(_, win)
@@ -260,7 +263,7 @@ custom_entries_view._select = function(self, cursor, option)
 end
 
 custom_entries_view._insert = function(self, word)
-  vim.cmd [[undojoin]]
+  vim.cmd([[undojoin]])
   local cursor = vim.api.nvim_win_get_cursor(0)
   vim.api.nvim_buf_set_text(0, cursor[1] - 1, self.offset - 1, cursor[1] - 1, cursor[2], { word })
   vim.api.nvim_win_set_cursor(0, { cursor[1], self.offset + #word - 1 })

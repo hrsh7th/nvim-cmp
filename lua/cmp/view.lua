@@ -179,4 +179,3 @@ view.on_entry_change = async.throttle(function(self)
 end, 20)
 
 return view
-

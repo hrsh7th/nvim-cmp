@@ -1,5 +1,3 @@
-local misc = require('cmp.utils.misc')
-
 local mapping = setmetatable({}, {
   __call = function(_, invoke, modes)
     return {

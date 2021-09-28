@@ -250,7 +250,6 @@ entry.get_vim_item = function(self, suggest_offset)
     end
     vim_item.equal = 1
     vim_item.empty = 1
-    vim_item.user_data = ('cmp:%s'):format(self.id)
 
     return vim_item
   end)
