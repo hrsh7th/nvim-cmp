@@ -27,7 +27,7 @@ misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
     ctermbg = 'NONE',
   })
   highlight.inherit('CmpItemAbbrDeprecatedDefault', 'Comment', {
-    gui = 'italic',
+    gui = 'NONE',
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
@@ -37,7 +37,7 @@ misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
     ctermbg = 'NONE',
   })
   highlight.inherit('CmpItemAbbrMatchFuzzyDefault', 'Normal', {
-    gui = 'italic',
+    gui = 'NONE',
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
