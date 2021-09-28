@@ -84,8 +84,8 @@ custom_entries_view.open = function(self, offset, entries)
     for _, e in ipairs(entries) do
       local i = #self.entries + 1
       local item = e:get_vim_item(offset)
-      if item.dup == 1 or not dedup[item.abbr] then
-        dedup[item.abbr] = true
+      if item.dup == 1 or not dedup[e.completion_item.label] then
+        dedup[e.completion_item.label] = true
 
         table.insert(self.entries, e)
 
