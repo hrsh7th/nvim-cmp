@@ -194,6 +194,32 @@ entry.is_deprecated = function(self)
   return self.completion_item.deprecated or vim.tbl_contains(self.completion_item.tags or {}, types.lsp.CompletionItemTag.Deprecated)
 end
 
+---Return view information.
+---@return table
+entry.get_view = function(self, suggest_offset)
+  return self.cache:ensure({ 'get_view', suggest_offset, self.resolved_completion_item and 1 or 0 }, function()
+    local item = self:get_vim_item(suggest_offset)
+    local view = {}
+    view.abbr = {}
+    view.abbr.text = item.abbr or ''
+    view.abbr.bytes = #view.abbr.text
+    view.abbr.width = vim.str_utfindex(view.abbr.text)
+    view.abbr.hl_group = self:is_deprecated() and 'CmpItemAbbrDeprecated' or 'CmpItemAbbr'
+    view.kind = {}
+    view.kind.text = item.kind or ''
+    view.kind.bytes = #view.kind.text
+    view.kind.width = vim.str_utfindex(view.kind.text)
+    view.kind.hl_group = 'CmpItemKind'
+    view.menu = {}
+    view.menu.text = item.menu or ''
+    view.menu.bytes = #view.menu.text
+    view.menu.width = vim.str_utfindex(view.menu.text)
+    view.menu.hl_group = 'CmpItemMenu'
+    view.dup = item.dup
+    return view
+  end)
+end
+
 ---Make vim.CompletedItem
 ---@param suggest_offset number
 ---@return vim.CompletedItem

@@ -3,8 +3,10 @@ local autocmd = require('cmp.utils.autocmd')
 local window = require('cmp.utils.window')
 local config = require('cmp.config')
 local types = require('cmp.types')
+local cache  = require('cmp.utils.cache')
 
 ---@class cmp.CustomEntriesView
+---@field private cache cmp.Cache
 ---@field private entries_win cmp.Window
 ---@field private offset number
 ---@field private entries cmp.Entry[]
@@ -16,6 +18,7 @@ custom_entries_view.ns = vim.api.nvim_create_namespace('cmp.view.custom_entries_
 
 custom_entries_view.new = function()
   local self = setmetatable({}, { __index = custom_entries_view })
+  self.cache = cache.new()
   self.entries_win = window.new()
   self.entries_win:option('conceallevel', 2)
   self.entries_win:option('concealcursor', 'n')
@@ -77,61 +80,54 @@ custom_entries_view.open = function(self, offset, entries)
 
   if #entries > 0 then
     local dedup = {}
-    local abbrs = { width = 0, texts = {}, widths = {}, hl_groups = {} }
-    local kinds = { width = 0, texts = {}, widths = {}, hl_groups = {} }
-    local menus = { width = 0, texts = {}, widths = {}, hl_groups = {} }
+    local column_width = { abbr = 0, kind = 0, menu = 0 }
     local preselect = 0
+    local i = 1
     for _, e in ipairs(entries) do
-      local i = #self.entries + 1
-      local item = e:get_vim_item(offset)
-      if item.dup == 1 or not dedup[e.completion_item.label] then
+      local view = e:get_view(offset)
+      if view.dup == 1 or not dedup[e.completion_item.label] then
         dedup[e.completion_item.label] = true
-
+        column_width.abbr = math.max(column_width.abbr, view.abbr.width)
+        column_width.kind = math.max(column_width.kind, view.kind.width)
+        column_width.menu = math.max(column_width.menu, view.menu.width)
         table.insert(self.entries, e)
-
-        abbrs.texts[i] = item.abbr
-        abbrs.hl_groups[i] = e:is_deprecated() and 'CmpItemAbbrDeprecated' or 'CmpItemAbbr'
-        abbrs.widths[i] = vim.str_utfindex(abbrs.texts[i])
-        abbrs.width = math.max(abbrs.width, abbrs.widths[i])
-
-        kinds.texts[i] = (item.kind or '')
-        kinds.hl_groups[i] = 'CmpItemKind'
-        kinds.widths[i] = vim.str_utfindex(kinds.texts[i])
-        kinds.width = math.max(kinds.width, kinds.widths[i])
-
-        menus.texts[i] = (item.menu or '')
-        menus.widths[i] = vim.str_utfindex(kinds.texts[i])
-        menus.width = math.max(kinds.width, kinds.widths[i])
-        menus.hl_groups[i] = 'CmpItemMenu'
-
         if preselect == 0 and e.completion_item.preselect then
           preselect = i
         end
+        i = i + 1
       end
     end
 
     local lines = {}
+    local marks = {}
     local width = 0
-    for i = 1, #self.entries do
-      self.marks[i] = {}
-      local off = 1
-      local parts = { '' }
-      for _, part in ipairs({ abbrs, kinds, menus }) do
-        if #part.texts[i] > 0 then
-          local text = part.texts[i] .. string.rep(' ', part.width - part.widths[i])
-          table.insert(parts, text)
-          table.insert(self.marks[i], {
-            col = off,
-            length = #part.texts[i],
-            hl_group = part.hl_groups[i],
-          })
-          off = off + #text + 1
+    for j, e in ipairs(self.entries) do
+      local t, m, w = self.cache:ensure({ 'lines', e.id, column_width.abbr, column_width.kind, column_width.menu }, function()
+        local view = e:get_view(offset)
+        local text = string.format(' %s%s%s%s%s%s ',
+          view.abbr.text, string.rep(' ', column_width.abbr - view.abbr.width + (view.kind.text ~= '' and 1 or 0)),
+          view.kind.text, string.rep(' ', column_width.kind - view.kind.width + (view.menu.text ~= '' and 1 or 0)),
+          view.menu.text, string.rep(' ', column_width.menu - view.menu.width)
+        )
+        local off = 1
+        local mark = {}
+        for _, key in ipairs({ 'abbr', 'menu', 'kind' }) do
+          if view[key].text ~= '' then
+            table.insert(mark, {
+              col = off,
+              length = view[key].bytes,
+              hl_group = view[key].hl_group,
+            })
+            off = off + column_width[key] + 1
+          end
         end
-      end
-      table.insert(parts, '')
-      lines[i] = table.concat(parts, ' ')
-      width = math.max(width, vim.str_utfindex(lines[i]))
+        return text, mark, off
+      end)
+      lines[j] = t
+      marks[j] = m
+      width = math.max(width, w)
     end
+    self.marks = marks
     vim.api.nvim_buf_set_lines(self.entries_win.buf, 0, -1, false, lines)
 
     local row = vim.fn.screenrow()

@@ -58,9 +58,11 @@ ghost_text_view.show = function(self, e)
 end
 
 ghost_text_view.hide = function(self)
-  self.win = nil
-  self.entry = nil
-  vim.cmd([[redraw!]]) -- force invoke decoration provider.
+  if self.win and self.entry then
+    self.win = nil
+    self.entry = nil
+    vim.cmd([[redraw!]]) -- force invoke decoration provider.
+  end
 end
 
 return ghost_text_view
