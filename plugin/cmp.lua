@@ -20,7 +20,6 @@ vim.cmd [[
   augroup END
 ]]
 
-
 misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
   highlight.inherit('CmpItemAbbrDefault', 'Comment', {
     guibg = 'NONE',
