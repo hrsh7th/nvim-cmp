@@ -1,4 +1,5 @@
 local cache = require('cmp.utils.cache')
+local misc  = require('cmp.utils.misc')
 
 ---@class cmp.WindowStyle
 ---@field public relative string
@@ -83,7 +84,9 @@ window.open = function(self, style)
   if self.win and vim.api.nvim_win_is_valid(self.win) then
     vim.api.nvim_win_set_config(self.win, self.style)
   else
-    self.win = vim.api.nvim_open_win(self.buf, false, self.style)
+    local s = misc.copy(self.style)
+    s.noautocmd = true
+    self.win = vim.api.nvim_open_win(self.buf, false, s)
     for k, v in pairs(self.opt) do
       vim.api.nvim_win_set_option(self.win, k, v)
     end
@@ -109,6 +112,7 @@ window.update = function(self)
     if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
       vim.api.nvim_win_set_config(self.swin1, style1)
     else
+      style1.noautocmd = true
       self.swin1 = vim.api.nvim_open_win(self.sbuf1, false, style1)
       vim.api.nvim_win_set_option(self.swin1, 'winhighlight', 'Normal:PmenuSbar,NormalNC:PmenuSbar,NormalFloat:PmenuSbar')
     end
@@ -123,6 +127,7 @@ window.update = function(self)
     if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
       vim.api.nvim_win_set_config(self.swin2, style2)
     else
+      style2.noautocmd = true
       self.swin2 = vim.api.nvim_open_win(self.sbuf2, false, style2)
       vim.api.nvim_win_set_option(self.swin2, 'winhighlight', 'Normal:PmenuThumb,NormalNC:PmenuThumb,NormalFloat:PmenuThumb')
     end
