@@ -197,8 +197,8 @@ end
 ---Return view information.
 ---@return table
 entry.get_view = function(self, suggest_offset)
-  return self.cache:ensure({ 'get_view', suggest_offset, self.resolved_completion_item and 1 or 0 }, function()
-    local item = self:get_vim_item(suggest_offset)
+  local item = self:get_vim_item(suggest_offset)
+  return self.cache:ensure({ 'get_view', self.resolved_completion_item and 1 or 0 }, function()
     local view = {}
     view.abbr = {}
     view.abbr.text = string.sub(item.abbr or '', 0, 99)
