@@ -26,12 +26,16 @@ describe('matcher', function()
 
     assert.is.truthy(matcher.match('vi', 'void#') >= 1)
     assert.is.truthy(matcher.match('vo', 'void#') >= 1)
+    assert.is.truthy(matcher.match('usela', 'useLayoutEffect') > matcher.match('usela', 'useDataLayer'))
   end)
 
   it('debug', function()
     matcher.debug = function(...)
       print(vim.inspect({ ... }))
     end
-    -- print('score', matcher.match('vsnipnextjump', 'vsnip-jump-next'))
+    -- print(vim.inspect({
+    --   useLayoutEffect = matcher.match('usela', 'useLayoutEffect'),
+    --   useDataLayer = matcher.match('usela', 'useDataLayer'),
+    -- }))
   end)
 end)

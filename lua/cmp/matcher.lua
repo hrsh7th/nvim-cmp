@@ -3,7 +3,7 @@ local str = require('cmp.utils.str')
 
 local matcher = {}
 
-matcher.WORD_BOUNDALY_ORDER_FACTOR = 5
+matcher.WORD_BOUNDALY_ORDER_FACTOR = 10
 
 matcher.PREFIX_FACTOR = 8
 matcher.NOT_FUZZY_FACTOR = 6
@@ -110,6 +110,8 @@ matcher.match = function(input, word, words)
     return 0, {}
   end
 
+  matcher.debug(word, matches)
+
   -- Add prefix bonus
   local prefix = false
   if matches[1].input_match_start == 1 and matches[1].word_match_start == 1 then
@@ -125,7 +127,6 @@ matcher.match = function(input, word, words)
 
   -- Compute prefix match score
   local score = prefix and matcher.PREFIX_FACTOR or 0
-  local boundary_fixer = prefix and matches[1].index - 1 or 0
   local idx = 1
   for _, m in ipairs(matches) do
     local s = 0
@@ -135,8 +136,9 @@ matcher.match = function(input, word, words)
     end
     idx = idx + 1
     if s > 0 then
-      s = s * (m.strict_match and 1.2 or 1)
-      score = score + (s * (1 + math.max(0, matcher.WORD_BOUNDALY_ORDER_FACTOR - (m.index - boundary_fixer)) / matcher.WORD_BOUNDALY_ORDER_FACTOR))
+      s = s * (1 + m.strict_ratio)
+      s = s * (1 + math.max(0, matcher.WORD_BOUNDALY_ORDER_FACTOR - m.index) / matcher.WORD_BOUNDALY_ORDER_FACTOR)
+      score = score + s
     end
   end
 
@@ -181,14 +183,19 @@ matcher.fuzzy = function(input, word, matches)
   local input_match_start = -1
   local input_match_end = -1
   local word_match_start = -1
+  local strict_count = 0
+  local match_count = 0
   while word_offset + word_index <= #word and input_index <= #input do
-    if char.match(string.byte(word, word_index + word_offset), string.byte(input, input_index)) then
+    local c1, c2 = string.byte(word, word_index + word_offset), string.byte(input, input_index)
+    if char.match(c1, c2) then
       if not matched then
         input_match_start = input_index
         word_match_start = word_index + word_offset
       end
       matched = true
       input_index = input_index + 1
+      strict_count = strict_count + (c1 == c2 and 1 or 0)
+      match_count = match_count + 1
     elseif matched then
       input_index = last_input_index
       input_match_end = input_index - 1
@@ -201,6 +208,7 @@ matcher.fuzzy = function(input, word, matches)
       input_match_end = input_match_end,
       word_match_start = word_match_start,
       word_match_end = word_index + word_offset - 1,
+      strict_ratio = strict_count / match_count,
       fuzzy = true,
     })
     return true
@@ -223,10 +231,11 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
     return nil
   end
 
-  local strict_match_count = 0
   local input_match_start = -1
   local input_index = input_end_index
   local word_offset = 0
+  local strict_count = 0
+  local match_count = 0
   while input_index <= #input and word_index + word_offset <= #word do
     local c1 = string.byte(input, input_index)
     local c2 = string.byte(word, word_index + word_offset)
@@ -236,11 +245,8 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
         input_match_start = input_index
       end
 
-      -- Increase strict_match_count
-      if c1 == c2 then
-        strict_match_count = strict_match_count + 1
-      end
-
+      strict_count = strict_count + (c1 == c2 and 1 or 0)
+      match_count = match_count + 1
       word_offset = word_offset + 1
     else
       -- Match end (partial region)
@@ -250,7 +256,7 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
           input_match_end = input_index - 1,
           word_match_start = word_index,
           word_match_end = word_index + word_offset - 1,
-          strict_match = strict_match_count == input_index - input_match_start,
+          strict_ratio = strict_count / match_count,
           fuzzy = false,
         }
       else
@@ -267,7 +273,7 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
       input_match_end = input_index - 1,
       word_match_start = word_index,
       word_match_end = word_index + word_offset - 1,
-      strict_match = strict_match_count == input_index - input_match_start,
+      strict_ratio = strict_count / match_count,
       fuzzy = false,
     }
   end

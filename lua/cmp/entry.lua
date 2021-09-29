@@ -274,6 +274,10 @@ entry.get_vim_item = function(self, suggest_offset)
     if config.get().formatting.format then
       vim_item = config.get().formatting.format(self, vim_item)
     end
+    vim_item.word = str.oneline(vim_item.word or '')
+    vim_item.abbr = str.oneline(vim_item.abbr or '')
+    vim_item.kind = str.oneline(vim_item.kind or '')
+    vim_item.menu = str.oneline(vim_item.menu or '')
     vim_item.equal = 1
     vim_item.empty = 1
 

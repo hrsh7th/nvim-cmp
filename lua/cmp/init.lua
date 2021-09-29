@@ -2,6 +2,7 @@ local core = require('cmp.core')
 local source = require('cmp.source')
 local config = require('cmp.config')
 local autocmd = require('cmp.utils.autocmd')
+local keymap   = require('cmp.utils.keymap')
 
 local cmp = {}
 
@@ -122,6 +123,10 @@ cmp.confirm = function(option)
     end)
     return true
   else
+    if vim.fn.complete_info({ 'selected' }).selected ~= -1 then
+      keymap.feedkeys(keymap.t('<C-y>'), 'n')
+      return true
+    end
     return false
   end
 end
