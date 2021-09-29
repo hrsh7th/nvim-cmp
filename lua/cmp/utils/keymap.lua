@@ -35,6 +35,29 @@ keymap.escape = function(keys)
   return keys
 end
 
+---Return upper case key sequence.
+---@param keys string
+---@return string
+keymap.to_upper = function(keys)
+  local result = {}
+  local ctrl = false
+  for i = 1, #keys do
+    local c = string.sub(keys, i, i)
+    if c == '<' then
+      table.insert(result, c)
+      ctrl = true
+    elseif ctrl and c ~= '>' then
+      table.insert(result, string.upper(c))
+    elseif ctrl and c == '>' then
+      table.insert(result, c)
+      ctrl = false
+    else
+      table.insert(result, c)
+    end
+  end
+  return table.concat(result, '')
+end
+
 ---Return vim notation keymapping (simple conversion).
 ---@param s string
 ---@return string
@@ -169,8 +192,9 @@ end)
 ---@param rhs string
 ---@return string
 keymap.recursive = function(mode, lhs, rhs)
+  rhs = keymap.to_upper(rhs)
   local fallback_lhs = ('<Plug>(cmp-utils-keymap-listen-lhs:%s)'):format(lhs)
-  local new_rhs = string.gsub(rhs, '^' .. vim.pesc(lhs), fallback_lhs)
+  local new_rhs = string.gsub(rhs, '^' .. vim.pesc(keymap.to_upper(lhs)), fallback_lhs)
   if new_rhs ~= rhs then
     vim.api.nvim_buf_set_keymap(0, mode, fallback_lhs, lhs, {
       expr = false,
