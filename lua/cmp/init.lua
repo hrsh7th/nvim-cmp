@@ -2,7 +2,7 @@ local core = require('cmp.core')
 local source = require('cmp.source')
 local config = require('cmp.config')
 local autocmd = require('cmp.utils.autocmd')
-local keymap   = require('cmp.utils.keymap')
+local keymap = require('cmp.utils.keymap')
 
 local cmp = {}
 

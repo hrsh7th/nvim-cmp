@@ -67,7 +67,7 @@ return function()
       ['<C-c>'] = function(fallback)
         require('cmp').close()
         fallback()
-      end
+      end,
     },
 
     formatting = {
@@ -84,5 +84,3 @@ return function()
     sources = {},
   }
 end
-
-

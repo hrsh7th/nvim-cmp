@@ -1,5 +1,5 @@
 local cache = require('cmp.utils.cache')
-local misc  = require('cmp.utils.misc')
+local misc = require('cmp.utils.misc')
 
 ---@class cmp.WindowStyle
 ---@field public relative string

@@ -3,8 +3,8 @@ local autocmd = require('cmp.utils.autocmd')
 local window = require('cmp.utils.window')
 local config = require('cmp.config')
 local types = require('cmp.types')
-local cache  = require('cmp.utils.cache')
-local keymap  = require('cmp.utils.keymap')
+local cache = require('cmp.utils.cache')
+local keymap = require('cmp.utils.keymap')
 
 ---@class cmp.CustomEntriesView
 ---@field private cache cmp.Cache
@@ -89,8 +89,8 @@ custom_entries_view.open = function(self, offset, entries)
   self.marks = {}
 
   if #entries > 0 then
-    local dedup = {}
     self.column_width = { abbr = 0, kind = 0, menu = 0 }
+    local dedup = {}
     local preselect = 0
     local i = 1
     for _, e in ipairs(entries) do
@@ -110,11 +110,7 @@ custom_entries_view.open = function(self, offset, entries)
 
     local lines = {}
     local width = 0
-    local format = string.format(' %%-%ds%%-%ds%%-%ds ',
-      self.column_width.abbr + ((self.column_width.kind + self.column_width.menu) > 0 and 1 or 0),
-      self.column_width.kind + (self.column_width.menu > 0 and 1 or 0),
-      self.column_width.menu
-    )
+    local format = string.format(' %%-%ds%%-%ds%%-%ds ', self.column_width.abbr + ((self.column_width.kind + self.column_width.menu) > 0 and 1 or 0), self.column_width.kind + (self.column_width.menu > 0 and 1 or 0), self.column_width.menu)
     for j, e in ipairs(self.entries) do
       local t, w = self.cache:ensure({ 'lines', e.id, self.column_width.abbr, self.column_width.kind, self.column_width.menu }, function()
         local view = e:get_view(offset)
