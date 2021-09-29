@@ -4,6 +4,7 @@ local window = require('cmp.utils.window')
 local config = require('cmp.config')
 local types = require('cmp.types')
 local cache  = require('cmp.utils.cache')
+local keymap  = require('cmp.utils.keymap')
 
 ---@class cmp.CustomEntriesView
 ---@field private cache cmp.Cache
@@ -185,7 +186,9 @@ custom_entries_view.abort = function(self)
 end
 
 custom_entries_view.visible = function(self)
-  return self.entries_win:visible()
+  -- It's super hacky implementation for enabling keymapping.
+  -- Filtering and completion behavior still disabled because `custom_entries_view:ready` returns false.
+  return self.entries_win:visible() or vim.fn.pumvisible() == 1
 end
 
 custom_entries_view.info = function(self)
@@ -211,6 +214,12 @@ custom_entries_view.select_next_item = function(self, option)
       cursor = 0
     end
     self:_select(cursor, option)
+  elseif vim.fn.pumvisible() == 1 then
+    if (option.behavior or types.cmp.SelectBehavior.Insert) == types.cmp.SelectBehavior.Insert then
+      keymap.feedkeys(keymap.t('<C-n>'), 'n')
+    else
+      keymap.feedkeys(keymap.t('<Down>'), 'n')
+    end
   end
 end
 
@@ -221,6 +230,12 @@ custom_entries_view.select_prev_item = function(self, option)
       cursor = #self.entries
     end
     self:_select(cursor, option)
+  elseif vim.fn.pumvisible() == 1 then
+    if (option.behavior or types.cmp.SelectBehavior.Insert) == types.cmp.SelectBehavior.Insert then
+      keymap.feedkeys(keymap.t('<C-p>'), 'n')
+    else
+      keymap.feedkeys(keymap.t('<Up>'), 'n')
+    end
   end
 end
 
