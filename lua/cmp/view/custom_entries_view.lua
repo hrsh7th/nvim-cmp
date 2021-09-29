@@ -42,31 +42,36 @@ custom_entries_view.new = function()
   )
 
   vim.api.nvim_set_decoration_provider(custom_entries_view.ns, {
-    on_win = function(_, win)
-      return win == self.entries_win.win
-    end,
-    on_line = function(_, _, bufnr, row)
-      local e = self.entries[row + 1]
-      local v = e:get_view(self.offset)
-      local o = 1
-      for _, key in ipairs({ 'abbr', 'kind', 'menu' }) do
-        vim.api.nvim_buf_set_extmark(bufnr, custom_entries_view.ns, row, o, {
-          end_line = row,
-          end_col = o + v[key].bytes,
-          hl_group = v[key].hl_group,
-          hl_mode = 'combine',
-          ephemeral = true,
-        })
-        o = o + self.column_width[key] + 1
+    on_win = function(_, win, buf, top, bot)
+      if win ~= self.entries_win.win then
+        return
       end
-      for _, m in ipairs(e.matches or {}) do
-        vim.api.nvim_buf_set_extmark(bufnr, custom_entries_view.ns, row, m.word_match_start, {
-          end_line = row,
-          end_col = m.word_match_end + 1,
-          hl_group = m.fuzzy and 'CmpItemAbbrMatchFuzzy' or 'CmpItemAbbrMatch',
-          hl_mode = 'combine',
-          ephemeral = true,
-        })
+
+      for i = top, bot do
+        local e = self.entries[i + 1]
+        local v = e:get_view(self.offset)
+        local o = 1
+        for _, key in ipairs({ 'abbr', 'kind', 'menu' }) do
+          if self.column_width[key] > 0 then
+            vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, o, {
+              end_line = i,
+              end_col = o + v[key].bytes,
+              hl_group = v[key].hl_group,
+              hl_mode = 'combine',
+              ephemeral = true,
+            })
+            o = o + self.column_width[key] + 1
+          end
+        end
+        for _, m in ipairs(e.matches or {}) do
+          vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, m.word_match_start, {
+            end_line = i,
+            end_col = m.word_match_end + 1,
+            hl_group = m.fuzzy and 'CmpItemAbbrMatchFuzzy' or 'CmpItemAbbrMatch',
+            hl_mode = 'combine',
+            ephemeral = true,
+          })
+        end
       end
     end,
   })
@@ -92,9 +97,9 @@ custom_entries_view.open = function(self, offset, entries)
       local view = e:get_view(offset)
       if view.dup == 1 or not dedup[e.completion_item.label] then
         dedup[e.completion_item.label] = true
-        self.column_width.abbr = math.max(self.column_width.abbr, view.abbr.width)
-        self.column_width.kind = math.max(self.column_width.kind, view.kind.width)
-        self.column_width.menu = math.max(self.column_width.menu, view.menu.width)
+        self.column_width.abbr = math.max(self.column_width.abbr, view.abbr.bytes)
+        self.column_width.kind = math.max(self.column_width.kind, view.kind.bytes)
+        self.column_width.menu = math.max(self.column_width.menu, view.menu.bytes)
         table.insert(self.entries, e)
         if preselect == 0 and e.completion_item.preselect then
           preselect = i
@@ -105,7 +110,11 @@ custom_entries_view.open = function(self, offset, entries)
 
     local lines = {}
     local width = 0
-    local format = string.format(' %%-%ds%%-%ds%%-%ds ', self.column_width.abbr + 1, self.column_width.kind + 1, self.column_width.menu)
+    local format = string.format(' %%-%ds%%-%ds%%-%ds ',
+      self.column_width.abbr + ((self.column_width.kind + self.column_width.menu) > 0 and 1 or 0),
+      self.column_width.kind + (self.column_width.menu > 0 and 1 or 0),
+      self.column_width.menu
+    )
     for j, e in ipairs(self.entries) do
       local t, w = self.cache:ensure({ 'lines', e.id, self.column_width.abbr, self.column_width.kind, self.column_width.menu }, function()
         local view = e:get_view(offset)
