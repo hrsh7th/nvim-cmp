@@ -46,16 +46,20 @@ custom_entries_view.new = function()
       return win == self.entries_win.win
     end,
     on_line = function(_, _, bufnr, row)
-      for _, mark in ipairs(self.marks[row + 1]) do
-        vim.api.nvim_buf_set_extmark(bufnr, custom_entries_view.ns, row, mark.col, {
+      local e = self.entries[row + 1]
+      local v = e:get_view(self.offset)
+      local o = 1
+      for _, key in ipairs({ 'abbr', 'kind', 'menu' }) do
+        vim.api.nvim_buf_set_extmark(bufnr, custom_entries_view.ns, row, o, {
           end_line = row,
-          end_col = mark.col + mark.length,
-          hl_group = mark.hl_group,
+          end_col = o + v[key].bytes,
+          hl_group = v[key].hl_group,
           hl_mode = 'combine',
           ephemeral = true,
         })
+        o = o + self.column_width[key] + 1
       end
-      for _, m in ipairs(self.entries[row + 1].matches or {}) do
+      for _, m in ipairs(e.matches or {}) do
         vim.api.nvim_buf_set_extmark(bufnr, custom_entries_view.ns, row, m.word_match_start, {
           end_line = row,
           end_col = m.word_match_end + 1,
@@ -81,16 +85,16 @@ custom_entries_view.open = function(self, offset, entries)
 
   if #entries > 0 then
     local dedup = {}
-    local column_width = { abbr = 0, kind = 0, menu = 0 }
+    self.column_width = { abbr = 0, kind = 0, menu = 0 }
     local preselect = 0
     local i = 1
     for _, e in ipairs(entries) do
       local view = e:get_view(offset)
       if view.dup == 1 or not dedup[e.completion_item.label] then
         dedup[e.completion_item.label] = true
-        column_width.abbr = math.max(column_width.abbr, view.abbr.width)
-        column_width.kind = math.max(column_width.kind, view.kind.width)
-        column_width.menu = math.max(column_width.menu, view.menu.width)
+        self.column_width.abbr = math.max(self.column_width.abbr, view.abbr.width)
+        self.column_width.kind = math.max(self.column_width.kind, view.kind.width)
+        self.column_width.menu = math.max(self.column_width.menu, view.menu.width)
         table.insert(self.entries, e)
         if preselect == 0 and e.completion_item.preselect then
           preselect = i
@@ -100,35 +104,17 @@ custom_entries_view.open = function(self, offset, entries)
     end
 
     local lines = {}
-    local marks = {}
     local width = 0
+    local format = string.format(' %%-%ds%%-%ds%%-%ds ', self.column_width.abbr + 1, self.column_width.kind + 1, self.column_width.menu)
     for j, e in ipairs(self.entries) do
-      local t, m, w = self.cache:ensure({ 'lines', e.id, column_width.abbr, column_width.kind, column_width.menu }, function()
+      local t, w = self.cache:ensure({ 'lines', e.id, self.column_width.abbr, self.column_width.kind, self.column_width.menu }, function()
         local view = e:get_view(offset)
-        local text = string.format(' %s%s%s%s%s%s ',
-          view.abbr.text, string.rep(' ', column_width.abbr - view.abbr.width + (view.kind.text ~= '' and 1 or 0)),
-          view.kind.text, string.rep(' ', column_width.kind - view.kind.width + (view.menu.text ~= '' and 1 or 0)),
-          view.menu.text, string.rep(' ', column_width.menu - view.menu.width)
-        )
-        local off = 1
-        local mark = {}
-        for _, key in ipairs({ 'abbr', 'menu', 'kind' }) do
-          if view[key].text ~= '' then
-            table.insert(mark, {
-              col = off,
-              length = view[key].bytes,
-              hl_group = view[key].hl_group,
-            })
-            off = off + column_width[key] + 1
-          end
-        end
-        return text, mark, off
+        local text = string.format(format, view.abbr.text, view.kind.text, view.menu.text)
+        return text, vim.str_utfindex(text)
       end)
       lines[j] = t
-      marks[j] = m
       width = math.max(width, w)
     end
-    self.marks = marks
     vim.api.nvim_buf_set_lines(self.entries_win.buf, 0, -1, false, lines)
 
     local row = vim.fn.screenrow()
@@ -174,7 +160,7 @@ custom_entries_view.close = function(self)
   self.offset = -1
   self.entries = {}
   self.marks = {}
-  self.original = ''
+  self.cache:clear()
   self.entries_win:close()
 end
 
