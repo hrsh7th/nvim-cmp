@@ -182,19 +182,21 @@ end
 ---Check autoindent
 ---@param event cmp.TriggerEvent
 ---@param callback function
-core.autoindent = function(_, event, callback)
+core.autoindent = function(self, event, callback)
   if event == types.cmp.TriggerEvent.TextChanged then
     local cursor_before_line = misc.get_cursor_before_line()
     local prefix = pattern.matchstr('[^[:blank:]]\\+$', cursor_before_line)
     if prefix then
       for _, key in ipairs(vim.split(vim.bo.indentkeys, ',')) do
         if vim.tbl_contains({ '=' .. prefix, '0=' .. prefix }, key) then
+          local release = self:suspend()
           return vim.schedule(function()
             if cursor_before_line == misc.get_cursor_before_line() then
               local indentkeys = vim.bo.indentkeys
               vim.bo.indentkeys = indentkeys .. ',!^F'
               keymap.feedkeys(keymap.t('<C-f>'), 'n', function()
                 vim.bo.indentkeys = indentkeys
+                release()
                 callback()
               end)
             else
@@ -240,7 +242,7 @@ core.filter = async.throttle(function(self)
   if not misc.is_insert_mode() then
     return
   end
-  local ctx = core.get_context()
+  local ctx = self:get_context()
 
   -- To wait for processing source for that's timeout.
   local sources = {}
