@@ -22,6 +22,12 @@ misc.get_cursor_before_line = function()
   return string.sub(vim.api.nvim_get_current_line(), 1, cursor[2])
 end
 
+---Return current mode is insert-mode or not.
+---@return boolean
+misc.is_insert_mode = function()
+  return string.sub(vim.api.nvim_get_mode().mode, 1, 1) == 'i'
+end
+
 ---Merge two tables recursively
 ---@generic T
 ---@param v1 T

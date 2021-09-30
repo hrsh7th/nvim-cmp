@@ -85,6 +85,9 @@ core.register_source = function(s)
     core.sources_by_name[s.name] = {}
   end
   table.insert(core.sources_by_name[s.name], s)
+  if misc.is_insert_mode() then
+    core.complete(core.get_context({ reason = types.cmp.ContextReason.Auto }))
+  end
 end
 
 ---Unregister source
@@ -253,7 +256,7 @@ end
 ---Invoke completion
 ---@param ctx cmp.Context
 core.complete = function(ctx)
-  if ctx:invalid() then
+  if not misc.is_insert_mode() then
     return
   end
 
@@ -278,10 +281,10 @@ end
 
 ---Update completion menu
 core.filter = async.throttle(function()
-  local ctx = core.get_context()
-  if ctx:invalid() then
+  if not misc.is_insert_mode() then
     return
   end
+  local ctx = core.get_context()
 
   -- To wait for processing source for that's timeout.
   local sources = {}
