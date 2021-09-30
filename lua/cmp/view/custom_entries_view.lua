@@ -82,6 +82,10 @@ custom_entries_view.ready = function()
   return vim.fn.pumvisible() == 0
 end
 
+custom_entries_view.redraw = function()
+  -- noop
+end
+
 custom_entries_view.open = function(self, offset, entries)
   self.offset = offset
   self.entries = {}

@@ -36,6 +36,11 @@ view.ready = function(self)
   return self:_get_entries_view():ready()
 end
 
+---Redraw menu.
+view.redraw = function(self)
+  self:_get_entries_view():redraw()
+end
+
 ---Open menu
 ---@param ctx cmp.Context
 ---@param sources cmp.Source[]

@@ -165,6 +165,7 @@ core.on_change = function(self, event)
 
     debug.log(('ctx: `%s`'):format(ctx.cursor_before_line))
     if ctx:changed(ctx.prev_context) then
+      self.view:redraw()
       debug.log('changed')
 
       if vim.tbl_contains(config.get().completion.autocomplete or {}, event) then
@@ -190,7 +191,7 @@ core.autoindent = function(self, event, callback)
       for _, key in ipairs(vim.split(vim.bo.indentkeys, ',')) do
         if vim.tbl_contains({ '=' .. prefix, '0=' .. prefix }, key) then
           local release = self:suspend()
-          return vim.schedule(function()
+          vim.schedule(function()
             if cursor_before_line == misc.get_cursor_before_line() then
               local indentkeys = vim.bo.indentkeys
               vim.bo.indentkeys = indentkeys .. ',!^F'
@@ -203,6 +204,7 @@ core.autoindent = function(self, event, callback)
               callback()
             end
           end)
+          return
         end
       end
     end
