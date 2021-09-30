@@ -11,7 +11,7 @@ local keymap = require('cmp.utils.keymap')
 ---@field private entries_win cmp.Window
 ---@field private offset number
 ---@field private entries cmp.Entry[]
----@field private marks table[]
+---@field private column_width any
 ---@field public event cmp.Event
 local custom_entries_view = {}
 
@@ -30,7 +30,6 @@ custom_entries_view.new = function()
   self.event = event.new()
   self.offset = -1
   self.entries = {}
-  self.marks = {}
 
   autocmd.subscribe(
     'CompleteChanged',
@@ -86,85 +85,78 @@ end
 custom_entries_view.open = function(self, offset, entries)
   self.offset = offset
   self.entries = {}
-  self.marks = {}
+  self.column_width = { abbr = 0, kind = 0, menu = 0 }
 
-  if #entries > 0 then
-    self.column_width = { abbr = 0, kind = 0, menu = 0 }
-    local dedup = {}
-    local preselect = 0
-    local i = 1
-    for _, e in ipairs(entries) do
-      local view = e:get_view(offset)
-      if view.dup == 1 or not dedup[e.completion_item.label] then
-        dedup[e.completion_item.label] = true
-        self.column_width.abbr = math.max(self.column_width.abbr, view.abbr.bytes)
-        self.column_width.kind = math.max(self.column_width.kind, view.kind.bytes)
-        self.column_width.menu = math.max(self.column_width.menu, view.menu.bytes)
-        table.insert(self.entries, e)
-        if preselect == 0 and e.completion_item.preselect then
-          preselect = i
-        end
-        i = i + 1
+  local dedup = {}
+  local preselect = 0
+  local i = 1
+  for _, e in ipairs(entries) do
+    local view = e:get_view(offset)
+    if view.dup == 1 or not dedup[e.completion_item.label] then
+      dedup[e.completion_item.label] = true
+      self.column_width.abbr = math.max(self.column_width.abbr, view.abbr.bytes)
+      self.column_width.kind = math.max(self.column_width.kind, view.kind.bytes)
+      self.column_width.menu = math.max(self.column_width.menu, view.menu.bytes)
+      table.insert(self.entries, e)
+      if preselect == 0 and e.completion_item.preselect then
+        preselect = i
       end
+      i = i + 1
     end
-
-    local lines = {}
-    local width = 0
-    local format = string.format(' %%-%ds%%-%ds%%-%ds ', self.column_width.abbr + ((self.column_width.kind + self.column_width.menu) > 0 and 1 or 0), self.column_width.kind + (self.column_width.menu > 0 and 1 or 0), self.column_width.menu)
-    for j, e in ipairs(self.entries) do
-      local t, w = self.cache:ensure({ 'lines', e.id, self.column_width.abbr, self.column_width.kind, self.column_width.menu }, function()
-        local view = e:get_view(offset)
-        local text = string.format(format, view.abbr.text, view.kind.text, view.menu.text)
-        return text, vim.str_utfindex(text)
-      end)
-      lines[j] = t
-      width = math.max(width, w)
-    end
-    vim.api.nvim_buf_set_lines(self.entries_win.buf, 0, -1, false, lines)
-
-    local row = vim.fn.screenrow()
-    local height = vim.api.nvim_get_option('pumheight')
-    height = height == 0 and #self.entries or height
-    height = math.min(height, #self.entries)
-    if (vim.o.lines - row) <= 8 and row - 8 > 0 then
-      row = row - height - 1
-    else
-      height = math.min(height, vim.o.lines - row)
-    end
-
-    if width < 1 or height < 1 then
-      return
-    end
-
-    local delta = vim.api.nvim_win_get_cursor(0)[2] + 1 - self.offset
-    self.entries_win:option('cursorline', false)
-    self.entries_win:open({
-      relative = 'editor',
-      style = 'minimal',
-      row = row,
-      col = vim.fn.screencol() - 1 - delta - 1,
-      width = width,
-      height = height,
-      zindex = 1001,
-    })
-    vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 1 })
-
-    if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
-      self:preselect(preselect)
-    elseif string.match(config.get().completion.completeopt, 'noinsert') then
-      self:preselect(1)
-    end
-    self.event:emit('change')
-  else
-    self:close()
-    self.event:emit('change')
   end
+
+  local lines = {}
+  local width = 0
+  local format = string.format(' %%-%ds%%-%ds%%-%ds ', self.column_width.abbr + ((self.column_width.kind + self.column_width.menu) > 0 and 1 or 0), self.column_width.kind + (self.column_width.menu > 0 and 1 or 0), self.column_width.menu)
+  for j, e in ipairs(self.entries) do
+    local t, w = self.cache:ensure({ 'lines', e.id, self.column_width.abbr, self.column_width.kind, self.column_width.menu }, function()
+      local view = e:get_view(offset)
+      local text = string.format(format, view.abbr.text, view.kind.text, view.menu.text)
+      return text, vim.str_utfindex(text)
+    end)
+    lines[j] = t
+    width = math.max(width, w)
+  end
+  vim.api.nvim_buf_set_lines(self.entries_win.buf, 0, -1, false, lines)
+
+  local row = vim.fn.screenrow()
+  local height = vim.api.nvim_get_option('pumheight')
+  height = height == 0 and #self.entries or height
+  height = math.min(height, #self.entries)
+  if (vim.o.lines - row) <= 8 and row - 8 > 0 then
+    row = row - height - 1
+  else
+    height = math.min(height, vim.o.lines - row)
+  end
+
+  if width < 1 or height < 1 then
+    return
+  end
+
+  local delta = vim.api.nvim_win_get_cursor(0)[2] + 1 - self.offset
+  self.entries_win:option('cursorline', false)
+  self.entries_win:open({
+    relative = 'editor',
+    style = 'minimal',
+    row = row,
+    col = vim.fn.screencol() - 1 - delta - 1,
+    width = width,
+    height = height,
+    zindex = 1001,
+  })
+  vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 1 })
+
+  if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
+    self:preselect(preselect)
+  elseif string.match(config.get().completion.completeopt, 'noinsert') then
+    self:preselect(1)
+  end
+  self.event:emit('change')
 end
 
 custom_entries_view.close = function(self)
   self.offset = -1
   self.entries = {}
-  self.marks = {}
   self.cache:clear()
   self.entries_win:close()
 end

@@ -81,7 +81,11 @@ view.open = function(self, ctx, sources)
   end)
 
   -- open
-  self:_get_entries_view():open(offset, entries)
+  if #entries > 0 then
+    self:_get_entries_view():open(offset, entries)
+  else
+    self:close()
+  end
 end
 
 ---Close menu

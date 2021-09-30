@@ -30,31 +30,27 @@ native_entries_view.open = function(self, offset, entries)
   self.offset = offset
   self.entries = {}
 
-  if #entries > 0 then
-    local preselect = 0
-    local dedup = {}
-    local items = {}
-    for _, e in ipairs(entries) do
-      local item = e:get_vim_item(offset)
-      if item.dup == 1 or not dedup[item.abbr] then
-        dedup[item.abbr] = true
-        table.insert(self.entries, e)
-        table.insert(items, item)
-        if preselect == 0 and e.completion_item.preselect then
-          preselect = #self.entries
-        end
+  local preselect = 0
+  local dedup = {}
+  local items = {}
+  for _, e in ipairs(entries) do
+    local item = e:get_vim_item(offset)
+    if item.dup == 1 or not dedup[item.abbr] then
+      dedup[item.abbr] = true
+      table.insert(self.entries, e)
+      table.insert(items, item)
+      if preselect == 0 and e.completion_item.preselect then
+        preselect = #self.entries
       end
     end
-    local completeopt = vim.o.completeopt
-    vim.o.completeopt = preselect == 1 and 'menu,menuone,noinsert' or config.get().completion.completeopt
-    vim.fn.complete(self.offset, items)
-    vim.o.completeopt = completeopt
+  end
+  local completeopt = vim.o.completeopt
+  vim.o.completeopt = preselect == 1 and 'menu,menuone,noinsert' or config.get().completion.completeopt
+  vim.fn.complete(self.offset, items)
+  vim.o.completeopt = completeopt
 
-    if preselect > 1 and config.get().preselect == types.cmp.PreselectMode.Item then
-      self:preselect(preselect)
-    end
-  else
-    self:close()
+  if preselect > 1 and config.get().preselect == types.cmp.PreselectMode.Item then
+    self:preselect(preselect)
   end
 end
 
