@@ -218,24 +218,26 @@ core.complete = function(self, ctx)
   if not misc.is_insert_mode() then
     return
   end
-
   self:set_context(ctx)
 
-  local callback = function()
-    local new = context.new(ctx)
-    if new:changed(new.prev_context) and ctx == self.context then
-      self:complete(new)
-    else
-      self.filter.stop()
-      self.filter.timeout = DEBOUNCE_TIME
-      self:filter()
-    end
-  end
   for _, s in ipairs(self:get_sources({ source.SourceStatus.WAITING, source.SourceStatus.COMPLETED })) do
-    s:complete(ctx, callback)
+    s:complete(ctx, (function(src)
+      local callback
+      callback = function()
+        local new = context.new(ctx)
+        if new:changed(new.prev_context) and ctx == self.context then
+          src:complete(new, callback)
+        else
+          self.filter.stop()
+          self.filter.timeout = DEBOUNCE_TIME
+          self:filter()
+        end
+      end
+      return callback
+    end)(s))
   end
 
-  self.filter.timeout = self.view:visible() and THROTTLE_TIME or 1
+  self.filter.timeout = THROTTLE_TIME
   self:filter()
 end
 
