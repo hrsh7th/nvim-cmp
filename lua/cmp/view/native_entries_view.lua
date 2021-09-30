@@ -60,7 +60,6 @@ end
 
 native_entries_view.close = function(_)
   if string.sub(vim.api.nvim_get_mode().mode, 1, 1) == 'i' then
-    vim.api.nvim_select_popupmenu_item(-1, false, false, {})
     vim.fn.complete(1, {})
   end
 end
