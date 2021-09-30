@@ -12,6 +12,7 @@ local types = require('cmp.types')
 
 local SOURCE_TIMEOUT = 500
 local THROTTLE_TIME = 80
+local DEBOUNCE_TIME = 20
 
 ---@class cmp.Core
 ---@field public suspending boolean
@@ -221,7 +222,8 @@ core.complete = function(self, ctx)
     if new:changed(new.prev_context) and ctx == self.context then
       self:complete(new)
     else
-      self.filter.timeout = THROTTLE_TIME
+      self.filter.stop()
+      self.filter.timeout = DEBOUNCE_TIME
       self:filter()
     end
   end
@@ -255,6 +257,7 @@ core.filter = async.throttle(function(self)
     end
     table.insert(sources, s)
   end
+  self.filter.timeout = THROTTLE_TIME
 
   self.view:open(ctx, sources)
 end, THROTTLE_TIME)
