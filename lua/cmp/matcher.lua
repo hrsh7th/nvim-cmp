@@ -127,6 +127,7 @@ matcher.match = function(input, word, words)
 
   -- Compute prefix match score
   local score = prefix and matcher.PREFIX_FACTOR or 0
+  local offset = prefix and matches[1].index - 1 or 0
   local idx = 1
   for _, m in ipairs(matches) do
     local s = 0
@@ -137,7 +138,7 @@ matcher.match = function(input, word, words)
     idx = idx + 1
     if s > 0 then
       s = s * (1 + m.strict_ratio)
-      s = s * (1 + math.max(0, matcher.WORD_BOUNDALY_ORDER_FACTOR - m.index) / matcher.WORD_BOUNDALY_ORDER_FACTOR)
+      s = s * (1 + math.max(0, matcher.WORD_BOUNDALY_ORDER_FACTOR - (m.index - offset)) / matcher.WORD_BOUNDALY_ORDER_FACTOR)
       score = score + s
     end
   end
