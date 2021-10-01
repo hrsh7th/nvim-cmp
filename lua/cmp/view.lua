@@ -170,27 +170,30 @@ view._get_entries_view = function(self)
 end
 
 ---On entry change
-view.on_entry_change = async.throttle(vim.schedule_wrap(function(self)
-  local e = self:get_selected_entry()
-  if e then
-    for _, c in ipairs(config.get().confirmation.get_commit_characters(e:get_commit_characters())) do
-      keymap.listen('i', c, function(...)
-        self.event:emit('keymap', ...)
-      end)
+view.on_entry_change = async.throttle(
+  vim.schedule_wrap(function(self)
+    local e = self:get_selected_entry()
+    if e then
+      for _, c in ipairs(config.get().confirmation.get_commit_characters(e:get_commit_characters())) do
+        keymap.listen('i', c, function(...)
+          self.event:emit('keymap', ...)
+        end)
+      end
+      e:resolve(vim.schedule_wrap(self.resolve_dedup(function()
+        self.docs_view:open(e, self:_get_entries_view():info())
+      end)))
+    else
+      self.docs_view:close()
     end
-    e:resolve(vim.schedule_wrap(self.resolve_dedup(function()
-      self.docs_view:open(e, self:_get_entries_view():info())
-    end)))
-  else
-    self.docs_view:close()
-  end
 
-  e = e or self:get_first_entry()
-  if e then
-    self.ghost_text_view:show(e)
-  else
-    self.ghost_text_view:hide()
-  end
-end), 20)
+    e = e or self:get_first_entry()
+    if e then
+      self.ghost_text_view:show(e)
+    else
+      self.ghost_text_view:hide()
+    end
+  end),
+  20
+)
 
 return view

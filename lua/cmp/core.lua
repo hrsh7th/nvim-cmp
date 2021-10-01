@@ -221,20 +221,23 @@ core.complete = function(self, ctx)
   self:set_context(ctx)
 
   for _, s in ipairs(self:get_sources({ source.SourceStatus.WAITING, source.SourceStatus.COMPLETED })) do
-    s:complete(ctx, (function(src)
-      local callback
-      callback = function()
-        local new = context.new(ctx)
-        if new:changed(new.prev_context) and ctx == self.context then
-          src:complete(new, callback)
-        else
-          self.filter.stop()
-          self.filter.timeout = DEBOUNCE_TIME
-          self:filter()
+    s:complete(
+      ctx,
+      (function(src)
+        local callback
+        callback = function()
+          local new = context.new(ctx)
+          if new:changed(new.prev_context) and ctx == self.context then
+            src:complete(new, callback)
+          else
+            self.filter.stop()
+            self.filter.timeout = DEBOUNCE_TIME
+            self:filter()
+          end
         end
-      end
-      return callback
-    end)(s))
+        return callback
+      end)(s)
+    )
   end
 
   self.filter.timeout = THROTTLE_TIME
@@ -242,31 +245,34 @@ core.complete = function(self, ctx)
 end
 
 ---Update completion menu
-core.filter = async.throttle(vim.schedule_wrap(function(self)
-  if not misc.is_insert_mode() then
-    return
-  end
-  local ctx = self:get_context()
-
-  -- To wait for processing source for that's timeout.
-  local sources = {}
-  for _, s in ipairs(self:get_sources({ source.SourceStatus.FETCHING, source.SourceStatus.COMPLETED })) do
-    local time = SOURCE_TIMEOUT - s:get_fetching_time()
-    if not s.incomplete and time > 0 then
-      if #sources == 0 then
-        self.filter.stop()
-        self.filter.timeout = time + 1
-        self:filter()
-        return
-      end
-      break
+core.filter = async.throttle(
+  vim.schedule_wrap(function(self)
+    if not misc.is_insert_mode() then
+      return
     end
-    table.insert(sources, s)
-  end
-  self.filter.timeout = THROTTLE_TIME
+    local ctx = self:get_context()
 
-  self.view:open(ctx, sources)
-end), THROTTLE_TIME)
+    -- To wait for processing source for that's timeout.
+    local sources = {}
+    for _, s in ipairs(self:get_sources({ source.SourceStatus.FETCHING, source.SourceStatus.COMPLETED })) do
+      local time = SOURCE_TIMEOUT - s:get_fetching_time()
+      if not s.incomplete and time > 0 then
+        if #sources == 0 then
+          self.filter.stop()
+          self.filter.timeout = time + 1
+          self:filter()
+          return
+        end
+        break
+      end
+      table.insert(sources, s)
+    end
+    self.filter.timeout = THROTTLE_TIME
+
+    self.view:open(ctx, sources)
+  end),
+  THROTTLE_TIME
+)
 
 ---Confirm completion.
 ---@param e cmp.Entry

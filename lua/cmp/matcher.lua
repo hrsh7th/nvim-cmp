@@ -1,5 +1,4 @@
 local char = require('cmp.utils.char')
-local str = require('cmp.utils.str')
 
 local matcher = {}
 
@@ -127,7 +126,9 @@ matcher.match = function(input, word, words)
         end
         o = o + 1
       end
-      break
+      if prefix then
+        break
+      end
     end
   end
 
