@@ -308,7 +308,7 @@ source.complete = function(self, ctx, callback)
       option = self:get_config().opts,
       completion_context = completion_context,
     },
-    self.complete_dedup(vim.schedule_wrap(function(response)
+    async.timeout(self.complete_dedup(vim.schedule_wrap(function(response)
       if #((response or {}).items or response or {}) > 0 then
         debug.log(self:get_debug_name(), 'retrieve', #(response.items or response))
         local old_offset = self.offset
@@ -338,7 +338,7 @@ source.complete = function(self, ctx, callback)
         self.status = prev_status
       end
       callback()
-    end))
+    end)), 2000)
   )
   return true
 end

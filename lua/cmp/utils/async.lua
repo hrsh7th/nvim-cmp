@@ -35,6 +35,28 @@ async.throttle = function(fn, timeout)
   })
 end
 
+---Timeout callback function
+---@param fn function
+---@param timeout number
+---@return function
+async.timeout = function(fn, timeout)
+  local timer
+  local done = false
+  local callback = function(...)
+    timer:stop()
+    timer:close()
+    if not done then
+      done = true
+      fn(...)
+    end
+  end
+  timer = vim.loop.new_timer()
+  timer:start(timeout, 0, function()
+    callback()
+  end)
+  return callback
+end
+
 ---@alias cmp.AsyncDedup fun(callback: function): function
 
 ---Create deduplicated callback
