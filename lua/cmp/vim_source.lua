@@ -5,7 +5,9 @@ local vim_source = {}
 ---@param id number
 ---@param args any[]
 vim_source.on_callback = function(id, args)
-  return vim_source.to_callback.callbacks[id](unpack(args))
+  if vim_source.to_callback.callbacks[id] then
+    vim_source.to_callback.callbacks[id](unpack(args))
+  end
 end
 
 ---@param callback function

@@ -43,10 +43,10 @@ async.timeout = function(fn, timeout)
   local timer
   local done = false
   local callback = function(...)
-    timer:stop()
-    timer:close()
     if not done then
       done = true
+      timer:stop()
+      timer:close()
       fn(...)
     end
   end
