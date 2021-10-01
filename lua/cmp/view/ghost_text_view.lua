@@ -53,8 +53,12 @@ end
 ---Show ghost text
 ---@param e cmp.Entry
 ghost_text_view.show = function(self, e)
+  local changed = e ~= self.entry
   self.win = vim.api.nvim_get_current_win()
   self.entry = e
+  if changed then
+    vim.cmd([[redraw!]]) -- force invoke decoration provider.
+  end
 end
 
 ghost_text_view.hide = function(self)
