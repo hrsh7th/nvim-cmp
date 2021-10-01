@@ -118,10 +118,16 @@ matcher.match = function(input, word, words)
     prefix = true
   else
     for _, w in ipairs(words or {}) do
-      if str.has_prefix(w, string.sub(input, matches[1].input_match_start, matches[1].input_match_end)) then
-        prefix = true
-        break
+      prefix = true
+      local o = 1
+      for i = matches[1].input_match_start, matches[1].input_match_end - 1 do
+        if not char.match(string.byte(w, o), string.byte(input, i)) then
+          prefix = false
+          break
+        end
+        o = o + 1
       end
+      break
     end
   end
 
@@ -145,7 +151,7 @@ matcher.match = function(input, word, words)
 
   -- Check remaining input as fuzzy
   if matches[#matches].input_match_end < #input then
-    if matcher.fuzzy(input, word, matches) then
+    if prefix and matcher.fuzzy(input, word, matches) then
       return score, matches
     end
     return 0, {}

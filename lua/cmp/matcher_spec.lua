@@ -27,6 +27,7 @@ describe('matcher', function()
     assert.is.truthy(matcher.match('vi', 'void#') >= 1)
     assert.is.truthy(matcher.match('vo', 'void#') >= 1)
     assert.is.truthy(matcher.match('usela', 'useLayoutEffect') > matcher.match('usela', 'useDataLayer'))
+    assert.is.truthy(matcher.match('true', 'v:true', { 'true' }) == matcher.match('true', 'true'))
   end)
 
   it('debug', function()
@@ -34,8 +35,8 @@ describe('matcher', function()
       print(vim.inspect({ ... }))
     end
     -- print(vim.inspect({
-    --   useLayoutEffect = matcher.match('usela', 'useLayoutEffect'),
-    --   useDataLayer = matcher.match('usela', 'useDataLayer'),
+    --   a = matcher.match('true', 'v:true', { 'true' }),
+    --   b = matcher.match('true', 'true'),
     -- }))
   end)
 end)

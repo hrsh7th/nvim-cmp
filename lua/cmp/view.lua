@@ -170,7 +170,7 @@ view._get_entries_view = function(self)
 end
 
 ---On entry change
-view.on_entry_change = async.throttle(function(self)
+view.on_entry_change = async.throttle(vim.schedule_wrap(function(self)
   local e = self:get_selected_entry()
   if e then
     for _, c in ipairs(config.get().confirmation.get_commit_characters(e:get_commit_characters())) do
@@ -191,6 +191,6 @@ view.on_entry_change = async.throttle(function(self)
   else
     self.ghost_text_view:hide()
   end
-end, 20)
+end), 20)
 
 return view

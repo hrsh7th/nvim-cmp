@@ -242,7 +242,7 @@ core.complete = function(self, ctx)
 end
 
 ---Update completion menu
-core.filter = async.throttle(function(self)
+core.filter = async.throttle(vim.schedule_wrap(function(self)
   if not misc.is_insert_mode() then
     return
   end
@@ -266,7 +266,7 @@ core.filter = async.throttle(function(self)
   self.filter.timeout = THROTTLE_TIME
 
   self.view:open(ctx, sources)
-end, THROTTLE_TIME)
+end), THROTTLE_TIME)
 
 ---Confirm completion.
 ---@param e cmp.Entry
