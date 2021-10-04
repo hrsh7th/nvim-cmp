@@ -195,7 +195,7 @@ entry.is_deprecated = function(self)
 end
 
 ---Return view information.
----@return table
+---@return { abbr: { text: string, bytes: number, width: number, hl_group: string }, kind: { text: string, bytes: number, width: number, hl_group: string }, menu: { text: string, bytes: number, width: number, hl_group: string } }
 entry.get_view = function(self, suggest_offset)
   local item = self:get_vim_item(suggest_offset)
   return self.cache:ensure({ 'get_view', self.resolved_completion_item and 1 or 0 }, function()

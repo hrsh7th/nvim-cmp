@@ -11,8 +11,9 @@ local config = require('cmp.config')
 local types = require('cmp.types')
 
 local SOURCE_TIMEOUT = 500
-local THROTTLE_TIME = 80
+local THROTTLE_TIME = 120
 local DEBOUNCE_TIME = 20
+
 
 ---@class cmp.Core
 ---@field public suspending boolean

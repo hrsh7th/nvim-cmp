@@ -3,14 +3,13 @@ local autocmd = require('cmp.utils.autocmd')
 local window = require('cmp.utils.window')
 local config = require('cmp.config')
 local types = require('cmp.types')
-local cache = require('cmp.utils.cache')
 local keymap = require('cmp.utils.keymap')
 
 ---@class cmp.CustomEntriesView
----@field private cache cmp.Cache
 ---@field private entries_win cmp.Window
 ---@field private offset number
 ---@field private entries cmp.Entry[]
+---@field private column_bytes any
 ---@field private column_width any
 ---@field public event cmp.Event
 local custom_entries_view = {}
@@ -19,7 +18,6 @@ custom_entries_view.ns = vim.api.nvim_create_namespace('cmp.view.custom_entries_
 
 custom_entries_view.new = function()
   local self = setmetatable({}, { __index = custom_entries_view })
-  self.cache = cache.new()
   self.entries_win = window.new()
   self.entries_win:option('conceallevel', 2)
   self.entries_win:option('concealcursor', 'n')
@@ -48,28 +46,30 @@ custom_entries_view.new = function()
 
       for i = top, bot do
         local e = self.entries[i + 1]
-        local v = e:get_view(self.offset)
-        local o = 1
-        for _, key in ipairs({ 'abbr', 'kind', 'menu' }) do
-          if self.column_width[key] > 0 then
-            vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, o, {
+        if e then
+          local v = e:get_view(self.offset)
+          local o = 1
+          for _, key in ipairs({ 'abbr', 'kind', 'menu' }) do
+            if self.column_bytes[key] > 0 then
+              vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, o, {
+                end_line = i,
+                end_col = o + v[key].bytes,
+                hl_group = v[key].hl_group,
+                hl_mode = 'combine',
+                ephemeral = true,
+              })
+              o = o + self.column_bytes[key] + 1
+            end
+          end
+          for _, m in ipairs(e.matches or {}) do
+            vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, m.word_match_start, {
               end_line = i,
-              end_col = o + v[key].bytes,
-              hl_group = v[key].hl_group,
+              end_col = m.word_match_end + 1,
+              hl_group = m.fuzzy and 'CmpItemAbbrMatchFuzzy' or 'CmpItemAbbrMatch',
               hl_mode = 'combine',
               ephemeral = true,
             })
-            o = o + self.column_width[key] + 1
           end
-        end
-        for _, m in ipairs(e.matches or {}) do
-          vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, m.word_match_start, {
-            end_line = i,
-            end_col = m.word_match_end + 1,
-            hl_group = m.fuzzy and 'CmpItemAbbrMatchFuzzy' or 'CmpItemAbbrMatch',
-            hl_mode = 'combine',
-            ephemeral = true,
-          })
         end
       end
     end,
@@ -89,8 +89,10 @@ end
 custom_entries_view.open = function(self, offset, entries)
   self.offset = offset
   self.entries = {}
+  self.column_bytes = { abbr = 0, kind = 0, menu = 0 }
   self.column_width = { abbr = 0, kind = 0, menu = 0 }
 
+  local lines = {}
   local dedup = {}
   local preselect = 0
   local i = 1
@@ -98,30 +100,27 @@ custom_entries_view.open = function(self, offset, entries)
     local view = e:get_view(offset)
     if view.dup == 1 or not dedup[e.completion_item.label] then
       dedup[e.completion_item.label] = true
-      self.column_width.abbr = math.max(self.column_width.abbr, view.abbr.bytes)
-      self.column_width.kind = math.max(self.column_width.kind, view.kind.bytes)
-      self.column_width.menu = math.max(self.column_width.menu, view.menu.bytes)
+      self.column_bytes.abbr = math.max(self.column_bytes.abbr, view.abbr.bytes)
+      self.column_bytes.kind = math.max(self.column_bytes.kind, view.kind.bytes)
+      self.column_bytes.menu = math.max(self.column_bytes.menu, view.menu.bytes)
+      self.column_width.abbr = math.max(self.column_width.abbr, view.abbr.width)
+      self.column_width.kind = math.max(self.column_width.kind, view.kind.width)
+      self.column_width.menu = math.max(self.column_width.menu, view.menu.width)
       table.insert(self.entries, e)
+      table.insert(lines, ' ')
       if preselect == 0 and e.completion_item.preselect then
         preselect = i
       end
       i = i + 1
     end
   end
-
-  local lines = {}
-  local width = 0
-  local format = string.format(' %%-%ds%%-%ds%%-%ds ', self.column_width.abbr + ((self.column_width.kind + self.column_width.menu) > 0 and 1 or 0), self.column_width.kind + (self.column_width.menu > 0 and 1 or 0), self.column_width.menu)
-  for j, e in ipairs(self.entries) do
-    local t, w = self.cache:ensure({ 'lines', e.id, self.column_width.abbr, self.column_width.kind, self.column_width.menu }, function()
-      local view = e:get_view(offset)
-      local text = string.format(format, view.abbr.text, view.kind.text, view.menu.text)
-      return text, vim.str_utfindex(text)
-    end)
-    lines[j] = t
-    width = math.max(width, w)
-  end
   vim.api.nvim_buf_set_lines(self.entries_win.buf, 0, -1, false, lines)
+
+  local width = 0
+  width = width + 1
+  width = width + self.column_width.abbr + (self.column_width.kind > 0 and 1 or 0)
+  width = width + self.column_width.kind + (self.column_width.menu > 0 and 1 or 0)
+  width = width + self.column_width.menu + 1
 
   local row = vim.fn.screenrow()
   local height = vim.api.nvim_get_option('pumheight')
@@ -149,6 +148,7 @@ custom_entries_view.open = function(self, offset, entries)
     zindex = 1001,
   })
   vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 1 })
+  self:draw()
 
   if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
     self:preselect(preselect)
@@ -161,7 +161,6 @@ end
 custom_entries_view.close = function(self)
   self.offset = -1
   self.entries = {}
-  self.cache:clear()
   self.entries_win:close()
 end
 
@@ -170,6 +169,27 @@ custom_entries_view.abort = function(self)
     self:_insert(self.prefix)
   end
   self:close()
+end
+
+custom_entries_view.draw = function(self)
+  local info = vim.fn.getwininfo(self.entries_win.win)[1]
+  local topline = info.topline - 1
+  local botline = info.topline + info.height - 1
+  local texts = {}
+  for i = topline, botline - 1 do
+    local view = self.entries[i + 1]:get_view(self.offset)
+    local text = {}
+    table.insert(text, ' ')
+    table.insert(text, view.abbr.text)
+    table.insert(text, string.rep(' ', 1 + self.column_width.abbr - view.abbr.width))
+    table.insert(text, view.kind.text)
+    table.insert(text, string.rep(' ', 1 + self.column_width.kind - view.kind.width))
+    table.insert(text, view.menu.text)
+    table.insert(text, string.rep(' ', 1 + self.column_width.menu - view.menu.width))
+    table.insert(text, ' ')
+    table.insert(texts, table.concat(text, ''))
+  end
+  vim.api.nvim_buf_set_lines(self.entries_win.buf, topline, botline, false, texts)
 end
 
 custom_entries_view.visible = function(self)
@@ -188,6 +208,7 @@ custom_entries_view.preselect = function(self, index)
       self.entries_win:option('cursorline', true)
       vim.api.nvim_win_set_cursor(self.entries_win.win, { index, 1 })
       self.entries_win:update()
+      self:draw()
     end
   end
 end
@@ -262,6 +283,7 @@ custom_entries_view._select = function(self, cursor, option)
     self:_insert(self.entries[cursor] and self.entries[cursor]:get_vim_item(self.offset).word or self.prefix)
   end
   self.entries_win:update()
+  self:draw()
   self.event:emit('change')
 end
 
