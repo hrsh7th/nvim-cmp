@@ -3,7 +3,6 @@ local autocmd = require('cmp.utils.autocmd')
 local window = require('cmp.utils.window')
 local config = require('cmp.config')
 local types = require('cmp.types')
-local keymap = require('cmp.utils.keymap')
 
 ---@class cmp.CustomEntriesView
 ---@field private entries_win cmp.Window
