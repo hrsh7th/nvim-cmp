@@ -35,7 +35,7 @@ end
 ---@return T
 misc.merge = function(v1, v2)
   local merge1 = type(v1) == 'table' and (not vim.tbl_islist(v1) or vim.tbl_isempty(v1))
-  local merge2 = type(v2) == 'table' and (not vim.tbl_islist(v1) or vim.tbl_isempty(v1))
+  local merge2 = type(v2) == 'table' and (not vim.tbl_islist(v2) or vim.tbl_isempty(v2))
   if merge1 and merge2 then
     local new_tbl = {}
     for k, v in pairs(v2) do
