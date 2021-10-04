@@ -148,12 +148,13 @@ custom_entries_view.open = function(self, offset, entries)
     zindex = 1001,
   })
   vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 1 })
-  self:draw()
 
   if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
     self:preselect(preselect)
   elseif string.match(config.get().completion.completeopt, 'noinsert') then
     self:preselect(1)
+  else
+    self:draw()
   end
   self.event:emit('change')
 end
@@ -193,9 +194,7 @@ custom_entries_view.draw = function(self)
 end
 
 custom_entries_view.visible = function(self)
-  -- It's super hacky implementation for enabling keymapping.
-  -- Filtering and completion behavior still disabled because `custom_entries_view:ready` returns false.
-  return self.entries_win:visible() or vim.fn.pumvisible() == 1
+  return self.entries_win:visible()
 end
 
 custom_entries_view.info = function(self)
@@ -222,12 +221,6 @@ custom_entries_view.select_next_item = function(self, option)
       cursor = 0
     end
     self:_select(cursor, option)
-  elseif vim.fn.pumvisible() == 1 then
-    if (option.behavior or types.cmp.SelectBehavior.Insert) == types.cmp.SelectBehavior.Insert then
-      keymap.feedkeys(keymap.t('<C-n>'), 'n')
-    else
-      keymap.feedkeys(keymap.t('<Down>'), 'n')
-    end
   end
 end
 
@@ -238,12 +231,6 @@ custom_entries_view.select_prev_item = function(self, option)
       cursor = #self.entries
     end
     self:_select(cursor, option)
-  elseif vim.fn.pumvisible() == 1 then
-    if (option.behavior or types.cmp.SelectBehavior.Insert) == types.cmp.SelectBehavior.Insert then
-      keymap.feedkeys(keymap.t('<C-p>'), 'n')
-    else
-      keymap.feedkeys(keymap.t('<Up>'), 'n')
-    end
   end
 end
 
