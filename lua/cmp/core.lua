@@ -14,7 +14,6 @@ local SOURCE_TIMEOUT = 500
 local THROTTLE_TIME = 120
 local DEBOUNCE_TIME = 20
 
-
 ---@class cmp.Core
 ---@field public suspending boolean
 ---@field public view cmp.View
