@@ -14,7 +14,7 @@ end
 cache.get = function(self, key)
   key = self:key(key)
   if self.entries[key] ~= nil then
-    return unpack(self.entries[key])
+    return self.entries[key]
   end
   return nil
 end
@@ -22,9 +22,9 @@ end
 ---Set cache value explicitly
 ---@param key string
 ---@vararg any
-cache.set = function(self, key, ...)
+cache.set = function(self, key, value)
   key = self:key(key)
-  self.entries[key] = { ... }
+  self.entries[key] = value
 end
 
 ---Ensure value by callback
@@ -33,9 +33,11 @@ end
 cache.ensure = function(self, key, callback)
   local value = self:get(key)
   if value == nil then
-    self:set(key, callback())
+    local v = callback()
+    self:set(key, v)
+    return v
   end
-  return self:get(key)
+  return value
 end
 
 ---Clear all cache entries

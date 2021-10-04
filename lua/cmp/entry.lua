@@ -59,7 +59,7 @@ entry.get_offset = function(self)
         local c = misc.to_vimindex(self.context.cursor_line, range.start.character)
         for idx = c, self.source_offset do
           if not char.is_white(string.byte(self.context.cursor_line, idx)) then
-            offset = math.min(offset, idx)
+            offset = idx
             break
           end
         end
@@ -106,8 +106,8 @@ entry.get_word = function(self)
     local word
     if misc.safe(self.completion_item.textEdit) then
       word = str.trim(self.completion_item.textEdit.newText)
-      local _, after = self:get_overwrite()
-      if 0 < after or self.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
+      local overwrite = self:get_overwrite()
+      if 0 < overwrite[2] or self.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
         word = str.get_word(word, string.byte(self.context.cursor_after_line, 1))
       end
     elseif misc.safe(self.completion_item.insertText) then
@@ -132,9 +132,9 @@ entry.get_overwrite = function(self)
       local e = misc.to_vimindex(self.context.cursor_line, r['end'].character)
       local before = self.context.cursor.col - s
       local after = e - self.context.cursor.col
-      return before, after
+      return { before, after }
     end
-    return 0, 0
+    return { 0, 0 }
   end)
 end
 
@@ -201,17 +201,17 @@ entry.get_view = function(self, suggest_offset)
   return self.cache:ensure({ 'get_view', self.resolved_completion_item and 1 or 0 }, function()
     local view = {}
     view.abbr = {}
-    view.abbr.text = string.sub(item.abbr or '', 1, 98)
+    view.abbr.text = item.abbr or ''
     view.abbr.bytes = #view.abbr.text
     view.abbr.width = vim.str_utfindex(view.abbr.text)
     view.abbr.hl_group = self:is_deprecated() and 'CmpItemAbbrDeprecated' or 'CmpItemAbbr'
     view.kind = {}
-    view.kind.text = string.sub(item.kind or '', 1, 98)
+    view.kind.text = item.kind or ''
     view.kind.bytes = #view.kind.text
     view.kind.width = vim.str_utfindex(view.kind.text)
     view.kind.hl_group = 'CmpItemKind'
     view.menu = {}
-    view.menu.text = string.sub(item.menu or '', 1, 98)
+    view.menu.text = item.menu or ''
     view.menu.bytes = #view.menu.text
     view.menu.width = vim.str_utfindex(view.menu.text)
     view.menu.hl_group = 'CmpItemMenu'

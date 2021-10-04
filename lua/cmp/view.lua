@@ -172,6 +172,9 @@ end
 ---On entry change
 view.on_entry_change = async.throttle(
   vim.schedule_wrap(function(self)
+    if not self:visible() then
+      return
+    end
     local e = self:get_selected_entry()
     if e then
       for _, c in ipairs(config.get().confirmation.get_commit_characters(e:get_commit_characters())) do
@@ -180,6 +183,9 @@ view.on_entry_change = async.throttle(
         end)
       end
       e:resolve(vim.schedule_wrap(self.resolve_dedup(function()
+        if not self:visible() then
+          return
+        end
         self.docs_view:open(e, self:_get_entries_view():info())
       end)))
     else
