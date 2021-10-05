@@ -47,13 +47,30 @@ return function()
     sorting = {
       priority_weight = 2,
       comparators = {
-        compare.offset,
-        compare.exact,
-        compare.score,
-        compare.kind,
-        compare.sort_text,
-        compare.length,
-        compare.order,
+        function(e1, e2)
+            local d
+            d = compare.offset(e1, e2)
+            if d ~= nil then
+              return d
+            end
+            d = compare.exact(e1, e2)
+            if d ~= nil then
+              return d
+            end
+            d = compare.kind(e1, e2)
+            if d ~= nil then
+              return d
+            end
+            d = compare.sort_text(e1, e2)
+            if d ~= nil then
+              return d
+            end
+            d = compare.length(e1, e2)
+            if d ~= nil then
+              return d
+            end
+            return compare.order(e1, e2)
+        end
       },
     },
 
