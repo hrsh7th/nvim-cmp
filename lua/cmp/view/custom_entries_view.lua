@@ -121,7 +121,8 @@ custom_entries_view.open = function(self, offset, entries)
   width = width + self.column_width.kind + (self.column_width.menu > 0 and 1 or 0)
   width = width + self.column_width.menu + 1
 
-  local row = vim.fn.screenrow()
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local row = vim.fn.screenpos('.', cursor[1], cursor[2] + 1).row
   local height = vim.api.nvim_get_option('pumheight')
   height = height == 0 and #self.entries or height
   height = math.min(height, #self.entries)
@@ -135,7 +136,7 @@ custom_entries_view.open = function(self, offset, entries)
     return
   end
 
-  local delta = vim.api.nvim_win_get_cursor(0)[2] + 1 - self.offset
+  local delta = cursor[2] + 1 - self.offset
   self.entries_win:option('cursorline', false)
   self.entries_win:open({
     relative = 'editor',
