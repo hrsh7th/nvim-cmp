@@ -275,7 +275,10 @@ custom_entries_view._select = function(self, cursor, option)
 end
 
 custom_entries_view._insert = function(self, word)
-  vim.cmd([[undojoin]])
+  local tree = vim.fn.undotree()
+  if tree.seq_cur == tree.seq_last then
+    vim.cmd([[undojoin]])
+  end
   local cursor = vim.api.nvim_win_get_cursor(0)
   vim.api.nvim_buf_set_text(0, cursor[1] - 1, self.offset - 1, cursor[1] - 1, cursor[2], { word })
   vim.api.nvim_win_set_cursor(0, { cursor[1], self.offset + #word - 1 })
