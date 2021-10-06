@@ -366,11 +366,8 @@ Please see [FAQ](#how-to-show-name-of-item-kind-and-source-like-compe) if you wo
 local lspkind = require('lspkind')
 cmp.setup {
   formatting = {
-    format = function(entry, vim_item)
-      vim_item.kind = lspkind.presets.default[vim_item.kind]
-      return vim_item
-    end
-  }
+    format = lspkind.cmp_format(),
+  },
 }
 ```
 
@@ -515,20 +512,13 @@ This will greatly slow down nvim-cmp (and other LSP related features).
 
 ```lua
 formatting = {
-  format = function(entry, vim_item)
-    -- fancy icons and a name of kind
-    vim_item.kind = require("lspkind").presets.default[vim_item.kind] .. " " .. vim_item.kind
-
-    -- set a name for each source
-    vim_item.menu = ({
+  format = require("lspkind").cmp_format({with_text = true, menu = ({
       buffer = "[Buffer]",
       nvim_lsp = "[LSP]",
       luasnip = "[LuaSnip]",
       nvim_lua = "[Lua]",
       latex_symbols = "[Latex]",
-    })[entry.source.name]
-    return vim_item
-  end,
+    })}),
 },
 ```
 
