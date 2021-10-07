@@ -119,7 +119,7 @@ matcher.match = function(input, word, words)
     for _, w in ipairs(words or {}) do
       prefix = true
       local o = 1
-      for i = matches[1].input_match_start, matches[1].input_match_end - 1 do
+      for i = matches[1].input_match_start, matches[1].input_match_end do
         if not char.match(string.byte(w, o), string.byte(input, i)) then
           prefix = false
           break

@@ -28,6 +28,7 @@ describe('matcher', function()
     assert.is.truthy(matcher.match('vo', 'void#') >= 1)
     assert.is.truthy(matcher.match('usela', 'useLayoutEffect') > matcher.match('usela', 'useDataLayer'))
     assert.is.truthy(matcher.match('true', 'v:true', { 'true' }) == matcher.match('true', 'true'))
+    assert.is.truthy(matcher.match('g', 'get', { 'get' }) > matcher.match('g', 'dein#get', { 'dein#get' }))
   end)
 
   it('debug', function()
