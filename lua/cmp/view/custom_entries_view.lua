@@ -3,6 +3,7 @@ local autocmd = require('cmp.utils.autocmd')
 local window = require('cmp.utils.window')
 local config = require('cmp.config')
 local types = require('cmp.types')
+local keymap = require('cmp.utils.keymap')
 
 ---@class cmp.CustomEntriesView
 ---@field private entries_win cmp.Window
@@ -281,8 +282,11 @@ custom_entries_view._insert = function(self, word)
     vim.cmd([[undojoin]])
   end
   local cursor = vim.api.nvim_win_get_cursor(0)
-  vim.api.nvim_buf_set_text(0, cursor[1] - 1, self.offset - 1, cursor[1] - 1, cursor[2], { word })
-  vim.api.nvim_win_set_cursor(0, { cursor[1], self.offset + #word - 1 })
+  local length = vim.str_utfindex(string.sub(vim.api.nvim_get_current_line(), self.offset, cursor[2]))
+  local keys = {}
+  table.insert(keys, keymap.t(string.rep('<C-g>U<Left><Del>', length)))
+  table.insert(keys, word)
+  keymap.feedkeys(table.concat(keys, ''), 'n')
 end
 
 return custom_entries_view
