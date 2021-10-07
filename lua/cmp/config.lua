@@ -33,9 +33,10 @@ end
 
 ---@return cmp.ConfigSchema
 config.get = function()
+  local bufnr = vim.api.nvim_get_current_buf()
   local global = config.global
-  local buffer = config.buffers[vim.api.nvim_get_current_buf()] or { revision = 1 }
-  return config.cache:ensure({ 'get', global.revision or 0, buffer.revision or 0 }, function()
+  local buffer = config.buffers[bufnr] or { revision = 1 }
+  return config.cache:ensure({ 'get', bufnr, global.revision or 0, buffer.revision or 0 }, function()
     return misc.merge(buffer, global)
   end)
 end
@@ -53,9 +54,10 @@ end
 ---@param name string
 ---@return cmp.SourceConfig
 config.get_source_config = function(name)
+  local bufnr = vim.api.nvim_get_current_buf()
   local global = config.global
-  local buffer = config.buffers[vim.api.nvim_get_current_buf()] or { revision = 1 }
-  return config.cache:ensure({ 'get_source_config', global.revision or 0, buffer.revision or 0, name }, function()
+  local buffer = config.buffers[bufnr] or { revision = 1 }
+  return config.cache:ensure({ 'get_source_config', bufnr, global.revision or 0, buffer.revision or 0, name }, function()
     local c = config.get()
     for _, s in ipairs(c.sources) do
       if s.name == name then
