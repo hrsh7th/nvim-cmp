@@ -282,7 +282,7 @@ custom_entries_view._insert = function(self, word)
   local keys = {}
   table.insert(keys, keymap.t(string.rep('<C-g>U<Left><Del>', length)))
   table.insert(keys, word)
-  keymap.feedkeys(table.concat(keys, ''), 'n')
+  keymap.feedkeys(table.concat(keys, ''), 'nt')
 end
 
 return custom_entries_view
