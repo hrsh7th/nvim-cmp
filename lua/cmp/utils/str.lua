@@ -15,6 +15,8 @@ INVALID_CHARS[string.byte('\t')] = true
 INVALID_CHARS[string.byte('\n')] = true
 INVALID_CHARS[string.byte('\r')] = true
 
+local NR_BYTE = string.byte('\n')
+
 local PAIR_CHARS = {}
 PAIR_CHARS[string.byte('[')] = string.byte(']')
 PAIR_CHARS[string.byte('(')] = string.byte(')')
@@ -72,24 +74,6 @@ str.strikethrough = function(text)
   return buffer
 end
 
----omit
----@param text string
----@param width number
----@return string
-str.omit = function(text, width)
-  if width == 0 then
-    return ''
-  end
-
-  if not text then
-    text = ''
-  end
-  if #text > width then
-    return string.sub(text, 1, width + 1) .. '...'
-  end
-  return text
-end
-
 ---trim
 ---@param text string
 ---@return string
@@ -136,21 +120,12 @@ str.get_word = function(text, stop_char)
   return text
 end
 
----Get character length.
----@param text string
----@param s number
----@param e number
----@return number
-str.chars = function(text, s, e)
-  return vim.fn.strchars(string.sub(text, s, e))
-end
-
 ---Oneline
 ---@param text string
 ---@return string
 str.oneline = function(text)
   for i = 1, #text do
-    if string.byte(text, i) == string.byte('\n', 1) then
+    if string.byte(text, i) == NR_BYTE then
       return string.sub(text, 1, i - 1)
     end
   end

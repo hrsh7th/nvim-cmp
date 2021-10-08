@@ -5,7 +5,9 @@ local vim_source = {}
 ---@param id number
 ---@param args any[]
 vim_source.on_callback = function(id, args)
-  return vim_source.to_callback.callbacks[id](unpack(args))
+  if vim_source.to_callback.callbacks[id] then
+    vim_source.to_callback.callbacks[id](unpack(args))
+  end
 end
 
 ---@param callback function
@@ -34,7 +36,7 @@ vim_source.to_args = function(args)
   return args
 end
 
----@param id number
+---@param bridge_id number
 ---@param methods string[]
 vim_source.new = function(bridge_id, methods)
   local self = {}

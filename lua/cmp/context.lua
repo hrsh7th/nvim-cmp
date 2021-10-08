@@ -8,8 +8,6 @@ local cache = require('cmp.utils.cache')
 ---@field public cache cmp.Cache
 ---@field public prev_context cmp.Context
 ---@field public option cmp.ContextOption
----@field public pumvisible boolean
----@field public pumselect  boolean
 ---@field public filetype string
 ---@field public time number
 ---@field public mode string
@@ -41,13 +39,10 @@ context.new = function(prev_context, option)
   option = option or {}
 
   local self = setmetatable({}, { __index = context })
-  local completeinfo = vim.fn.complete_info({ 'selected', 'mode', 'pum_visible' })
   self.id = misc.id('context')
   self.cache = cache.new()
   self.prev_context = prev_context or context.empty()
   self.option = option or { reason = types.cmp.ContextReason.None }
-  self.pumvisible = completeinfo.pum_visible ~= 0
-  self.pumselect = completeinfo.selected ~= -1
   self.filetype = vim.api.nvim_buf_get_option(0, 'filetype')
   self.time = vim.loop.now()
   self.mode = vim.api.nvim_get_mode().mode
@@ -109,13 +104,6 @@ end
 ---@return boolean
 context.changed = function(self, ctx)
   local curr = self
-
-  if self.pumvisible then
-    local completed_item = vim.v.completed_item or {}
-    if completed_item.word then
-      return false
-    end
-  end
 
   if curr.bufnr ~= ctx.bufnr then
     return true

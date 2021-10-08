@@ -1,10 +1,12 @@
 local core = require('cmp.core')
-local keymap = require('cmp.utils.keymap')
 local source = require('cmp.source')
 local config = require('cmp.config')
 local autocmd = require('cmp.utils.autocmd')
+local keymap = require('cmp.utils.keymap')
 
 local cmp = {}
+
+cmp.core = core.new()
 
 ---Expose types
 for k, v in pairs(require('cmp.types.cmp')) do
@@ -26,27 +28,38 @@ cmp.mapping = require('cmp.config.mapping')
 ---@return number
 cmp.register_source = function(name, s)
   local src = source.new(name, s)
-  core.register_source(src)
+  cmp.core:register_source(src)
   return src.id
 end
 
 ---Unregister completion source
 ---@param id number
 cmp.unregister_source = function(id)
-  core.unregister_source(id)
+  cmp.core:unregister_source(id)
 end
 
 ---Invoke completion manually
 cmp.complete = function()
-  core.complete(core.get_context({ reason = cmp.ContextReason.Manual }))
+  cmp.core:complete(cmp.core:get_context({ reason = cmp.ContextReason.Manual }))
   return true
+end
+
+---Return view is visible or not.
+cmp.visible = function()
+  return cmp.core.view:visible() or vim.fn.pumvisible() == 1
 end
 
 ---Close current completion
 cmp.close = function()
-  if vim.fn.pumvisible() == 1 then
-    core.reset()
-    keymap.feedkeys(keymap.t('<C-e>'), 'n')
+  if cmp.core.view:visible() then
+    local release = cmp.core:suspend()
+    cmp.core.view:close()
+    cmp.core:reset()
+    vim.schedule(release)
+    return true
+  elseif vim.fn.pumvisible() == 1 then
+    vim.fn.complete(1, {})
+    cmp.core:reset()
     return true
   else
     return false
@@ -55,10 +68,13 @@ end
 
 ---Abort current completion
 cmp.abort = function()
-  if vim.fn.pumvisible() == 1 then
-    keymap.feedkeys(keymap.t('<C-e>'), 'n', function()
-      core.reset()
-    end)
+  if cmp.core.view:visible() then
+    local release = cmp.core:suspend()
+    cmp.core.view:abort()
+    vim.schedule(release)
+    return true
+  elseif vim.fn.pumvisible() == 1 then
+    vim.api.nvim_select_popupmenu_item(-1, true, true, {})
     return true
   else
     return false
@@ -66,9 +82,12 @@ cmp.abort = function()
 end
 
 ---Select next item if possible
-cmp.select_next_item = function()
-  if vim.fn.pumvisible() == 1 then
-    vim.api.nvim_feedkeys(keymap.t('<C-n>'), 'n', true)
+cmp.select_next_item = function(option)
+  option = option or {}
+  if cmp.core.view:visible() then
+    local release = cmp.core:suspend()
+    cmp.core.view:select_next_item(option)
+    vim.schedule(release)
     return true
   else
     return false
@@ -76,9 +95,12 @@ cmp.select_next_item = function()
 end
 
 ---Select prev item if possible
-cmp.select_prev_item = function()
-  if vim.fn.pumvisible() == 1 then
-    vim.api.nvim_feedkeys(keymap.t('<C-p>'), 'n', true)
+cmp.select_prev_item = function(option)
+  option = option or {}
+  if cmp.core.view:visible() then
+    local release = cmp.core:suspend()
+    cmp.core.view:select_prev_item(option)
+    vim.schedule(release)
     return true
   else
     return false
@@ -87,8 +109,8 @@ end
 
 ---Scrolling documentation window if possible
 cmp.scroll_docs = function(delta)
-  if core.menu.float:is_visible() then
-    core.menu.float:scroll(delta)
+  if cmp.core.view:visible() then
+    cmp.core.view:scroll_docs(delta)
     return true
   else
     return false
@@ -98,15 +120,20 @@ end
 ---Confirm completion
 cmp.confirm = function(option)
   option = option or {}
-  local e = core.menu:get_selected_entry() or (option.select and core.menu:get_first_entry() or nil)
+
+  local e = cmp.core.view:get_selected_entry() or (option.select and cmp.core.view:get_first_entry() or nil)
   if e then
-    core.confirm(e, {
+    cmp.core:confirm(e, {
       behavior = option.behavior,
     }, function()
-      core.complete(core.get_context({ reason = cmp.ContextReason.TriggerOnly }))
+      cmp.core:complete(cmp.core:get_context({ reason = cmp.ContextReason.TriggerOnly }))
     end)
     return true
   else
+    if vim.fn.complete_info({ 'selected' }).selected ~= -1 then
+      keymap.feedkeys(keymap.t('<C-y>'), 'n')
+      return true
+    end
     return false
   end
 end
@@ -121,7 +148,7 @@ cmp.status = function()
   kinds.installed = {}
   kinds.invalid = {}
   local names = {}
-  for _, s in pairs(core.sources) do
+  for _, s in pairs(cmp.core.sources) do
     names[s.name] = true
 
     if config.get_source_config(s.name) then
@@ -192,20 +219,21 @@ autocmd.subscribe('InsertEnter', function()
   -- Avoid unexpected mode detection (mode() function will returns `normal mode` on the InsertEnter event.)
   vim.schedule(function()
     if config.enabled() then
-      core.prepare()
-      core.on_change('InsertEnter')
+      cmp.core:prepare()
+      cmp.core:on_change('InsertEnter')
     end
   end)
 end)
 
 autocmd.subscribe('TextChanged', function()
   if config.enabled() then
-    core.on_change('TextChanged')
+    cmp.core:on_change('TextChanged')
   end
 end)
 
 autocmd.subscribe('InsertLeave', function()
-  core.reset()
+  cmp.core:reset()
+  cmp.core.view:close()
 end)
 
 return cmp

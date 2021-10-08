@@ -1,4 +1,5 @@
 local compare = require('cmp.config.compare')
+local mapping = require('cmp.config.mapping')
 local types = require('cmp.types')
 
 local WIDE_HEIGHT = 40
@@ -46,28 +47,58 @@ return function()
     sorting = {
       priority_weight = 2,
       comparators = {
-        compare.offset,
-        compare.exact,
-        compare.score,
-        compare.kind,
-        compare.sort_text,
-        compare.length,
-        compare.order,
+        function(e1, e2)
+          local diff
+          diff = compare.offset(e1, e2)
+          if diff ~= nil then
+            return diff
+          end
+          diff = compare.exact(e1, e2)
+          if diff ~= nil then
+            return diff
+          end
+          diff = compare.score(e1, e2)
+          if diff ~= nil then
+            return diff
+          end
+          diff = compare.kind(e1, e2)
+          if diff ~= nil then
+            return diff
+          end
+          diff = compare.sort_text(e1, e2)
+          if diff ~= nil then
+            return diff
+          end
+          diff = compare.length(e1, e2)
+          if diff ~= nil then
+            return diff
+          end
+          return compare.order(e1, e2)
+        end,
       },
     },
 
     event = {},
 
-    mapping = {},
+    mapping = {
+      ['<Down>'] = mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Select }),
+      ['<Up>'] = mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Select }),
+      ['<C-n>'] = mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Insert }),
+      ['<C-p>'] = mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Insert }),
+      ['<C-c>'] = function(fallback)
+        require('cmp').close()
+        fallback()
+      end,
+    },
 
     formatting = {
-      deprecated = false,
       format = function(_, vim_item)
         return vim_item
       end,
     },
 
     experimental = {
+      native_menu = false,
       ghost_text = false,
     },
 

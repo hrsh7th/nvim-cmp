@@ -3,6 +3,11 @@
 A completion engine plugin for neovim written in Lua.
 Completion sources are installed from external repositories and "sourced".
 
+Readme!
+====================
+
+nvim-cmp's breaking change are [here](https://github.com/hrsh7th/nvim-cmp/issues/231).
+
 
 Status
 ====================
@@ -67,7 +72,7 @@ lua <<EOF
     snippet = {
       expand = function(args)
         -- For `vsnip` user.
-        vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` user.
+        vim.fn["vsnip#anonymous"](args.body)
 
         -- For `luasnip` user.
         -- require('luasnip').lsp_expand(args.body)
@@ -125,8 +130,8 @@ If you want to remove an option, you can set it to `false` instead.
 
 Built in helper `cmd.mappings` are:
 
-- *cmp.mapping.select_prev_item()*
-- *cmp.mapping.select_next_item()*
+- *cmp.mapping.select_prev_item({ cmp.SelectBehavior.{Insert,Select} } })*
+- *cmp.mapping.select_next_item({ cmp.SelectBehavior.{Insert,Select} })*
 - *cmp.mapping.scroll_docs(number)*
 - *cmp.mapping.complete()*
 - *cmp.mapping.close()*
@@ -137,6 +142,10 @@ You can configure `nvim-cmp` to use these `cmd.mappings` like this:
 
 ```lua
 mapping = {
+  ['<C-n>'] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert }),
+  ['<C-p>'] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }),
+  ['<Down>'] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+  ['<Up>'] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
   ['<C-d>'] = cmp.mapping.scroll_docs(-4),
   ['<C-f>'] = cmp.mapping.scroll_docs(4),
   ['<C-Space>'] = cmp.mapping.complete(),
@@ -344,14 +353,6 @@ The documentation window's max width.
 
 The documentation window's max height.
 
-#### formatting.deprecated (type: boolean)
-
-Specify deprecated candidate should be marked as deprecated or not.
-
-This option is useful but disabled by default because sometimes, this option can break your terminal appearance.
-
-Default: `false`
-
 #### formatting.format (type: fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem)
 
 A function to customize completion menu.
@@ -375,12 +376,17 @@ cmp.setup {
 
 A callback function called when the item is confirmed.
 
-#### experimental.ghost_text (type: boolean)
+#### experimental.native_menu (type: boolean)
+
+Use vim's native completion menu instead of custom floating menu.
+
+Default: `false`
+
+#### experimental.ghost_text (type: cmp.GhostTextConfig | false)
 
 Specify whether to display ghost text.
 
 Default: `false`
-
 
 Commands
 ====================
@@ -396,6 +402,34 @@ Autocmds
 
 Invoke after nvim-cmp setup.
 
+Highlights
+====================
+
+※ The following highlights are used only when enabling `experimental.cusom_menu = true`.
+
+#### `CmpItemAbbr`
+
+The abbr field.
+
+#### `CmpItemAbbrDeprecated`
+
+The deprecated item's abbr field.
+
+#### `CmpItemAbbrMatch`
+
+The matched characters highlight.
+
+#### `CmpItemAbbrMatchFuzzy`
+
+The fuzzy matched characters highlight.
+
+#### `CmpItemKind`
+
+The kind field.
+
+#### `CmpItemMenu`
+
+The menu field.
 
 Programatic API
 ====================
@@ -418,11 +452,11 @@ Close current completion menu.
 
 Close current completion menu and restore current line (similar to native `<C-e>` behavior).
 
-#### `cmp.select_next_item()`
+#### `cmp.select_next_item({ cmp.SelectBehavior.{Insert,Select} })`
 
 Select next completion item if possible.
 
-#### `cmp.select_prev_item()`
+#### `cmp.select_prev_item({ cmp.SelectBehavior.{Insert,Select} })`
 
 Select prev completion item if possible.
 

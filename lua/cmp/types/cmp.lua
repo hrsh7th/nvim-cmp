@@ -5,6 +5,11 @@ cmp.ConfirmBehavior = {}
 cmp.ConfirmBehavior.Insert = 'insert'
 cmp.ConfirmBehavior.Replace = 'replace'
 
+---@alias cmp.SelectBehavior "'insert'" | "'select'"
+cmp.SelectBehavior = {}
+cmp.SelectBehavior.Insert = 'insert'
+cmp.SelectBehavior.Select = 'select'
+
 ---@alias cmp.ContextReason "'auto'" | "'manual'" | "'none'"
 cmp.ContextReason = {}
 cmp.ContextReason.Auto = 'auto'
@@ -27,6 +32,9 @@ cmp.PreselectMode.None = 'none'
 
 ---@class cmp.ConfirmOption
 ---@field public behavior cmp.ConfirmBehavior
+
+---@class cmp.SelectOption
+---@field public behavior cmp.SelectBehavior
 
 ---@class cmp.SnippetExpansionParams
 ---@field public body string
@@ -82,7 +90,6 @@ cmp.PreselectMode.None = 'none'
 ---@field public comparators function[]
 
 ---@class cmp.FormattingConfig
----@field public deprecated boolean
 ---@field public format fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem
 
 ---@class cmp.SnippetConfig
@@ -92,6 +99,7 @@ cmp.PreselectMode.None = 'none'
 ---@field on_confirm_done function(e: cmp.Entry)
 
 ---@class cmp.ExperimentalConfig
+---@field public native_menu boolean
 ---@field public ghost_text cmp.GhostTextConfig|"false"
 
 ---@class cmp.GhostTextConfig

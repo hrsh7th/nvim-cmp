@@ -149,8 +149,12 @@ misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(mode, keys)
   local bufnr = vim.api.nvim_get_current_buf()
   local fallback = keymap.listen.cache:get({ mode, bufnr, keys }).fallback
   local callback = keymap.listen.cache:get({ mode, bufnr, keys }).callback
+  local done = false
   callback(keys, function()
-    keymap.feedkeys(keymap.t(fallback), 'i')
+    if not done then
+      done = true
+      keymap.feedkeys(keymap.t(fallback), 'i')
+    end
   end)
   return keymap.t('<Ignore>')
 end)

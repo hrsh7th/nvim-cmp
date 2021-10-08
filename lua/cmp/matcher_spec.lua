@@ -23,12 +23,21 @@ describe('matcher', function()
     assert.is.truthy(matcher.match('my_', 'my_awesome_variable') > matcher.match('my_', 'completion_matching_strategy_list'))
     assert.is.truthy(matcher.match('luacon', 'lua_context') > matcher.match('luacon', 'LuaContext'))
     assert.is.truthy(matcher.match('call', 'calc') == 0)
+
+    assert.is.truthy(matcher.match('vi', 'void#') >= 1)
+    assert.is.truthy(matcher.match('vo', 'void#') >= 1)
+    assert.is.truthy(matcher.match('usela', 'useLayoutEffect') > matcher.match('usela', 'useDataLayer'))
+    assert.is.truthy(matcher.match('true', 'v:true', { 'true' }) == matcher.match('true', 'true'))
+    assert.is.truthy(matcher.match('g', 'get', { 'get' }) > matcher.match('g', 'dein#get', { 'dein#get' }))
   end)
 
   it('debug', function()
     matcher.debug = function(...)
       print(vim.inspect({ ... }))
     end
-    -- print('score', matcher.match('vsnipnextjump', 'vsnip-jump-next'))
+    -- print(vim.inspect({
+    --   a = matcher.match('true', 'v:true', { 'true' }),
+    --   b = matcher.match('true', 'true'),
+    -- }))
   end)
 end)

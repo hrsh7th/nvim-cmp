@@ -10,6 +10,7 @@ local types = require('cmp.types')
 ---@field public cache cmp.Cache
 ---@field public score number
 ---@field public exact boolean
+---@field public matches table
 ---@field public context cmp.Context
 ---@field public source cmp.Source
 ---@field public source_offset number
@@ -32,6 +33,8 @@ entry.new = function(ctx, source, completion_item)
   self.id = misc.id('entry')
   self.cache = cache.new()
   self.score = 0
+  self.exact = false
+  self.matches = {}
   self.context = ctx
   self.source = source
   self.source_offset = source.request_offset
@@ -56,7 +59,7 @@ entry.get_offset = function(self)
         local c = misc.to_vimindex(self.context.cursor_line, range.start.character)
         for idx = c, self.source_offset do
           if not char.is_white(string.byte(self.context.cursor_line, idx)) then
-            offset = math.min(offset, idx)
+            offset = idx
             break
           end
         end
@@ -103,8 +106,8 @@ entry.get_word = function(self)
     local word
     if misc.safe(self.completion_item.textEdit) then
       word = str.trim(self.completion_item.textEdit.newText)
-      local _, after = self:get_overwrite()
-      if 0 < after or self.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
+      local overwrite = self:get_overwrite()
+      if 0 < overwrite[2] or self.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
         word = str.get_word(word, string.byte(self.context.cursor_after_line, 1))
       end
     elseif misc.safe(self.completion_item.insertText) then
@@ -129,9 +132,9 @@ entry.get_overwrite = function(self)
       local e = misc.to_vimindex(self.context.cursor_line, r['end'].character)
       local before = self.context.cursor.col - s
       local after = e - self.context.cursor.col
-      return before, after
+      return { before, after }
     end
-    return 0, 0
+    return { 0, 0 }
   end)
 end
 
@@ -185,6 +188,38 @@ entry.get_insert_text = function(self)
   end)
 end
 
+---Return the item is deprecated or not.
+---@return boolean
+entry.is_deprecated = function(self)
+  return self.completion_item.deprecated or vim.tbl_contains(self.completion_item.tags or {}, types.lsp.CompletionItemTag.Deprecated)
+end
+
+---Return view information.
+---@return { abbr: { text: string, bytes: number, width: number, hl_group: string }, kind: { text: string, bytes: number, width: number, hl_group: string }, menu: { text: string, bytes: number, width: number, hl_group: string } }
+entry.get_view = function(self, suggest_offset)
+  local item = self:get_vim_item(suggest_offset)
+  return self.cache:ensure({ 'get_view', self.resolved_completion_item and 1 or 0 }, function()
+    local view = {}
+    view.abbr = {}
+    view.abbr.text = item.abbr or ''
+    view.abbr.bytes = #view.abbr.text
+    view.abbr.width = vim.str_utfindex(view.abbr.text)
+    view.abbr.hl_group = self:is_deprecated() and 'CmpItemAbbrDeprecated' or 'CmpItemAbbr'
+    view.kind = {}
+    view.kind.text = item.kind or ''
+    view.kind.bytes = #view.kind.text
+    view.kind.width = vim.str_utfindex(view.kind.text)
+    view.kind.hl_group = 'CmpItemKind'
+    view.menu = {}
+    view.menu.text = item.menu or ''
+    view.menu.bytes = #view.menu.text
+    view.menu.width = vim.str_utfindex(view.menu.text)
+    view.menu.hl_group = 'CmpItemMenu'
+    view.dup = item.dup
+    return view
+  end)
+end
+
 ---Make vim.CompletedItem
 ---@param suggest_offset number
 ---@return vim.CompletedItem
@@ -192,7 +227,7 @@ entry.get_vim_item = function(self, suggest_offset)
   return self.cache:ensure({ 'get_vim_item', suggest_offset, self.resolved_completion_item and 1 or 0 }, function()
     local completion_item = self:get_completion_item()
     local word = self:get_word()
-    local abbr = str.trim(completion_item.label)
+    local abbr = str.oneline(str.trim(completion_item.label))
 
     -- ~ indicator
     if #(misc.safe(completion_item.additionalTextEdits) or {}) > 0 then
@@ -201,13 +236,6 @@ entry.get_vim_item = function(self, suggest_offset)
       local insert_text = self:get_insert_text()
       if word ~= insert_text then
         abbr = abbr .. '~'
-      end
-    end
-
-    -- deprecated
-    if config.get().formatting.deprecated then
-      if completion_item.deprecated or vim.tbl_contains(completion_item.tags or {}, types.lsp.CompletionItemTag.Deprecated) then
-        abbr = str.strikethrough(abbr)
       end
     end
 
@@ -246,9 +274,12 @@ entry.get_vim_item = function(self, suggest_offset)
     if config.get().formatting.format then
       vim_item = config.get().formatting.format(self, vim_item)
     end
+    vim_item.word = str.oneline(vim_item.word or '')
+    vim_item.abbr = str.oneline(vim_item.abbr or '')
+    vim_item.kind = str.oneline(vim_item.kind or '')
+    vim_item.menu = str.oneline(vim_item.menu or '')
     vim_item.equal = 1
     vim_item.empty = 1
-    vim_item.user_data = ('cmp:%s'):format(self.id)
 
     return vim_item
   end)
