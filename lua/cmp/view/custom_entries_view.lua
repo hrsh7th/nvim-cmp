@@ -4,6 +4,7 @@ local window = require('cmp.utils.window')
 local config = require('cmp.config')
 local types = require('cmp.types')
 local keymap = require('cmp.utils.keymap')
+local misc   = require('cmp.utils.misc')
 
 ---@class cmp.CustomEntriesView
 ---@field private entries_win cmp.Window
@@ -277,12 +278,19 @@ custom_entries_view._select = function(self, cursor, option)
 end
 
 custom_entries_view._insert = function(self, word)
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  local length = vim.str_utfindex(string.sub(vim.api.nvim_get_current_line(), self.offset, cursor[2]))
-  local keys = {}
-  table.insert(keys, keymap.t(string.rep('<C-g>U<Left><Del>', length)))
-  table.insert(keys, word)
-  keymap.feedkeys(table.concat(keys, ''), 'nt')
+  vim.api.nvim_buf_set_keymap(0, 'i', '<Plug>(cmp.view.custom_entries_view._insert.remove)', ('v:lua.cmp.view.custom_entries_view._insert.remove(%s)'):format(self.offset), {
+    expr = true,
+    noremap = true,
+  })
+  keymap.feedkeys(keymap.t('<Plug>(cmp.view.custom_entries_view._insert.remove)'), '')
+  keymap.feedkeys(word, 'n')
 end
 
+misc.set(_G, { 'cmp', 'view', 'custom_entries_view', '_insert', 'remove' }, function(offset)
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local length = vim.str_utfindex(string.sub(vim.api.nvim_get_current_line(), offset, cursor[2] + 1))
+  return keymap.t(string.rep('<C-g>U<Left><Del>', length))
+end)
+
 return custom_entries_view
+
