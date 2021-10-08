@@ -288,7 +288,7 @@ end
 
 misc.set(_G, { 'cmp', 'view', 'custom_entries_view', '_insert', 'remove' }, function(offset)
   local cursor = vim.api.nvim_win_get_cursor(0)
-  local length = vim.str_utfindex(string.sub(vim.api.nvim_get_current_line(), offset, cursor[2] + 1))
+  local length = vim.str_utfindex(string.sub(vim.api.nvim_get_current_line(), offset, cursor[2]))
   return keymap.t(string.rep('<C-g>U<Left><Del>', length))
 end)
 

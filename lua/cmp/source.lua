@@ -117,7 +117,7 @@ source.get_entries = function(self, ctx)
     return entries
   end)
 
-  local max_item_count = self:get_config().max_item_count
+  local max_item_count = self:get_config().max_item_count or 200
   local limited_entries = {}
   for _, e in ipairs(entries) do
     table.insert(limited_entries, e)
