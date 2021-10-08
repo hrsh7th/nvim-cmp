@@ -74,7 +74,7 @@ return function()
             return diff
           end
           return compare.order(e1, e2)
-        end
+        end,
       },
     },
 

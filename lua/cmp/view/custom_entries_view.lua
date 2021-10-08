@@ -4,7 +4,7 @@ local window = require('cmp.utils.window')
 local config = require('cmp.config')
 local types = require('cmp.types')
 local keymap = require('cmp.utils.keymap')
-local misc   = require('cmp.utils.misc')
+local misc = require('cmp.utils.misc')
 
 ---@class cmp.CustomEntriesView
 ---@field private entries_win cmp.Window
@@ -293,4 +293,3 @@ misc.set(_G, { 'cmp', 'view', 'custom_entries_view', '_insert', 'remove' }, func
 end)
 
 return custom_entries_view
-

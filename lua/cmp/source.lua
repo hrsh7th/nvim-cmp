@@ -109,7 +109,7 @@ source.get_entries = function(self, ctx)
       e.exact = false
       e.matches = matches
       if e.score >= 1 then
-        e.exact = e:get_filter_text() == inputs[o] or  e:get_word() == inputs[o]
+        e.exact = e:get_filter_text() == inputs[o] or e:get_word() == inputs[o]
         table.insert(entries, e)
       end
     end
