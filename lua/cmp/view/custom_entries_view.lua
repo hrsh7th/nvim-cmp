@@ -17,8 +17,7 @@ local custom_entries_view = {}
 
 custom_entries_view.ns = vim.api.nvim_create_namespace('cmp.view.custom_entries_view')
 
-custom_entries_view.new = function()
-  local self = setmetatable({}, { __index = custom_entries_view })
+local function set_entries_win(self)
   self.entries_win = window.new()
   self.entries_win:option('conceallevel', 2)
   self.entries_win:option('concealcursor', 'n')
@@ -29,6 +28,11 @@ custom_entries_view.new = function()
   self.event = event.new()
   self.offset = -1
   self.entries = {}
+end
+
+custom_entries_view.new = function()
+  local self = setmetatable({}, { __index = custom_entries_view })
+  set_entries_win(self)
 
   autocmd.subscribe(
     'CompleteChanged',
@@ -114,6 +118,9 @@ custom_entries_view.open = function(self, offset, entries)
       end
       i = i + 1
     end
+  end
+  if not vim.api.nvim_buf_is_valid(self.entries_win.buf) then
+    set_entries_win(self)
   end
   vim.api.nvim_buf_set_lines(self.entries_win.buf, 0, -1, false, lines)
 
