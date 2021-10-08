@@ -282,8 +282,8 @@ custom_entries_view._insert = function(self, word)
     expr = true,
     noremap = true,
   })
-  keymap.feedkeys(keymap.t('<Plug>(cmp.view.custom_entries_view._insert.remove)'), '')
-  keymap.feedkeys(word, 'n')
+  keymap.feedkeys(keymap.t('<Plug>(cmp.view.custom_entries_view._insert.remove)'), 't')
+  keymap.feedkeys(word, 'nt')
 end
 
 misc.set(_G, { 'cmp', 'view', 'custom_entries_view', '_insert', 'remove' }, function(offset)
