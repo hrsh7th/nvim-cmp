@@ -137,11 +137,11 @@ window.update = function(self)
     end
   else
     if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
-      vim.api.nvim_win_close(self.swin1, false)
+      vim.api.nvim_win_close(self.swin1, true)
       self.swin1 = nil
     end
     if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
-      vim.api.nvim_win_close(self.swin2, false)
+      vim.api.nvim_win_close(self.swin2, true)
       self.swin2 = nil
     end
   end

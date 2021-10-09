@@ -6,6 +6,7 @@ local docs_view = require('cmp.view.docs_view')
 local custom_entries_view = require('cmp.view.custom_entries_view')
 local native_entries_view = require('cmp.view.native_entries_view')
 local ghost_text_view = require('cmp.view.ghost_text_view')
+local misc = require('cmp.utils.misc')
 
 ---@class cmp.View
 ---@field public event cmp.Event
@@ -157,7 +158,7 @@ view._get_entries_view = function(self)
   self.native_entries_view.event:clear()
   self.custom_entries_view.event:clear()
 
-  if c.experimental.native_menu then
+  if c.experimental.native_menu or misc.is_cmdwin() then
     self.native_entries_view.event:on('change', function()
       self:on_entry_change()
     end)

@@ -15,6 +15,12 @@ misc.concat = function(list1, list2)
   return new_list
 end
 
+---Return is cmdwin or not.
+---@return boolean
+misc.is_cmdwin = function()
+  return vim.fn.getcmdwintype() ~= ''
+end
+
 ---Get cursor before line
 ---@return string
 misc.get_cursor_before_line = function()
