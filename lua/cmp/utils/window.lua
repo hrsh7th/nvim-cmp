@@ -45,6 +45,10 @@ end
 ---@param key string
 ---@param value any
 window.option = function(self, key, value)
+  if vim.fn.exists('+' .. key) == 0 then
+    return
+  end
+
   if value == nil then
     return self.opt[key]
   end
