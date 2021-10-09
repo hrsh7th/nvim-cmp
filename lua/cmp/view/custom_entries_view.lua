@@ -14,6 +14,7 @@ local misc = require('cmp.utils.misc')
 ---@field private column_width any
 ---@field public event cmp.Event
 local custom_entries_view = {}
+local blend = vim.opt.pumblend:get()
 
 custom_entries_view.ns = vim.api.nvim_create_namespace('cmp.view.custom_entries_view')
 
@@ -26,6 +27,7 @@ custom_entries_view.new = function()
   self.entries_win:option('foldenable', false)
   self.entries_win:option('wrap', false)
   self.entries_win:option('scrolloff', 0)
+  self.entries_win:option('winblend', blend)
   self.entries_win:option('winhighlight', 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None')
   self.event = event.new()
   self.offset = -1
