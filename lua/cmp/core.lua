@@ -180,6 +180,18 @@ core.on_change = function(self, event)
   end)
 end
 
+---Cursor moved.
+core.on_moved = function(self)
+  local ignore = false
+  ignore = ignore or self.suspending
+  ignore = ignore or (vim.fn.pumvisible() == 1 and (vim.v.completed_item).word)
+  ignore = ignore or not self.view:visible()
+  if ignore then
+    return
+  end
+  self:filter()
+end
+
 ---Check autoindent
 ---@param event cmp.TriggerEvent
 ---@param callback function

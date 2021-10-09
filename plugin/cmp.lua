@@ -12,7 +12,8 @@ vim.cmd [[
     autocmd!
     autocmd InsertEnter * lua require'cmp.utils.autocmd'.emit('InsertEnter')
     autocmd InsertLeave * lua require'cmp.utils.autocmd'.emit('InsertLeave')
-    autocmd CursorMovedI,TextChangedI,TextChangedP * lua require'cmp.utils.autocmd'.emit('TextChanged')
+    autocmd TextChangedI,TextChangedP * lua require'cmp.utils.autocmd'.emit('TextChanged')
+    autocmd CursorMovedI * lua require'cmp.utils.autocmd'.emit('CursorMoved')
     autocmd CompleteChanged * lua require'cmp.utils.autocmd'.emit('CompleteChanged')
     autocmd CompleteDone * lua require'cmp.utils.autocmd'.emit('CompleteDone')
     autocmd ColorScheme * call v:lua.cmp.plugin.colorscheme()

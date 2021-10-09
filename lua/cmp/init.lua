@@ -231,6 +231,12 @@ autocmd.subscribe('TextChanged', function()
   end
 end)
 
+autocmd.subscribe('CursorMoved', function()
+  if config.enabled() then
+    cmp.core:on_moved()
+  end
+end)
+
 autocmd.subscribe('InsertLeave', function()
   cmp.core:reset()
   cmp.core.view:close()
