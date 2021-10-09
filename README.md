@@ -405,8 +405,6 @@ Invoke after nvim-cmp setup.
 Highlights
 ====================
 
-※ The following highlights are used only when enabling `experimental.cusom_menu = true`.
-
 #### `CmpItemAbbr`
 
 The abbr field.
