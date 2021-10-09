@@ -26,7 +26,6 @@ custom_entries_view.new = function()
   self.entries_win:option('foldenable', false)
   self.entries_win:option('wrap', false)
   self.entries_win:option('scrolloff', 0)
-  self.entries_win:option('winblend', vim.opt.pumblend:get())
   self.entries_win:option('winhighlight', 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None')
   self.event = event.new()
   self.offset = -1
@@ -94,6 +93,9 @@ custom_entries_view.open = function(self, offset, entries)
   self.entries = {}
   self.column_bytes = { abbr = 0, kind = 0, menu = 0 }
   self.column_width = { abbr = 0, kind = 0, menu = 0 }
+
+  -- Apply window options (that might be changed) on the custom completion menu.
+  self.entries_win:option('winblend', vim.opt.pumblend:get())
 
   local lines = {}
   local dedup = {}
