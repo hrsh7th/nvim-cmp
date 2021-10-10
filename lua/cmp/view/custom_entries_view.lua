@@ -128,15 +128,15 @@ custom_entries_view.open = function(self, offset, entries)
   width = width + self.column_width.menu + 1
 
   local cursor = vim.api.nvim_win_get_cursor(0)
-  local row = vim.fn.screenpos('.', cursor[1], cursor[2] + 1).row
+  local pos = vim.fn.screenpos('.', cursor[1], cursor[2] + 1)
   local height = vim.api.nvim_get_option('pumheight')
   height = height == 0 and #self.entries or height
   height = math.min(height, #self.entries)
-  if (vim.o.lines - row) <= 8 and row - 8 > 0 then
-    height = math.min(height, row - 1)
-    row = row - height - 1
+  if (vim.o.lines - pos.row) <= 8 and pos.row - 8 > 0 then
+    height = math.min(height, pos.row - 1)
+    pos.row = pos.row - height - 1
   else
-    height = math.min(height, vim.o.lines - row)
+    height = math.min(height, vim.o.lines - pos.row)
   end
 
   if width < 1 or height < 1 then
@@ -148,8 +148,8 @@ custom_entries_view.open = function(self, offset, entries)
   self.entries_win:open({
     relative = 'editor',
     style = 'minimal',
-    row = row,
-    col = vim.fn.screencol() - 1 - delta - 1,
+    row = pos.row,
+    col = pos.col - 1 - delta - 1,
     width = width,
     height = height,
     zindex = 1001,
