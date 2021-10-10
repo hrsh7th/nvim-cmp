@@ -1,6 +1,5 @@
 local context = require('cmp.context')
 local config = require('cmp.config')
-local matcher = require('cmp.matcher')
 local entry = require('cmp.entry')
 local debug = require('cmp.utils.debug')
 local misc = require('cmp.utils.misc')

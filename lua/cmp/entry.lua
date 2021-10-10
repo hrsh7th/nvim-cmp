@@ -345,7 +345,7 @@ end
 ---@return { score: number, matches: table[] }
 entry.match = function(self, input)
   return self.match_cache:ensure(input, function()
-    local score, matches
+    local score, matches, _
     score, matches = matcher.match(input, self:get_filter_text(), { self:get_word() })
     if self:get_filter_text() ~= self:get_completion_item().label then
       _, matches = matcher.match(input, self:get_completion_item().label)

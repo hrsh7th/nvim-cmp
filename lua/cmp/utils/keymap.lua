@@ -72,6 +72,20 @@ keymap.to_keymap = function(s)
   end)
 end
 
+---Create backspace keys.
+---@param count number
+---@return string
+keymap.backspace = function(count)
+  if count <= 0 then
+    return ''
+  end
+  local keys = {}
+  table.insert(keys, keymap.t('<C-g>U'))
+  table.insert(keys, keymap.t(string.rep('<Left>', count)))
+  table.insert(keys, keymap.t(string.rep('<Del>', count)))
+  return table.concat(keys, '')
+end
+
 ---Return two key sequence are equal or not.
 ---@param a string
 ---@param b string
