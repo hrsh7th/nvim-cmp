@@ -191,7 +191,7 @@ end
 
 #### sources (type: table<cmp.SourceConfig>)
 
-Globals source lists are listed in the `source` table. These are applied to all
+Global source lists are listed in the `source` table. These are applied to all
 buffers. The order of the sources list helps define the source priority, see
 the *sorting.priority_weight* options below.
 
@@ -225,7 +225,7 @@ The source customization options. It is defined by each source.
 #### sources[number].priority (type: number|nil)
 
 The manually specified source priority.
-If you don't specifies it, The source priority will determine by the default algorithm (see `sorting.priority_weight`).
+If you don't specify it, the source priority will be determined by the default algorithm (see `sorting.priority_weight`).
 
 #### sources[number].keyword_pattern (type: string)
 
@@ -458,7 +458,7 @@ Select next completion item if possible.
 
 #### `cmp.select_prev_item({ cmp.SelectBehavior.{Insert,Select} })`
 
-Select prev completion item if possible.
+Select previous completion item if possible.
 
 #### `cmp.scroll_docs(delta)`
 
@@ -562,7 +562,7 @@ formatting = {
 
 #### How to setup mapping?
 
-You can found any mapping solution in [Example mappings](https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings).
+You can find all the mapping solutions in [Example mappings](https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings).
 
 
 Source creation
