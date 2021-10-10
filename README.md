@@ -434,6 +434,12 @@ Programatic API
 
 You can use the following APIs.
 
+#### `cmp.visible()`
+
+Return the completion menu is visible or not.
+
+NOTE: This method returns true if the native popup menu is visible. For convenience to define mappings.
+
 #### `cmp.confirm({ select = boolean, behavior = cmp.ConfirmBehavior.{Insert,Replace} })`
 
 Confirm current selected item if possible.

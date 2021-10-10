@@ -258,7 +258,7 @@ window.get_content_height = function(self)
   }, function()
     local height = 0
     for _, text in ipairs(vim.api.nvim_buf_get_lines(self.buf, 0, -1, false)) do
-      height = height + math.ceil(math.max(1, vim.fn.strdisplaywidth(text)) / self.style.width)
+      height = height + math.ceil(math.max(1, vim.str_utfindex(text)) / self.style.width)
     end
     return height
   end)
