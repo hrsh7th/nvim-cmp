@@ -6,7 +6,6 @@ local docs_view = require('cmp.view.docs_view')
 local custom_entries_view = require('cmp.view.custom_entries_view')
 local native_entries_view = require('cmp.view.native_entries_view')
 local ghost_text_view = require('cmp.view.ghost_text_view')
-local misc = require('cmp.utils.misc')
 
 ---@class cmp.View
 ---@field public event cmp.Event

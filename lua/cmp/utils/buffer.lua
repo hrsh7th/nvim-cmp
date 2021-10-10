@@ -1,7 +1,7 @@
 local buffer = {}
 
 buffer.ensure = setmetatable({
-  cache = {}
+  cache = {},
 }, {
   __call = function(self, name)
     if not (self.cache[name] and vim.api.nvim_buf_is_valid(self.cache[name])) then
@@ -11,7 +11,7 @@ buffer.ensure = setmetatable({
       self.cache[name] = buf
     end
     return self.cache[name]
-  end
+  end,
 })
 
 return buffer
