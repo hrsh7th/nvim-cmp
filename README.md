@@ -6,13 +6,9 @@ Completion sources are installed from external repositories and "sourced".
 Readme!
 ====================
 
-nvim-cmp's breaking change are [here](https://github.com/hrsh7th/nvim-cmp/issues/231).
-
-
-Status
-====================
-
-Can be used. Feedback wanted!
+1. nvim-cmp's breaking changes are [here](https://github.com/hrsh7th/nvim-cmp/issues/231).
+2. This is my hobby project. You can support me via GitHub sponsors.
+3. The bug reports are welcome, but I might not fix if you don't provide a minimal reproduction configuration and steps.
 
 
 Concept
@@ -476,6 +472,9 @@ FAQ
 
 You should check `:CmpStatus` command's output. Probably, your specified source name is wrong.
 
+NOTE: `nvim_lsp` will be sourced on InsertEnter event. It will show as `unknown source` but it isn't problem.
+
+
 #### What is the `pairs-wise plugin automatically supported`?
 
 Some pairs-wise plugin set up the mapping automatically.
@@ -496,6 +495,7 @@ mapping = {
 }
 ```
 
+
 #### How to set up like nvim-compe's `preselect = 'always'`?
 
 You can use the following configuration.
@@ -507,6 +507,7 @@ cmp.setup {
   }
 }
 ```
+
 
 #### I dislike auto-completion
 
@@ -520,6 +521,7 @@ cmp.setup {
 }
 ```
 
+
 #### How to disable nvim-cmp on the specific buffer?
 
 You can specify `enabled = false` like this.
@@ -527,6 +529,7 @@ You can specify `enabled = false` like this.
 ```vim
 autocmd FileType TelescopePrompt lua require('cmp').setup.buffer { enabled = false }
 ```
+
 
 #### nvim-cmp is slow.
 
@@ -536,15 +539,11 @@ I've optimized `nvim-cmp` as much as possible, but there are currently some know
 
 The `cmp-buffer` source makes an index of the current buffer so if the current buffer is too large, it will slowdown the main UI thread.
 
-**Slow language server**
-
-For example, `typescript-language-server` will returns 15k items to the client.
-In such a case, it will take 100ms just to parse payloads as JSON.
-
 **`vim.lsp.set_log_level`**
 
 This setting will cause the filesystem operation for each LSP payload.
 This will greatly slow down nvim-cmp (and other LSP related features).
+
 
 #### How to show name of item kind and source (like compe)?
 
@@ -560,9 +559,10 @@ formatting = {
 },
 ```
 
-#### How to setup supertab-like mapping?
 
-You can found the solution in [Example mappings](https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings).
+#### How to setup mapping?
+
+You can found any mapping solution in [Example mappings](https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings).
 
 
 Source creation
