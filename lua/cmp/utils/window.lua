@@ -25,19 +25,26 @@ local window = {}
 ---@return cmp.Window
 window.new = function()
   local self = setmetatable({}, { __index = window })
-  self.buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_buf_set_option(self.buf, 'undolevels', -1)
-  vim.api.nvim_buf_set_option(self.buf, 'buftype', 'nofile')
+  self:ensure()
   self.win = nil
-  self.style = {}
-  self.sbuf1 = vim.api.nvim_create_buf(false, true)
   self.swin1 = nil
-  self.sbuf2 = vim.api.nvim_create_buf(false, true)
   self.swin2 = nil
+  self.style = {}
   self.cache = cache.new()
   self.opt = {}
   self.id = 0
   return self
+end
+
+---Ensure valid state.
+window.ensure = function(self)
+  for _, name in ipairs({ 'buf', 'sbuf1', 'subf2' }) do
+    if not (self[name] and vim.api.nvim_buf_is_valid(self[name])) then
+      self[name] = vim.api.nvim_create_buf(false, true)
+      vim.api.nvim_buf_set_option(self[name], 'undolevels', -1)
+      vim.api.nvim_buf_set_option(self[name], 'buftype', 'nofile')
+    end
+  end
 end
 
 ---Set window option.

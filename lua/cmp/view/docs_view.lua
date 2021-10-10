@@ -22,6 +22,8 @@ end
 ---@param e cmp.Entry
 ---@param view cmp.WindowStyle
 docs_view.open = function(self, e, view)
+  self.window:ensure()
+
   local documentation = config.get().documentation
   if not documentation then
     return

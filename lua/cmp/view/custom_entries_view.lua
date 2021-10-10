@@ -89,6 +89,8 @@ custom_entries_view.redraw = function()
 end
 
 custom_entries_view.open = function(self, offset, entries)
+  self.entries_win:ensure()
+
   self.offset = offset
   self.entries = {}
   self.column_bytes = { abbr = 0, kind = 0, menu = 0 }
