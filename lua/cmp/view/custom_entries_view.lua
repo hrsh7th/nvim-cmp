@@ -10,7 +10,6 @@ local misc = require('cmp.utils.misc')
 ---@field private entries_win cmp.Window
 ---@field private offset number
 ---@field private entries cmp.Entry[]
----@field private column_bytes any
 ---@field private column_width any
 ---@field public event cmp.Event
 local custom_entries_view = {}
@@ -52,16 +51,14 @@ custom_entries_view.new = function()
           local v = e:get_view(self.offset)
           local o = 1
           for _, key in ipairs({ 'abbr', 'kind', 'menu' }) do
-            if self.column_bytes[key] > 0 then
-              vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, o, {
-                end_line = i,
-                end_col = o + v[key].bytes,
-                hl_group = v[key].hl_group,
-                hl_mode = 'combine',
-                ephemeral = true,
-              })
-              o = o + self.column_bytes[key] + 1
-            end
+            vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, o, {
+              end_line = i,
+              end_col = o + v[key].bytes,
+              hl_group = v[key].hl_group,
+              hl_mode = 'combine',
+              ephemeral = true,
+            })
+            o = o + v[key].bytes + (self.column_width[key] - v[key].width) + 1
           end
           for _, m in ipairs(e.matches or {}) do
             vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, m.word_match_start, {
@@ -91,7 +88,6 @@ end
 custom_entries_view.open = function(self, offset, entries)
   self.offset = offset
   self.entries = {}
-  self.column_bytes = { abbr = 0, kind = 0, menu = 0 }
   self.column_width = { abbr = 0, kind = 0, menu = 0 }
 
   -- Apply window options (that might be changed) on the custom completion menu.
@@ -105,9 +101,6 @@ custom_entries_view.open = function(self, offset, entries)
     local view = e:get_view(offset)
     if view.dup == 1 or not dedup[e.completion_item.label] then
       dedup[e.completion_item.label] = true
-      self.column_bytes.abbr = math.max(self.column_bytes.abbr, view.abbr.bytes)
-      self.column_bytes.kind = math.max(self.column_bytes.kind, view.kind.bytes)
-      self.column_bytes.menu = math.max(self.column_bytes.menu, view.menu.bytes)
       self.column_width.abbr = math.max(self.column_width.abbr, view.abbr.width)
       self.column_width.kind = math.max(self.column_width.kind, view.kind.width)
       self.column_width.menu = math.max(self.column_width.menu, view.menu.width)
