@@ -22,8 +22,6 @@ end
 ---@param e cmp.Entry
 ---@param view cmp.WindowStyle
 docs_view.open = function(self, e, view)
-  self.window:ensure()
-
   local documentation = config.get().documentation
   if not documentation then
     return
@@ -45,16 +43,16 @@ docs_view.open = function(self, e, view)
     end
 
     self.entry = e
-    vim.api.nvim_buf_call(self.window.buf, function()
+    vim.api.nvim_buf_call(self.window:get_buffer(), function()
       vim.cmd([[syntax clear]])
     end)
-    vim.lsp.util.stylize_markdown(self.window.buf, documents, {
+    vim.lsp.util.stylize_markdown(self.window:get_buffer(), documents, {
       max_width = maxwidth,
       max_height = documentation.maxheight,
     })
   end
 
-  local width, height = vim.lsp.util._make_floating_popup_size(vim.api.nvim_buf_get_lines(self.window.buf, 0, -1, false), {
+  local width, height = vim.lsp.util._make_floating_popup_size(vim.api.nvim_buf_get_lines(self.window:get_buffer(), 0, -1, false), {
     max_width = maxwidth,
     max_height = documentation.maxheight,
   })
@@ -113,7 +111,7 @@ docs_view.scroll = function(self, delta)
     top = math.min(top, self.window:get_content_height() - info.height + 1)
 
     vim.defer_fn(function()
-      vim.api.nvim_buf_call(self.window.buf, function()
+      vim.api.nvim_buf_call(self.window:get_buffer(), function()
         vim.api.nvim_command('normal! ' .. top .. 'zt')
         self.window:update()
       end)

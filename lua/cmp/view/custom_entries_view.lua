@@ -89,8 +89,6 @@ custom_entries_view.redraw = function()
 end
 
 custom_entries_view.open = function(self, offset, entries)
-  self.entries_win:ensure()
-
   self.offset = offset
   self.entries = {}
   self.column_bytes = { abbr = 0, kind = 0, menu = 0 }
@@ -121,7 +119,7 @@ custom_entries_view.open = function(self, offset, entries)
       i = i + 1
     end
   end
-  vim.api.nvim_buf_set_lines(self.entries_win.buf, 0, -1, false, lines)
+  vim.api.nvim_buf_set_lines(self.entries_win:get_buffer(), 0, -1, false, lines)
 
   local width = 0
   width = width + 1
@@ -202,7 +200,7 @@ custom_entries_view.draw = function(self)
       table.insert(texts, table.concat(text, ''))
     end
   end
-  vim.api.nvim_buf_set_lines(self.entries_win.buf, topline, botline, false, texts)
+  vim.api.nvim_buf_set_lines(self.entries_win:get_buffer(), topline, botline, false, texts)
 end
 
 custom_entries_view.visible = function(self)

@@ -1,5 +1,6 @@
 local cache = require('cmp.utils.cache')
 local misc = require('cmp.utils.misc')
+local buffer = require('cmp.utils.buffer')
 
 ---@class cmp.WindowStyle
 ---@field public relative string
@@ -10,11 +11,9 @@ local misc = require('cmp.utils.misc')
 ---@field public zindex number|nil
 
 ---@class cmp.Window
----@field public buf number
+---@field public name string
 ---@field public win number|nil
----@field public sbuf1 number
 ---@field public swin1 number|nil
----@field public sbuf2 number
 ---@field public swin2 number|nil
 ---@field public style cmp.WindowStyle
 ---@field public opt table<string, any>
@@ -25,7 +24,7 @@ local window = {}
 ---@return cmp.Window
 window.new = function()
   local self = setmetatable({}, { __index = window })
-  self:ensure()
+  self.name = misc.id('cmp.utils.window')
   self.win = nil
   self.swin1 = nil
   self.swin2 = nil
@@ -34,19 +33,6 @@ window.new = function()
   self.opt = {}
   self.id = 0
   return self
-end
-
----Ensure valid state.
-window.ensure = function(self)
-  for _, name in ipairs({ 'buf', 'sbuf1', 'subf2' }) do
-    if not (self[name] and vim.api.nvim_buf_is_valid(self[name])) then
-      self[name] = vim.api.nvim_create_buf(false, true)
-    end
-    -- We always apply options to the buffer to support session related plugins.
-    vim.api.nvim_buf_set_option(self[name], 'undolevels', -1)
-    vim.api.nvim_buf_set_option(self[name], 'buftype', 'nofile')
-    vim.api.nvim_buf_set_option(self[name], 'bufhidden', 'hide')
-  end
 end
 
 ---Set window option.
@@ -81,6 +67,12 @@ window.set_style = function(self, style)
   self.style.zindex = self.style.zindex or 1
 end
 
+---Return buffer id.
+---@return number
+window.get_buffer = function(self)
+  return buffer.ensure(self.name)
+end
+
 ---Open window
 ---@param style cmp.WindowStyle
 window.open = function(self, style)
@@ -99,7 +91,7 @@ window.open = function(self, style)
   else
     local s = misc.copy(self.style)
     s.noautocmd = true
-    self.win = vim.api.nvim_open_win(self.buf, false, s)
+    self.win = vim.api.nvim_open_win(buffer.ensure(self.name), false, s)
     for k, v in pairs(self.opt) do
       vim.api.nvim_win_set_option(self.win, k, v)
     end
@@ -126,7 +118,7 @@ window.update = function(self)
       vim.api.nvim_win_set_config(self.swin1, style1)
     else
       style1.noautocmd = true
-      self.swin1 = vim.api.nvim_open_win(self.sbuf1, false, style1)
+      self.swin1 = vim.api.nvim_open_win(buffer.ensure(self.name .. 'sbuf1'), false, style1)
       vim.api.nvim_win_set_option(self.swin1, 'winhighlight', 'Normal:PmenuSbar,NormalNC:PmenuSbar,NormalFloat:PmenuSbar')
     end
     local style2 = {}
@@ -141,7 +133,7 @@ window.update = function(self)
       vim.api.nvim_win_set_config(self.swin2, style2)
     else
       style2.noautocmd = true
-      self.swin2 = vim.api.nvim_open_win(self.sbuf2, false, style2)
+      self.swin2 = vim.api.nvim_open_win(buffer.ensure(self.name .. 'sbuf2'), false, style2)
       vim.api.nvim_win_set_option(self.swin2, 'winhighlight', 'Normal:PmenuThumb,NormalNC:PmenuThumb,NormalFloat:PmenuThumb')
     end
   else
@@ -249,17 +241,17 @@ end
 ---@return number
 window.get_content_height = function(self)
   if not self:option('wrap') then
-    return vim.api.nvim_buf_line_count(self.buf)
+    return vim.api.nvim_buf_line_count(self:get_buffer())
   end
 
   return self.cache:ensure({
     'get_content_height',
     self.style.width,
-    self.buf,
-    vim.api.nvim_buf_get_changedtick(self.buf),
+    self:get_buffer(),
+    vim.api.nvim_buf_get_changedtick(self:get_buffer()),
   }, function()
     local height = 0
-    for _, text in ipairs(vim.api.nvim_buf_get_lines(self.buf, 0, -1, false)) do
+    for _, text in ipairs(vim.api.nvim_buf_get_lines(self:get_buffer(), 0, -1, false)) do
       height = height + math.ceil(math.max(1, vim.str_utfindex(text)) / self.style.width)
     end
     return height
