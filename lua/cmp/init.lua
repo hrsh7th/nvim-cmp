@@ -89,9 +89,15 @@ cmp.select_next_item = function(option)
     cmp.core.view:select_next_item(option)
     vim.schedule(release)
     return true
-  else
-    return false
+  elseif vim.fn.pumvisible() == 1 then
+    if (option.behavior or cmp.SelectBehavior.Insert) == cmp.SelectBehavior.Insert then
+      keymap.feedkeys(keymap.t('<C-n>'), 'n')
+    else
+      keymap.feedkeys(keymap.t('<Down>'), 'n')
+    end
+    return true
   end
+  return false
 end
 
 ---Select prev item if possible
@@ -102,9 +108,15 @@ cmp.select_prev_item = function(option)
     cmp.core.view:select_prev_item(option)
     vim.schedule(release)
     return true
-  else
-    return false
+  elseif vim.fn.pumvisible() == 1 then
+    if (option.behavior or cmp.SelectBehavior.Insert) == cmp.SelectBehavior.Insert then
+      keymap.feedkeys(keymap.t('<C-p>'), 'n')
+    else
+      keymap.feedkeys(keymap.t('<Up>'), 'n')
+    end
+    return true
   end
+  return false
 end
 
 ---Scrolling documentation window if possible
