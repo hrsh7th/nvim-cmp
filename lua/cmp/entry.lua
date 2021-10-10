@@ -4,10 +4,12 @@ local misc = require('cmp.utils.misc')
 local str = require('cmp.utils.str')
 local config = require('cmp.config')
 local types = require('cmp.types')
+local matcher = require('cmp.matcher')
 
 ---@class cmp.Entry
 ---@field public id number
 ---@field public cache cmp.Cache
+---@field public match_cache cmp.Cache
 ---@field public score number
 ---@field public exact boolean
 ---@field public matches table
@@ -32,6 +34,7 @@ entry.new = function(ctx, source, completion_item)
   local self = setmetatable({}, { __index = entry })
   self.id = misc.id('entry')
   self.cache = cache.new()
+  self.match_cache = cache.new()
   self.score = 0
   self.exact = false
   self.matches = {}
@@ -334,6 +337,20 @@ entry.get_replace_range = function(self)
       }
     end
     return replace_range
+  end)
+end
+
+---Match line.
+---@param input string
+---@return { score: number, matches: table[] }
+entry.match = function(self, input)
+  return self.match_cache:ensure(input, function()
+    local score, matches
+    score, matches = matcher.match(input, self:get_filter_text(), { self:get_word() })
+    if self:get_filter_text() ~= self:get_completion_item().label then
+      _, matches = matcher.match(input, self:get_completion_item().label)
+    end
+    return { score = score, matches = matches }
   end)
 end
 
