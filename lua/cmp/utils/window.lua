@@ -144,11 +144,11 @@ window.update = function(self)
     end
   else
     if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
-      vim.api.nvim_win_close(self.swin1, true)
+      vim.api.nvim_win_hide(self.swin1)
       self.swin1 = nil
     end
     if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
-      vim.api.nvim_win_close(self.swin2, true)
+      vim.api.nvim_win_hide(self.swin2)
       self.swin2 = nil
     end
   end
@@ -161,15 +161,15 @@ window.close = function(self)
     if id == self.id then
       if self.win and vim.api.nvim_win_is_valid(self.win) then
         if self.win and vim.api.nvim_win_is_valid(self.win) then
-          vim.api.nvim_win_close(self.win, true)
+          vim.api.nvim_win_hide(self.win)
           self.win = nil
         end
         if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
-          vim.api.nvim_win_close(self.swin1, false)
+          vim.api.nvim_win_hide(self.swin1)
           self.swin1 = nil
         end
         if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
-          vim.api.nvim_win_close(self.swin2, false)
+          vim.api.nvim_win_hide(self.swin2)
           self.swin2 = nil
         end
       end

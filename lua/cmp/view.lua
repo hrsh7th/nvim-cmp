@@ -158,7 +158,7 @@ view._get_entries_view = function(self)
   self.native_entries_view.event:clear()
   self.custom_entries_view.event:clear()
 
-  if c.experimental.native_menu or misc.is_cmdwin() then
+  if c.experimental.native_menu then
     self.native_entries_view.event:on('change', function()
       self:on_entry_change()
     end)
