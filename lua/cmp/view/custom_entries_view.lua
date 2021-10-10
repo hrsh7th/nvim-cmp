@@ -187,17 +187,20 @@ custom_entries_view.draw = function(self)
   local botline = info.topline + info.height - 1
   local texts = {}
   for i = topline, botline - 1 do
-    local view = self.entries[i + 1]:get_view(self.offset)
-    local text = {}
-    table.insert(text, ' ')
-    table.insert(text, view.abbr.text)
-    table.insert(text, string.rep(' ', 1 + self.column_width.abbr - view.abbr.width))
-    table.insert(text, view.kind.text)
-    table.insert(text, string.rep(' ', 1 + self.column_width.kind - view.kind.width))
-    table.insert(text, view.menu.text)
-    table.insert(text, string.rep(' ', 1 + self.column_width.menu - view.menu.width))
-    table.insert(text, ' ')
-    table.insert(texts, table.concat(text, ''))
+    local e = self.entries[i + 1]
+    if e then
+      local view = e:get_view(self.offset)
+      local text = {}
+      table.insert(text, ' ')
+      table.insert(text, view.abbr.text)
+      table.insert(text, string.rep(' ', 1 + self.column_width.abbr - view.abbr.width))
+      table.insert(text, view.kind.text)
+      table.insert(text, string.rep(' ', 1 + self.column_width.kind - view.kind.width))
+      table.insert(text, view.menu.text)
+      table.insert(text, string.rep(' ', 1 + self.column_width.menu - view.menu.width))
+      table.insert(text, ' ')
+      table.insert(texts, table.concat(text, ''))
+    end
   end
   vim.api.nvim_buf_set_lines(self.entries_win.buf, topline, botline, false, texts)
 end

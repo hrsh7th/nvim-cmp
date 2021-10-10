@@ -43,6 +43,7 @@ window.ensure = function(self)
       self[name] = vim.api.nvim_create_buf(false, true)
       vim.api.nvim_buf_set_option(self[name], 'undolevels', -1)
       vim.api.nvim_buf_set_option(self[name], 'buftype', 'nofile')
+      vim.api.nvim_buf_set_option(self[name], 'bufhidden', 'hide')
     end
   end
 end
