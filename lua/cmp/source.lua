@@ -107,8 +107,13 @@ source.get_entries = function(self, ctx)
       local score, matches = matcher.match(inputs[o], e:get_filter_text(), { e:get_word() })
       e.score = score
       e.exact = false
-      e.matches = matches
       if e.score >= 1 then
+        if e:get_filter_text() ~= e.completion_item.label then
+          local _, matches_for_highlights = matcher.match(inputs[o], e.completion_item.label, {})
+          e.matches = matches_for_highlights
+        else
+          e.matches = matches
+        end
         e.exact = e:get_filter_text() == inputs[o] or e:get_word() == inputs[o]
         table.insert(entries, e)
       end
