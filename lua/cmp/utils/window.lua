@@ -41,10 +41,11 @@ window.ensure = function(self)
   for _, name in ipairs({ 'buf', 'sbuf1', 'subf2' }) do
     if not (self[name] and vim.api.nvim_buf_is_valid(self[name])) then
       self[name] = vim.api.nvim_create_buf(false, true)
-      vim.api.nvim_buf_set_option(self[name], 'undolevels', -1)
-      vim.api.nvim_buf_set_option(self[name], 'buftype', 'nofile')
-      vim.api.nvim_buf_set_option(self[name], 'bufhidden', 'hide')
     end
+    -- We always apply options to the buffer to support session related plugins.
+    vim.api.nvim_buf_set_option(self[name], 'undolevels', -1)
+    vim.api.nvim_buf_set_option(self[name], 'buftype', 'nofile')
+    vim.api.nvim_buf_set_option(self[name], 'bufhidden', 'hide')
   end
 end
 
