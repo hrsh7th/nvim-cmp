@@ -3,6 +3,7 @@ local autocmd = require('cmp.utils.autocmd')
 local keymap = require('cmp.utils.keymap')
 local types = require('cmp.types')
 local config = require('cmp.config')
+local misc   = require('cmp.utils.misc')
 
 ---@class cmp.NativeEntriesView
 ---@field private offset number
@@ -69,7 +70,7 @@ native_entries_view.open = function(self, offset, entries)
 end
 
 native_entries_view.close = function(self)
-  if string.sub(vim.api.nvim_get_mode().mode, 1, 1) == 'i' then
+  if misc.is_suitable_mode() then
     vim.fn.complete(1, {})
   end
   self.offset = -1
@@ -79,7 +80,7 @@ native_entries_view.close = function(self)
 end
 
 native_entries_view.abort = function(_)
-  if string.sub(vim.api.nvim_get_mode().mode, 1, 1) == 'i' then
+  if misc.is_suitable_mode() then
     vim.api.nvim_select_popupmenu_item(-1, true, true, {})
   end
 end

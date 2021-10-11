@@ -346,9 +346,9 @@ end
 entry.match = function(self, input)
   return self.match_cache:ensure(input, function()
     local score, matches, _
-    score, matches = matcher.match(input, self:get_filter_text(), { self:get_word() })
+    score, matches = matcher.match(input, self:get_filter_text(), { self:get_word(), self:get_completion_item().label })
     if self:get_filter_text() ~= self:get_completion_item().label then
-      _, matches = matcher.match(input, self:get_completion_item().label)
+      _, matches = matcher.match(input, self:get_completion_item().label, { self:get_word() })
     end
     return { score = score, matches = matches }
   end)

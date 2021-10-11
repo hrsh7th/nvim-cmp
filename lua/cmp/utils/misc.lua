@@ -24,8 +24,13 @@ end
 
 ---Return current mode is insert-mode or not.
 ---@return boolean
-misc.is_insert_mode = function()
-  return string.sub(vim.api.nvim_get_mode().mode, 1, 1) == 'i'
+misc.is_suitable_mode = function()
+  local mode = vim.api.nvim_get_mode().mode
+  return vim.tbl_contains({
+    'i',
+    'ic',
+    'ix',
+  }, mode)
 end
 
 ---Merge two tables recursively

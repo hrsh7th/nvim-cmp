@@ -81,10 +81,10 @@ return function()
     event = {},
 
     mapping = {
-      ['<Down>'] = mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Select }),
-      ['<Up>'] = mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Select }),
-      ['<C-n>'] = mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Insert }),
-      ['<C-p>'] = mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Insert }),
+      ['<Down>'] = mapping(mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Select }), { 'i' }),
+      ['<Up>'] = mapping(mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Select }), { 'i' }),
+      ['<C-n>'] = mapping(mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Insert }), { 'i' }),
+      ['<C-p>'] = mapping(mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Insert }), { 'i' }),
       ['<C-c>'] = function(fallback)
         require('cmp').close()
         fallback()

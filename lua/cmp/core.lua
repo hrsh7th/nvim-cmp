@@ -227,7 +227,7 @@ end
 ---Invoke completion
 ---@param ctx cmp.Context
 core.complete = function(self, ctx)
-  if not misc.is_insert_mode() then
+  if not misc.is_suitable_mode() then
     return
   end
   self:set_context(ctx)
@@ -259,7 +259,7 @@ end
 ---Update completion menu
 core.filter = async.throttle(
   vim.schedule_wrap(function(self)
-    if not misc.is_insert_mode() then
+    if not misc.is_suitable_mode() then
       return
     end
     local ctx = self:get_context()

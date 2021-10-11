@@ -47,7 +47,7 @@ config.enabled = function()
   if type(enabled) == 'function' then
     enabled = enabled()
   end
-  return enabled and string.sub(vim.api.nvim_get_mode().mode, 1, 1) == 'i'
+  return enabled and misc.is_suitable_mode()
 end
 
 ---Return source config
