@@ -33,7 +33,7 @@ docs_view.open = function(self, e, view)
 
   local right_space = vim.o.columns - (view.col + view.width) - 2
   local left_space = view.col - 2
-  local maxwidth = math.min(documentation.maxwidth, math.max(left_space, right_space))
+  local maxwidth = math.min(documentation.maxwidth, math.max(left_space, right_space) - 1)
 
   -- update buffer content if needed.
   if not self.entry or e.id ~= self.entry.id then
