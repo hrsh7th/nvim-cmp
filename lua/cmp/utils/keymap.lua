@@ -80,8 +80,7 @@ keymap.backspace = function(count)
     return ''
   end
   local keys = {}
-  table.insert(keys, keymap.t('<C-g>U'))
-  table.insert(keys, keymap.t(string.rep('<Left>', count)))
+  table.insert(keys, keymap.t(string.rep('<C-g>U<Left>', count)))
   table.insert(keys, keymap.t(string.rep('<Del>', count)))
   return table.concat(keys, '')
 end

@@ -16,7 +16,7 @@ Readme!
 Concept
 ====================
 
-- No flicker
+- No flicker (Sorry. Now, nvim-cmp requires `set lazyredraw` for reducing flickers.)
 - Works properly
 - Fully customizable via Lua functions
 - Fully supported LSP's Completion capabilities
@@ -61,6 +61,7 @@ Plug 'hrsh7th/vim-vsnip'
 call plug#end()
 
 set completeopt=menu,menuone,noselect
+set lazyredraw
 
 lua <<EOF
   -- Setup nvim-cmp.
