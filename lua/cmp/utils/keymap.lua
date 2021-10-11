@@ -73,15 +73,28 @@ keymap.to_keymap = function(s)
   end)
 end
 
+---Mode safe break undo
+keymap.undobreak = function()
+  if api.is_cmdline_mode() then
+    return ''
+  end
+  return keymap.t('<C-g>u')
+end
+
+---Mode safe join undo
+keymap.undojoin = function()
+  if api.is_cmdline_mode() then
+    return ''
+  end
+  return keymap.t('<C-g>U')
+end
+
 ---Create backspace keys.
 ---@param count number
 ---@return string
 keymap.backspace = function(count)
   if count <= 0 then
     return ''
-  end
-  if api.is_cmdline_mode() or api.is_terminal_mode() then
-    return keymap.t(string.rep('<BS>', count))
   end
   local keys = {}
   table.insert(keys, keymap.t(string.rep('<BS>', count)))

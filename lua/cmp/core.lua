@@ -138,7 +138,7 @@ core.prepare = function(self)
   for keys, action in pairs(config.get().mapping) do
     if type(action) == 'function' then
       action = {
-        modes = { 'i' },
+        modes = { 'i', 'c' },
         action = action,
       }
     end
@@ -371,10 +371,10 @@ core.confirm = function(self, e, option, callback)
 
       local is_snippet = completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet
       if is_snippet then
-        table.insert(keys, keymap.t('<C-g>u') .. e:get_word() .. keymap.t('<C-g>u'))
+        table.insert(keys, keymap.undobreak() .. e:get_word() .. keymap.undobreak())
         table.insert(keys, keymap.backspace(vim.str_utfindex(e:get_word())))
       else
-        table.insert(keys, keymap.t('<C-g>u') .. completion_item.textEdit.newText .. keymap.t('<C-g>u'))
+        table.insert(keys, keymap.undobreak() .. completion_item.textEdit.newText .. keymap.undobreak())
       end
       keymap.feedkeys(table.concat(keys, ''), 'n', function()
         if is_snippet then

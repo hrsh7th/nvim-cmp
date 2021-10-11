@@ -272,7 +272,7 @@ custom_entries_view._select = function(self, cursor, option)
   local is_insert = (option.behavior or types.cmp.SelectBehavior.Insert) == types.cmp.SelectBehavior.Insert
   if is_insert then
     if vim.api.nvim_win_get_cursor(self.entries_win.win)[2] == 1 then
-      self.prefix = string.sub(vim.api.nvim_get_current_line(), self.offset, vim.api.nvim_win_get_cursor(0)[2]) or ''
+      self.prefix = string.sub(api.get_current_line(), self.offset, api.get_cursor()[2]) or ''
     end
   end
 
