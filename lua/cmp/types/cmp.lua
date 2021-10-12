@@ -80,6 +80,7 @@ cmp.PreselectMode.None = 'none'
 ---@field public winhighlight string
 ---@field public maxwidth number|nil
 ---@field public maxheight number|nil
+---@field public zindex number|nil
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior
