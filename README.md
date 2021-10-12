@@ -351,6 +351,10 @@ The documentation window's max width.
 
 The documentation window's max height.
 
+#### documentation.zindex (type: number)
+
+The documentation window's zindex.
+
 #### formatting.format (type: fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem)
 
 A function to customize completion menu.
