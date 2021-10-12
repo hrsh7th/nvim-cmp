@@ -99,9 +99,13 @@ keymap.feedkeys = setmetatable({
   callbacks = {},
 }, {
   __call = function(self, keys, mode, callback)
-    if #keys ~= 0 then
-      vim.api.nvim_feedkeys(keys, mode, true)
+    if #keys == 0 then
+      return callback and callback() or nil
     end
+
+    vim.api.nvim_feedkeys(keymap.t('<Cmd>set eventignore=all<CR>'), 'n', true)
+    vim.api.nvim_feedkeys(keys, mode, true)
+    vim.api.nvim_feedkeys(keymap.t(('<Cmd>set eventignore=%s<CR>'):format(vim.o.eventignore)), 'n', true)
 
     if callback then
       if vim.fn.reg_recording() == '' then
