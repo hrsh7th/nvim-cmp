@@ -27,6 +27,12 @@ cmp.PreselectMode = {}
 cmp.PreselectMode.Item = 'item'
 cmp.PreselectMode.None = 'none'
 
+---@alias cmp.ItemField "'abbr'" | "'kind'" | "'menu'"
+cmp.ItemField = {}
+cmp.ItemField.Abbr = 'abbr'
+cmp.ItemField.Kind = 'kind'
+cmp.ItemField.Menu = 'menu'
+
 ---@class cmp.ContextOption
 ---@field public reason cmp.ContextReason|nil
 
@@ -91,6 +97,7 @@ cmp.PreselectMode.None = 'none'
 ---@field public comparators function[]
 
 ---@class cmp.FormattingConfig
+---@field public fields cmp.ItemField[]
 ---@field public format fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem
 
 ---@class cmp.SnippetConfig

@@ -355,6 +355,10 @@ The documentation window's max height.
 
 The documentation window's zindex.
 
+#### formatting.fields (type: cmp.ItemField[])
+
+The order of item's fields for completion menu.
+
 #### formatting.format (type: fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem)
 
 A function to customize completion menu.

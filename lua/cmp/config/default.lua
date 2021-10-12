@@ -92,6 +92,7 @@ return function()
     },
 
     formatting = {
+      fields = { 'abbr', 'kind', 'menu' },
       format = function(_, vim_item)
         return vim_item
       end,

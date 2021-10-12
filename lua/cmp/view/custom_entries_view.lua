@@ -45,12 +45,17 @@ custom_entries_view.new = function()
         return
       end
 
+      local c = config.get().formatting.fields
       for i = top, bot do
         local e = self.entries[i + 1]
         if e then
           local v = e:get_view(self.offset)
           local o = 1
-          for _, key in ipairs({ 'abbr', 'kind', 'menu' }) do
+          local a = 0
+          for _, key in ipairs(c) do
+            if key == types.cmp.ItemField.Abbr then
+              a = o
+            end
             vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, o, {
               end_line = i,
               end_col = o + v[key].bytes,
@@ -60,10 +65,11 @@ custom_entries_view.new = function()
             })
             o = o + v[key].bytes + (self.column_width[key] - v[key].width) + 1
           end
+
           for _, m in ipairs(e.matches or {}) do
-            vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, m.word_match_start, {
+            vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, a + m.word_match_start - 1, {
               end_line = i,
-              end_col = m.word_match_end + 1,
+              end_col = a + m.word_match_end,
               hl_group = m.fuzzy and 'CmpItemAbbrMatchFuzzy' or 'CmpItemAbbrMatch',
               hl_mode = 'combine',
               ephemeral = true,
@@ -177,18 +183,17 @@ custom_entries_view.draw = function(self)
   local topline = info.topline - 1
   local botline = info.topline + info.height - 1
   local texts = {}
+  local fields = config.get().formatting.fields
   for i = topline, botline - 1 do
     local e = self.entries[i + 1]
     if e then
       local view = e:get_view(self.offset)
       local text = {}
       table.insert(text, ' ')
-      table.insert(text, view.abbr.text)
-      table.insert(text, string.rep(' ', 1 + self.column_width.abbr - view.abbr.width))
-      table.insert(text, view.kind.text)
-      table.insert(text, string.rep(' ', 1 + self.column_width.kind - view.kind.width))
-      table.insert(text, view.menu.text)
-      table.insert(text, string.rep(' ', 1 + self.column_width.menu - view.menu.width))
+      for _, field in ipairs(fields) do
+        table.insert(text, view[field].text)
+        table.insert(text, string.rep(' ', 1 + self.column_width[field] - view[field].width))
+      end
       table.insert(text, ' ')
       table.insert(texts, table.concat(text, ''))
     end
