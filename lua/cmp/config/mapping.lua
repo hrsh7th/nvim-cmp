@@ -14,7 +14,7 @@ mapping = setmetatable({
         fallback()
       end
     end, vim.tbl_keys(definitions))
-  end
+  end,
 }, {
   __call = function(_, invoke, modes)
     if type(invoke) == 'function' then
