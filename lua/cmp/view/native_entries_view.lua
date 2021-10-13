@@ -34,7 +34,7 @@ native_entries_view.ready = function(_)
 end
 
 native_entries_view.redraw = function(self)
-  if #self.entries > 0 and self.offset <= vim.api.nvim_win_get_cursor(0)[2] then
+  if #self.entries > 0 and self.offset <= vim.api.nvim_win_get_cursor(0)[2] + 1 then
     local completeopt = vim.o.completeopt
     vim.o.completeopt = self.preselect == 1 and 'menu,menuone,noinsert' or config.get().completion.completeopt
     vim.fn.complete(self.offset, self.items)
