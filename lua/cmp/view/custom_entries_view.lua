@@ -45,25 +45,25 @@ custom_entries_view.new = function()
         return
       end
 
-      local c = config.get().formatting.fields
+      local fields = config.get().formatting.fields
       for i = top, bot do
         local e = self.entries[i + 1]
         if e then
           local v = e:get_view(self.offset)
           local o = 1
           local a = 0
-          for _, key in ipairs(c) do
-            if key == types.cmp.ItemField.Abbr then
+          for _, field in ipairs(fields) do
+            if field == types.cmp.ItemField.Abbr then
               a = o
             end
             vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, o, {
               end_line = i,
-              end_col = o + v[key].bytes,
-              hl_group = v[key].hl_group,
+              end_col = o + v[field].bytes,
+              hl_group = v[field].hl_group,
               hl_mode = 'combine',
               ephemeral = true,
             })
-            o = o + v[key].bytes + (self.column_width[key] - v[key].width) + 1
+            o = o + v[field].bytes + (self.column_width[field] - v[field].width) + 1
           end
 
           for _, m in ipairs(e.matches or {}) do
