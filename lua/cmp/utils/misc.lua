@@ -33,37 +33,54 @@ misc.is_suitable_mode = function()
   }, mode)
 end
 
----Merge two tables recursively
----@generic T
----@param v1 T
----@param v2 T
----@return T
-misc.merge = function(v1, v2)
-  local merge1 = type(v1) == 'table' and (not vim.tbl_islist(v1) or vim.tbl_isempty(v1))
-  local merge2 = type(v2) == 'table' and (not vim.tbl_islist(v2) or vim.tbl_isempty(v2))
-  if merge1 and merge2 then
-    local new_tbl = {}
-    for k, v in pairs(v2) do
-      new_tbl[k] = misc.merge(v1[k], v)
-    end
-    for k, v in pairs(v1) do
-      if v2[k] == nil then
-        new_tbl[k] = v
-      end
-    end
-    return new_tbl
+---Merge two non-list tables recursively
+---@param overrides table
+---@param base table
+---@return table
+local function merge_tables(overrides, base)
+  local new = {}
+  for k, v in pairs(base) do
+    new[k] = v
   end
-  if v1 == nil then
-    return v2
+  for k, v in pairs(overrides) do
+    new[k] = misc.merge(v, new[k])
   end
-  if v1 == true then
-    if merge2 then
-      return v2
-    end
-    return {}
-  end
+  return new
+end
 
-  return v1
+--- Checks if value is a table that is not array-like. Empty tables are assumed
+--- to be an object, unlike vim.tbl_islist.
+---
+---@generic T
+---@param value T
+---@return boolean
+local function is_object_table(value)
+  return (type(value) == 'table' and (vim.tbl_isempty(value) or not vim.tbl_islist(value)))
+end
+
+--- Merge two values recursively.
+---
+--- Overriding with an empty table will return base value if base value is also
+--- a table.
+---
+---@generic T
+---@param override T
+---@param base T
+---@return T
+misc.merge = function(override, base)
+  -- Assume empty tables are not lists
+  local override_is_obj = is_object_table(override)
+  local base_is_obj = is_object_table(base)
+
+  if override_is_obj and base_is_obj then
+    return merge_tables(override, base)
+  elseif type(base) == 'function' and override == false then
+    return nil
+  elseif override == nil then
+    return base
+  else
+    return override
+  end
 end
 
 ---Generate id for group name

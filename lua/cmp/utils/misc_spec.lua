@@ -66,5 +66,36 @@ describe('misc', function()
       assert.are.equal(merged.boo, false)
       assert.are.equal(merged.str, 'world')
     end)
+
+    it('deletes key when function is merged with false', function()
+      local placeholder = function() end
+
+      local merged = misc.merge({
+        mappings = {
+          k = false,
+        },
+        options = {
+          store = false,
+        },
+        new = {
+          value = false,
+        },
+      }, {
+        mappings = {
+          j = placeholder,
+          k = placeholder,
+        },
+        options = {
+          store = true,
+        },
+      })
+
+      -- Key is not in the new list anymore
+      assert.are.same(merged.mappings, { j = placeholder })
+
+      -- But non-functions are still here and set to false
+      assert.are.same(merged.options, { store = false })
+      assert.are.same(merged.new, { value = false })
+    end)
   end)
 end)

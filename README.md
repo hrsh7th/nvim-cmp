@@ -151,7 +151,8 @@ mapping = {
   ['<CR>'] = cmp.mapping.confirm({
     behavior = cmp.ConfirmBehavior.Replace,
     select = true,
-  })
+  }),
+  ['<C-c>'] = false, -- Override with `false` to disable mapping
 }
 ```
 
