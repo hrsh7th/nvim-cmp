@@ -80,7 +80,7 @@ keymap.backspace = function(count)
     return ''
   end
   local keys = {}
-  table.insert(keys, keymap.t('<Cmd>set backspace=<CR>'))
+  table.insert(keys, keymap.t('<Cmd>set backspace=start<CR>'))
   table.insert(keys, keymap.t(string.rep('<BS>', count)))
   table.insert(keys, keymap.t(('<Cmd>set backspace=%s<CR>'):format(vim.o.backspace)))
   return table.concat(keys, '')
