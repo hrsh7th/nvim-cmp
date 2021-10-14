@@ -283,18 +283,12 @@ custom_entries_view._select = function(self, cursor, option)
 end
 
 custom_entries_view._insert = function(self, word)
-  vim.api.nvim_buf_set_keymap(0, 'i', '<Plug>(cmp.view.custom_entries_view._insert.remove)', ('v:lua.cmp.view.custom_entries_view._insert.remove(%s)'):format(self.offset), {
-    expr = true,
-    noremap = true,
-  })
-  keymap.feedkeys(keymap.t('<Plug>(cmp.view.custom_entries_view._insert.remove)'), 't')
-  keymap.feedkeys(word, 'nt')
+  keymap.feedkeys(keymap.t('<Ignore>'), 'n', function()
+    local cursor = vim.api.nvim_win_get_cursor(0)
+    local length = vim.str_utfindex(string.sub(vim.api.nvim_get_current_line(), self.offset, cursor[2]))
+    keymap.feedkeys(keymap.backspace(length) .. word, 'int')
+  end)
 end
 
-misc.set(_G, { 'cmp', 'view', 'custom_entries_view', '_insert', 'remove' }, function(offset)
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  local length = vim.str_utfindex(string.sub(vim.api.nvim_get_current_line(), offset, cursor[2]))
-  return keymap.backspace(length)
-end)
-
 return custom_entries_view
+

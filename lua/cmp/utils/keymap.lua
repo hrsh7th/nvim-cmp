@@ -80,9 +80,7 @@ keymap.backspace = function(count)
     return ''
   end
   local keys = {}
-  table.insert(keys, keymap.t('<Cmd>set backspace=start<CR>'))
   table.insert(keys, keymap.t(string.rep('<BS>', count)))
-  table.insert(keys, keymap.t(('<Cmd>set backspace=%s<CR>'):format(vim.o.backspace)))
   return table.concat(keys, '')
 end
 
@@ -99,29 +97,37 @@ keymap.feedkeys = setmetatable({
   callbacks = {},
 }, {
   __call = function(self, keys, mode, callback)
-    if #keys == 0 then
-      return callback and callback() or nil
+    local typed = false
+    local modes = {}
+    if string.match(mode, 'n') then
+      table.insert(modes, 'n')
+    end
+    if string.match(mode, 'i') then
+      table.insert(modes, 'i')
+    end
+    if string.match(mode, 'x') then
+      table.insert(modes, 'x')
+    end
+    if string.match(mode, 't') then
+      typed = true
     end
 
-    vim.api.nvim_feedkeys(keys, mode, true)
+    vim.api.nvim_feedkeys(keymap.t('<Cmd>set backspace=start<CR>'), 'n', true)
+    vim.api.nvim_feedkeys(keymap.t('<Cmd>set eventignore=all<CR>'), 'n', true)
+    vim.api.nvim_feedkeys(keys, table.concat(modes, ''), true)
+    vim.api.nvim_feedkeys(keymap.t(('<Cmd>set backspace=%s<CR>'):format(vim.o.backspace)), 'n', true)
+    vim.api.nvim_feedkeys(keymap.t(('<Cmd>set eventignore=%s<CR>'):format(vim.o.eventignore)), 'n', true)
 
-    if callback then
-      if vim.fn.reg_recording() == '' then
-        local id = misc.id('cmp.utils.keymap.feedkeys')
-        self.callbacks[id] = callback
-        vim.api.nvim_feedkeys(keymap.t('<Cmd>call v:lua.cmp.utils.keymap.feedkeys.run(%s)<CR>'):format(id), 'n', true)
-      else
-        -- Does not feed extra keys if macro recording.
-        local wait
-        wait = vim.schedule_wrap(function()
-          if vim.fn.getchar(1) == 0 then
-            return callback()
-          end
-          vim.defer_fn(wait, 1)
-        end)
-        wait()
+    local id = misc.id('cmp.utils.keymap.feedkeys')
+    self.callbacks[id] = function()
+      if typed then
+        vim.fn.setreg('".', vim.fn.getreg('".') .. keys)
+      end
+      if callback then
+        callback()
       end
     end
+    vim.api.nvim_feedkeys(keymap.t('<Cmd>call v:lua.cmp.utils.keymap.feedkeys.run(%s)<CR>'):format(id), 'n', true)
   end,
 })
 misc.set(_G, { 'cmp', 'utils', 'keymap', 'feedkeys', 'run' }, function(id)
