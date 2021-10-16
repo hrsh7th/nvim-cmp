@@ -139,8 +139,13 @@ keymap.listen = setmetatable({
   __call = function(self, mode, keys, callback)
     keys = keymap.to_keymap(keys)
 
+    local bufnr = vim.api.nvim_get_current_buf()
     local existing = keymap.find_map_by_lhs(mode, keys)
-    if string.match(existing.rhs, '^.*' .. vim.pesc('v:lua.cmp.utils.keymap.listen.run') .. '.*$') then
+
+    local done = true
+    done = done and string.match(existing.rhs, vim.pesc('v:lua.cmp.utils.keymap.listen.run'))
+    done = done and self.cache:get({ mode, bufnr, keys }) ~= nil
+    if done then
       return
     end
 
@@ -152,7 +157,6 @@ keymap.listen = setmetatable({
       nowait = true,
     })
 
-    local bufnr = vim.api.nvim_get_current_buf()
     self.cache:set({ mode, bufnr, keys }, {
       mode = mode,
       callback = callback,
