@@ -32,7 +32,7 @@ local entry = {}
 ---@return cmp.Entry
 entry.new = function(ctx, source, completion_item)
   local self = setmetatable({}, { __index = entry })
-  self.id = misc.id('entry')
+  self.id = misc.id('entry.new')
   self.cache = cache.new()
   self.match_cache = cache.new()
   self.score = 0

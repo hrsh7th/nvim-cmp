@@ -34,7 +34,7 @@ source.SourceStatus.COMPLETED = 3
 ---@return cmp.Source
 source.new = function(name, s)
   local self = setmetatable({}, { __index = source })
-  self.id = misc.id('source')
+  self.id = misc.id('cmp.source.new')
   self.name = name
   self.source = s
   self.cache = cache.new()

@@ -1,5 +1,19 @@
 local misc = {}
 
+---Create once callback
+---@param callback function
+---@return function
+misc.once = function(callback)
+  local done = false
+  return function()
+    if done then
+      return
+    end
+    done = true
+    callback()
+  end
+end
+
 ---Return concatenated list
 ---@param list1 any[]
 ---@param list2 any[]

@@ -38,7 +38,7 @@ context.new = function(prev_context, option)
   option = option or {}
 
   local self = setmetatable({}, { __index = context })
-  self.id = misc.id('context')
+  self.id = misc.id('cmp.context.new')
   self.cache = cache.new()
   self.prev_context = prev_context or context.empty()
   self.option = option or { reason = types.cmp.ContextReason.None }

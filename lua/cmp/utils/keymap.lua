@@ -136,46 +136,42 @@ end)
 keymap.listen = setmetatable({
   cache = cache.new(),
 }, {
-  __call = function(self, mode, keys, callback)
-    keys = keymap.to_keymap(keys)
-
+  __call = function(self, mode, keys_or_chars, callback)
+    local keys = keymap.to_keymap(keys_or_chars)
     local bufnr = vim.api.nvim_get_current_buf()
     local existing = keymap.find_map_by_lhs(mode, keys)
 
     local done = true
     done = done and string.match(existing.rhs, vim.pesc('v:lua.cmp.utils.keymap.listen.run'))
-    done = done and self.cache:get({ mode, bufnr, keys }) ~= nil
+    done = done and self.cache:get({ 'id', mode, bufnr, keys }) ~= nil
     if done then
       return
     end
+    self.cache:set({ 'id', mode, bufnr, keys }, misc.id('cmp.utils.keymap.listen'))
 
     local fallback = keymap.evacuate(mode, keys)
-    vim.api.nvim_buf_set_keymap(0, mode, keys, ('<Cmd>call v:lua.cmp.utils.keymap.listen.run("%s", "%s")<CR>'):format(mode, str.escape(keymap.escape(keys), { '"' })), {
+    vim.api.nvim_buf_set_keymap(0, mode, keys, ('<Cmd>call v:lua.cmp.utils.keymap.listen.run(%s)<CR>'):format(self.cache:get({ 'id', mode, bufnr, keys })), {
       expr = false,
       noremap = true,
       silent = true,
       nowait = true,
     })
 
-    self.cache:set({ mode, bufnr, keys }, {
+    self.cache:set({ 'definition', self.cache:get({ 'id', mode, bufnr, keys }) }, {
+      keys = keys,
       mode = mode,
+      bufnr = bufnr,
       callback = callback,
       fallback = fallback,
       existing = existing,
     })
   end,
 })
-misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(mode, keys)
-  local bufnr = vim.api.nvim_get_current_buf()
-  local fallback = keymap.listen.cache:get({ mode, bufnr, keys }).fallback
-  local callback = keymap.listen.cache:get({ mode, bufnr, keys }).callback
-  local done = false
-  callback(keys, function()
-    if not done then
-      done = true
-      keymap.feedkeys(keymap.t(fallback), 'i')
-    end
-  end)
+misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(id)
+  local definition = keymap.listen.cache:get({ 'definition', id })
+  definition.callback(definition.keys, misc.once(function()
+    keymap.feedkeys(keymap.t(definition.fallback), 'i')
+  end))
   return keymap.t('<Ignore>')
 end)
 

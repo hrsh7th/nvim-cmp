@@ -24,7 +24,7 @@ local window = {}
 ---@return cmp.Window
 window.new = function()
   local self = setmetatable({}, { __index = window })
-  self.name = misc.id('cmp.utils.window')
+  self.name = misc.id('cmp.utils.window.new')
   self.win = nil
   self.swin1 = nil
   self.swin2 = nil
