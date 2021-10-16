@@ -109,7 +109,6 @@ keymap.equals = function(a, b)
   return keymap.t(a) == keymap.t(b)
 end
 
-
 ---Feedkeys with callback
 ---@param keys string
 ---@param mode string
@@ -185,40 +184,44 @@ keymap.feedkeys_macro_safe = setmetatable({
     if not self.timer:is_active() then
       local consume
       consume = function()
-        self.timer:start(1, 0, vim.schedule_wrap(function()
-          if vim.fn.getchar(1) == 0 then
-            if self.current then
-              vim.cmd(('set backspace=%s'):format(self.current.backspace or ''))
-              vim.cmd(('set eventignore=%s'):format(self.current.eventignore or ''))
-              if self.current.callback then
-                self.current.callback()
+        self.timer:start(
+          1,
+          0,
+          vim.schedule_wrap(function()
+            if vim.fn.getchar(1) == 0 then
+              if self.current then
+                vim.cmd(('set backspace=%s'):format(self.current.backspace or ''))
+                vim.cmd(('set eventignore=%s'):format(self.current.eventignore or ''))
+                if self.current.callback then
+                  self.current.callback()
+                end
+                self.current = nil
               end
-              self.current = nil
+
+              local current = table.remove(self.queue, 1)
+              if current then
+                self.current = {
+                  keys = current.keys,
+                  callback = current.callback,
+                  backspace = vim.o.backspace,
+                  eventignore = vim.o.eventignore,
+                }
+                vim.api.nvim_feedkeys(keymap.t('<Cmd>set backspace=start<CR>'), 'n', true)
+                vim.api.nvim_feedkeys(keymap.t('<Cmd>set eventignore=all<CR>'), 'n', true)
+                vim.api.nvim_feedkeys(current.keys, string.gsub(current.mode, '[i]', ''), true) -- 'i' flag is manually resolved.
+              end
             end
 
-            local current = table.remove(self.queue, 1)
-            if current then
-              self.current = {
-                keys = current.keys,
-                callback = current.callback,
-                backspace = vim.o.backspace,
-                eventignore = vim.o.eventignore
-              }
-              vim.api.nvim_feedkeys(keymap.t('<Cmd>set backspace=start<CR>'), 'n', true)
-              vim.api.nvim_feedkeys(keymap.t('<Cmd>set eventignore=all<CR>'), 'n', true)
-              vim.api.nvim_feedkeys(current.keys, string.gsub(current.mode, '[i]', ''), true) -- 'i' flag is manually resolved.
+            self.timer:stop()
+            if #self.queue ~= 0 or self.current then
+              consume()
             end
-          end
-
-          self.timer:stop()
-          if #self.queue ~= 0 or self.current then
-            consume()
-          end
-        end))
+          end)
+        )
       end
       consume()
     end
-  end
+  end,
 })
 
 ---Register keypress handler.
