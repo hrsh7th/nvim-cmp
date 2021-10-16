@@ -15,6 +15,9 @@ config.global = require('cmp.config.default')()
 ---@type table<number, cmp.ConfigSchema>
 config.buffers = {}
 
+---@type table<string, cmp.ConfigSchema>
+config.cmdline = {}
+
 ---Set configuration for global.
 ---@param c cmp.ConfigSchema
 config.set_global = function(c)
@@ -32,14 +35,29 @@ config.set_buffer = function(c, bufnr)
   config.buffers[bufnr].revision = revision + 1
 end
 
+---Set configuration for cmdline
+config.set_cmdline = function(c, type)
+  local revision = (config.cmdline[type] or {}).revision or 1
+  config.cmdline[type] = c
+  config.cmdline[type].revision = revision + 1
+end
+
 ---@return cmp.ConfigSchema
 config.get = function()
-  local bufnr = vim.api.nvim_get_current_buf()
   local global = config.global
-  local buffer = config.buffers[bufnr] or { revision = 1 }
-  return config.cache:ensure({ 'get', bufnr, global.revision or 0, buffer.revision or 0 }, function()
-    return misc.merge(buffer, global)
-  end)
+  if api.is_cmdline_mode() then
+    local type = vim.fn.getcmdtype()
+    local cmdline = config.cmdline[type] or { revision = 1, sources = {} }
+    return config.cache:ensure({ 'get_cmdline', type, global.revision or 0, cmdline.revision or 0 }, function()
+      return misc.merge(cmdline, global)
+    end)
+  else
+    local bufnr = vim.api.nvim_get_current_buf()
+    local buffer = config.buffers[bufnr] or { revision = 1 }
+    return config.cache:ensure({ 'get_buffer', bufnr, global.revision or 0, buffer.revision or 0 }, function()
+      return misc.merge(buffer, global)
+    end)
+  end
 end
 
 ---Return cmp is enabled or not.

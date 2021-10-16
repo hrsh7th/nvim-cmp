@@ -232,6 +232,9 @@ cmp.setup = setmetatable({
   buffer = function(c)
     config.set_buffer(c, vim.api.nvim_get_current_buf())
   end,
+  cmdline = function(type, c)
+    config.set_cmdline(c, type)
+  end
 }, {
   __call = function(self, c)
     self.global(c)
