@@ -122,30 +122,21 @@ keymap.feedkeys = setmetatable({
       return keymap.feedkeys_macro_safe(keys, mode, callback)
     end
 
-    local typed = false
-    local modes = {}
-    local insert = false
-    if string.match(mode, 'n') then
-      table.insert(modes, 'n')
-    end
-    if string.match(mode, 'i') then
-      insert = true
-    end
-    if string.match(mode, 'x') then
-      table.insert(modes, 'x')
-    end
-    if string.match(mode, 't') then
-      typed = true
-    end
+    local is_typed = string.match(mode, 't') ~= nil
+    local is_insert = string.match(mode, 'i') ~= nil
 
     local queue = {}
     if #keys > 0 then
-      table.insert(queue, { keys, table.concat(modes, ''), true })
+      table.insert(queue, { keymap.t('<Cmd>set backspace=start<CR>'), 'n' })
+      table.insert(queue, { keymap.t('<Cmd>set eventignore=all<CR>'), 'n' })
+      table.insert(queue, { keys, string.gsub(mode, '[it]', ''), true })
+      table.insert(queue, { keymap.t('<Cmd>set backspace=%s<CR>'):format(vim.o.backspace or ''), 'n' })
+      table.insert(queue, { keymap.t('<Cmd>set eventignore=%s<CR>'):format(vim.o.eventignore or ''), 'n' })
     end
     if #keys > 0 or callback then
       local id = misc.id('cmp.utils.keymap.feedkeys')
       self.callbacks[id] = function()
-        if typed then
+        if is_typed then
           vim.fn.setreg('".', vim.fn.getreg('".') .. keys)
         end
         if callback then
@@ -155,7 +146,7 @@ keymap.feedkeys = setmetatable({
       table.insert(queue, { keymap.t('<Cmd>call v:lua.cmp.utils.keymap.feedkeys.run(%s)<CR>'):format(id), 'n', true })
     end
 
-    if insert then
+    if is_insert then
       for i = #queue, 1, -1 do
         vim.api.nvim_feedkeys(queue[i][1], queue[i][2] .. 'i', queue[i][3])
       end
