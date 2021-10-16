@@ -4,7 +4,6 @@ local window = require('cmp.utils.window')
 local config = require('cmp.config')
 local types = require('cmp.types')
 local keymap = require('cmp.utils.keymap')
-local misc = require('cmp.utils.misc')
 local api = require('cmp.utils.api')
 
 ---@class cmp.CustomEntriesView
@@ -202,7 +201,9 @@ custom_entries_view.draw = function(self)
   vim.api.nvim_buf_set_lines(self.entries_win:get_buffer(), topline, botline, false, texts)
 
   if api.is_cmdline_mode() then
-    vim.cmd([[redraw]])
+    vim.api.nvim_win_call(self.entries_win.win, function()
+      vim.cmd([[redraw]])
+    end)
   end
 end
 
@@ -297,4 +298,3 @@ custom_entries_view._insert = function(self, word)
 end
 
 return custom_entries_view
-

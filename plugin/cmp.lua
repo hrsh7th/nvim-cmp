@@ -1,4 +1,3 @@
-local api = require "cmp.utils.api"
 if vim.g.loaded_cmp then
   return
 end
@@ -11,15 +10,40 @@ local highlight = require('cmp.utils.highlight')
 vim.cmd [[
   augroup cmp
     autocmd!
-    autocmd CmdlineEnter,InsertEnter * lua require'cmp.utils.autocmd'.emit('InsertEnter')
-    autocmd CmdlineLeave,InsertLeave * lua require'cmp.utils.autocmd'.emit('InsertLeave')
-    autocmd CmdlineChanged,TextChangedI,TextChangedP * lua require'cmp.utils.autocmd'.emit('TextChanged')
+    autocmd InsertEnter * lua require'cmp.utils.autocmd'.emit('InsertEnter')
+    autocmd InsertLeave * lua require'cmp.utils.autocmd'.emit('InsertLeave')
+    autocmd TextChangedI,TextChangedP * lua require'cmp.utils.autocmd'.emit('TextChanged')
     autocmd CursorMovedI * lua require'cmp.utils.autocmd'.emit('CursorMoved')
     autocmd CompleteChanged * lua require'cmp.utils.autocmd'.emit('CompleteChanged')
     autocmd CompleteDone * lua require'cmp.utils.autocmd'.emit('CompleteDone')
     autocmd ColorScheme * call v:lua.cmp.plugin.colorscheme()
+    autocmd CmdlineEnter * call v:lua.cmp.plugin.cmdline.enter()
+    autocmd CmdlineLeave * call v:lua.cmp.plugin.cmdline.leave()
   augroup END
 ]]
+
+misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'enter' }, function()
+  if vim.fn.getcmdtype() ~= '=' then
+    vim.cmd [[
+      augroup cmp-cmdline
+        autocmd!
+        autocmd CmdlineChanged * lua require'cmp.utils.autocmd'.emit('TextChanged')
+      augroup END
+    ]]
+    require('cmp.utils.autocmd').emit('InsertEnter')
+  end
+end)
+
+misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'leave' }, function()
+  if vim.fn.getcmdtype() ~= '=' then
+    vim.cmd [[
+      augroup cmp-cmdline
+        autocmd!
+      augroup END
+    ]]
+    require('cmp.utils.autocmd').emit('InsertLeave')
+  end
+end)
 
 misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
   highlight.inherit('CmpItemAbbrDefault', 'Comment', {

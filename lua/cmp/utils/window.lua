@@ -1,6 +1,7 @@
 local cache = require('cmp.utils.cache')
 local misc = require('cmp.utils.misc')
 local buffer = require('cmp.utils.buffer')
+local api = require('cmp.utils.api')
 
 ---@class cmp.WindowStyle
 ---@field public relative string
@@ -145,6 +146,13 @@ window.update = function(self)
       vim.api.nvim_win_hide(self.swin2)
       self.swin2 = nil
     end
+  end
+
+  -- In cmdline, vim does not redraw automatically.
+  if api.is_cmdline_mode() then
+    vim.api.nvim_win_call(self.win, function()
+      vim.cmd([[redraw]])
+    end)
   end
 end
 

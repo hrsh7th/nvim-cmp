@@ -207,9 +207,12 @@ keymap.listen = setmetatable({
 })
 misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(id)
   local definition = keymap.listen.cache:get({ 'definition', id })
-  definition.callback(definition.keys, misc.once(function()
-    vim.api.nvim_feedkeys(keymap.t(definition.fallback), 'i', true)
-  end))
+  definition.callback(
+    definition.keys,
+    misc.once(function()
+      vim.api.nvim_feedkeys(keymap.t(definition.fallback), 'i', true)
+    end)
+  )
   return keymap.t('<Ignore>')
 end)
 
