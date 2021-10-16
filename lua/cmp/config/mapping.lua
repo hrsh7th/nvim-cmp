@@ -1,11 +1,17 @@
-local mapping = setmetatable({}, {
+local api = require('cmp.utils.api')
+
+local mapping
+mapping = setmetatable({}, {
   __call = function(_, invoke, modes)
-    return {
-      invoke = function(...)
-        invoke(...)
-      end,
-      modes = modes or { 'i' },
-    }
+    if type(invoke) == 'function' then
+      return {
+        invoke = function(...)
+          invoke(...)
+        end,
+        modes = modes or { 'i' },
+      }
+    end
+    return invoke
   end,
 })
 

@@ -1,5 +1,6 @@
 local cache = require('cmp.utils.cache')
 local misc = require('cmp.utils.misc')
+local api = require('cmp.utils.api')
 
 ---@class cmp.Config
 ---@field public g cmp.ConfigSchema
@@ -33,10 +34,10 @@ end
 
 ---@return cmp.ConfigSchema
 config.get = function()
-  local bufnr = vim.api.nvim_get_current_buf()
   local global = config.global
+  local bufnr = vim.api.nvim_get_current_buf()
   local buffer = config.buffers[bufnr] or { revision = 1 }
-  return config.cache:ensure({ 'get', bufnr, global.revision or 0, buffer.revision or 0 }, function()
+  return config.cache:ensure({ 'get_buffer', bufnr, global.revision or 0, buffer.revision or 0 }, function()
     return misc.merge(buffer, global)
   end)
 end
@@ -47,7 +48,7 @@ config.enabled = function()
   if type(enabled) == 'function' then
     enabled = enabled()
   end
-  return enabled and misc.is_suitable_mode()
+  return enabled and api.is_suitable_mode()
 end
 
 ---Return source config

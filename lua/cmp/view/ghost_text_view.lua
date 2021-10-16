@@ -1,6 +1,7 @@
 local config = require('cmp.config')
 local str = require('cmp.utils.str')
 local types = require('cmp.types')
+local api = require('cmp.utils.api')
 
 ---@class cmp.GhostTextView
 local ghost_text_view = {}
@@ -53,6 +54,9 @@ end
 ---Show ghost text
 ---@param e cmp.Entry
 ghost_text_view.show = function(self, e)
+  if not api.is_insert_mode() then
+    return
+  end
   local changed = e ~= self.entry
   self.win = vim.api.nvim_get_current_win()
   self.entry = e

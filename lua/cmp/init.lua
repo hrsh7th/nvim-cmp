@@ -84,6 +84,12 @@ end
 ---Select next item if possible
 cmp.select_next_item = function(option)
   option = option or {}
+
+  -- Hack: Ignore when executing macro.
+  if vim.fn.reg_executing() ~= '' then
+    return true
+  end
+
   if cmp.core.view:visible() then
     local release = cmp.core:suspend()
     cmp.core.view:select_next_item(option)
@@ -103,6 +109,12 @@ end
 ---Select prev item if possible
 cmp.select_prev_item = function(option)
   option = option or {}
+
+  -- Hack: Ignore when executing macro.
+  if vim.fn.reg_executing() ~= '' then
+    return true
+  end
+
   if cmp.core.view:visible() then
     local release = cmp.core:suspend()
     cmp.core.view:select_prev_item(option)
@@ -132,6 +144,11 @@ end
 ---Confirm completion
 cmp.confirm = function(option)
   option = option or {}
+
+  -- Hack: Ignore when executing macro.
+  if vim.fn.reg_executing() ~= '' then
+    return true
+  end
 
   local e = cmp.core.view:get_selected_entry() or (option.select and cmp.core.view:get_first_entry() or nil)
   if e then

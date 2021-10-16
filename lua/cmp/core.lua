@@ -9,6 +9,7 @@ local view = require('cmp.view')
 local misc = require('cmp.utils.misc')
 local config = require('cmp.config')
 local types = require('cmp.types')
+local api = require('cmp.utils.api')
 
 local SOURCE_TIMEOUT = 500
 local THROTTLE_TIME = 120
@@ -196,14 +197,14 @@ end
 ---@param callback function
 core.autoindent = function(self, event, callback)
   if event == types.cmp.TriggerEvent.TextChanged then
-    local cursor_before_line = misc.get_cursor_before_line()
+    local cursor_before_line = api.get_cursor_before_line()
     local prefix = pattern.matchstr('[^[:blank:]]\\+$', cursor_before_line)
     if prefix then
       for _, key in ipairs(vim.split(vim.bo.indentkeys, ',')) do
         if vim.tbl_contains({ '=' .. prefix, '0=' .. prefix }, key) then
           local release = self:suspend()
           vim.schedule(function()
-            if cursor_before_line == misc.get_cursor_before_line() then
+            if cursor_before_line == api.get_cursor_before_line() then
               local indentkeys = vim.bo.indentkeys
               vim.bo.indentkeys = indentkeys .. ',!^F'
               keymap.feedkeys(keymap.t('<C-f>'), 'n', function()
@@ -226,7 +227,7 @@ end
 ---Invoke completion
 ---@param ctx cmp.Context
 core.complete = function(self, ctx)
-  if not misc.is_suitable_mode() then
+  if not api.is_suitable_mode() then
     return
   end
   self:set_context(ctx)
@@ -258,7 +259,7 @@ end
 ---Update completion menu
 core.filter = async.throttle(
   vim.schedule_wrap(function(self)
-    if not misc.is_suitable_mode() then
+    if not api.is_suitable_mode() then
       return
     end
     if self.view:get_active_entry() ~= nil then
@@ -370,10 +371,10 @@ core.confirm = function(self, e, option, callback)
 
       local is_snippet = completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet
       if is_snippet then
-        table.insert(keys, keymap.t('<C-g>u') .. e:get_word() .. keymap.t('<C-g>u'))
+        table.insert(keys, keymap.undobreak() .. e:get_word() .. keymap.undobreak())
         table.insert(keys, keymap.backspace(vim.str_utfindex(e:get_word())))
       else
-        table.insert(keys, keymap.t('<C-g>u') .. completion_item.textEdit.newText .. keymap.t('<C-g>u'))
+        table.insert(keys, keymap.undobreak() .. completion_item.textEdit.newText .. keymap.undobreak())
       end
       keymap.feedkeys(table.concat(keys, ''), 'n', function()
         if is_snippet then

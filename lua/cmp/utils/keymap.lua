@@ -1,6 +1,7 @@
 local misc = require('cmp.utils.misc')
 local str = require('cmp.utils.str')
 local cache = require('cmp.utils.cache')
+local api = require('cmp.utils.api')
 
 local keymap = {}
 
@@ -72,6 +73,22 @@ keymap.to_keymap = function(s)
   end)
 end
 
+---Mode safe break undo
+keymap.undobreak = function()
+  if api.is_cmdline_mode() then
+    return ''
+  end
+  return keymap.t('<C-g>u')
+end
+
+---Mode safe join undo
+keymap.undojoin = function()
+  if api.is_cmdline_mode() then
+    return ''
+  end
+  return keymap.t('<C-g>U')
+end
+
 ---Create backspace keys.
 ---@param count number
 ---@return string
@@ -80,9 +97,7 @@ keymap.backspace = function(count)
     return ''
   end
   local keys = {}
-  table.insert(keys, keymap.t('<Cmd>set backspace=start<CR>'))
   table.insert(keys, keymap.t(string.rep('<BS>', count)))
-  table.insert(keys, keymap.t(('<Cmd>set backspace=%s<CR>'):format(vim.o.backspace)))
   return table.concat(keys, '')
 end
 
@@ -95,31 +110,48 @@ keymap.equals = function(a, b)
 end
 
 ---Feedkeys with callback
+---@param keys string
+---@param mode string
+---@param callback function
 keymap.feedkeys = setmetatable({
   callbacks = {},
 }, {
   __call = function(self, keys, mode, callback)
-    if #keys == 0 then
-      return callback and callback() or nil
+    if vim.fn.reg_recording() ~= '' then
+      return keymap.feedkeys_macro_safe(keys, mode, callback)
     end
 
-    vim.api.nvim_feedkeys(keys, mode, true)
+    local is_typed = string.match(mode, 't') ~= nil
+    local is_insert = string.match(mode, 'i') ~= nil
 
-    if callback then
-      if vim.fn.reg_recording() == '' then
-        local id = misc.id('cmp.utils.keymap.feedkeys')
-        self.callbacks[id] = callback
-        vim.api.nvim_feedkeys(keymap.t('<Cmd>call v:lua.cmp.utils.keymap.feedkeys.run(%s)<CR>'):format(id), 'n', true)
-      else
-        -- Does not feed extra keys if macro recording.
-        local wait
-        wait = vim.schedule_wrap(function()
-          if vim.fn.getchar(1) == 0 then
-            return callback()
-          end
-          vim.defer_fn(wait, 1)
-        end)
-        wait()
+    local queue = {}
+    if #keys > 0 then
+      table.insert(queue, { keymap.t('<Cmd>set backspace=start<CR>'), 'n' })
+      table.insert(queue, { keymap.t('<Cmd>set eventignore=all<CR>'), 'n' })
+      table.insert(queue, { keys, string.gsub(mode, '[it]', ''), true })
+      table.insert(queue, { keymap.t('<Cmd>set backspace=%s<CR>'):format(vim.o.backspace or ''), 'n' })
+      table.insert(queue, { keymap.t('<Cmd>set eventignore=%s<CR>'):format(vim.o.eventignore or ''), 'n' })
+    end
+    if #keys > 0 or callback then
+      local id = misc.id('cmp.utils.keymap.feedkeys')
+      self.callbacks[id] = function()
+        if is_typed then
+          vim.fn.setreg('".', vim.fn.getreg('".') .. keys)
+        end
+        if callback then
+          callback()
+        end
+      end
+      table.insert(queue, { keymap.t('<Cmd>call v:lua.cmp.utils.keymap.feedkeys.run(%s)<CR>'):format(id), 'n', true })
+    end
+
+    if is_insert then
+      for i = #queue, 1, -1 do
+        vim.api.nvim_feedkeys(queue[i][1], queue[i][2] .. 'i', queue[i][3])
+      end
+    else
+      for i = 1, #queue do
+        vim.api.nvim_feedkeys(queue[i][1], queue[i][2], queue[i][3])
       end
     end
   end,
@@ -131,6 +163,63 @@ misc.set(_G, { 'cmp', 'utils', 'keymap', 'feedkeys', 'run' }, function(id)
   end
   return ''
 end)
+
+---Macro safe feedkeys.
+---@param keys string
+---@param mode string
+---@param callback function
+keymap.feedkeys_macro_safe = setmetatable({
+  queue = {},
+  current = nil,
+  timer = vim.loop.new_timer(),
+  running = false,
+}, {
+  __call = function(self, keys, mode, callback)
+    local is_insert = string.match(mode, 'i') ~= nil
+    table.insert(self.queue, is_insert and 1 or #self.queue + 1, {
+      keys = keys,
+      mode = mode,
+      callback = callback,
+    })
+
+    if not self.running then
+      self.running = true
+      local consume
+      consume = vim.schedule_wrap(function()
+        if vim.fn.getchar(1) == 0 then
+          if self.current then
+            vim.cmd(('set backspace=%s'):format(self.current.backspace or ''))
+            vim.cmd(('set eventignore=%s'):format(self.current.eventignore or ''))
+            if self.current.callback then
+              self.current.callback()
+            end
+            self.current = nil
+          end
+
+          local current = table.remove(self.queue, 1)
+          if current then
+            self.current = {
+              keys = current.keys,
+              callback = current.callback,
+              backspace = vim.o.backspace,
+              eventignore = vim.o.eventignore,
+            }
+            vim.api.nvim_feedkeys(keymap.t('<Cmd>set backspace=start<CR>'), 'n', true)
+            vim.api.nvim_feedkeys(keymap.t('<Cmd>set eventignore=all<CR>'), 'n', true)
+            vim.api.nvim_feedkeys(current.keys, string.gsub(current.mode, '[i]', ''), true) -- 'i' flag is manually resolved.
+          end
+        end
+
+        if #self.queue ~= 0 or self.current then
+          vim.defer_fn(consume, 1)
+        else
+          self.running = false
+        end
+      end)
+      vim.defer_fn(consume, 1)
+    end
+  end,
+})
 
 ---Register keypress handler.
 keymap.listen = setmetatable({
@@ -169,9 +258,15 @@ keymap.listen = setmetatable({
 })
 misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(id)
   local definition = keymap.listen.cache:get({ 'definition', id })
-  definition.callback(definition.keys, misc.once(function()
-    keymap.feedkeys(keymap.t(definition.fallback), 'i')
-  end))
+  if definition.mode == 'c' and vim.fn.getcmdtype() == '=' then
+    return vim.api.nvim_feedkeys(keymap.t(definition.fallback), 'i', true)
+  end
+  definition.callback(
+    definition.keys,
+    misc.once(function()
+      vim.api.nvim_feedkeys(keymap.t(definition.fallback), 'i', true)
+    end)
+  )
   return keymap.t('<Ignore>')
 end)
 
@@ -250,6 +345,23 @@ keymap.find_map_by_lhs = function(mode, lhs)
     nowait = 0,
     silent = 1,
   }
+end
+
+keymap.spec = function()
+  vim.fn.setreg('q', '')
+  vim.cmd([[normal! qq]])
+  vim.schedule(function()
+    keymap.feedkeys('i', 'nt', function()
+      keymap.feedkeys(keymap.t('foo2'), 'n')
+      keymap.feedkeys(keymap.t('bar2'), 'nt')
+      keymap.feedkeys(keymap.t('baz2'), 'n', function()
+        vim.cmd[[normal! q]]
+      end)
+      keymap.feedkeys(keymap.t('baz1'), 'ni')
+      keymap.feedkeys(keymap.t('bar1'), 'nti')
+      keymap.feedkeys(keymap.t('foo1'), 'ni')
+    end)
+  end)
 end
 
 return keymap
