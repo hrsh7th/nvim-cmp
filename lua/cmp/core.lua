@@ -162,10 +162,9 @@ core.on_change = function(self, event)
 
   self:autoindent(event, function()
     local ctx = self:get_context({ reason = types.cmp.ContextReason.Auto })
-
     debug.log(('ctx: `%s`'):format(ctx.cursor_before_line))
     if ctx:changed(ctx.prev_context) then
-      self.view:redraw()
+      self.view:on_change()
       debug.log('changed')
 
       if vim.tbl_contains(config.get().completion.autocomplete or {}, event) then
@@ -260,6 +259,9 @@ end
 core.filter = async.throttle(
   vim.schedule_wrap(function(self)
     if not misc.is_suitable_mode() then
+      return
+    end
+    if self.view:get_active_entry() ~= nil then
       return
     end
     local ctx = self:get_context()

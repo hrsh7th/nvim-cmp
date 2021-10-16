@@ -87,8 +87,11 @@ custom_entries_view.ready = function()
   return vim.fn.pumvisible() == 0
 end
 
-custom_entries_view.redraw = function()
-  -- noop
+custom_entries_view.on_change = function(self)
+  if self:visible() and self:get_active_entry() then
+    self.entries_win:option('cursorline', false)
+    vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 1 })
+  end
 end
 
 custom_entries_view.open = function(self, offset, entries)
@@ -143,7 +146,6 @@ custom_entries_view.open = function(self, offset, entries)
   end
 
   local delta = cursor[2] + 1 - self.offset
-  self.entries_win:option('cursorline', false)
   self.entries_win:open({
     relative = 'editor',
     style = 'minimal',
@@ -153,6 +155,7 @@ custom_entries_view.open = function(self, offset, entries)
     height = height,
     zindex = 1001,
   })
+  self.entries_win:option('cursorline', false)
   vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 1 })
 
   if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
