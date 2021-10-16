@@ -36,9 +36,9 @@ view.ready = function(self)
   return self:_get_entries_view():ready()
 end
 
----Redraw menu.
-view.redraw = function(self)
-  self:_get_entries_view():redraw()
+---OnChange handler.
+view.on_change = function(self)
+  self:_get_entries_view():on_change()
 end
 
 ---Open menu
