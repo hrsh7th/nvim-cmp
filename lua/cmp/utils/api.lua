@@ -23,7 +23,7 @@ api.is_select_mode = function()
 end
 
 api.is_suitable_mode = function()
-  return api.is_insert_mode()
+  return api.is_insert_mode() or api.is_cmdline_mode()
 end
 
 api.get_current_line = function()

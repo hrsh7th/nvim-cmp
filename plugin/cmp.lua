@@ -23,7 +23,7 @@ vim.cmd [[
 ]]
 
 misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'enter' }, function()
-  if vim.fn.getcmdtype() ~= '=' then
+  if vim.v.cmdtype ~= '=' then
     vim.cmd [[
       augroup cmp-cmdline
         autocmd!
@@ -35,7 +35,7 @@ misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'enter' }, function()
 end)
 
 misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'leave' }, function()
-  if vim.fn.getcmdtype() ~= '=' then
+  if vim.v.cmdtype ~= '=' then
     vim.cmd [[
       augroup cmp-cmdline
         autocmd!
