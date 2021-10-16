@@ -288,10 +288,11 @@ custom_entries_view._select = function(self, cursor, option)
 end
 
 custom_entries_view._insert = function(self, word)
-  keymap.feedkeys(keymap.t('<Ignore>'), 'n', function()
+  keymap.feedkeys('', 'n', function()
+    local release = require('cmp').core:suspend()
     local cursor = api.get_cursor()
     local length = vim.str_utfindex(string.sub(api.get_current_line(), self.offset, cursor[2]))
-    keymap.feedkeys(keymap.backspace(length) .. word, 'int')
+    keymap.feedkeys(keymap.backspace(length) .. word, 'int', vim.schedule_wrap(release))
   end)
 end
 

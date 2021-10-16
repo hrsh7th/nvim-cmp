@@ -116,11 +116,12 @@ keymap.feedkeys = setmetatable({
   __call = function(self, keys, mode, callback)
     local typed = false
     local modes = {}
+    local insert = false
     if string.match(mode, 'n') then
       table.insert(modes, 'n')
     end
     if string.match(mode, 'i') then
-      table.insert(modes, 'i')
+      insert = true
     end
     if string.match(mode, 'x') then
       table.insert(modes, 'x')
@@ -129,22 +130,36 @@ keymap.feedkeys = setmetatable({
       typed = true
     end
 
-    vim.api.nvim_feedkeys(keymap.t('<Cmd>set backspace=start<CR>'), 'n', true)
-    vim.api.nvim_feedkeys(keymap.t('<Cmd>set eventignore=all<CR>'), 'n', true)
-    vim.api.nvim_feedkeys(keys, table.concat(modes, ''), true)
-    vim.api.nvim_feedkeys(keymap.t(('<Cmd>set backspace=%s<CR>'):format(vim.o.backspace)), 'n', true)
-    vim.api.nvim_feedkeys(keymap.t(('<Cmd>set eventignore=%s<CR>'):format(vim.o.eventignore)), 'n', true)
-
-    local id = misc.id('cmp.utils.keymap.feedkeys')
-    self.callbacks[id] = function()
-      if typed then
-        vim.fn.setreg('".', vim.fn.getreg('".') .. keys)
+    local queue = {}
+    if #keys > 0 then
+      table.insert(queue, { keymap.t('<Cmd>set backspace=start<CR>'), 'n', true })
+      table.insert(queue, { keymap.t('<Cmd>set eventignore=all<CR>'), 'n', true })
+      table.insert(queue, { keys, table.concat(modes, ''), true })
+      table.insert(queue, { keymap.t('<Cmd>set backspace=%s<CR>'):format(vim.o.backspace or ''), 'n', true })
+      table.insert(queue, { keymap.t('<Cmd>set eventignore=%s<CR>'):format(vim.o.eventignore or ''), 'n', true })
+    end
+    if #keys > 0 or callback then
+      local id = misc.id('cmp.utils.keymap.feedkeys')
+      self.callbacks[id] = function()
+        if typed then
+          vim.fn.setreg('".', vim.fn.getreg('".') .. keys)
+        end
+        if callback then
+          callback()
+        end
       end
-      if callback then
-        callback()
+      table.insert(queue, { keymap.t('<Cmd>call v:lua.cmp.utils.keymap.feedkeys.run(%s)<CR>'):format(id), 'n', true })
+    end
+
+    if insert then
+      for i = #queue, 1, -1 do
+        vim.api.nvim_feedkeys(queue[i][1], queue[i][2] .. 'i', queue[i][3])
+      end
+    else
+      for i = 1, #queue do
+        vim.api.nvim_feedkeys(queue[i][1], queue[i][2], queue[i][3])
       end
     end
-    vim.api.nvim_feedkeys(keymap.t('<Cmd>call v:lua.cmp.utils.keymap.feedkeys.run(%s)<CR>'):format(id), 'n', true)
   end,
 })
 misc.set(_G, { 'cmp', 'utils', 'keymap', 'feedkeys', 'run' }, function(id)
@@ -193,7 +208,7 @@ keymap.listen = setmetatable({
 misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(id)
   local definition = keymap.listen.cache:get({ 'definition', id })
   definition.callback(definition.keys, misc.once(function()
-    keymap.feedkeys(keymap.t(definition.fallback), 'i')
+    vim.api.nvim_feedkeys(keymap.t(definition.fallback), 'i', true)
   end))
   return keymap.t('<Ignore>')
 end)
