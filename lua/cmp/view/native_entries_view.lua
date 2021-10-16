@@ -9,7 +9,7 @@ local misc   = require('cmp.utils.misc')
 ---@field private offset number
 ---@field private items vim.CompletedItem
 ---@field private entries cmp.Entry[]
----@field private preselect number
+---@field private preselect_index number
 ---@field public event cmp.Event
 local native_entries_view = {}
 
@@ -19,7 +19,7 @@ native_entries_view.new = function()
   self.offset = -1
   self.items = {}
   self.entries = {}
-  self.preselect = 0
+  self.preselect_index = 0
   autocmd.subscribe('CompleteChanged', function()
     self.event:emit('change')
   end)
@@ -36,12 +36,12 @@ end
 native_entries_view.redraw = function(self)
   if #self.entries > 0 and self.offset <= vim.api.nvim_win_get_cursor(0)[2] + 1 then
     local completeopt = vim.o.completeopt
-    vim.o.completeopt = self.preselect == 1 and 'menu,menuone,noinsert' or config.get().completion.completeopt
+    vim.o.completeopt = self.preselect_index == 1 and 'menu,menuone,noinsert' or config.get().completion.completeopt
     vim.fn.complete(self.offset, self.items)
     vim.o.completeopt = completeopt
 
-    if self.preselect > 1 and config.get().preselect == types.cmp.PreselectMode.Item then
-      self:preselect(self.preselect)
+    if self.preselect_index > 1 and config.get().preselect == types.cmp.PreselectMode.Item then
+      self:preselect(self.preselect_index)
     end
   end
 end
@@ -50,22 +50,22 @@ native_entries_view.open = function(self, offset, entries)
   local dedup = {}
   local items = {}
   local dedup_entries = {}
-  local preselect = 0
+  local preselect_index = 0
   for _, e in ipairs(entries) do
     local item = e:get_vim_item(offset)
     if item.dup == 1 or not dedup[item.abbr] then
       dedup[item.abbr] = true
       table.insert(items, item)
       table.insert(dedup_entries, e)
-      if preselect == 0 and e.completion_item.preselect then
-        preselect = #dedup_entries
+      if preselect_index == 0 and e.completion_item.preselect then
+        preselect_index = #dedup_entries
       end
     end
   end
   self.offset = offset
   self.items = items
   self.entries = dedup_entries
-  self.preselect = preselect
+  self.preselect_index = preselect_index
   self:redraw()
 end
 
@@ -76,7 +76,7 @@ native_entries_view.close = function(self)
   self.offset = -1
   self.entries = {}
   self.items = {}
-  self.preselect = 0
+  self.preselect_index = 0
 end
 
 native_entries_view.abort = function(_)
