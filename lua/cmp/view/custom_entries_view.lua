@@ -202,12 +202,6 @@ custom_entries_view.draw = function(self)
     end
   end
   vim.api.nvim_buf_set_lines(self.entries_win:get_buffer(), topline, botline, false, texts)
-
-  if api.is_cmdline_mode() then
-    vim.api.nvim_win_call(self.entries_win.win, function()
-      vim.cmd([[redraw]])
-    end)
-  end
 end
 
 custom_entries_view.visible = function(self)

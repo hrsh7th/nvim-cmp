@@ -138,7 +138,7 @@ core.prepare = function(self)
   for keys, action in pairs(config.get().mapping) do
     if type(action) == 'function' then
       action = {
-        modes = { 'i', 'c' },
+        modes = { 'i' },
         action = action,
       }
     end

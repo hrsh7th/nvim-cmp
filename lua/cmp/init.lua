@@ -145,6 +145,11 @@ end
 cmp.confirm = function(option)
   option = option or {}
 
+  -- Hack: Ignore when executing macro.
+  if vim.fn.reg_executing() ~= '' then
+    return true
+  end
+
   local e = cmp.core.view:get_selected_entry() or (option.select and cmp.core.view:get_first_entry() or nil)
   if e then
     cmp.core:confirm(e, {
@@ -232,9 +237,6 @@ cmp.setup = setmetatable({
   buffer = function(c)
     config.set_buffer(c, vim.api.nvim_get_current_buf())
   end,
-  cmdline = function(type, c)
-    config.set_cmdline(c, type)
-  end
 }, {
   __call = function(self, c)
     self.global(c)

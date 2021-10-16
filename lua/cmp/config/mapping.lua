@@ -1,21 +1,7 @@
 local api = require('cmp.utils.api')
 
 local mapping
-mapping = setmetatable({
-  modes = function(definitions)
-    return mapping(function(fallback)
-      if api.is_insert_mode() and definitions.i then
-        return definitions.i(fallback)
-      elseif api.is_cmdline_mode() and definitions.c then
-        return definitions.c(fallback)
-      elseif api.is_select_mode() and definitions.s then
-        return definitions.s(fallback)
-      else
-        fallback()
-      end
-    end, vim.tbl_keys(definitions))
-  end,
-}, {
+mapping = setmetatable({}, {
   __call = function(_, invoke, modes)
     if type(invoke) == 'function' then
       return {

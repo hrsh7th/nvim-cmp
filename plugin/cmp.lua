@@ -17,33 +17,8 @@ vim.cmd [[
     autocmd CompleteChanged * lua require'cmp.utils.autocmd'.emit('CompleteChanged')
     autocmd CompleteDone * lua require'cmp.utils.autocmd'.emit('CompleteDone')
     autocmd ColorScheme * call v:lua.cmp.plugin.colorscheme()
-    autocmd CmdlineEnter * call v:lua.cmp.plugin.cmdline.enter()
-    autocmd CmdlineLeave * call v:lua.cmp.plugin.cmdline.leave()
   augroup END
 ]]
-
-misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'enter' }, function()
-  if vim.v.cmdtype ~= '=' then
-    vim.cmd [[
-      augroup cmp-cmdline
-        autocmd!
-        autocmd CmdlineChanged * lua require'cmp.utils.autocmd'.emit('TextChanged')
-      augroup END
-    ]]
-    require('cmp.utils.autocmd').emit('InsertEnter')
-  end
-end)
-
-misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'leave' }, function()
-  if vim.v.cmdtype ~= '=' then
-    vim.cmd [[
-      augroup cmp-cmdline
-        autocmd!
-      augroup END
-    ]]
-    require('cmp.utils.autocmd').emit('InsertLeave')
-  end
-end)
 
 misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
   highlight.inherit('CmpItemAbbrDefault', 'Comment', {
