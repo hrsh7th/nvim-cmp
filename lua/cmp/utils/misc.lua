@@ -29,24 +29,6 @@ misc.concat = function(list1, list2)
   return new_list
 end
 
----Get cursor before line
----@return string
-misc.get_cursor_before_line = function()
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  return string.sub(vim.api.nvim_get_current_line(), 1, cursor[2])
-end
-
----Return current mode is insert-mode or not.
----@return boolean
-misc.is_suitable_mode = function()
-  local mode = vim.api.nvim_get_mode().mode
-  return vim.tbl_contains({
-    'i',
-    'ic',
-    'ix',
-  }, mode)
-end
-
 ---Merge two tables recursively
 ---@generic T
 ---@param v1 T

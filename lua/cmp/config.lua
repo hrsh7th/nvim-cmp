@@ -1,5 +1,6 @@
 local cache = require('cmp.utils.cache')
 local misc = require('cmp.utils.misc')
+local api = require('cmp.utils.api')
 
 ---@class cmp.Config
 ---@field public g cmp.ConfigSchema
@@ -47,7 +48,7 @@ config.enabled = function()
   if type(enabled) == 'function' then
     enabled = enabled()
   end
-  return enabled and misc.is_suitable_mode()
+  return enabled and api.is_suitable_mode()
 end
 
 ---Return source config

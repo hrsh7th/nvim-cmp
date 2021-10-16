@@ -9,6 +9,7 @@ local view = require('cmp.view')
 local misc = require('cmp.utils.misc')
 local config = require('cmp.config')
 local types = require('cmp.types')
+local api = require('cmp.utils.api')
 
 local SOURCE_TIMEOUT = 500
 local THROTTLE_TIME = 120
@@ -154,6 +155,7 @@ core.on_change = function(self, event)
   local ignore = false
   ignore = ignore or self.suspending
   ignore = ignore or (vim.fn.pumvisible() == 1 and (vim.v.completed_item).word)
+  ignore = ignore or self.view:get_active_entry() ~= nil
   ignore = ignore or not self.view:ready()
   if ignore then
     self:get_context({ reason = types.cmp.ContextReason.Auto })
@@ -185,6 +187,7 @@ core.on_moved = function(self)
   local ignore = false
   ignore = ignore or self.suspending
   ignore = ignore or (vim.fn.pumvisible() == 1 and (vim.v.completed_item).word)
+  ignore = ignore or self.view:get_active_entry() ~= nil
   ignore = ignore or not self.view:visible()
   if ignore then
     return
@@ -197,14 +200,14 @@ end
 ---@param callback function
 core.autoindent = function(self, event, callback)
   if event == types.cmp.TriggerEvent.TextChanged then
-    local cursor_before_line = misc.get_cursor_before_line()
+    local cursor_before_line = api.get_cursor_before_line()
     local prefix = pattern.matchstr('[^[:blank:]]\\+$', cursor_before_line)
     if prefix then
       for _, key in ipairs(vim.split(vim.bo.indentkeys, ',')) do
         if vim.tbl_contains({ '=' .. prefix, '0=' .. prefix }, key) then
           local release = self:suspend()
           vim.schedule(function()
-            if cursor_before_line == misc.get_cursor_before_line() then
+            if cursor_before_line == api.get_cursor_before_line() then
               local indentkeys = vim.bo.indentkeys
               vim.bo.indentkeys = indentkeys .. ',!^F'
               keymap.feedkeys(keymap.t('<C-f>'), 'n', function()
@@ -227,7 +230,7 @@ end
 ---Invoke completion
 ---@param ctx cmp.Context
 core.complete = function(self, ctx)
-  if not misc.is_suitable_mode() then
+  if not api.is_suitable_mode() then
     return
   end
   self:set_context(ctx)
@@ -259,7 +262,7 @@ end
 ---Update completion menu
 core.filter = async.throttle(
   vim.schedule_wrap(function(self)
-    if not misc.is_suitable_mode() then
+    if not api.is_suitable_mode() then
       return
     end
     local ctx = self:get_context()

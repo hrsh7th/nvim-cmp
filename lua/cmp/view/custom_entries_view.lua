@@ -5,6 +5,7 @@ local config = require('cmp.config')
 local types = require('cmp.types')
 local keymap = require('cmp.utils.keymap')
 local misc = require('cmp.utils.misc')
+local api = require('cmp.utils.api')
 
 ---@class cmp.CustomEntriesView
 ---@field private entries_win cmp.Window
@@ -126,16 +127,16 @@ custom_entries_view.open = function(self, offset, entries)
   width = width + self.column_width.kind + (self.column_width.menu > 0 and 1 or 0)
   width = width + self.column_width.menu + 1
 
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  local pos = vim.fn.screenpos(0, cursor[1], cursor[2] + 1)
+  local cursor = api.get_cursor()
+  local pos = api.get_screen_cursor()
   local height = vim.api.nvim_get_option('pumheight')
   height = height == 0 and #self.entries or height
   height = math.min(height, #self.entries)
-  if (vim.o.lines - pos.row) <= 8 and pos.row - 8 > 0 then
-    height = math.min(height, pos.row - 1)
-    pos.row = pos.row - height - 1
+  if (vim.o.lines - pos[1]) <= 8 and pos[1] - 8 > 0 then
+    height = math.min(height, pos[1] - 1)
+    pos[1] = pos[1] - height - 1
   else
-    height = math.min(height, vim.o.lines - pos.row)
+    height = math.min(height, vim.o.lines - pos[1])
   end
 
   if width < 1 or height < 1 then
@@ -147,8 +148,8 @@ custom_entries_view.open = function(self, offset, entries)
   self.entries_win:open({
     relative = 'editor',
     style = 'minimal',
-    row = pos.row,
-    col = pos.col - 1 - delta - 1,
+    row = pos[1],
+    col = pos[2] - delta - 1,
     width = width,
     height = height,
     zindex = 1001,
@@ -199,6 +200,10 @@ custom_entries_view.draw = function(self)
     end
   end
   vim.api.nvim_buf_set_lines(self.entries_win:get_buffer(), topline, botline, false, texts)
+
+  if api.is_cmdline_mode() then
+    vim.cmd([[redraw]])
+  end
 end
 
 custom_entries_view.visible = function(self)
@@ -284,8 +289,8 @@ end
 
 custom_entries_view._insert = function(self, word)
   keymap.feedkeys(keymap.t('<Ignore>'), 'n', function()
-    local cursor = vim.api.nvim_win_get_cursor(0)
-    local length = vim.str_utfindex(string.sub(vim.api.nvim_get_current_line(), self.offset, cursor[2]))
+    local cursor = api.get_cursor()
+    local length = vim.str_utfindex(string.sub(api.get_current_line(), self.offset, cursor[2]))
     keymap.feedkeys(keymap.backspace(length) .. word, 'int')
   end)
 end

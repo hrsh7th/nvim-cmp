@@ -2,6 +2,7 @@ local misc = require('cmp.utils.misc')
 local pattern = require('cmp.utils.pattern')
 local types = require('cmp.types')
 local cache = require('cmp.utils.cache')
+local api = require('cmp.utils.api')
 
 ---@class cmp.Context
 ---@field public id string
@@ -47,8 +48,8 @@ context.new = function(prev_context, option)
   self.mode = vim.api.nvim_get_mode().mode
   self.bufnr = vim.api.nvim_get_current_buf()
 
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  self.cursor_line = vim.api.nvim_get_current_line()
+  local cursor = api.get_cursor()
+  self.cursor_line = api.get_current_line()
   self.cursor = {}
   self.cursor.row = cursor[1]
   self.cursor.col = cursor[2] + 1

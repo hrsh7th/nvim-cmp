@@ -1,6 +1,7 @@
 local misc = require('cmp.utils.misc')
 local str = require('cmp.utils.str')
 local cache = require('cmp.utils.cache')
+local api = require('cmp.utils.api')
 
 local keymap = {}
 
@@ -78,6 +79,9 @@ end
 keymap.backspace = function(count)
   if count <= 0 then
     return ''
+  end
+  if api.is_cmdline_mode() or api.is_terminal_mode() then
+    return keymap.t(string.rep('<BS>', count))
   end
   local keys = {}
   table.insert(keys, keymap.t(string.rep('<BS>', count)))

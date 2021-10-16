@@ -1,3 +1,4 @@
+local api = require "cmp.utils.api"
 if vim.g.loaded_cmp then
   return
 end
@@ -10,15 +11,34 @@ local highlight = require('cmp.utils.highlight')
 vim.cmd [[
   augroup cmp
     autocmd!
-    autocmd InsertEnter * lua require'cmp.utils.autocmd'.emit('InsertEnter')
-    autocmd InsertLeave * lua require'cmp.utils.autocmd'.emit('InsertLeave')
-    autocmd TextChangedI,TextChangedP * lua require'cmp.utils.autocmd'.emit('TextChanged')
+    autocmd CmdlineEnter,InsertEnter * lua require'cmp.utils.autocmd'.emit('InsertEnter')
+    autocmd CmdlineLeave,InsertLeave * lua require'cmp.utils.autocmd'.emit('InsertLeave')
+    autocmd CmdlineChanged,TextChangedI,TextChangedP * lua require'cmp.utils.autocmd'.emit('TextChanged')
     autocmd CursorMovedI * lua require'cmp.utils.autocmd'.emit('CursorMoved')
     autocmd CompleteChanged * lua require'cmp.utils.autocmd'.emit('CompleteChanged')
     autocmd CompleteDone * lua require'cmp.utils.autocmd'.emit('CompleteDone')
     autocmd ColorScheme * call v:lua.cmp.plugin.colorscheme()
+    autocmd TermEnter * call v:lua.cmp.plugin.polling_s()
+    autocmd TermLeave * call v:lua.cmp.plugin.polling_e()
   augroup END
 ]]
+
+local timer = vim.loop.new_timer()
+misc.set(_G, { 'cmp', 'plugin', 'polling_s' }, function()
+  require('cmp.utils.autocmd').emit('InsertEnter')
+  local cursor = api.get_cursor()
+  timer:start(1, 1, vim.schedule_wrap(function()
+    local new_cursor = api.get_cursor()
+    if cursor[1] ~= new_cursor[1] or cursor[2] ~= new_cursor[2] then
+      require('cmp.utils.autocmd').emit('TextChanged')
+    end
+  end))
+end)
+misc.set(_G, { 'cmp', 'plugin', 'polling_e' }, function()
+  timer:stop()
+  require('cmp.utils.autocmd').emit('InsertLeave')
+end)
+
 
 misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
   highlight.inherit('CmpItemAbbrDefault', 'Comment', {
