@@ -239,7 +239,7 @@ cmp.setup = setmetatable({
   end,
   cmdline = function(type, c)
     config.set_cmdline(c, type)
-  end
+  end,
 }, {
   __call = function(self, c)
     self.global(c)
