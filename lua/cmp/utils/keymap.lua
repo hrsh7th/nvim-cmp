@@ -75,7 +75,7 @@ end
 
 ---Mode safe break undo
 keymap.undobreak = function()
-  if api.is_cmdline_mode() then
+  if not api.is_insert_mode() then
     return ''
   end
   return keymap.t('<C-g>u')
@@ -83,7 +83,7 @@ end
 
 ---Mode safe join undo
 keymap.undojoin = function()
-  if api.is_cmdline_mode() then
+  if not api.is_insert_mode() then
     return ''
   end
   return keymap.t('<C-g>U')
