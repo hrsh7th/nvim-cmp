@@ -183,7 +183,9 @@ custom_entries_view.abort = function(self)
   if self.prefix then
     self:_insert(self.prefix)
   end
-  self:close()
+  keymap.feedkeys('', 'n', function()
+    self:close()
+  end)
 end
 
 custom_entries_view.draw = function(self)
