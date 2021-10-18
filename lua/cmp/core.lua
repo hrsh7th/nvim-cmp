@@ -311,7 +311,7 @@ core.confirm = function(self, e, option, callback)
   local confirm = {}
   table.insert(confirm, keymap.backspace(ctx.cursor.character - misc.to_utfindex(e.context.cursor_before_line, e:get_offset())))
   table.insert(confirm, e:get_word())
-  keymap.feedkeys(table.concat(confirm, ''), 'nt', function()
+  keymap.feedkeys(table.concat(confirm, ''), 'n', function()
     -- Restore to the requested state.
     local restore = {}
     table.insert(restore, keymap.backspace(vim.str_utfindex(e:get_word())))
@@ -368,16 +368,29 @@ core.confirm = function(self, e, option, callback)
       if completion_item.textEdit.range.start.character < e.context.cursor.character then
         table.insert(keys, keymap.backspace(e.context.cursor.character - completion_item.textEdit.range.start.character))
       end
+      table.insert(keys, keymap.undobreak())
 
       local is_snippet = completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet
       if is_snippet then
-        table.insert(keys, keymap.undobreak() .. e:get_word() .. keymap.undobreak())
-        table.insert(keys, keymap.backspace(vim.str_utfindex(e:get_word())))
+        table.insert(keys, e:get_word())
       else
-        table.insert(keys, keymap.undobreak() .. completion_item.textEdit.newText .. keymap.undobreak())
+        table.insert(keys, completion_item.textEdit.newText)
       end
+
       keymap.feedkeys(table.concat(keys, ''), 'n', function()
         if is_snippet then
+          -- remove snippet prefix without changing `dot` register.
+          local snippet_ctx = context.new()
+          vim.fn['cmp#apply_text_edits'](ctx.bufnr, { {
+            range = {
+              start = {
+                line = snippet_ctx.cursor.line,
+                character = snippet_ctx.cursor.character - vim.str_utfindex(e:get_word()),
+              },
+              ['end'] = snippet_ctx.cursor,
+            },
+            newText = ''
+          } })
           config.get().snippet.expand({
             body = completion_item.textEdit.newText,
             insert_text_mode = completion_item.insertTextMode,
