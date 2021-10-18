@@ -121,7 +121,6 @@ keymap.feedkeys = setmetatable({
       return keymap.feedkeys_macro_safe(keys, mode, callback)
     end
 
-    local is_typed = string.match(mode, 't') ~= nil
     local is_insert = string.match(mode, 'i') ~= nil
 
     local queue = {}
@@ -135,9 +134,6 @@ keymap.feedkeys = setmetatable({
     if #keys > 0 or callback then
       local id = misc.id('cmp.utils.keymap.feedkeys')
       self.callbacks[id] = function()
-        if is_typed then
-          vim.fn.setreg('".', vim.fn.getreg('".') .. keys)
-        end
         if callback then
           callback()
         end
