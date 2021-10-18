@@ -147,9 +147,6 @@ custom_entries_view.open = function(self, offset, entries)
   local cursor = api.get_cursor()
   local delta = cursor[2] + 1 - self.offset
   local row, col = pos[1], pos[2] - delta - 1
-  if row < 0 or vim.o.lines <= row or col < 0 or vim.o.columns <= col then
-    return
-  end
 
   self.entries_win:open({
     relative = 'editor',
