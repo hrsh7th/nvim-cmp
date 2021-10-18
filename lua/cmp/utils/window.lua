@@ -120,7 +120,7 @@ window.update = function(self)
     else
       style1.noautocmd = true
       self.swin1 = vim.api.nvim_open_win(buffer.ensure(self.name .. 'sbuf1'), false, style1)
-      vim.api.nvim_win_set_option(self.swin1, 'winhighlight', 'Normal:PmenuSbar,NormalNC:PmenuSbar,NormalFloat:PmenuSbar')
+      vim.api.nvim_win_set_option(self.swin1, 'winhighlight', 'EndOfBuffer:PmenuSbar,Normal:PmenuSbar,NormalNC:PmenuSbar,NormalFloat:PmenuSbar')
     end
     local style2 = {}
     style2.relative = 'editor'
@@ -135,7 +135,7 @@ window.update = function(self)
     else
       style2.noautocmd = true
       self.swin2 = vim.api.nvim_open_win(buffer.ensure(self.name .. 'sbuf2'), false, style2)
-      vim.api.nvim_win_set_option(self.swin2, 'winhighlight', 'Normal:PmenuThumb,NormalNC:PmenuThumb,NormalFloat:PmenuThumb')
+      vim.api.nvim_win_set_option(self.swin2, 'winhighlight', 'EndOfBuffer:PmenuThumb,Normal:PmenuThumb,NormalNC:PmenuThumb,NormalFloat:PmenuThumb')
     end
   else
     if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
