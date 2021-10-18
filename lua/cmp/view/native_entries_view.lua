@@ -66,7 +66,7 @@ native_entries_view.open = function(self, offset, entries)
   self.items = items
   self.entries = dedup_entries
   self.preselect_index = preselect_index
-  self:redraw()
+  self:on_change()
 end
 
 native_entries_view.close = function(self)

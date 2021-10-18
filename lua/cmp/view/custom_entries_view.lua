@@ -129,7 +129,6 @@ custom_entries_view.open = function(self, offset, entries)
   width = width + self.column_width.kind + (self.column_width.menu > 0 and 1 or 0)
   width = width + self.column_width.menu + 1
 
-  local cursor = api.get_cursor()
   local pos = api.get_screen_cursor()
   local height = vim.api.nvim_get_option('pumheight')
   height = height == 0 and #self.entries or height
@@ -145,18 +144,24 @@ custom_entries_view.open = function(self, offset, entries)
     return
   end
 
+  local cursor = api.get_cursor()
   local delta = cursor[2] + 1 - self.offset
+  local row, col = pos[1], pos[2] - delta - 1
+  if row < 0 or vim.o.lines <= row or col < 0 or vim.o.columns <= col then
+    return
+  end
+
   self.entries_win:open({
     relative = 'editor',
     style = 'minimal',
-    row = pos[1],
-    col = pos[2] - delta - 1,
+    row = row,
+    col = col,
     width = width,
     height = height,
     zindex = 1001,
   })
-  self.entries_win:option('cursorline', false)
   vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 1 })
+  self.entries_win:option('cursorline', false)
 
   if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
     self:preselect(preselect)
