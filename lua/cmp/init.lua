@@ -142,8 +142,9 @@ cmp.scroll_docs = function(delta)
 end
 
 ---Confirm completion
-cmp.confirm = function(option)
+cmp.confirm = function(option, callback)
   option = option or {}
+  callback = callback or function() end
 
   -- Hack: Ignore when executing macro.
   if vim.fn.reg_executing() ~= '' then
@@ -155,6 +156,7 @@ cmp.confirm = function(option)
     cmp.core:confirm(e, {
       behavior = option.behavior,
     }, function()
+      callback()
       cmp.core:complete(cmp.core:get_context({ reason = cmp.ContextReason.TriggerOnly }))
     end)
     return true
