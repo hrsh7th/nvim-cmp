@@ -82,6 +82,9 @@ char.is_semantic_index = function(text, index)
   if not char.is_alpha(prev) and char.is_alpha(curr) then
     return true
   end
+  if not char.is_digit(prev) and char.is_digit(curr) then
+    return true
+  end
   return false
 end
 

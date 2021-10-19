@@ -29,6 +29,7 @@ describe('matcher', function()
     assert.is.truthy(matcher.match('usela', 'useLayoutEffect') > matcher.match('usela', 'useDataLayer'))
     assert.is.truthy(matcher.match('true', 'v:true', { 'true' }) == matcher.match('true', 'true'))
     assert.is.truthy(matcher.match('g', 'get', { 'get' }) > matcher.match('g', 'dein#get', { 'dein#get' }))
+    assert.is.truthy(matcher.match('2', '[[2021') >= 1)
   end)
 
   it('debug', function()

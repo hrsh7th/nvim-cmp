@@ -260,7 +260,7 @@ misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(id)
   definition.callback(
     definition.keys,
     misc.once(function()
-      vim.api.nvim_feedkeys(keymap.t(definition.fallback), 'i', true)
+      vim.api.nvim_feedkeys(keymap.t(definition.fallback), 'it', true)
     end)
   )
   return keymap.t('<Ignore>')
