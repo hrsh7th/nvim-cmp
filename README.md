@@ -446,7 +446,7 @@ Return the completion menu is visible or not.
 
 NOTE: This method returns true if the native popup menu is visible. For convenience to define mappings.
 
-#### `cmp.confirm({ select = boolean, behavior = cmp.ConfirmBehavior.{Insert,Replace} })`
+#### `cmp.confirm({ select = boolean, behavior = cmp.ConfirmBehavior.{Insert,Replace} }, callback)`
 
 Confirm current selected item if possible.
 
