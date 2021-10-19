@@ -46,7 +46,7 @@ misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'leave' }, function()
 end)
 
 misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
-  highlight.inherit('CmpItemAbbrDefault', 'Comment', {
+  highlight.inherit('CmpItemAbbrDefault', 'Pmenu', {
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
@@ -55,21 +55,21 @@ misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
-  highlight.inherit('CmpItemAbbrMatchDefault', 'Normal', {
-    gui = 'bold',
-    guibg = 'NONE',
-    ctermbg = 'NONE',
-  })
-  highlight.inherit('CmpItemAbbrMatchFuzzyDefault', 'Normal', {
+  highlight.inherit('CmpItemAbbrMatchDefault', 'Pmenu', {
     gui = 'NONE',
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
-  highlight.inherit('CmpItemKindDefault', 'Special', {
+  highlight.inherit('CmpItemAbbrMatchFuzzyDefault', 'Pmenu', {
+    gui = 'NONE',
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
-  highlight.inherit('CmpItemMenuDefault', 'NonText', {
+  highlight.inherit('CmpItemKindDefault', 'Pmenu', {
+    guibg = 'NONE',
+    ctermbg = 'NONE',
+  })
+  highlight.inherit('CmpItemMenuDefault', 'Pmenu', {
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
