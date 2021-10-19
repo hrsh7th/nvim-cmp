@@ -3,6 +3,7 @@ if vim.g.loaded_cmp then
 end
 vim.g.loaded_cmp = true
 
+local api = require "cmp.utils.api"
 local misc = require('cmp.utils.misc')
 local highlight = require('cmp.utils.highlight')
 
@@ -78,4 +79,14 @@ end
 vim.cmd [[command! CmpStatus lua require('cmp').status()]]
 
 vim.cmd [[doautocmd <nomodeline> User cmp#ready]]
+
+vim.on_key(function(keys)
+  if keys == vim.api.nvim_replace_termcodes('<C-c>', true, true, true) then
+    vim.schedule(function()
+      if not api.is_suitable_mode() then
+        require('cmp.utils.autocmd').emit('InsertLeave')
+      end
+    end)
+  end
+end, vim.api.nvim_create_namespace('cmp.plugin'))
 
