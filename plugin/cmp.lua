@@ -41,7 +41,7 @@ misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
-  highlight.inherit('CmpItemKindDefault', 'Pmenu', {
+  highlight.inherit('CmpItemKindDefault', 'Special', {
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
