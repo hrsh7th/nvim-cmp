@@ -311,7 +311,7 @@ core.confirm = function(self, e, option, callback)
   local confirm = {}
   table.insert(confirm, keymap.backspace(ctx.cursor.character - misc.to_utfindex(e.context.cursor_before_line, e:get_offset())))
   table.insert(confirm, e:get_word())
-  keymap.feedkeys(table.concat(confirm, ''), 'n', function()
+  keymap.feedkeys(table.concat(confirm, ''), 'nt', function()
     -- Restore to the requested state.
     local restore = {}
     table.insert(restore, keymap.backspace(vim.str_utfindex(e:get_word())))
