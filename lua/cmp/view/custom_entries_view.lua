@@ -6,6 +6,8 @@ local types = require('cmp.types')
 local keymap = require('cmp.utils.keymap')
 local api = require('cmp.utils.api')
 
+local SIDE_PADDING = 1
+
 ---@class cmp.CustomEntriesView
 ---@field private entries_win cmp.Window
 ---@field private offset number
@@ -50,7 +52,7 @@ custom_entries_view.new = function()
         local e = self.entries[i + 1]
         if e then
           local v = e:get_view(self.offset)
-          local o = 1
+          local o = SIDE_PADDING
           local a = 0
           for _, field in ipairs(fields) do
             if field == types.cmp.ItemField.Abbr then
@@ -133,6 +135,7 @@ custom_entries_view.open = function(self, offset, entries)
   local height = vim.api.nvim_get_option('pumheight')
   height = height == 0 and #self.entries or height
   height = math.min(height, #self.entries)
+
   if (vim.o.lines - pos[1]) <= 8 and pos[1] - 8 > 0 then
     height = math.min(height, pos[1] - 1)
     pos[1] = pos[1] - height - 1
@@ -196,12 +199,12 @@ custom_entries_view.draw = function(self)
     if e then
       local view = e:get_view(self.offset)
       local text = {}
-      table.insert(text, ' ')
+      table.insert(text, string.rep(' ', SIDE_PADDING))
       for _, field in ipairs(fields) do
         table.insert(text, view[field].text)
         table.insert(text, string.rep(' ', 1 + self.column_width[field] - view[field].width))
       end
-      table.insert(text, ' ')
+      table.insert(text, string.rep(' ', SIDE_PADDING))
       table.insert(texts, table.concat(text, ''))
     end
   end
