@@ -49,6 +49,11 @@ cmp.visible = function()
   return cmp.core.view:visible() or vim.fn.pumvisible() == 1
 end
 
+---Get current selected entry or nil
+cmp.get_selected_entry = function()
+  return cmp.core.view:get_selected_entry()
+end
+
 ---Close current completion
 cmp.close = function()
   if cmp.core.view:visible() then
