@@ -293,18 +293,27 @@ custom_entries_view._select = function(self, cursor, option)
   if is_insert then
     self:_insert(self.entries[cursor] and self.entries[cursor]:get_vim_item(self.offset).word or self.prefix)
   end
+
   self.entries_win:update()
   self:draw()
   self.event:emit('change')
 end
 
 custom_entries_view._insert = function(self, word)
-  local release = require('cmp').core:suspend()
-  keymap.feedkeys('', 'n', function()
+  if api.is_cmdline_mode() then
     local cursor = api.get_cursor()
     local length = vim.str_utfindex(string.sub(api.get_current_line(), self.offset, cursor[2]))
-    keymap.feedkeys(keymap.backspace(length) .. word, 'int', vim.schedule_wrap(release))
-  end)
+    vim.api.nvim_feedkeys(keymap.backspace(length) .. word, 'in', true)
+  else
+    local release = require('cmp').core:suspend()
+    keymap.feedkeys('', 'n', function()
+      local cursor = api.get_cursor()
+      local length = vim.str_utfindex(string.sub(api.get_current_line(), self.offset, cursor[2]))
+      keymap.feedkeys(keymap.backspace(length) .. word, 'in', vim.schedule_wrap(function()
+        release()
+      end))
+    end)
+  end
 end
 
 return custom_entries_view
