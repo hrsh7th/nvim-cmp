@@ -1,6 +1,6 @@
 return function(...)
   local sources = {}
-  for i, group in ipairs({ unpack(...) }) do
+  for i, group in ipairs({ ... }) do
     for _, source in ipairs(group) do
       source.group = i
       table.insert(sources, source);
