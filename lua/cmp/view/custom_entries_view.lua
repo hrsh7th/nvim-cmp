@@ -154,8 +154,8 @@ custom_entries_view.open = function(self, offset, entries)
   self.entries_win:open({
     relative = 'editor',
     style = 'minimal',
-    row = row,
-    col = col,
+    row = math.max(0, row),
+    col = math.max(0, col),
     width = width,
     height = height,
     zindex = 1001,
