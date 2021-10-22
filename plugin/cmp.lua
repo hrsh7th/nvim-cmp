@@ -5,6 +5,7 @@ vim.g.loaded_cmp = true
 
 local api = require "cmp.utils.api"
 local misc = require('cmp.utils.misc')
+local config = require('cmp.config')
 local highlight = require('cmp.utils.highlight')
 
 -- TODO: https://github.com/neovim/neovim/pull/14661
@@ -24,6 +25,9 @@ vim.cmd [[
 ]]
 
 misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'enter' }, function()
+  if config.get().experimental.native_menu then
+    return
+  end
   if vim.v.cmdtype ~= '=' then
     vim.cmd [[
       augroup cmp-cmdline
@@ -36,6 +40,9 @@ misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'enter' }, function()
 end)
 
 misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'leave' }, function()
+  if config.get().experimental.native_menu then
+    return
+  end
   if vim.v.cmdtype ~= '=' then
     vim.cmd [[
       augroup cmp-cmdline
