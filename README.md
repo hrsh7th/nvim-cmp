@@ -451,6 +451,16 @@ Return the completion menu is visible or not.
 
 NOTE: This method returns true if the native popup menu is visible. For convenience to define mappings.
 
+#### `cmp.get_selected_entry()`
+
+Return the selected entry.
+
+#### `cmp.get_active_entry()`
+
+Return the active entry.
+
+NOTE: The `preselected` entry does not returned from this method.
+
 #### `cmp.confirm({ select = boolean, behavior = cmp.ConfirmBehavior.{Insert,Replace} }, callback)`
 
 Confirm current selected item if possible.
