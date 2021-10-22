@@ -389,7 +389,7 @@ core.confirm = function(self, e, option, callback)
               },
               ['end'] = snippet_ctx.cursor,
             },
-            newText = ''
+            newText = '',
           } })
           config.get().snippet.expand({
             body = completion_item.textEdit.newText,

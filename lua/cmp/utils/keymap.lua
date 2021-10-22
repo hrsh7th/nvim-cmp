@@ -351,7 +351,7 @@ keymap.spec = function()
       keymap.feedkeys(keymap.t('foo2'), 'n')
       keymap.feedkeys(keymap.t('bar2'), 'nt')
       keymap.feedkeys(keymap.t('baz2'), 'n', function()
-        vim.cmd[[normal! q]]
+        vim.cmd([[normal! q]])
       end)
       keymap.feedkeys(keymap.t('baz1'), 'ni')
       keymap.feedkeys(keymap.t('bar1'), 'nti')
