@@ -241,8 +241,6 @@ The source specific maximum item count.
 
 The source group index.
 
-This option must be sequential order.
-
 You can call built-in utility like `cmp.config.sources({ { name = 'a' } }, { { name = 'b' } })`.
 
 #### preselect (type: cmp.PreselectMode)

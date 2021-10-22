@@ -120,6 +120,6 @@ cmp.ItemField.Menu = 'menu'
 ---@field public keyword_pattern string
 ---@field public keyword_length number
 ---@field public max_item_count number
----@field public group number
+---@field public group_index number
 
 return cmp
