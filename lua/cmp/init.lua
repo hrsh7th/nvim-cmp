@@ -18,6 +18,7 @@ cmp.vim = require('cmp.types.vim')
 ---Export default config presets.
 cmp.config = {}
 cmp.config.compare = require('cmp.config.compare')
+cmp.config.sources = require('cmp.config.sources')
 
 ---Export mapping
 cmp.mapping = require('cmp.config.mapping')
@@ -47,6 +48,16 @@ end
 ---Return view is visible or not.
 cmp.visible = function()
   return cmp.core.view:visible() or vim.fn.pumvisible() == 1
+end
+
+---Get current selected entry or nil
+cmp.get_selected_entry = function()
+  return cmp.core.view:get_selected_entry()
+end
+
+---Get current active entry or nil
+cmp.get_active_entry = function()
+  return cmp.core.view:get_active_entry()
 end
 
 ---Close current completion

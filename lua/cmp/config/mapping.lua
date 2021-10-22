@@ -1,5 +1,3 @@
-local api = require('cmp.utils.api')
-
 local mapping
 mapping = setmetatable({
   modes = function(definitions)

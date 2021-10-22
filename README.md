@@ -46,17 +46,21 @@ Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-buffer'
 Plug 'hrsh7th/nvim-cmp'
 
-" For vsnip user.
+" For vsnip users.
 Plug 'hrsh7th/cmp-vsnip'
 Plug 'hrsh7th/vim-vsnip'
 
-" For luasnip user.
+" For luasnip users.
 " Plug 'L3MON4D3/LuaSnip'
 " Plug 'saadparwaiz1/cmp_luasnip'
 
-" For ultisnips user.
+" For ultisnips users.
 " Plug 'SirVer/ultisnips'
 " Plug 'quangnguyen30192/cmp-nvim-ultisnips'
+
+" For snippy users.
+" Plug 'dcampos/nvim-snippy'
+" Plug 'dcampos/cmp-snippy'
 
 call plug#end()
 
@@ -69,14 +73,10 @@ lua <<EOF
   cmp.setup({
     snippet = {
       expand = function(args)
-        -- For `vsnip` user.
-        vim.fn["vsnip#anonymous"](args.body)
-
-        -- For `luasnip` user.
-        -- require('luasnip').lsp_expand(args.body)
-
-        -- For `ultisnips` user.
-        -- vim.fn["UltiSnips#Anon"](args.body)
+        vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+        -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+        -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+        -- require'snippy'.expand_snippet(args.body) -- For `snippy` users.
       end,
     },
     mapping = {
@@ -86,25 +86,22 @@ lua <<EOF
       ['<C-e>'] = cmp.mapping.close(),
       ['<CR>'] = cmp.mapping.confirm({ select = true }),
     },
-    sources = {
+    sources = cmp.config.sources({
       { name = 'nvim_lsp' },
-
-      -- For vsnip user.
-      { name = 'vsnip' },
-
-      -- For luasnip user.
-      -- { name = 'luasnip' },
-
-      -- For ultisnips user.
-      -- { name = 'ultisnips' },
-
+      { name = 'vsnip' }, -- For vsnip users.
+      -- { name = 'luasnip' }, -- For luasnip users.
+      -- { name = 'ultisnips' }, -- For ultisnips users.
+      -- { name = 'snippy' }, -- For snippy users.
+    }, {
       { name = 'buffer' },
+    })
     }
   })
 
   -- Setup lspconfig.
+  local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
   require('lspconfig')[%YOUR_LSP_SERVER%].setup {
-    capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+    capabilities = capabilities
   }
 EOF
 ```
@@ -240,6 +237,14 @@ The source specific keyword_length for override.
 #### sources[number].max_item_count (type: number)
 
 The source specific maximum item count.
+
+#### sources[number].group (type: number)
+
+The source group index.
+
+This option must be sequential order.
+
+You can call built-in utility like `cmp.config.sources({ { name = 'a' } }, { { name = 'b' } })`.
 
 #### preselect (type: cmp.PreselectMode)
 
@@ -445,6 +450,16 @@ You can use the following APIs.
 Return the completion menu is visible or not.
 
 NOTE: This method returns true if the native popup menu is visible. For convenience to define mappings.
+
+#### `cmp.get_selected_entry()`
+
+Return the selected entry.
+
+#### `cmp.get_active_entry()`
+
+Return the active entry.
+
+NOTE: The `preselected` entry does not returned from this method.
 
 #### `cmp.confirm({ select = boolean, behavior = cmp.ConfirmBehavior.{Insert,Replace} }, callback)`
 

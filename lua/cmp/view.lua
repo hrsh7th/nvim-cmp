@@ -45,51 +45,67 @@ end
 ---@param ctx cmp.Context
 ---@param sources cmp.Source[]
 view.open = function(self, ctx, sources)
+  local group_index = -1
   local entries = {}
+  while true do
+    group_index = group_index + 1
 
-  -- check the source triggered by character
-  local has_triggered_by_symbol_source = false
-  for _, s in ipairs(sources) do
-    if #s:get_entries(ctx) > 0 then
-      if s.is_triggered_by_symbol then
-        has_triggered_by_symbol_source = true
-        break
-      end
+    local group = vim.tbl_filter(function(s)
+      return (s:get_config().group or 0) == group_index
+    end, sources)
+
+    if #group == 0 then
+      break
     end
-  end
 
-  -- create filtered entries.
-  local offset = ctx.cursor.col
-  for i, s in ipairs(sources) do
-    if s.offset <= offset then
-      if not has_triggered_by_symbol_source or s.is_triggered_by_symbol then
-        -- source order priority bonus.
-        local priority = s:get_config().priority or ((#sources - (i - 1)) * config.get().sorting.priority_weight)
-
-        for _, e in ipairs(s:get_entries(ctx)) do
-          e.score = e.score + priority
-          table.insert(entries, e)
-          offset = math.min(offset, e:get_offset())
+    -- check the source triggered by character
+    local has_triggered_by_symbol_source = false
+    for _, s in ipairs(group) do
+      if #s:get_entries(ctx) > 0 then
+        if s.is_triggered_by_symbol then
+          has_triggered_by_symbol_source = true
+          break
         end
       end
     end
-  end
 
-  -- sort.
-  local comparetors = config.get().sorting.comparators
-  table.sort(entries, function(e1, e2)
-    for _, fn in ipairs(comparetors) do
-      local diff = fn(e1, e2)
-      if diff ~= nil then
-        return diff
+    -- create filtered entries.
+    local offset = ctx.cursor.col
+    for i, s in ipairs(group) do
+      if s.offset <= offset then
+        if not has_triggered_by_symbol_source or s.is_triggered_by_symbol then
+          -- source order priority bonus.
+          local priority = s:get_config().priority or ((#group - (i - 1)) * config.get().sorting.priority_weight)
+
+          for _, e in ipairs(s:get_entries(ctx)) do
+            e.score = e.score + priority
+            table.insert(entries, e)
+            offset = math.min(offset, e:get_offset())
+          end
+        end
       end
     end
-  end)
 
-  -- open
-  if #entries > 0 then
-    self:_get_entries_view():open(offset, entries)
-  else
+    -- sort.
+    local comparetors = config.get().sorting.comparators
+    table.sort(entries, function(e1, e2)
+      for _, fn in ipairs(comparetors) do
+        local diff = fn(e1, e2)
+        if diff ~= nil then
+          return diff
+        end
+      end
+    end)
+
+    -- open
+    if #entries > 0 then
+      self:_get_entries_view():open(offset, entries)
+      break
+    end
+  end
+
+  -- close.
+  if #entries == 0 then
     self:close()
   end
 end
