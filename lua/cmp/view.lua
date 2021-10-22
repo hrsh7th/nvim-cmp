@@ -45,7 +45,7 @@ end
 ---@param ctx cmp.Context
 ---@param sources cmp.Source[]
 view.open = function(self, ctx, sources)
-  local group_index = -1
+  local group_index = 0
   local entries = {}
   while true do
     group_index = group_index + 1
