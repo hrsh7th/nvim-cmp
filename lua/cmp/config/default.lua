@@ -61,6 +61,10 @@ return function()
           if diff ~= nil then
             return diff
           end
+          diff = compare.under(e1, e2)
+          if diff ~= nil then
+            return diff
+          end
           diff = compare.kind(e1, e2)
           if diff ~= nil then
             return diff
