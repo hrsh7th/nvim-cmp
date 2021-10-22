@@ -237,7 +237,7 @@ The source specific keyword_length for override.
 
 The source specific maximum item count.
 
-#### sources[number].group (type: number)
+#### sources[number].group_index (type: number)
 
 The source group index.
 
