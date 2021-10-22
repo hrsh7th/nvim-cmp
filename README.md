@@ -95,7 +95,6 @@ lua <<EOF
     }, {
       { name = 'buffer' },
     })
-    }
   })
 
   -- Setup lspconfig.
