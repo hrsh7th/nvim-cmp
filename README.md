@@ -199,7 +199,7 @@ the *sorting.priority_weight* options below.
 
 It is possible to setup different source lists for different filetypes, this is
 an example using the `FileType` autocommand to setup different sources for the
-lua filetype.
+lua filetype. This will overwrite your global sources for the buffer.
 
 ```viml
 " Setup buffer configuration (nvim-lua source only enables in Lua filetype).
