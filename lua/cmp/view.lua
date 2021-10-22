@@ -50,17 +50,17 @@ view.open = function(self, ctx, sources)
   while true do
     group_index = group_index + 1
 
-    local group = vim.tbl_filter(function(s)
-      return (s:get_config().group or 0) == group_index
+    local source_group = vim.tbl_filter(function(s)
+      return (s:get_config().group_index or 1) == group_index
     end, sources)
 
-    if #group == 0 then
+    if #source_group == 0 then
       break
     end
 
     -- check the source triggered by character
     local has_triggered_by_symbol_source = false
-    for _, s in ipairs(group) do
+    for _, s in ipairs(source_group) do
       if #s:get_entries(ctx) > 0 then
         if s.is_triggered_by_symbol then
           has_triggered_by_symbol_source = true
@@ -71,11 +71,11 @@ view.open = function(self, ctx, sources)
 
     -- create filtered entries.
     local offset = ctx.cursor.col
-    for i, s in ipairs(group) do
+    for i, s in ipairs(source_group) do
       if s.offset <= offset then
         if not has_triggered_by_symbol_source or s.is_triggered_by_symbol then
           -- source order priority bonus.
-          local priority = s:get_config().priority or ((#group - (i - 1)) * config.get().sorting.priority_weight)
+          local priority = s:get_config().priority or ((#source_group - (i - 1)) * config.get().sorting.priority_weight)
 
           for _, e in ipairs(s:get_entries(ctx)) do
             e.score = e.score + priority
