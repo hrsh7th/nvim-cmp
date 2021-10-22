@@ -45,18 +45,23 @@ end
 ---@param ctx cmp.Context
 ---@param sources cmp.Source[]
 view.open = function(self, ctx, sources)
-  local group_index = 0
-  local entries = {}
-  while true do
-    group_index = group_index + 1
-
-    local source_group = vim.tbl_filter(function(s)
-      return (s:get_config().group_index or 1) == group_index
-    end, sources)
-
-    if #source_group == 0 then
-      break
+  local source_group_map = {}
+  for _, s in ipairs(sources) do
+    local group_index = s:get_config().group_index or 0
+    if not source_group_map[group_index] then
+      source_group_map[group_index] = {}
     end
+    table.insert(source_group_map[group_index], s)
+  end
+
+  local group_indexes = vim.tbl_keys(source_group_map)
+  table.sort(group_indexes, function(a, b)
+    return a ~= b and (a < b) or nil
+  end)
+
+  local entries = {}
+  for _, group_index in ipairs(group_indexes) do
+    local source_group = source_group_map[group_index] or {}
 
     -- check the source triggered by character
     local has_triggered_by_symbol_source = false
