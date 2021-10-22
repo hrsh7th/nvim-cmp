@@ -99,7 +99,8 @@ lua <<EOF
 
   -- Setup lspconfig.
   local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
-  require('lspconfig')[%YOUR_LSP_SERVER%].setup {
+  -- %YOUR_LSP_SERVER% is a string, e.g. 'gopls'. You can also use member access, e.g. `require('lspconfig').gopls`.
+  require('lspconfig').[%YOUR_LSP_SERVER%].setup {
     capabilities = capabilities
   }
 EOF
@@ -107,8 +108,8 @@ EOF
 
 ### I want to see  more sources!
 
+The list of `lspconfig` supported sources is [here](https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md).
 You can see the all of `nvim-cmp` sources [here](https://github.com/topics/nvim-cmp).
-
 
 Configuration options
 ====================
