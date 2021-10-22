@@ -309,9 +309,13 @@ custom_entries_view._insert = function(self, word)
     keymap.feedkeys('', 'n', function()
       local cursor = api.get_cursor()
       local length = vim.str_utfindex(string.sub(api.get_current_line(), self.offset, cursor[2]))
-      keymap.feedkeys(keymap.backspace(length) .. word, 'int', vim.schedule_wrap(function()
-        release()
-      end))
+      keymap.feedkeys(
+        keymap.backspace(length) .. word,
+        'int',
+        vim.schedule_wrap(function()
+          release()
+        end)
+      )
     end)
   end
 end
