@@ -51,7 +51,7 @@ view.open = function(self, ctx, sources)
     group_index = group_index + 1
 
     local group = vim.tbl_filter(function(s)
-      return (s:get_config().group or 0) == group_index
+      return (s:get_config().group or 1) == group_index
     end, sources)
 
     if #group == 0 then
