@@ -162,7 +162,7 @@ custom_entries_view.open = function(self, offset, entries)
 
   if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
     self:preselect(preselect)
-  elseif string.match(config.get().completion.completeopt, 'noinsert') then
+  elseif not string.match(config.get().completion.completeopt, 'noselect') then
     self:preselect(1)
   else
     self:draw()
