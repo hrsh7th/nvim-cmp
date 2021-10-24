@@ -10,7 +10,7 @@ local highlight = require('cmp.utils.highlight')
 
 -- TODO: https://github.com/neovim/neovim/pull/14661
 vim.cmd [[
-  augroup cmp
+  augroup ___cmp___
     autocmd!
     autocmd InsertEnter * lua require'cmp.utils.autocmd'.emit('InsertEnter')
     autocmd InsertLeave * lua require'cmp.utils.autocmd'.emit('InsertLeave')
