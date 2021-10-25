@@ -102,7 +102,7 @@ custom_entries_view.open = function(self, offset, entries)
   self.column_width = { abbr = 0, kind = 0, menu = 0 }
 
   -- Apply window options (that might be changed) on the custom completion menu.
-  self.entries_win:option('winblend', vim.opt.pumblend:get())
+  self.entries_win:option('winblend', vim.o.pumblend)
 
   local lines = {}
   local dedup = {}
@@ -165,7 +165,7 @@ custom_entries_view.open = function(self, offset, entries)
 
   if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
     self:preselect(preselect)
-  elseif string.match(config.get().completion.completeopt, 'noinsert') then
+  elseif not string.match(config.get().completion.completeopt, 'noselect') then
     self:preselect(1)
   else
     self:draw()
