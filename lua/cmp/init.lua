@@ -85,6 +85,11 @@ cmp.abort = function()
   end
 end
 
+---Suspend completion.
+cmp.suspend = function()
+  return cmp.core:suspend()
+end
+
 ---Select next item if possible
 cmp.select_next_item = function(option)
   option = option or {}
