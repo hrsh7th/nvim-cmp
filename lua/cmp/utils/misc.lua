@@ -29,6 +29,9 @@ misc.concat = function(list1, list2)
   return new_list
 end
 
+---The symbol to remove key in misc.merge.
+misc.none = vim.NIL
+
 ---Merge two tables recursively
 ---@generic T
 ---@param v1 T
@@ -48,6 +51,9 @@ misc.merge = function(v1, v2)
       end
     end
     return new_tbl
+  end
+  if v1 == misc.none then
+    return nil
   end
   if v1 == nil then
     return v2
