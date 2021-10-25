@@ -3,6 +3,7 @@ local source = require('cmp.source')
 local config = require('cmp.config')
 local autocmd = require('cmp.utils.autocmd')
 local keymap = require('cmp.utils.keymap')
+local misc = require('cmp.utils.misc')
 
 local cmp = {}
 
@@ -17,6 +18,7 @@ cmp.vim = require('cmp.types.vim')
 
 ---Export default config presets.
 cmp.config = {}
+cmp.config.disable = misc.none
 cmp.config.compare = require('cmp.config.compare')
 cmp.config.sources = require('cmp.config.sources')
 
