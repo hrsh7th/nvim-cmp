@@ -222,7 +222,7 @@ keymap.listen = setmetatable({
   cache = cache.new(),
 }, {
   __call = function(self, mode, keys_or_chars, callback)
-    local keys = keymap.to_keymap(keys_or_chars)
+    local keys = keymap.to_upper(keymap.to_keymap(keys_or_chars))
     local bufnr = vim.api.nvim_get_current_buf()
     local existing = keymap.find_map_by_lhs(mode, keys)
 
@@ -306,7 +306,7 @@ keymap.recursive = function(mode, lhs, rhs)
   rhs = keymap.to_upper(rhs)
   local fallback_lhs = ('<Plug>(cmp-utils-keymap-listen-lhs:%s)'):format(lhs)
   local new_rhs = string.gsub(rhs, '^' .. vim.pesc(keymap.to_upper(lhs)), fallback_lhs)
-  if new_rhs ~= rhs then
+  if not keymap.equals(new_rhs, rhs) then
     vim.api.nvim_buf_set_keymap(0, mode, fallback_lhs, lhs, {
       expr = false,
       noremap = true,
