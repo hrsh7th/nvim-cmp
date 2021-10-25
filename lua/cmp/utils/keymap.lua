@@ -255,7 +255,7 @@ keymap.listen = setmetatable({
 misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(id)
   local definition = keymap.listen.cache:get({ 'definition', id })
   if definition.mode == 'c' and vim.fn.getcmdtype() == '=' then
-    return vim.api.nvim_feedkeys(keymap.t(definition.fallback), 'i', true)
+    return vim.api.nvim_feedkeys(keymap.t(definition.fallback), 'it', true)
   end
   definition.callback(
     definition.keys,

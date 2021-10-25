@@ -9,6 +9,7 @@ spec.before = function()
     bdelete!
     enew!
     setlocal virtualedit=all
+    setlocal completeopt=menu,menuone,noselect
   ]])
 end
 
