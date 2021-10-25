@@ -276,12 +276,20 @@ keymap.evacuate = function(mode, lhs)
   -- Keep existing mapping as <Plug> mapping. We escape fisrt recursive key sequence. See `:help recursive_mapping`)
   local rhs = map.rhs
   if map.noremap == 0 and map.expr == 1 then
+    -- remap & expr mapping should evacuate as <Plug> mapping with solving recursive mapping.
     rhs = string.format('v:lua.cmp.utils.keymap.evacuate.expr("%s", "%s", "%s")', mode, str.escape(keymap.escape(lhs), { '"' }), str.escape(keymap.escape(rhs), { '"' }))
-  else
+  elseif map.noremap ~= 0 and map.expr == 1 then
+    -- noremap & expr mapping should always evacuate as <Plug> mapping.
+    rhs = rhs
+  elseif map.noremap == 0 then
+    -- remap & non-expr mapping should be checked if recursive or not.
     rhs = keymap.recursive(mode, lhs, rhs)
-    if rhs == map.rhs then
+    if rhs == map.rhs or map.noremap ~= 0 then
       return { keys = rhs, mode = 'it' .. (map.noremap == 1 and 'n' or '') }
     end
+  else
+    -- noremap & non-expr mapping doesn't need to evacuate.
+    return { keys = rhs, mode = 'it' .. (map.noremap == 1 and 'n' or '') }
   end
 
   local fallback = ('<Plug>(cmp-utils-keymap-evacuate-rhs:%s)'):format(map.lhs)
