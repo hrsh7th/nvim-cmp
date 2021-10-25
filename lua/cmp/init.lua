@@ -68,10 +68,6 @@ cmp.close = function()
     cmp.core:reset()
     vim.schedule(release)
     return true
-  elseif vim.fn.pumvisible() == 1 then
-    vim.fn.complete(1, {})
-    cmp.core:reset()
-    return true
   else
     return false
   end
@@ -83,9 +79,6 @@ cmp.abort = function()
     local release = cmp.core:suspend()
     cmp.core.view:abort()
     vim.schedule(release)
-    return true
-  elseif vim.fn.pumvisible() == 1 then
-    vim.api.nvim_select_popupmenu_item(-1, true, true, {})
     return true
   else
     return false

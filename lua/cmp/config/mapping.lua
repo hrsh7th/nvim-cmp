@@ -71,7 +71,9 @@ end
 mapping.select_next_item = function(option)
   return function(fallback)
     if not require('cmp').select_next_item(option) then
+      local release = require('cmp').core:suspend()
       fallback()
+      vim.schedule(release)
     end
   end
 end
@@ -80,7 +82,9 @@ end
 mapping.select_prev_item = function(option)
   return function(fallback)
     if not require('cmp').select_prev_item(option) then
+      local release = require('cmp').core:suspend()
       fallback()
+      vim.schedule(release)
     end
   end
 end

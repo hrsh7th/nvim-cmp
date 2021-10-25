@@ -255,12 +255,12 @@ keymap.listen = setmetatable({
 misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(id)
   local definition = keymap.listen.cache:get({ 'definition', id })
   if definition.mode == 'c' and vim.fn.getcmdtype() == '=' then
-    return vim.api.nvim_feedkeys(keymap.t(definition.fallback), 'i', true)
+    return vim.api.nvim_feedkeys(keymap.t(definition.fallback.keys), definition.fallback.mode, true)
   end
   definition.callback(
     definition.keys,
     misc.once(function()
-      vim.api.nvim_feedkeys(keymap.t(definition.fallback), 'it', true)
+      vim.api.nvim_feedkeys(keymap.t(definition.fallback.keys), definition.fallback.mode, true)
     end)
   )
   return keymap.t('<Ignore>')
@@ -269,7 +269,7 @@ end)
 ---Evacuate existing key mapping
 ---@param mode string
 ---@param lhs string
----@return string
+---@return { keys: string, mode: string }
 keymap.evacuate = function(mode, lhs)
   local map = keymap.find_map_by_lhs(mode, lhs)
 
@@ -283,6 +283,10 @@ keymap.evacuate = function(mode, lhs)
     end
   end
 
+  if rhs == map.rhs then
+    return { keys = rhs, mode = 'it' .. (map.noremap == 1 and 'n' or '') }
+  end
+
   local fallback = ('<Plug>(cmp-utils-keymap-evacuate-rhs:%s)'):format(map.lhs)
   vim.api.nvim_buf_set_keymap(0, mode, fallback, rhs, {
     expr = map.expr ~= 0,
@@ -291,7 +295,7 @@ keymap.evacuate = function(mode, lhs)
     silent = true,
     nowait = true,
   })
-  return fallback
+  return { keys = fallback, mode = 'it' }
 end
 misc.set(_G, { 'cmp', 'utils', 'keymap', 'evacuate', 'expr' }, function(mode, lhs, rhs)
   return keymap.t(keymap.recursive(mode, lhs, vim.api.nvim_eval(rhs)))
