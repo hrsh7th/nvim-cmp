@@ -5,15 +5,6 @@ local api = require('cmp.utils.api')
 
 local keymap = {}
 
----The mapping of vim notation and chars.
-keymap._table = {
-  ['<CR>'] = { '\n', '\r', '\r\n' },
-  ['<Tab>'] = { '\t' },
-  ['<BSlash>'] = { '\\' },
-  ['<Bar>'] = { '|' },
-  ['<Space>'] = { ' ' },
-}
-
 ---Shortcut for nvim_replace_termcodes
 ---@param keys string
 ---@return string
@@ -36,42 +27,40 @@ keymap.escape = function(keys)
   return keys
 end
 
----Return upper case key sequence.
+---Normalize key sequence.
 ---@param keys string
 ---@return string
-keymap.to_upper = function(keys)
-  local result = {}
-  local ctrl = false
-  for i = 1, #keys do
-    local c = string.sub(keys, i, i)
-    if c == '<' then
-      table.insert(result, c)
-      ctrl = true
-    elseif ctrl and c ~= '>' then
-      table.insert(result, string.upper(c))
-    elseif ctrl and c == '>' then
-      table.insert(result, c)
-      ctrl = false
-    else
-      table.insert(result, c)
+keymap.normalize = function(keys)
+  vim.api.nvim_set_keymap('t', '<Plug>(cmp.utils.keymap.normalize)', keys, {})
+  for _, map in ipairs(vim.api.nvim_get_keymap('t')) do
+    if map.lhs == '<Plug>(cmp.utils.keymap.normalize)' then
+      return map.rhs
     end
   end
-  return table.concat(result, '')
+  return keys
 end
 
 ---Return vim notation keymapping (simple conversion).
 ---@param s string
 ---@return string
-keymap.to_keymap = function(s)
-  return string.gsub(s, '.', function(c)
-    for key, chars in pairs(keymap._table) do
-      if vim.tbl_contains(chars, c) then
-        return key
+keymap.to_keymap = setmetatable({
+  ['<CR>'] = { '\n', '\r', '\r\n' },
+  ['<Tab>'] = { '\t' },
+  ['<BSlash>'] = { '\\' },
+  ['<Bar>'] = { '|' },
+  ['<Space>'] = { ' ' },
+}, {
+  __call = function(self, s)
+    return string.gsub(s, '.', function(c)
+      for key, chars in pairs(self) do
+        if vim.tbl_contains(chars, c) then
+          return key
+        end
       end
-    end
-    return c
-  end)
-end
+      return c
+    end)
+  end
+})
 
 ---Mode safe break undo
 keymap.undobreak = function()
@@ -222,7 +211,7 @@ keymap.listen = setmetatable({
   cache = cache.new(),
 }, {
   __call = function(self, mode, keys_or_chars, callback)
-    local keys = keymap.to_upper(keymap.to_keymap(keys_or_chars))
+    local keys = keymap.normalize(keymap.to_keymap(keys_or_chars))
     local bufnr = vim.api.nvim_get_current_buf()
     local existing = keymap.find_map_by_lhs(mode, keys)
 
@@ -312,9 +301,9 @@ end)
 ---@param rhs string
 ---@return string
 keymap.recursive = function(mode, lhs, rhs)
-  rhs = keymap.to_upper(rhs)
+  rhs = keymap.normalize(rhs)
   local fallback_lhs = ('<Plug>(cmp-utils-keymap-listen-lhs:%s)'):format(lhs)
-  local new_rhs = string.gsub(rhs, '^' .. vim.pesc(keymap.to_upper(lhs)), fallback_lhs)
+  local new_rhs = string.gsub(rhs, '^' .. vim.pesc(keymap.normalize(lhs)), fallback_lhs)
   if not keymap.equals(new_rhs, rhs) then
     vim.api.nvim_buf_set_keymap(0, mode, fallback_lhs, lhs, {
       expr = false,
