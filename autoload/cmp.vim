@@ -35,12 +35,9 @@ endfunction
 " cmp#unregister_source
 "
 function! cmp#unregister_source(id) abort
-  for [l:i, l:source] in s:sources
-    if l:source.id == a:id
-      call remove(s:sources, index(s:sources, l:source))
-      break
-    endif
-  endfor
+  if has_key(s:sources, a:id)
+    unlet s:sources[a:id]
+  endif
   call luaeval('require("cmp").unregister_source(_A)', a:id)
 endfunction
 
@@ -77,4 +74,3 @@ endfunction
 function! s:callback(id) abort
   return { ... -> luaeval('require("cmp.vim_source").on_callback(_A[1], _A[2])', [a:id, a:000]) }
 endfunction
-
