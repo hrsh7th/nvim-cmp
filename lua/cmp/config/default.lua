@@ -88,7 +88,7 @@ return function()
           cmp.close()
           vim.schedule(cmp.suspend())
           fallback()
-        end
+        end,
       }),
       ['<Up>'] = mapping({
         i = mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Select }),
@@ -97,7 +97,7 @@ return function()
           cmp.close()
           vim.schedule(cmp.suspend())
           fallback()
-        end
+        end,
       }),
       ['<C-n>'] = mapping(mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Insert }), { 'i', 'c' }),
       ['<C-p>'] = mapping(mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Insert }), { 'i', 'c' }),
