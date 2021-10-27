@@ -270,6 +270,9 @@ keymap.evacuate = function(mode, lhs)
   elseif map.noremap ~= 0 and map.expr == 1 then
     -- noremap & expr mapping should always evacuate as <Plug> mapping.
     rhs = rhs
+  elseif map.script == 1 then
+    -- script mapping should always evacuate as <Plug> mapping.
+    rhs = rhs
   elseif map.noremap == 0 then
     -- remap & non-expr mapping should be checked if recursive or not.
     rhs = keymap.recursive(mode, lhs, rhs)
