@@ -59,7 +59,7 @@ keymap.to_keymap = setmetatable({
       end
       return c
     end)
-  end
+  end,
 })
 
 ---Mode safe break undo
