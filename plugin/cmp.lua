@@ -28,7 +28,7 @@ misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'enter' }, function()
   if config.get().experimental.native_menu then
     return
   end
-  if vim.v.cmdtype ~= '=' then
+  if vim.v.cmdtype and vim.v.cmdtype ~= '=' then
     vim.cmd [[
       augroup cmp-cmdline
         autocmd!
@@ -43,7 +43,7 @@ misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'leave' }, function()
   if config.get().experimental.native_menu then
     return
   end
-  if vim.v.cmdtype ~= '=' then
+  if vim.v.cmdtype and vim.v.cmdtype ~= '=' then
     vim.cmd [[
       augroup cmp-cmdline
         autocmd!
