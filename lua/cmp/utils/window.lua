@@ -1,6 +1,7 @@
 local cache = require('cmp.utils.cache')
 local misc = require('cmp.utils.misc')
 local buffer = require('cmp.utils.buffer')
+local api = require('cmp.utils.api')
 
 ---@class cmp.WindowStyle
 ---@field public relative string
@@ -31,7 +32,6 @@ window.new = function()
   self.style = {}
   self.cache = cache.new()
   self.opt = {}
-  self.id = 0
   return self
 end
 
@@ -76,8 +76,6 @@ end
 ---Open window
 ---@param style cmp.WindowStyle
 window.open = function(self, style)
-  self.id = self.id + 1
-
   if style then
     self:set_style(style)
   end
@@ -146,29 +144,31 @@ window.update = function(self)
       self.swin2 = nil
     end
   end
+
+  -- In cmdline, vim does not redraw automatically.
+  if api.is_cmdline_mode() then
+    vim.api.nvim_win_call(self.win, function()
+      vim.cmd([[redraw]])
+    end)
+  end
 end
 
 ---Close window
 window.close = function(self)
-  local id = self.id
-  vim.schedule(function()
-    if id == self.id then
-      if self.win and vim.api.nvim_win_is_valid(self.win) then
-        if self.win and vim.api.nvim_win_is_valid(self.win) then
-          vim.api.nvim_win_hide(self.win)
-          self.win = nil
-        end
-        if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
-          vim.api.nvim_win_hide(self.swin1)
-          self.swin1 = nil
-        end
-        if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
-          vim.api.nvim_win_hide(self.swin2)
-          self.swin2 = nil
-        end
-      end
+  if self.win and vim.api.nvim_win_is_valid(self.win) then
+    if self.win and vim.api.nvim_win_is_valid(self.win) then
+      vim.api.nvim_win_hide(self.win)
+      self.win = nil
     end
-  end)
+    if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
+      vim.api.nvim_win_hide(self.swin1)
+      self.swin1 = nil
+    end
+    if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
+      vim.api.nvim_win_hide(self.swin2)
+      self.swin2 = nil
+    end
+  end
 end
 
 ---Return the window is visible or not.

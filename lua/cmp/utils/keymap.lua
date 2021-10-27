@@ -64,7 +64,7 @@ keymap.to_keymap = setmetatable({
 
 ---Mode safe break undo
 keymap.undobreak = function()
-  if api.is_cmdline_mode() then
+  if not api.is_insert_mode() then
     return ''
   end
   return keymap.t('<C-g>u')
@@ -72,7 +72,7 @@ end
 
 ---Mode safe join undo
 keymap.undojoin = function()
-  if api.is_cmdline_mode() then
+  if not api.is_insert_mode() then
     return ''
   end
   return keymap.t('<C-g>U')
@@ -244,12 +244,12 @@ keymap.listen = setmetatable({
 misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(id)
   local definition = keymap.listen.cache:get({ 'definition', id })
   if definition.mode == 'c' and vim.fn.getcmdtype() == '=' then
-    return vim.api.nvim_feedkeys(keymap.t(definition.fallback), 'it', true)
+    return vim.api.nvim_feedkeys(keymap.t(definition.fallback.keys), definition.fallback.mode, true)
   end
   definition.callback(
     definition.keys,
     misc.once(function()
-      vim.api.nvim_feedkeys(keymap.t(definition.fallback), 'it', true)
+      vim.api.nvim_feedkeys(keymap.t(definition.fallback.keys), definition.fallback.mode, true)
     end)
   )
   return keymap.t('<Ignore>')
@@ -258,18 +258,27 @@ end)
 ---Evacuate existing key mapping
 ---@param mode string
 ---@param lhs string
----@return string
+---@return { keys: string, mode: string }
 keymap.evacuate = function(mode, lhs)
   local map = keymap.find_map_by_lhs(mode, lhs)
 
   -- Keep existing mapping as <Plug> mapping. We escape fisrt recursive key sequence. See `:help recursive_mapping`)
   local rhs = map.rhs
-  if map.noremap == 0 then
-    if map.expr == 1 then
-      rhs = string.format('v:lua.cmp.utils.keymap.evacuate.expr("%s", "%s", "%s")', mode, str.escape(keymap.escape(lhs), { '"' }), str.escape(keymap.escape(rhs), { '"' }))
-    else
-      rhs = keymap.recursive(mode, lhs, rhs)
+  if map.noremap == 0 and map.expr == 1 then
+    -- remap & expr mapping should evacuate as <Plug> mapping with solving recursive mapping.
+    rhs = string.format('v:lua.cmp.utils.keymap.evacuate.expr("%s", "%s", "%s")', mode, str.escape(keymap.escape(lhs), { '"' }), str.escape(keymap.escape(rhs), { '"' }))
+  elseif map.noremap ~= 0 and map.expr == 1 then
+    -- noremap & expr mapping should always evacuate as <Plug> mapping.
+    rhs = rhs
+  elseif map.noremap == 0 then
+    -- remap & non-expr mapping should be checked if recursive or not.
+    rhs = keymap.recursive(mode, lhs, rhs)
+    if rhs == map.rhs or map.noremap ~= 0 then
+      return { keys = rhs, mode = 'it' .. (map.noremap == 1 and 'n' or '') }
     end
+  else
+    -- noremap & non-expr mapping doesn't need to evacuate.
+    return { keys = rhs, mode = 'it' .. (map.noremap == 1 and 'n' or '') }
   end
 
   local fallback = ('<Plug>(cmp-utils-keymap-evacuate-rhs:%s)'):format(map.lhs)
@@ -280,7 +289,7 @@ keymap.evacuate = function(mode, lhs)
     silent = true,
     nowait = true,
   })
-  return fallback
+  return { keys = fallback, mode = 'it' }
 end
 misc.set(_G, { 'cmp', 'utils', 'keymap', 'evacuate', 'expr' }, function(mode, lhs, rhs)
   return keymap.t(keymap.recursive(mode, lhs, vim.api.nvim_eval(rhs)))

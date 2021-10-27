@@ -9,10 +9,11 @@ api.is_insert_mode = function()
 end
 
 api.is_cmdline_mode = function()
-  return vim.tbl_contains({
+  local is_cmdline_mode = vim.tbl_contains({
     'c',
     'cv',
   }, vim.api.nvim_get_mode().mode)
+  return is_cmdline_mode and vim.fn.getcmdtype() ~= '='
 end
 
 api.is_select_mode = function()
@@ -41,16 +42,17 @@ api.get_cursor = function()
 end
 
 api.get_screen_cursor = function()
-  local cursor = api.get_cursor()
   if api.is_cmdline_mode() then
-    return cursor
+    return api.get_cursor()
   end
+  local cursor = api.get_cursor()
   local pos = vim.fn.screenpos(0, cursor[1], cursor[2] + 1)
   return { pos.row, pos.col - 1 }
 end
 
 api.get_cursor_before_line = function()
-  return string.sub(api.get_current_line(), 1, api.get_cursor()[2] + 1)
+  local cursor = api.get_cursor()
+  return string.sub(api.get_current_line(), 1, cursor[2] + 1)
 end
 
 return api

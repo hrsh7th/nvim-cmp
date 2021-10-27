@@ -70,10 +70,6 @@ cmp.close = function()
     cmp.core:reset()
     vim.schedule(release)
     return true
-  elseif vim.fn.pumvisible() == 1 then
-    vim.fn.complete(1, {})
-    cmp.core:reset()
-    return true
   else
     return false
   end
@@ -86,12 +82,14 @@ cmp.abort = function()
     cmp.core.view:abort()
     vim.schedule(release)
     return true
-  elseif vim.fn.pumvisible() == 1 then
-    vim.api.nvim_select_popupmenu_item(-1, true, true, {})
-    return true
   else
     return false
   end
+end
+
+---Suspend completion.
+cmp.suspend = function()
+  return cmp.core:suspend()
 end
 
 ---Select next item if possible
@@ -251,6 +249,9 @@ cmp.setup = setmetatable({
   end,
   buffer = function(c)
     config.set_buffer(c, vim.api.nvim_get_current_buf())
+  end,
+  cmdline = function(type, c)
+    config.set_cmdline(c, type)
   end,
 }, {
   __call = function(self, c)

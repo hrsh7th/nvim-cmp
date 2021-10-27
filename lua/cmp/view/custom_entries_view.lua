@@ -6,6 +6,8 @@ local types = require('cmp.types')
 local keymap = require('cmp.utils.keymap')
 local api = require('cmp.utils.api')
 
+local SIDE_PADDING = 1
+
 ---@class cmp.CustomEntriesView
 ---@field private entries_win cmp.Window
 ---@field private offset number
@@ -50,7 +52,7 @@ custom_entries_view.new = function()
         local e = self.entries[i + 1]
         if e then
           local v = e:get_view(self.offset)
-          local o = 1
+          local o = SIDE_PADDING
           local a = 0
           for _, field in ipairs(fields) do
             if field == types.cmp.ItemField.Abbr then
@@ -133,6 +135,7 @@ custom_entries_view.open = function(self, offset, entries)
   local height = vim.api.nvim_get_option('pumheight')
   height = height == 0 and #self.entries or height
   height = math.min(height, #self.entries)
+
   if (vim.o.lines - pos[1]) <= 8 and pos[1] - 8 > 0 then
     height = math.min(height, pos[1] - 1)
     pos[1] = pos[1] - height - 1
@@ -151,8 +154,8 @@ custom_entries_view.open = function(self, offset, entries)
   self.entries_win:open({
     relative = 'editor',
     style = 'minimal',
-    row = row,
-    col = col,
+    row = math.max(0, row),
+    col = math.max(0, col),
     width = width,
     height = height,
     zindex = 1001,
@@ -196,16 +199,22 @@ custom_entries_view.draw = function(self)
     if e then
       local view = e:get_view(self.offset)
       local text = {}
-      table.insert(text, ' ')
+      table.insert(text, string.rep(' ', SIDE_PADDING))
       for _, field in ipairs(fields) do
         table.insert(text, view[field].text)
         table.insert(text, string.rep(' ', 1 + self.column_width[field] - view[field].width))
       end
-      table.insert(text, ' ')
+      table.insert(text, string.rep(' ', SIDE_PADDING))
       table.insert(texts, table.concat(text, ''))
     end
   end
   vim.api.nvim_buf_set_lines(self.entries_win:get_buffer(), topline, botline, false, texts)
+
+  if api.is_cmdline_mode() then
+    vim.api.nvim_win_call(self.entries_win.win, function()
+      vim.cmd([[redraw]])
+    end)
+  end
 end
 
 custom_entries_view.visible = function(self)
@@ -282,20 +291,33 @@ custom_entries_view._select = function(self, cursor, option)
   vim.api.nvim_win_set_cursor(self.entries_win.win, { math.max(cursor, 1), is_insert and 0 or 1 })
 
   if is_insert then
-    self:_insert(self.entries[cursor] and self.entries[cursor]:get_vim_item(self.offset).word or self.prefix)
+    self:_insert(self.entries[cursor] and self.entries[cursor]:get_vim_item(self.offset).word or self.prefix or '')
   end
+
   self.entries_win:update()
   self:draw()
   self.event:emit('change')
 end
 
 custom_entries_view._insert = function(self, word)
-  keymap.feedkeys('', 'n', function()
-    local release = require('cmp').core:suspend()
+  if api.is_cmdline_mode() then
     local cursor = api.get_cursor()
     local length = vim.str_utfindex(string.sub(api.get_current_line(), self.offset, cursor[2]))
-    keymap.feedkeys(keymap.backspace(length) .. word, 'int', vim.schedule_wrap(release))
-  end)
+    vim.api.nvim_feedkeys(keymap.backspace(length) .. word, 'int', true)
+  else
+    local release = require('cmp').core:suspend()
+    keymap.feedkeys('', 'n', function()
+      local cursor = api.get_cursor()
+      local length = vim.str_utfindex(string.sub(api.get_current_line(), self.offset, cursor[2]))
+      keymap.feedkeys(
+        keymap.backspace(length) .. word,
+        'int',
+        vim.schedule_wrap(function()
+          release()
+        end)
+      )
+    end)
+  end
 end
 
 return custom_entries_view

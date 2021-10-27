@@ -5,12 +5,12 @@ local misc = {}
 ---@return function
 misc.once = function(callback)
   local done = false
-  return function()
+  return function(...)
     if done then
       return
     end
     done = true
-    callback()
+    callback(...)
   end
 end
 

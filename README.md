@@ -44,6 +44,8 @@ call plug#begin(s:plug_dir)
 Plug 'neovim/nvim-lspconfig'
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-buffer'
+Plug 'hrsh7th/cmp-path'
+Plug 'hrsh7th/cmp-cmdline'
 Plug 'hrsh7th/nvim-cmp'
 
 " For vsnip users.
@@ -80,11 +82,14 @@ lua <<EOF
       end,
     },
     mapping = {
-      ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-      ['<C-f>'] = cmp.mapping.scroll_docs(4),
-      ['<C-Space>'] = cmp.mapping.complete(),
-      ['<C-e>'] = cmp.mapping.close(),
+      ['<C-d>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
+      ['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
+      ['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
       ['<C-y>'] = cmp.config.disable, -- If you want to remove the default `<C-y>` mapping, You can specify `cmp.config.disable` value.
+      ['<C-e>'] = cmp.mapping({
+        i = cmp.mapping.abort(),
+        c = cmp.mapping.close(),
+      }),
       ['<CR>'] = cmp.mapping.confirm({ select = true }),
     },
     sources = cmp.config.sources({
@@ -95,6 +100,22 @@ lua <<EOF
       -- { name = 'snippy' }, -- For snippy users.
     }, {
       { name = 'buffer' },
+    })
+  })
+
+  -- Use buffer source for `/`.
+  cmp.setup.cmdline('/', {
+    sources = {
+      { name = 'buffer' }
+    }
+  })
+
+  -- Use cmdline & path source for ':'.
+  cmp.setup.cmdline(':', {
+    sources = cmp.config.sources({
+      { name = 'path' }
+    }, {
+      { name = 'cmdline' }
     })
   })
 
@@ -125,6 +146,7 @@ If you want to remove an option, you can set it to `false` instead.
 
 Built in helper `cmd.mappings` are:
 
+- *cmp.mapping(...)*
 - *cmp.mapping.select_prev_item({ cmp.SelectBehavior.{Insert,Select} } })*
 - *cmp.mapping.select_next_item({ cmp.SelectBehavior.{Insert,Select} })*
 - *cmp.mapping.scroll_docs(number)*
@@ -133,7 +155,7 @@ Built in helper `cmd.mappings` are:
 - *cmp.mapping.abort()*
 - *cmp.mapping.confirm({ select = bool, behavior = cmp.ConfirmBehavior.{Insert,Replace} })*
 
-You can configure `nvim-cmp` to use these `cmd.mappings` like this:
+You can configure `nvim-cmp` to use these `cmd.mapping` like this:
 
 ```lua
 mapping = {
@@ -159,6 +181,17 @@ mapping = {
   ...
   ['<Tab>'] = cmp.mapping(cmp.mapping.select_next_item(), { 'i', 's' })
   ...
+}
+```
+
+One more addition, the mapping mode can be specified by table key. It's useful to specify different function for each modes.
+
+```lua
+mapping = {
+  ['<CR>'] = cmp.mapping({
+    i = cmp.mapping.confirm({ select = true }),
+    c = cmp.mapping.confirm({ select = false }),
+  })
 }
 ```
 

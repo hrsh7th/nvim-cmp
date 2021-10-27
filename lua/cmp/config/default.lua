@@ -81,12 +81,28 @@ return function()
     event = {},
 
     mapping = {
-      ['<Down>'] = mapping(mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Select }), { 'i' }),
-      ['<Up>'] = mapping(mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Select }), { 'i' }),
-      ['<C-n>'] = mapping(mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Insert }), { 'i' }),
-      ['<C-p>'] = mapping(mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Insert }), { 'i' }),
-      ['<C-y>'] = mapping(mapping.confirm({ select = false }), { 'i' }),
-      ['<C-e>'] = mapping(mapping.abort(), { 'i' }),
+      ['<Down>'] = mapping({
+        i = mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Select }),
+        c = function(fallback)
+          local cmp = require('cmp')
+          cmp.close()
+          vim.schedule(cmp.suspend())
+          fallback()
+        end,
+      }),
+      ['<Up>'] = mapping({
+        i = mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Select }),
+        c = function(fallback)
+          local cmp = require('cmp')
+          cmp.close()
+          vim.schedule(cmp.suspend())
+          fallback()
+        end,
+      }),
+      ['<C-n>'] = mapping(mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Insert }), { 'i', 'c' }),
+      ['<C-p>'] = mapping(mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Insert }), { 'i', 'c' }),
+      ['<C-y>'] = mapping.confirm({ select = false }),
+      ['<C-e>'] = mapping.abort(),
     },
 
     formatting = {
