@@ -30,13 +30,15 @@ misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'enter' }, function()
   end
   local cmdtype = vim.fn.expand('<afile>')
   if cmdtype ~= '=' then
-    vim.cmd [[
-      augroup cmp-cmdline
-        autocmd!
-        autocmd CmdlineChanged * lua require'cmp.utils.autocmd'.emit('TextChanged')
-      augroup END
-    ]]
-    require('cmp.utils.autocmd').emit('InsertEnter')
+    if api.is_cmdline_mode() then
+      vim.cmd [[
+        augroup cmp-cmdline
+          autocmd!
+          autocmd CmdlineChanged * lua require'cmp.utils.autocmd'.emit('TextChanged')
+        augroup END
+      ]]
+      require('cmp.utils.autocmd').emit('InsertEnter')
+    end
   end
 end)
 
