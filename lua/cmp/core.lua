@@ -151,7 +151,7 @@ core.prepare = function(self)
 end
 
 ---Check auto-completion
-core.on_change = function(self, event)
+core.on_change = function(self, trigger_event)
   local ignore = false
   ignore = ignore or self.suspending
   ignore = ignore or (vim.fn.pumvisible() == 1 and (vim.v.completed_item).word)
@@ -161,14 +161,14 @@ core.on_change = function(self, event)
     return
   end
 
-  self:autoindent(event, function()
+  self:autoindent(trigger_event, function()
     local ctx = self:get_context({ reason = types.cmp.ContextReason.Auto })
     debug.log(('ctx: `%s`'):format(ctx.cursor_before_line))
     if ctx:changed(ctx.prev_context) then
       self.view:on_change()
       debug.log('changed')
 
-      if vim.tbl_contains(config.get().completion.autocomplete or {}, event) then
+      if vim.tbl_contains(config.get().completion.autocomplete or {}, trigger_event) then
         self:complete(ctx)
       else
         self.filter.timeout = THROTTLE_TIME
@@ -193,31 +193,36 @@ core.on_moved = function(self)
 end
 
 ---Check autoindent
----@param event cmp.TriggerEvent
+---@param trigger_event cmp.TriggerEvent
 ---@param callback function
-core.autoindent = function(self, event, callback)
-  if event == types.cmp.TriggerEvent.TextChanged then
-    local cursor_before_line = api.get_cursor_before_line()
-    local prefix = pattern.matchstr('[^[:blank:]]\\+$', cursor_before_line)
-    if prefix then
-      for _, key in ipairs(vim.split(vim.bo.indentkeys, ',')) do
-        if vim.tbl_contains({ '=' .. prefix, '0=' .. prefix }, key) then
-          local release = self:suspend()
-          vim.schedule(function()
-            if cursor_before_line == api.get_cursor_before_line() then
-              local indentkeys = vim.bo.indentkeys
-              vim.bo.indentkeys = indentkeys .. ',!^F'
-              keymap.feedkeys(keymap.t('<C-f>'), 'n', function()
-                vim.bo.indentkeys = indentkeys
-                release()
-                callback()
-              end)
-            else
+core.autoindent = function(self, trigger_event, callback)
+  if trigger_event ~= types.cmp.TriggerEvent.TextChanged then
+    return callback()
+  end
+  if not api.is_insert_mode()  then
+    return callback()
+  end
+
+  local cursor_before_line = api.get_cursor_before_line()
+  local prefix = pattern.matchstr('[^[:blank:]]\\+$', cursor_before_line)
+  if prefix then
+    for _, key in ipairs(vim.split(vim.bo.indentkeys, ',')) do
+      if vim.tbl_contains({ '=' .. prefix, '0=' .. prefix }, key) then
+        local release = self:suspend()
+        vim.schedule(function()
+          if cursor_before_line == api.get_cursor_before_line() then
+            local indentkeys = vim.bo.indentkeys
+            vim.bo.indentkeys = indentkeys .. ',!^F'
+            keymap.feedkeys(keymap.t('<C-f>'), 'n', function()
+              vim.bo.indentkeys = indentkeys
+              release()
               callback()
-            end
-          end)
-          return
-        end
+            end)
+          else
+            callback()
+          end
+        end)
+        return
       end
     end
   end
