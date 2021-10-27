@@ -414,10 +414,6 @@ cmp.setup {
 }
 ```
 
-#### event.on_confirm_done (type: fun(entry: cmp.Entry))
-
-A callback function called when the item is confirmed.
-
 #### experimental.native_menu (type: boolean)
 
 Use vim's native completion menu instead of custom floating menu.
@@ -475,6 +471,12 @@ Programatic API
 ====================
 
 You can use the following APIs.
+
+#### `cmp.event:on(name: string, callback: string)`
+
+Subscribe the following events.
+
+- `confirm_done`
 
 #### `cmp.visible()`
 
