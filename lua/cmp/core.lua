@@ -214,10 +214,9 @@ core.autoindent = function(self, trigger_event, callback)
         local release = self:suspend()
         vim.schedule(function()
           if cursor_before_line == api.get_cursor_before_line() then
-            local indentkeys = vim.bo.indentkeys
-            vim.bo.indentkeys = indentkeys .. ',!^F'
-            keymap.feedkeys(keymap.t('<C-f>'), 'n', function()
-              vim.bo.indentkeys = indentkeys
+            keymap.feedkeys(keymap.t('<Cmd>set indentkeys=%s<CR>'):format('!^F'), 'n')
+            keymap.feedkeys(keymap.t('<C-f>'):format('!^F'), 'n')
+            keymap.feedkeys(keymap.t('<Cmd>set indentkeys=%s<CR>'):format(vim.bo.indentkeys or ''), 'n', function()
               release()
               callback()
             end)
