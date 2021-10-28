@@ -101,27 +101,31 @@ return function()
       }),
       ['<Tab>'] = mapping({
         c = function(fallback)
-          local c = require('cmp.config')
           local cmp = require('cmp')
           if cmp.visible() then
             cmp.select_next_item()
-          elseif not c.get().experimental.native_menu then
-            cmp.complete()
           else
-            fallback()
+            local sources = cmp.core:get_sources()
+            if #sources > 0 and not require('cmp.config').get().experimental.native_menu then
+              cmp.complete()
+            else
+              fallback()
+            end
           end
         end
       }),
       ['<S-Tab>'] = mapping({
         c = function(fallback)
-          local c = require('cmp.config')
           local cmp = require('cmp')
           if cmp.visible() then
             cmp.select_prev_item()
-          elseif not c.get().experimental.native_menu then
-            cmp.complete()
           else
-            fallback()
+            local sources = cmp.core:get_sources()
+            if #sources > 0 and not require('cmp.config').get().experimental.native_menu then
+              cmp.complete()
+            else
+              fallback()
+            end
           end
         end
       }),
