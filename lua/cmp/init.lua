@@ -22,6 +22,9 @@ cmp.config.disable = misc.none
 cmp.config.compare = require('cmp.config.compare')
 cmp.config.sources = require('cmp.config.sources')
 
+---Expose event
+cmp.event = cmp.core.event
+
 ---Export mapping
 cmp.mapping = require('cmp.config.mapping')
 

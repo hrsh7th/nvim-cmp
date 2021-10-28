@@ -69,7 +69,6 @@ cmp.ItemField.Menu = 'menu'
 ---@field public sorting cmp.SortingConfig
 ---@field public formatting cmp.FormattingConfig
 ---@field public snippet cmp.SnippetConfig
----@field public event cmp.EventConfig
 ---@field public mapping table<string, fun(core: cmp.Core, fallback: function)>
 ---@field public sources cmp.SourceConfig[]
 ---@field public experimental cmp.ExperimentalConfig
@@ -102,9 +101,6 @@ cmp.ItemField.Menu = 'menu'
 
 ---@class cmp.SnippetConfig
 ---@field public expand fun(args: cmp.SnippetExpansionParams)
-
----@class cmp.EventConfig
----@field on_confirm_done function(e: cmp.Entry)
 
 ---@class cmp.ExperimentalConfig
 ---@field public native_menu boolean

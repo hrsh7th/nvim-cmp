@@ -10,6 +10,7 @@ local misc = require('cmp.utils.misc')
 local config = require('cmp.config')
 local types = require('cmp.types')
 local api = require('cmp.utils.api')
+local event = require('cmp.utils.event')
 
 local SOURCE_TIMEOUT = 500
 local THROTTLE_TIME = 120
@@ -21,6 +22,7 @@ local DEBOUNCE_TIME = 20
 ---@field public sources cmp.Source[]
 ---@field public sources_by_name table<string, cmp.Source>
 ---@field public context cmp.Context
+---@field public event cmp.Event
 local core = {}
 
 core.new = function()
@@ -29,6 +31,7 @@ core.new = function()
   self.sources = {}
   self.sources_by_name = {}
   self.context = context.new()
+  self.event = event.new()
   self.view = view.new()
   self.view.event:on('keymap', function(...)
     self:on_keymap(...)
@@ -403,7 +406,8 @@ core.confirm = function(self, e, option, callback)
         end
         e:execute(vim.schedule_wrap(function()
           release()
-
+          self.event:emit('confirm_done', e)
+          --For backward compatibility
           if config.get().event.on_confirm_done then
             config.get().event.on_confirm_done(e)
           end

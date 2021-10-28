@@ -99,6 +99,32 @@ return function()
           fallback()
         end,
       }),
+      ['<Tab>'] = mapping({
+        c = function(fallback)
+          local c = require('cmp.config')
+          local cmp = require('cmp')
+          if cmp.visible() then
+            cmp.select_next_item()
+          elseif not c.get().experimental.native_menu then
+            cmp.complete()
+          else
+            fallback()
+          end
+        end
+      }),
+      ['<S-Tab>'] = mapping({
+        c = function(fallback)
+          local c = require('cmp.config')
+          local cmp = require('cmp')
+          if cmp.visible() then
+            cmp.select_prev_item()
+          elseif not c.get().experimental.native_menu then
+            cmp.complete()
+          else
+            fallback()
+          end
+        end
+      }),
       ['<C-n>'] = mapping(mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Insert }), { 'i', 'c' }),
       ['<C-p>'] = mapping(mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Insert }), { 'i', 'c' }),
       ['<C-y>'] = mapping.confirm({ select = false }),
