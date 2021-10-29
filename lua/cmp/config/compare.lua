@@ -30,6 +30,22 @@ compare.score = function(entry1, entry2)
   end
 end
 
+-- recently_used
+compare.recently_used = setmetatable({
+  records = {},
+  add_entry = function(self, e)
+    self.records[e.completion_item.label] = vim.loop.now()
+  end
+}, {
+  __call = function(self, entry1, entry2)
+    local t1 = self.records[entry1.completion_item.label] or -1
+    local t2 = self.records[entry2.completion_item.label] or -1
+    if t1 ~= t2 then
+      return t1 > t2
+    end
+  end
+})
+
 -- kind
 compare.kind = function(entry1, entry2)
   local kind1 = entry1:get_kind()

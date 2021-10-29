@@ -44,6 +44,12 @@ cmp.unregister_source = function(id)
   cmp.core:unregister_source(id)
 end
 
+---Get current configuration.
+---@return cmp.ConfigSchema
+cmp.get_config = function()
+  return require('cmp.config').get()
+end
+
 ---Invoke completion manually
 cmp.complete = function()
   cmp.core:complete(cmp.core:get_context({ reason = cmp.ContextReason.Manual }))
@@ -262,7 +268,6 @@ cmp.setup = setmetatable({
   end,
 })
 
----Handle events
 autocmd.subscribe('InsertEnter', function()
   -- Avoid unexpected mode detection (mode() function will returns `normal mode` on the InsertEnter event.)
   vim.schedule(function()
@@ -288,6 +293,10 @@ end)
 autocmd.subscribe('InsertLeave', function()
   cmp.core:reset()
   cmp.core.view:close()
+end)
+
+cmp.event:on('confirm_done', function(e)
+  cmp.config.compare.recently_used:add_entry(e)
 end)
 
 return cmp

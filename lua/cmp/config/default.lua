@@ -47,34 +47,14 @@ return function()
     sorting = {
       priority_weight = 2,
       comparators = {
-        function(e1, e2)
-          local diff
-          diff = compare.offset(e1, e2)
-          if diff ~= nil then
-            return diff
-          end
-          diff = compare.exact(e1, e2)
-          if diff ~= nil then
-            return diff
-          end
-          diff = compare.score(e1, e2)
-          if diff ~= nil then
-            return diff
-          end
-          diff = compare.kind(e1, e2)
-          if diff ~= nil then
-            return diff
-          end
-          diff = compare.sort_text(e1, e2)
-          if diff ~= nil then
-            return diff
-          end
-          diff = compare.length(e1, e2)
-          if diff ~= nil then
-            return diff
-          end
-          return compare.order(e1, e2)
-        end,
+        compare.offset,
+        compare.exact,
+        compare.score,
+        compare.recently_used,
+        compare.kind,
+        compare.sort_text,
+        compare.length,
+        compare.order,
       },
     },
 
@@ -102,7 +82,7 @@ return function()
       ['<Tab>'] = mapping({
         c = function(fallback)
           local cmp = require('cmp')
-          if #cmp.core:get_sources() > 0 and not require('cmp.config').get().experimental.native_menu then
+          if #cmp.core:get_sources() > 0 and not cmp.get_config().experimental.native_menu then
             if cmp.visible() then
               cmp.select_next_item()
             else
@@ -116,7 +96,7 @@ return function()
       ['<S-Tab>'] = mapping({
         c = function(fallback)
           local cmp = require('cmp')
-          if #cmp.core:get_sources() > 0 and not require('cmp.config').get().experimental.native_menu then
+          if #cmp.core:get_sources() > 0 and not cmp.get_config().experimental.native_menu then
             if cmp.visible() then
               cmp.select_prev_item()
             else

@@ -360,6 +360,7 @@ Default:
   cmp.config.compare.offset,
   cmp.config.compare.exact,
   cmp.config.compare.score,
+  cmp.config.compare.recently_used,
   cmp.config.compare.kind,
   cmp.config.compare.sort_text,
   cmp.config.compare.length,
@@ -477,6 +478,10 @@ You can use the following APIs.
 Subscribe the following events.
 
 - `confirm_done`
+
+#### `cmp.get_config()`
+
+Return the current configuration.
 
 #### `cmp.visible()`
 
