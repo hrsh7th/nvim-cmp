@@ -207,16 +207,16 @@ core.autoindent = function(self, trigger_event, callback)
   end
 
   local cursor_before_line = api.get_cursor_before_line()
-  local prefix = pattern.matchstr('[^[:blank:]]\\+$', cursor_before_line)
-  if prefix then
+  local prefix = pattern.matchstr('[^[:blank:]]\\+$', cursor_before_line) or ''
+  if #prefix > 0 then
     for _, key in ipairs(vim.split(vim.bo.indentkeys, ',')) do
       if vim.tbl_contains({ '=' .. prefix, '0=' .. prefix }, key) then
         local release = self:suspend()
         vim.schedule(function()
           if cursor_before_line == api.get_cursor_before_line() then
-            keymap.feedkeys(keymap.t('<Cmd>set indentkeys=%s<CR>'):format('!^F'), 'n')
-            keymap.feedkeys(keymap.t('<C-f>'):format('!^F'), 'n')
-            keymap.feedkeys(keymap.t('<Cmd>set indentkeys=%s<CR>'):format(vim.bo.indentkeys or ''), 'n', function()
+            keymap.feedkeys(keymap.t('<Cmd>setlocal cindent<CR>'), 'n')
+            keymap.feedkeys(keymap.t('<C-f>'), 'n')
+            keymap.feedkeys(keymap.t('<Cmd>setlocal %scindent<CR>'):format(vim.bo.cindent and '' or 'no'), 'n', function()
               release()
               callback()
             end)
