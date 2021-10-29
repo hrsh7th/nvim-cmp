@@ -1,4 +1,5 @@
 local cache = require('cmp.utils.cache')
+local keymap = require('cmp.utils.keymap')
 local misc = require('cmp.utils.misc')
 local api = require('cmp.utils.api')
 
@@ -49,13 +50,13 @@ config.get = function()
     local type = vim.fn.getcmdtype()
     local cmdline = config.cmdline[type] or { revision = 1, sources = {} }
     return config.cache:ensure({ 'get_cmdline', type, global.revision or 0, cmdline.revision or 0 }, function()
-      return misc.merge(cmdline, global)
+      return misc.merge(config.normalize(cmdline), config.normalize(global))
     end)
   else
     local bufnr = vim.api.nvim_get_current_buf()
     local buffer = config.buffers[bufnr] or { revision = 1 }
     return config.cache:ensure({ 'get_buffer', bufnr, global.revision or 0, buffer.revision or 0 }, function()
-      return misc.merge(buffer, global)
+      return misc.merge(config.normalize(buffer), config.normalize(global))
     end)
   end
 end
@@ -88,6 +89,18 @@ config.get_source_config = function(name)
     end
     return nil
   end)
+end
+
+---Normalize mapping key
+---@param c cmp.ConfigSchema
+---@return cmp.ConfigSchema
+config.normalize = function(c)
+  if c.mapping then
+    for k, v in pairs(c.mapping) do
+      c.mapping[keymap.normalize(k)] = v
+    end
+  end
+  return c
 end
 
 return config
