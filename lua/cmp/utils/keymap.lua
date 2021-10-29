@@ -228,7 +228,6 @@ keymap.listen = setmetatable({
       expr = false,
       noremap = true,
       silent = true,
-      nowait = true,
     })
 
     self.cache:set({ 'definition', self.cache:get({ 'id', mode, bufnr, keys }) }, {
@@ -289,8 +288,7 @@ keymap.evacuate = function(mode, lhs)
     expr = map.expr ~= 0,
     noremap = map.noremap ~= 0,
     script = map.script ~= 0,
-    silent = true,
-    nowait = true,
+    silent = mode ~= 'c', -- I can't understand but it solves the #427 (wilder.nvim's mapping does not work if silent=true in cmdline mode...)
   })
   return { keys = fallback, mode = 'it' }
 end
@@ -312,7 +310,6 @@ keymap.recursive = function(mode, lhs, rhs)
       expr = false,
       noremap = true,
       silent = true,
-      nowait = true,
     })
   end
   return new_rhs
