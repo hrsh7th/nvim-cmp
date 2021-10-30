@@ -572,6 +572,23 @@ cmp.setup {
 }
 ```
 
+#### I don't use a snippet plugin.
+
+At the moment, nvim-cmp requires a snippet plugin to function correctly.
+You need to specify one in `snippet`:
+
+```lua
+snippet = {
+  -- REQUIRED - you must specify at least snippet plugin
+  expand = function(args)
+    vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+    -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+    -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+    -- require'snippy'.expand_snippet(args.body) -- For `snippy` users.
+  end,
+}
+```
+
 
 #### I dislike auto-completion
 
