@@ -46,7 +46,7 @@ misc.merge = function(v1, v2)
       new_tbl[k] = misc.merge(v1[k], v)
     end
     for k, v in pairs(v1) do
-      if v2[k] == nil then
+      if v2[k] == nil and v ~= misc.none then
         new_tbl[k] = v
       end
     end
@@ -56,7 +56,11 @@ misc.merge = function(v1, v2)
     return nil
   end
   if v1 == nil then
-    return v2
+    if v2 == misc.none then
+      return nil
+    else
+      return v2
+    end
   end
   if v1 == true then
     if merge2 then

@@ -33,5 +33,19 @@ describe('misc', function()
       },
     })
     assert.are.equal(merged.a, nil)
+
+    merged = misc.merge({
+      a = misc.none,
+    }, {
+      a = nil,
+    })
+    assert.are.equal(merged.a, nil)
+
+    merged = misc.merge({
+      a = nil,
+    }, {
+      a = misc.none,
+    })
+    assert.are.equal(merged.a, nil)
   end)
 end)
