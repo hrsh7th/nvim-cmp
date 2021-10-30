@@ -22,6 +22,8 @@ mapping = setmetatable({}, {
             return invoke.c(fallback)
           elseif api.is_select_mode() and invoke.s then
             return invoke.s(fallback)
+          elseif api.is_visual_mode() and invoke.x then
+            return invoke.x(fallback)
           else
             fallback()
           end

@@ -23,6 +23,13 @@ api.is_select_mode = function()
   }, vim.api.nvim_get_mode().mode)
 end
 
+api.is_visual_mode = function()
+  return vim.tbl_contains({
+    'v',
+    'V',
+  }, vim.api.nvim_get_mode().mode)
+end
+
 api.is_suitable_mode = function()
   return api.is_insert_mode() or api.is_cmdline_mode()
 end
