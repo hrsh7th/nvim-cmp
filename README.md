@@ -74,7 +74,7 @@ lua <<EOF
 
   cmp.setup({
     snippet = {
-      -- REQUIRED - you must specify at least snippet plugin
+      -- REQUIRED - you must specify a snippet engine
       expand = function(args)
         vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
         -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
@@ -574,12 +574,12 @@ cmp.setup {
 
 #### I don't use a snippet plugin.
 
-At the moment, nvim-cmp requires a snippet plugin to function correctly.
-You need to specify one in `snippet`:
+At the moment, nvim-cmp requires a snippet engine to function correctly.
+You need to specify one in `snippet`.
 
 ```lua
 snippet = {
-  -- REQUIRED - you must specify at least snippet plugin
+  -- REQUIRED - you must specify at least snippet engine
   expand = function(args)
     vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
     -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
