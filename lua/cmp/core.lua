@@ -232,7 +232,7 @@ core.complete = function(self, ctx)
   end
   self:set_context(ctx)
 
-  for _, s in ipairs(self:get_sources({ source.SourceStatus.WAITING, source.SourceStatus.COMPLETED })) do
+  for _, s in ipairs(self:get_sources({ source.SourceStatus.WAITING, source.SourceStatus.FETCHING, source.SourceStatus.COMPLETED })) do
     s:complete(
       ctx,
       (function(src)
