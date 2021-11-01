@@ -96,9 +96,10 @@ keymap.listen = function(mode, lhs, callback)
   lhs = keymap.normalize(keymap.to_keymap(lhs))
 
   local existing = keymap.get_mapping(mode, lhs)
-  if string.find(existing.rhs, 'v:lua.cmp.utils.keymap', 1, true) then
+  if string.match(existing.rhs, vim.pesc('v:lua.cmp.utils.keymap')) then
     return
   end
+
   local bufnr = existing.buffer and vim.api.nvim_get_current_buf() or -1
   local fallback = keymap.evacuate(bufnr, mode, lhs)
   keymap.set_map(bufnr, mode, lhs, function()
@@ -152,6 +153,7 @@ keymap.get_mapping = function(mode, lhs)
       }
     end
   end
+
   return {
     lhs = lhs,
     rhs = lhs,
@@ -218,50 +220,42 @@ end
 keymap.recursive = function(bufnr, mode, lhs, rhs)
   rhs = keymap.normalize(rhs)
 
-  local recursive = ('<Plug>(cmp.utils.keymap.recursive:%s)'):format(lhs)
-  local new_rhs = string.gsub(rhs, '^' .. vim.pesc(keymap.normalize(lhs)), recursive)
-  if not keymap.equals(new_rhs, rhs) then
-    keymap.set_map(bufnr, mode, recursive, lhs, {
+  local recursive_lhs = ('<Plug>(cmp.utils.keymap.recursive:%s)'):format(lhs)
+  local recursive_rhs = string.gsub(rhs, '^' .. vim.pesc(keymap.normalize(lhs)), recursive_lhs)
+  if not keymap.equals(recursive_rhs, rhs) then
+    keymap.set_map(bufnr, mode, recursive_lhs, lhs, {
       expr = false,
       noremap = true,
       silent = true,
     })
   end
-  return new_rhs
+  return recursive_rhs
 end
 
 ---Set keymapping
-keymap.set_map = function(bufnr, mode, lhs, rhs, opts)
-  rhs = keymap.resolve(rhs, opts)
-  if bufnr == -1 then
-    vim.api.nvim_set_keymap(mode, lhs, rhs, opts)
-  else
-    vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, opts)
-  end
-end
-
----Resolve rhs string
----@param callback function
----@param opts any
----@return string
-keymap.resolve = setmetatable({
-  callbacks = {},
+keymap.set_map = setmetatable({
+  callbacks = {}
 }, {
-  __call = function(self, rhs, opts)
-    if type(rhs) == 'string' then
-      return rhs
+  __call = function(self, bufnr, mode, lhs, rhs, opts)
+    if type(rhs) == 'function' then
+      local id = misc.id('cmp.utils.keymap.set_map')
+      self.callbacks[id] = rhs
+      if opts.expr then
+        rhs = ('v:lua.cmp.utils.keymap.set_map(%s)'):format(id)
+      else
+        rhs = ('<Cmd>call v:lua.cmp.utils.keymap.set_map(%s)<CR>'):format(id)
+      end
     end
 
-    local id = misc.id('cmp.utils.keymap.resolve')
-    self.callbacks[id] = rhs
-    if opts.expr then
-      return ('v:lua.cmp.utils.keymap.resolve(%s)'):format(id)
+    if bufnr == -1 then
+      vim.api.nvim_set_keymap(mode, lhs, rhs, opts)
+    else
+      vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, opts)
     end
-    return ('<Cmd>call v:lua.cmp.utils.keymap.resolve(%s)<CR>'):format(id)
-  end,
+  end
 })
-misc.set(_G, { 'cmp', 'utils', 'keymap', 'resolve' }, function(id)
-  return keymap.resolve.callbacks[id]()
+misc.set(_G, { 'cmp', 'utils', 'keymap', 'set_map' }, function(id)
+  return keymap.set_map.callbacks[id]()
 end)
 
 return keymap
