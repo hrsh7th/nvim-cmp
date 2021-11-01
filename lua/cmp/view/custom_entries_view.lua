@@ -1,5 +1,6 @@
 local event = require('cmp.utils.event')
 local autocmd = require('cmp.utils.autocmd')
+local feedkeys = require('cmp.utils.feedkeys')
 local window = require('cmp.utils.window')
 local config = require('cmp.config')
 local types = require('cmp.types')
@@ -183,7 +184,7 @@ custom_entries_view.abort = function(self)
   if self.prefix then
     self:_insert(self.prefix)
   end
-  keymap.feedkeys('', 'n', function()
+  feedkeys.call('', 'n', function()
     self:close()
   end)
 end
@@ -306,10 +307,10 @@ custom_entries_view._insert = function(self, word)
     vim.api.nvim_feedkeys(keymap.backspace(length) .. word, 'int', true)
   else
     local release = require('cmp').core:suspend()
-    keymap.feedkeys('', 'n', function()
+    feedkeys.call('', 'n', function()
       local cursor = api.get_cursor()
       local length = vim.str_utfindex(string.sub(api.get_current_line(), self.offset, cursor[2]))
-      keymap.feedkeys(
+      feedkeys.call(
         keymap.backspace(length) .. word,
         'int',
         vim.schedule_wrap(function()
