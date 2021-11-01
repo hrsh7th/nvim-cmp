@@ -1,6 +1,7 @@
 local debug = require('cmp.utils.debug')
 local char = require('cmp.utils.char')
 local pattern = require('cmp.utils.pattern')
+local feedkeys = require('cmp.utils.feedkeys')
 local async = require('cmp.utils.async')
 local keymap = require('cmp.utils.keymap')
 local context = require('cmp.context')
@@ -214,9 +215,9 @@ core.autoindent = function(self, trigger_event, callback)
         local release = self:suspend()
         vim.schedule(function()
           if cursor_before_line == api.get_cursor_before_line() then
-            keymap.feedkeys(keymap.t('<Cmd>setlocal cindent<CR>'), 'n')
-            keymap.feedkeys(keymap.t('<C-f>'), 'n')
-            keymap.feedkeys(keymap.t('<Cmd>setlocal %scindent<CR>'):format(vim.bo.cindent and '' or 'no'), 'n', function()
+            feedkeys.call(keymap.t('<Cmd>setlocal cindent<CR>'), 'n')
+            feedkeys.call(keymap.t('<C-f>'), 'n')
+            feedkeys.call(keymap.t('<Cmd>setlocal %scindent<CR>'):format(vim.bo.cindent and '' or 'no'), 'n', function()
               release()
               callback()
             end)
@@ -318,12 +319,12 @@ core.confirm = function(self, e, option, callback)
   local confirm = {}
   table.insert(confirm, keymap.backspace(ctx.cursor.character - misc.to_utfindex(e.context.cursor_before_line, e:get_offset())))
   table.insert(confirm, e:get_word())
-  keymap.feedkeys(table.concat(confirm, ''), 'nt', function()
+  feedkeys.call(table.concat(confirm, ''), 'nt', function()
     -- Restore to the requested state.
     local restore = {}
     table.insert(restore, keymap.backspace(vim.str_utfindex(e:get_word())))
     table.insert(restore, string.sub(e.context.cursor_before_line, e:get_offset()))
-    keymap.feedkeys(table.concat(restore, ''), 'n', function()
+    feedkeys.call(table.concat(restore, ''), 'n', function()
       --@see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/suggestController.ts#L334
       if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) == 0 then
         local pre = context.new()
@@ -384,7 +385,7 @@ core.confirm = function(self, e, option, callback)
         table.insert(keys, completion_item.textEdit.newText)
       end
 
-      keymap.feedkeys(table.concat(keys, ''), 'n', function()
+      feedkeys.call(table.concat(keys, ''), 'n', function()
         if is_snippet then
           -- remove snippet prefix without changing `dot` register.
           local snippet_ctx = context.new()

@@ -1,6 +1,7 @@
 local core = require('cmp.core')
 local source = require('cmp.source')
 local config = require('cmp.config')
+local feedkeys = require('cmp.utils.feedkeys')
 local autocmd = require('cmp.utils.autocmd')
 local keymap = require('cmp.utils.keymap')
 local misc = require('cmp.utils.misc')
@@ -117,9 +118,9 @@ cmp.select_next_item = function(option)
     return true
   elseif vim.fn.pumvisible() == 1 then
     if (option.behavior or cmp.SelectBehavior.Insert) == cmp.SelectBehavior.Insert then
-      keymap.feedkeys(keymap.t('<C-n>'), 'n')
+      feedkeys.call(keymap.t('<C-n>'), 'n')
     else
-      keymap.feedkeys(keymap.t('<Down>'), 'n')
+      feedkeys.call(keymap.t('<Down>'), 'n')
     end
     return true
   end
@@ -142,9 +143,9 @@ cmp.select_prev_item = function(option)
     return true
   elseif vim.fn.pumvisible() == 1 then
     if (option.behavior or cmp.SelectBehavior.Insert) == cmp.SelectBehavior.Insert then
-      keymap.feedkeys(keymap.t('<C-p>'), 'n')
+      feedkeys.call(keymap.t('<C-p>'), 'n')
     else
-      keymap.feedkeys(keymap.t('<Up>'), 'n')
+      feedkeys.call(keymap.t('<Up>'), 'n')
     end
     return true
   end
@@ -182,7 +183,7 @@ cmp.confirm = function(option, callback)
     return true
   else
     if vim.fn.complete_info({ 'selected' }).selected ~= -1 then
-      keymap.feedkeys(keymap.t('<C-y>'), 'n')
+      feedkeys.call(keymap.t('<C-y>'), 'n')
       return true
     end
     return false

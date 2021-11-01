@@ -1,6 +1,7 @@
 local event = require('cmp.utils.event')
 local autocmd = require('cmp.utils.autocmd')
 local keymap = require('cmp.utils.keymap')
+local feedkeys = require('cmp.utils.feedkeys')
 local types = require('cmp.types')
 local config = require('cmp.config')
 local api = require('cmp.utils.api')
@@ -118,9 +119,9 @@ end
 native_entries_view.select_next_item = function(self, option)
   if self:visible() then
     if (option.behavior or types.cmp.SelectBehavior.Insert) == types.cmp.SelectBehavior.Insert then
-      keymap.feedkeys(keymap.t('<C-n>'), 'n')
+      feedkeys.call(keymap.t('<C-n>'), 'n')
     else
-      keymap.feedkeys(keymap.t('<Down>'), 'n')
+      feedkeys.call(keymap.t('<Down>'), 'n')
     end
   end
 end
@@ -128,9 +129,9 @@ end
 native_entries_view.select_prev_item = function(self, option)
   if self:visible() then
     if (option.behavior or types.cmp.SelectBehavior.Insert) == types.cmp.SelectBehavior.Insert then
-      keymap.feedkeys(keymap.t('<C-p>'), 'n')
+      feedkeys.call(keymap.t('<C-p>'), 'n')
     else
-      keymap.feedkeys(keymap.t('<Up>'), 'n')
+      feedkeys.call(keymap.t('<Up>'), 'n')
     end
   end
 end
