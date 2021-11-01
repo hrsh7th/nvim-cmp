@@ -35,12 +35,18 @@ end
 
 native_entries_view.on_change = function(self)
   if #self.entries > 0 and self.offset <= vim.api.nvim_win_get_cursor(0)[2] + 1 then
+    local preselect_enabled = config.get().preselect == types.cmp.PreselectMode.Item
+
     local completeopt = vim.o.completeopt
-    vim.o.completeopt = self.preselect_index == 1 and 'menu,menuone,noinsert' or config.get().completion.completeopt
+    if self.preselect_index == 1 and preselect_enabled then
+      vim.o.completeopt = 'menu,menuone,noinsert'
+    else
+      vim.o.completeopt = config.get().completion.completeopt
+    end
     vim.fn.complete(self.offset, self.items)
     vim.o.completeopt = completeopt
 
-    if self.preselect_index > 1 and config.get().preselect == types.cmp.PreselectMode.Item then
+    if self.preselect_index > 1 and preselect_enabled then
       self:preselect(self.preselect_index)
     end
   end
