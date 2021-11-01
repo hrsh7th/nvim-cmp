@@ -109,56 +109,28 @@ keymap.equals = function(a, b)
 end
 
 ---Register keypress handler.
-keymap.listen = setmetatable({
-  cache = cache.new(),
-}, {
-  __call = function(self, mode, keys_or_chars, callback)
-    local keys = keymap.normalize(keymap.to_keymap(keys_or_chars))
-    local existing = keymap.get_mapping(mode, keys)
-    if not existing then
-      return
-    end
-    local bufnr = existing.buffer and vim.api.nvim_get_current_buf() or -1
-    self.cache:set({ 'id', mode, keys, bufnr }, misc.id('cmp.utils.keymap.listen'))
-
-    local fallback = keymap.evacuate(mode, keys, bufnr)
-    if bufnr == -1 then
-      vim.api.nvim_set_keymap(mode, keys, ('<Cmd>call v:lua.cmp.utils.keymap.listen.run(%s)<CR>'):format(self.cache:get({ 'id', mode, keys, bufnr })), {
-        expr = false,
-        noremap = true,
-        silent = true,
-      })
-    else
-      vim.api.nvim_buf_set_keymap(0, mode, keys, ('<Cmd>call v:lua.cmp.utils.keymap.listen.run(%s)<CR>'):format(self.cache:get({ 'id', mode, keys, bufnr })), {
-        expr = false,
-        noremap = true,
-        silent = true,
-      })
-    end
-
-    self.cache:set({ 'definition', self.cache:get({ 'id', mode, keys, bufnr }) }, {
-      mode = mode,
-      keys = keys,
-      bufnr = bufnr,
-      callback = callback,
-      fallback = fallback,
-      existing = existing,
-    })
-  end,
-})
-misc.set(_G, { 'cmp', 'utils', 'keymap', 'listen', 'run' }, function(id)
-  local definition = keymap.listen.cache:get({ 'definition', id })
-  if definition.mode == 'c' and vim.fn.getcmdtype() == '=' then
-    return vim.api.nvim_feedkeys(keymap.t(definition.fallback.keys), definition.fallback.mode, true)
+keymap.listen = function(mode, keys_or_chars, callback)
+  local keys = keymap.normalize(keymap.to_keymap(keys_or_chars))
+  local existing = keymap.get_mapping(mode, keys)
+  if string.find(existing.rhs, 'v:lua.cmp.utils.keymap', 1, true) then
+    return
   end
-  definition.callback(
-    definition.keys,
-    misc.once(function()
-      vim.api.nvim_feedkeys(keymap.t(definition.fallback.keys), definition.fallback.mode, true)
-    end)
-  )
-  return keymap.t('<Ignore>')
-end)
+  local bufnr = existing.buffer and vim.api.nvim_get_current_buf() or -1
+  local fallback = keymap.evacuate(bufnr, mode, keys)
+  keymap.set_map(bufnr, mode, keys, function()
+    if mode == 'c' and vim.fn.getcmdtype() == '=' then
+      return vim.api.nvim_feedkeys(keymap.t(fallback.keys), fallback.mode, true)
+    end
+
+    callback(keys, misc.once(function()
+      vim.api.nvim_feedkeys(keymap.t(fallback.keys), fallback.mode, true)
+    end))
+  end, {
+    expr = false,
+    noremap = true,
+    silent = true,
+  })
+end
 
 ---Get mapping
 ---@param mode string
@@ -169,9 +141,6 @@ keymap.get_mapping = function(mode, lhs)
 
   for _, map in ipairs(vim.api.nvim_buf_get_keymap(0, mode)) do
     if keymap.equals(map.lhs, lhs) then
-      if string.match(map.rhs, vim.pesc('v:lua.cmp.utils.keymap.listen.run')) then
-        return nil
-      end
       return {
         lhs = map.lhs,
         rhs = map.rhs,
@@ -187,9 +156,6 @@ keymap.get_mapping = function(mode, lhs)
 
   for _, map in ipairs(vim.api.nvim_get_keymap(mode)) do
     if keymap.equals(map.lhs, lhs) then
-      if string.match(map.rhs, vim.pesc('v:lua.cmp.utils.keymap.listen.run')) then
-        return nil
-      end
       return {
         lhs = map.lhs,
         rhs = map.rhs,
@@ -215,11 +181,11 @@ keymap.get_mapping = function(mode, lhs)
 end
 
 ---Evacuate existing key mapping
+---@param bufnr number
 ---@param mode string
 ---@param keys string
----@param bufnr number
 ---@return { keys: string, mode: string }
-keymap.evacuate = function(mode, keys, bufnr)
+keymap.evacuate = function(bufnr, mode, keys)
   local map = keymap.get_mapping(mode, keys)
   if not map then
     return { keys = keys, mode = 'itn' }
@@ -229,7 +195,9 @@ keymap.evacuate = function(mode, keys, bufnr)
   local rhs = map.rhs
   if not map.noremap and map.expr then
     -- remap & expr mapping should evacuate as <Plug> mapping with solving recursive mapping.
-    rhs = string.format('v:lua.cmp.utils.keymap.evacuate.expr("%s", "%s", "%s", "%s")', mode, str.escape(keymap.escape(keys), { '"' }), bufnr, str.escape(keymap.escape(rhs), { '"' }))
+    rhs = function()
+      return keymap.t(keymap.recursive(bufnr, mode, keys, vim.api.nvim_eval(rhs)))
+    end
   elseif map.noremap and map.expr then
     -- noremap & expr mapping should always evacuate as <Plug> mapping.
     rhs = rhs
@@ -238,7 +206,7 @@ keymap.evacuate = function(mode, keys, bufnr)
     rhs = rhs
   elseif not map.noremap then
     -- remap & non-expr mapping should be checked if recursive or not.
-    rhs = keymap.recursive(mode, keys, bufnr, rhs)
+    rhs = keymap.recursive(bufnr, mode, keys, rhs)
     if rhs == map.rhs or map.noremap then
       return { keys = rhs, mode = 'it' .. (map.noremap and 'n' or '') }
     end
@@ -248,53 +216,68 @@ keymap.evacuate = function(mode, keys, bufnr)
   end
 
   local fallback = ('<Plug>(cmp-utils-keymap-evacuate-rhs:%s)'):format(map.lhs)
-  if bufnr == -1  then
-    vim.api.nvim_set_keymap(mode, fallback, rhs, {
-      expr = map.expr,
-      noremap = map.noremap,
-      script = map.script,
-      silent = mode ~= 'c', -- I can't understand but it solves the #427 (wilder.nvim's mapping does not work if silent=true in cmdline mode...)
-    })
-  else
-    vim.api.nvim_buf_set_keymap(bufnr, mode, fallback, rhs, {
-      expr = map.expr,
-      noremap = map.noremap,
-      script = map.script,
-      silent = mode ~= 'c', -- I can't understand but it solves the #427 (wilder.nvim's mapping does not work if silent=true in cmdline mode...)
-    })
-  end
+  keymap.set_map(bufnr, mode, fallback, rhs, {
+    expr = map.expr,
+    noremap = map.noremap,
+    script = map.script,
+    silent = mode ~= 'c', -- I can't understand but it solves the #427 (wilder.nvim's mapping does not work if silent=true in cmdline mode...)
+  })
   return { keys = fallback, mode = 'it' }
 end
-misc.set(_G, { 'cmp', 'utils', 'keymap', 'evacuate', 'expr' }, function(mode, keys, bufnr, rhs)
-  return keymap.t(keymap.recursive(mode, keys, bufnr, vim.api.nvim_eval(rhs)))
-end)
 
 ---Solve recursive mapping
+---@param bufnr number
 ---@param mode string
 ---@param keys string
----@param bufnr number
 ---@param rhs string
 ---@return string
-keymap.recursive = function(mode, keys, bufnr, rhs)
+keymap.recursive = function(bufnr, mode, keys, rhs)
   rhs = keymap.normalize(rhs)
-  local fallback_lhs = ('<Plug>(cmp-utils-keymap-listen-lhs:%s)'):format(keys)
+
+  local fallback_lhs = ('<Plug>(cmp.utils.keymap.recursive:%s)'):format(keys)
   local new_rhs = string.gsub(rhs, '^' .. vim.pesc(keymap.normalize(keys)), fallback_lhs)
   if not keymap.equals(new_rhs, rhs) then
-    if bufnr == '-1'  then
-      vim.api.nvim_set_keymap(mode, fallback_lhs, keys, {
-        expr = false,
-        noremap = true,
-        silent = true,
-      })
-    else
-      vim.api.nvim_buf_set_keymap(0, mode, fallback_lhs, keys, {
-        expr = false,
-        noremap = true,
-        silent = true,
-      })
-    end
+    keymap.set_map(bufnr, mode, fallback_lhs, keys, {
+      expr = false,
+      noremap = true,
+      silent = true,
+    })
   end
   return new_rhs
 end
+
+---Set keymapping
+keymap.set_map = function(bufnr, mode, keys, target, opts)
+  local resolved = keymap.resolve(target, opts)
+  if bufnr == -1 then
+    vim.api.nvim_set_keymap(mode, keys, resolved, opts)
+  else
+    vim.api.nvim_buf_set_keymap(bufnr, mode, keys, resolved, opts)
+  end
+end
+
+---Resolve rhs string
+---@param callback function
+---@param opts any
+---@return string
+keymap.resolve = setmetatable({
+  callbacks = {},
+}, {
+  __call = function(self, target, opts)
+    if type(target) == 'string' then
+      return target
+    end
+
+    local id = misc.id('cmp.utils.keymap.resolve')
+    self.callbacks[id] = target
+    if opts.expr then
+      return ('v:lua.cmp.utils.keymap.resolve(%s)'):format(id)
+    end
+    return ('<Cmd>call v:lua.cmp.utils.keymap.resolve(%s)<CR>'):format(id)
+  end,
+})
+misc.set(_G, { 'cmp', 'utils', 'keymap', 'resolve' }, function(id)
+  return keymap.resolve.callbacks[id]()
+end)
 
 return keymap
