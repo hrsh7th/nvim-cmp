@@ -104,4 +104,3 @@ feedkeys.call_macro = setmetatable({
 })
 
 return feedkeys
-
