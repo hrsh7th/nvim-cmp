@@ -202,7 +202,7 @@ core.autoindent = function(self, trigger_event, callback)
   if trigger_event ~= types.cmp.TriggerEvent.TextChanged then
     return callback()
   end
-  if not api.is_insert_mode()  then
+  if not api.is_insert_mode() then
     return callback()
   end
 

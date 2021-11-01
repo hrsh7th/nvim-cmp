@@ -35,7 +35,7 @@ compare.recently_used = setmetatable({
   records = {},
   add_entry = function(self, e)
     self.records[e.completion_item.label] = vim.loop.now()
-  end
+  end,
 }, {
   __call = function(self, entry1, entry2)
     local t1 = self.records[entry1.completion_item.label] or -1
@@ -43,7 +43,7 @@ compare.recently_used = setmetatable({
     if t1 ~= t2 then
       return t1 > t2
     end
-  end
+  end,
 })
 
 -- kind

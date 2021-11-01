@@ -215,13 +215,30 @@ keymap.listen = setmetatable({
     local bufnr = vim.api.nvim_get_current_buf()
     local existing = keymap.find_map_by_lhs(mode, keys)
 
-    local done = true
-    done = done and string.match(existing.rhs, vim.pesc('v:lua.cmp.utils.keymap.listen.run'))
-    done = done and self.cache:get({ 'id', mode, bufnr, keys }) ~= nil
-    if done then
-      return
+    local cur_definition = self.cache:get({ 'definition', self.cache:get({ 'id', mode, bufnr, keys }) or '' })
+    if cur_definition then
+      local same = true
+      same = same and existing
+      same = same and cur_definition.existing.lhs == existing.lhs
+      same = same and cur_definition.existing.rhs == existing.rhs
+      same = same and cur_definition.existing.expr == existing.expr
+      same = same and cur_definition.existing.noremap == existing.noremap
+      same = same and cur_definition.existing.script == existing.script
+      if not existing or same then
+        return
+      end
     end
     self.cache:set({ 'id', mode, bufnr, keys }, misc.id('cmp.utils.keymap.listen'))
+
+    existing = existing or {
+      lhs = keys,
+      rhs = keys,
+      expr = 0,
+      script = 0,
+      noremap = 1,
+      nowait = 0,
+      silent = 1,
+    }
 
     local fallback = keymap.evacuate(mode, keys)
     vim.api.nvim_buf_set_keymap(0, mode, keys, ('<Cmd>call v:lua.cmp.utils.keymap.listen.run(%s)<CR>'):format(self.cache:get({ 'id', mode, bufnr, keys })), {
@@ -260,6 +277,9 @@ end)
 ---@return { keys: string, mode: string }
 keymap.evacuate = function(mode, lhs)
   local map = keymap.find_map_by_lhs(mode, lhs)
+  if not map then
+    return { keys = lhs, mode = 'itn' }
+  end
 
   -- Keep existing mapping as <Plug> mapping. We escape fisrt recursive key sequence. See `:help recursive_mapping`)
   local rhs = map.rhs
@@ -322,23 +342,21 @@ end
 keymap.find_map_by_lhs = function(mode, lhs)
   for _, map in ipairs(vim.api.nvim_buf_get_keymap(0, mode)) do
     if keymap.equals(map.lhs, lhs) then
+      if string.match(map.rhs, vim.pesc('v:lua.cmp.utils.keymap.listen.run')) then
+        return nil
+      end
       return map
     end
   end
+
   for _, map in ipairs(vim.api.nvim_get_keymap(mode)) do
     if keymap.equals(map.lhs, lhs) then
+      if string.match(map.rhs, vim.pesc('v:lua.cmp.utils.keymap.listen.run')) then
+        return nil
+      end
       return map
     end
   end
-  return {
-    lhs = lhs,
-    rhs = lhs,
-    expr = 0,
-    script = 0,
-    noremap = 1,
-    nowait = 0,
-    silent = 1,
-  }
 end
 
 keymap.spec = function()

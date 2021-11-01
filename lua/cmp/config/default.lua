@@ -91,7 +91,7 @@ return function()
           else
             fallback()
           end
-        end
+        end,
       }),
       ['<S-Tab>'] = mapping({
         c = function(fallback)
@@ -105,7 +105,7 @@ return function()
           else
             fallback()
           end
-        end
+        end,
       }),
       ['<C-n>'] = mapping(mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Insert }), { 'i', 'c' }),
       ['<C-p>'] = mapping(mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Insert }), { 'i', 'c' }),
