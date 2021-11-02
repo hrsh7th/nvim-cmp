@@ -175,6 +175,7 @@ custom_entries_view.open = function(self, offset, entries)
 end
 
 custom_entries_view.close = function(self)
+  self.prefix = nil
   self.offset = -1
   self.entries = {}
   self.entries_win:close()
@@ -292,7 +293,7 @@ custom_entries_view._select = function(self, cursor, option)
   vim.api.nvim_win_set_cursor(self.entries_win.win, { math.max(cursor, 1), is_insert and 0 or 1 })
 
   if is_insert then
-    self:_insert(self.entries[cursor] and self.entries[cursor]:get_vim_item(self.offset).word or self.prefix or '')
+    self:_insert(self.entries[cursor] and self.entries[cursor]:get_vim_item(self.offset).word or self.prefix)
   end
 
   self.entries_win:update()
@@ -301,6 +302,8 @@ custom_entries_view._select = function(self, cursor, option)
 end
 
 custom_entries_view._insert = function(self, word)
+  word = word or ''
+
   if api.is_cmdline_mode() then
     local cursor = api.get_cursor()
     local length = vim.str_utfindex(string.sub(api.get_current_line(), self.offset, cursor[2]))
