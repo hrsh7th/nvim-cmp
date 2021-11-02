@@ -11,12 +11,6 @@ describe('keymap', function()
     assert.are.equal(keymap.to_keymap('|'), '<Bar>')
   end)
 
-  it('escape', function()
-    assert.are.equal(keymap.escape('<C-d>'), '<LT>C-d>')
-    assert.are.equal(keymap.escape('<C-d><C-f>'), '<LT>C-d><LT>C-f>')
-    assert.are.equal(keymap.escape('<LT>C-d>'), '<LT>C-d>')
-  end)
-
   describe('evacuate', function()
     before_each(spec.before)
 
@@ -25,7 +19,7 @@ describe('keymap', function()
         expr = true,
         noremap = false,
       })
-      local fallback = keymap.evacuate('i', '(')
+      local fallback = keymap.evacuate(0, 'i', '(')
       vim.api.nvim_feedkeys('i' .. keymap.t(fallback.keys), fallback.mode .. 'x', true)
       assert.are.same({ '(' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
     end)
@@ -39,7 +33,7 @@ describe('keymap', function()
         expr = false,
         noremap = false,
       })
-      local fallback = keymap.evacuate('i', '(')
+      local fallback = keymap.evacuate(0, 'i', '(')
       vim.api.nvim_feedkeys('i' .. keymap.t(fallback.keys), fallback.mode .. 'x', true)
       assert.are.same({ '()' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
     end)
@@ -52,7 +46,7 @@ describe('keymap', function()
           expr = true,
           noremap = false,
         })
-        local fallback = keymap.evacuate('i', '<Tab>')
+        local fallback = keymap.evacuate(0, 'i', '<Tab>')
         vim.api.nvim_feedkeys('i' .. keymap.t(fallback.keys), fallback.mode .. 'x', true)
         assert.are.same({ 'foobar' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
       end)
@@ -61,7 +55,7 @@ describe('keymap', function()
           expr = true,
           noremap = false,
         })
-        local fallback = keymap.evacuate('i', '<Tab>')
+        local fallback = keymap.evacuate(0, 'i', '<Tab>')
         vim.api.nvim_feedkeys('i' .. keymap.t(fallback.keys), fallback.mode .. 'x', true)
         assert.are.same({ '\taiueo' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
       end)
