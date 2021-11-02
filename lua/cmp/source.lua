@@ -304,13 +304,14 @@ source.complete = function(self, ctx, callback)
       completion_context = completion_context,
     },
     self.complete_dedup(vim.schedule_wrap(misc.once(function(response)
+      self.incomplete = response.isIncomplete or false
+
       if #((response or {}).items or response or {}) > 0 then
         debug.log(self:get_debug_name(), 'retrieve', #(response.items or response))
         local old_offset = self.offset
         local old_entries = self.entries
 
         self.status = source.SourceStatus.COMPLETED
-        self.incomplete = response.isIncomplete or false
         self.entries = {}
         for i, item in ipairs(response.items or response) do
           if (misc.safe(item) or {}).label then
