@@ -104,14 +104,14 @@ lua <<EOF
     })
   })
 
-  -- Use buffer source for `/`.
+  -- Use buffer source for `/` (if you enabled `native_menu`, this wont work anymore).
   cmp.setup.cmdline('/', {
     sources = {
       { name = 'buffer' }
     }
   })
 
-  -- Use cmdline & path source for ':'.
+  -- Use cmdline & path source for ':' (if you enabled `native_menu`, this wont work anymore).
   cmp.setup.cmdline(':', {
     sources = cmp.config.sources({
       { name = 'path' }
