@@ -11,7 +11,6 @@ local api = require('cmp.utils.api')
 ---@field public option cmp.ContextOption
 ---@field public filetype string
 ---@field public time number
----@field public mode string
 ---@field public bufnr number
 ---@field public cursor vim.Position|lsp.Position
 ---@field public cursor_line string
@@ -45,7 +44,6 @@ context.new = function(prev_context, option)
   self.option = option or { reason = types.cmp.ContextReason.None }
   self.filetype = vim.api.nvim_buf_get_option(0, 'filetype')
   self.time = vim.loop.now()
-  self.mode = vim.api.nvim_get_mode().mode
   self.bufnr = vim.api.nvim_get_current_buf()
 
   local cursor = api.get_cursor()

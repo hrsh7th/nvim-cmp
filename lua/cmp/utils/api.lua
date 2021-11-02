@@ -17,7 +17,7 @@ api.is_insert_mode = function()
     'i',
     'ic',
     'ix',
-  }, vim.api.nvim_get_mode().mode)
+  }, vim.api.nvim_get_mode().mode) or vim.v.insertmode == 'i'
 end
 
 api.is_cmdline_mode = function()
