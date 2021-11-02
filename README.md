@@ -8,9 +8,9 @@ Completion sources are installed from external repositories and "sourced".
 Readme!
 ====================
 
-1. nvim-cmp's breaking changes are [here](https://github.com/hrsh7th/nvim-cmp/issues/231).
+1. nvim-cmp's breaking changes are documented [here](https://github.com/hrsh7th/nvim-cmp/issues/231).
 2. This is my hobby project. You can support me via GitHub sponsors.
-3. The bug reports are welcome, but I might not fix if you don't provide a minimal reproduction configuration and steps.
+3. Bug reports are welcome, but I might not fix if you don't provide a minimal reproduction configuration and steps.
 
 
 Concept
@@ -19,7 +19,7 @@ Concept
 - No flicker
 - Works properly
 - Fully customizable via Lua functions
-- Fully supported LSP's Completion capabilities
+- Fully supports LSP's completion capabilities
   - Snippets
   - CommitCharacters
   - TriggerCharacters
@@ -37,7 +37,7 @@ Setup
 
 ### Recommended Configuration
 
-This example configuration is using `vim-plug`.
+This example configuration uses `vim-plug` as the plugin manager.
 
 ```viml
 call plug#begin(s:plug_dir)
@@ -86,7 +86,7 @@ lua <<EOF
       ['<C-d>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
       ['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
       ['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
-      ['<C-y>'] = cmp.config.disable, -- If you want to remove the default `<C-y>` mapping, You can specify `cmp.config.disable` value.
+      ['<C-y>'] = cmp.config.disable, -- Specify `cmp.config.disable` if you want to remove the default `<C-y>` mapping.
       ['<C-e>'] = cmp.mapping({
         i = cmp.mapping.abort(),
         c = cmp.mapping.close(),
@@ -104,14 +104,14 @@ lua <<EOF
     })
   })
 
-  -- Use buffer source for `/` (if you enabled `native_menu`, this wont work anymore).
+  -- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
   cmp.setup.cmdline('/', {
     sources = {
       { name = 'buffer' }
     }
   })
 
-  -- Use cmdline & path source for ':' (if you enabled `native_menu`, this wont work anymore).
+  -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
   cmp.setup.cmdline(':', {
     sources = cmp.config.sources({
       { name = 'path' }
@@ -122,15 +122,16 @@ lua <<EOF
 
   -- Setup lspconfig.
   local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
-  require('lspconfig')[%YOUR_LSP_SERVER%].setup {
+  -- Replace <YOUR_LSP_SERVER> with each lsp server you've enabled.
+  require('lspconfig')['<YOUR_LSP_SERVER>'].setup {
     capabilities = capabilities
   }
 EOF
 ```
 
-### I want to see  more sources!
+### Where can I find more completion sources?
 
-You can see the all of `nvim-cmp` sources [here](https://github.com/topics/nvim-cmp).
+You can search for various completion sources [here](https://github.com/topics/nvim-cmp).
 
 
 Configuration options
@@ -140,21 +141,20 @@ You can specify the following configuration options via `cmp.setup { ... }`.
 
 The configuration options will be merged with the [default config](./lua/cmp/config/default.lua).
 
-If you want to remove an option, you can set it to `false` instead.
+If you want to remove a default option, set it to `false`.
 
 
 #### mapping (type: table<string, fun(fallback: function)>)
 
-Built in helper `cmd.mappings` are:
+Defines the action of each key mapping. The following lists all the built-in actions:
 
-- *cmp.mapping(...)*
-- *cmp.mapping.select_prev_item({ cmp.SelectBehavior.{Insert,Select} } })*
-- *cmp.mapping.select_next_item({ cmp.SelectBehavior.{Insert,Select} })*
-- *cmp.mapping.scroll_docs(number)*
-- *cmp.mapping.complete()*
-- *cmp.mapping.close()*
-- *cmp.mapping.abort()*
-- *cmp.mapping.confirm({ select = bool, behavior = cmp.ConfirmBehavior.{Insert,Replace} })*
+- `cmp.mapping.select_prev_item({ cmp.SelectBehavior.{Insert,Select} })`
+- `cmp.mapping.select_next_item({ cmp.SelectBehavior.{Insert,Select} })`
+- `cmp.mapping.scroll_docs(number)`
+- `cmp.mapping.complete()`
+- `cmp.mapping.close()`
+- `cmp.mapping.abort()`
+- `cmp.mapping.confirm({ select = bool, behavior = cmp.ConfirmBehavior.{Insert,Replace} })`: If `select` is true and you haven't select any item, automatically selects the first item.
 
 You can configure `nvim-cmp` to use these `cmd.mapping` like this:
 
@@ -175,7 +175,7 @@ mapping = {
 }
 ```
 
-In addition, the mapping mode can be specified. The default is insert mode (i).
+In addition, the mapping mode can be specified with the help of `cmp.mapping(...)`. The default is the insert mode (i) if not specified.
 
 ```lua
 mapping = {
@@ -185,7 +185,7 @@ mapping = {
 }
 ```
 
-One more addition, the mapping mode can be specified by table key. It's useful to specify different function for each modes.
+The mapping mode can also be specified using a table. This is particularly useful to set different actions for each mode.
 
 ```lua
 mapping = {
@@ -196,7 +196,7 @@ mapping = {
 }
 ```
 
-You can specify your own custom mapping function.
+You can also provide a custom function as the action.
 
 ```lua
 mapping = {
@@ -212,7 +212,7 @@ mapping = {
 
 #### enabled (type: fun(): boolean|boolean)
 
-The function or boolean value to specify all cmp's features enabled or not.
+A boolean value, or a function returning a boolean, that specifies whether to enable nvim-cmp's features or not.
 
 Default:
 
@@ -224,13 +224,13 @@ end
 
 #### sources (type: table<cmp.SourceConfig>)
 
-Global source lists are listed in the `source` table. These are applied to all
-buffers. The order of the sources list helps define the source priority, see
-the *sorting.priority_weight* options below.
+Lists all the global completion sources that will be enabled in all buffers.
+The order of the list defines the priority of each source. See the
+*sorting.priority_weight* option below.
 
-It is possible to setup different source lists for different filetypes, this is
-an example using the `FileType` autocommand to setup different sources for the
-lua filetype. This will overwrite your global sources for the buffer.
+It is possible to set up different sources for different filetypes using
+`FileType` autocommand and `cmp.setup.buffer` to override the global
+configuration.
 
 ```viml
 " Setup buffer configuration (nvim-lua source only enables in Lua filetype).
@@ -242,10 +242,10 @@ autocmd FileType lua lua require'cmp'.setup.buffer {
 \ }
 ```
 
-Note that the source name isn't necessarily the source repository name.
-Source names are defined in the source repository README files. For
-example look at the [hrsh7th/cmp-buffer](https://github.com/hrsh7th/cmp-buffer)
-source README which defines the source name as `buffer`.
+Note that the source name isn't necessarily the source repository name.  Source
+names are defined in the source repository README files. For example, look at
+the [hrsh7th/cmp-buffer](https://github.com/hrsh7th/cmp-buffer) source README
+which defines the source name as `buffer`.
 
 #### sources[number].name (type: string)
 
@@ -257,8 +257,8 @@ The source customization options. It is defined by each source.
 
 #### sources[number].priority (type: number|nil)
 
-The manually specified source priority.
-If you don't specify it, the source priority will be determined by the default algorithm (see `sorting.priority_weight`).
+The priority of the source.  If you don't specify it, the source priority will
+be determined by the default algorithm (see `sorting.priority_weight`).
 
 #### sources[number].keyword_pattern (type: string)
 
@@ -337,11 +337,12 @@ The function to resolve commit_characters.
 
 #### sorting.priority_weight (type: number)
 
-When sorting completion items before displaying them, boost each item's score
-based on the originating source. Each source gets a base priority of `#sources -
-(source_index - 1)`, and we then multiply this by `priority_weight`:
+The score multiplier of source when calculating the items' priorities.
+Specifically, each item's original priority (given by its corresponding source)
+will be increased by `#sources - (source_index - 1)` multiplied by
+`priority_weight`. That is, the final priority is calculated by the following formula:
 
-`score = score + ((#sources - (source_index - 1)) * sorting.priority_weight)`
+`final_score = orig_score + ((#sources - (source_index - 1)) * sorting.priority_weight)`
 
 Default: `2`
 
@@ -371,7 +372,9 @@ Default:
 
 #### documentation (type: false | cmp.DocumentationConfig)
 
-A documentation configuration or false to disable feature.
+If set to `false`, the documentation of each item will not be shown.
+Else, a table representing documentation configuration should be provided.
+The following are the possible options:
 
 #### documentation.border (type: string[])
 
@@ -400,7 +403,6 @@ The order of item's fields for completion menu.
 #### formatting.format (type: fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem)
 
 A function to customize completion menu.
-
 The return value is defined by vim. See `:help complete-items`.
 
 You can display the fancy icons to completion-menu with [lspkind-nvim](https://github.com/onsails/lspkind-nvim).
@@ -476,57 +478,57 @@ You can use the following APIs.
 
 #### `cmp.event:on(name: string, callback: string)`
 
-Subscribe the following events.
+Subscribes to the following events.
 
 - `confirm_done`
 
 #### `cmp.get_config()`
 
-Return the current configuration.
+Returns the current configuration.
 
 #### `cmp.visible()`
 
-Return the completion menu is visible or not.
+Returns the completion menu is visible or not.
 
-NOTE: This method returns true if the native popup menu is visible. For convenience to define mappings.
+NOTE: This method returns true if the native popup menu is visible, for the convenience of defining mappings.
 
 #### `cmp.get_selected_entry()`
 
-Return the selected entry.
+Returns the selected entry.
 
 #### `cmp.get_active_entry()`
 
-Return the active entry.
+Returns the active entry.
 
 NOTE: The `preselected` entry does not returned from this method.
 
 #### `cmp.confirm({ select = boolean, behavior = cmp.ConfirmBehavior.{Insert,Replace} }, callback)`
 
-Confirm current selected item if possible.
+Confirms the current selected item, if possible. If `select` is true and no item has been selected, selects the first item.
 
 #### `cmp.complete()`
 
-Invoke manual completion.
+Invokes manual completion.
 
 #### `cmp.close()`
 
-Close current completion menu.
+Closes the current completion menu.
 
 #### `cmp.abort()`
 
-Close current completion menu and restore current line (similar to native `<C-e>` behavior).
+Closes the current completion menu and restore the current line (similar to native `<C-e>` behavior).
 
 #### `cmp.select_next_item({ cmp.SelectBehavior.{Insert,Select} })`
 
-Select next completion item if possible.
+Selects the next completion item if possible.
 
 #### `cmp.select_prev_item({ cmp.SelectBehavior.{Insert,Select} })`
 
-Select previous completion item if possible.
+Selects the previous completion item if possible.
 
 #### `cmp.scroll_docs(delta)`
 
-Scroll documentation window if possible.
+Scrolls the documentation window by `delta` lines, if possible.
 
 
 FAQ
@@ -534,14 +536,14 @@ FAQ
 
 #### I can't get the specific source working.
 
-You should check `:CmpStatus` command's output. Probably, your specified source name is wrong.
+Check the output of command `:CmpStatus`. It is likely that you specify the source name incorrectly.
 
-NOTE: `nvim_lsp` will be sourced on InsertEnter event. It will show as `unknown source` but it isn't problem.
+NOTE: `nvim_lsp` will be sourced on `InsertEnter` event. It will show as `unknown source`, but this isn't a problem.
 
 
-#### What is the `pairs-wise plugin automatically supported`?
+#### What is the `pair-wise plugin automatically supported`?
 
-Some pairs-wise plugin set up the mapping automatically.
+Some pair-wise plugin set up the mapping automatically.
 For example, `vim-endwise` will map `<CR>` even if you don't do any mapping instructions for the plugin.
 
 But I think the user want to override `<CR>` mapping only when the mapping item is selected.
@@ -560,7 +562,7 @@ mapping = {
 ```
 
 
-#### How to set up like nvim-compe's `preselect = 'always'`?
+#### What is the equivalence of nvim-compe's `preselect = 'always'`?
 
 You can use the following configuration.
 
@@ -641,12 +643,12 @@ formatting = {
 ```
 
 
-#### How to setup mapping?
+#### How to set up mappings?
 
-You can find all the mapping solutions in [Example mappings](https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings).
+You can find all the mapping examples in [Example mappings](https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings).
 
 
-Source creation
+Create a Custom Source
 ====================
 
 Warning: If the LSP spec is changed, nvim-cmp will keep up to it without an announcement.
@@ -655,10 +657,12 @@ If you publish `nvim-cmp` source to GitHub, please add `nvim-cmp` topic for the 
 
 You should read [cmp types](/lua/cmp/types) and [LSP spec](https://microsoft.github.io/language-server-protocol/specifications/specification-current/) to create sources.
 
-- The `complete` function is required but others can be omitted.
+- The `complete` function is required. Others can be omitted.
 - The `callback` argument must always be called.
-- The custom source only can use `require('cmp')`.
+- The custom source should only use `require('cmp')`.
 - The custom source can specify `word` property to CompletionItem. (It isn't an LSP specification but supported as a special case.)
+
+Here is an example of a custom source.
 
 ```lua
 local source = {}
@@ -736,9 +740,9 @@ end
 require('cmp').register_source(source.new())
 ```
 
-You can also create source by Vim script like this (This is useful to support callback style plugins).
+You can also create a source by Vim script like this (This is useful to support callback style plugins).
 
-- If you want to return `boolean`, you must return `v:true`/`v:false`. It doesn't `0`/`1`.
+- If you want to return `boolean`, you must return `v:true`/`v:false` instead of `0`/`1`.
 
 ```vim
 let s:source = {}
