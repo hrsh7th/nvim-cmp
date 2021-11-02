@@ -1,0 +1,265 @@
+*nvim-cmp* *cmp*
+
+A completion plugin for neovim coded in Lua.
+
+==============================================================================
+CONTENTS                                                          *cmp-contents*
+
+Abstract                                                          |cmp-abstract|
+Concept                                                            |cmp-concept|
+Install                                                            |cmp-install|
+Usage                                                                |cmp-usage|
+Function                                                          |cmp-function|
+Mapping                                                            |cmp-mapping|
+Command                                                            |cmp-command|
+Highlight                                                        |cmp-highlight|
+Autocmd                                                            |cmp-autocmd|
+Config                                                              |cmp-config|
+
+
+
+==============================================================================
+Abstract                                                          *cmp-abstract*
+
+This is nvim-cmp's document.
+
+1. The `cmp` object is the return value from `require('cmp')`.
+2. Some type-definition can be found via `:CmpTypes`
+
+
+
+==============================================================================
+Concept                                                            *cmp-concept*
+
+- Full support for LSP completion related capabilities
+- Powerful customizability via Lua functions
+- Smart handling of key mapping
+
+
+
+==============================================================================
+Install                                                            *cmp-install*
+
+You must install `nvim-cmp` itself, sources and some snippet engine.
+
+>
+  Plug 'hrsh7th/nvim-cmp'
+  Plug 'hrsh7th/cmp-nvim-lsp'
+  Plug 'hrsh7th/cmp-buffer'
+  Plug 'hrsh7th/cmp-path'
+  Plug 'hrsh7th/cmp-cmdline'
+  Plug 'hrsh7th/cmp-vsnip'
+  Plug 'hrsh7th/vim-vsnip'
+<
+
+1. The above example uses `vim-vsnip` as snippet engine. You can choose other one.
+2. The above example uses `cmp-nvim-lsp`. This mean you should setup `neovim/nvim-lspconfig` by yourself. See `cmp-nvim-lsp`'s README.md.
+
+
+==============================================================================
+Usage                                                              *cmp-usage*
+
+The recommendation settings are the below.
+
+NOTE:
+  1. You must setup `snippet.expand` function.
+  2. The `cmp.setup.cmdline` wont work if you specify `experimental.native_menu` option.
+  3. You can disable default configuration via setting `cmp.config.disable` value.
+
+>
+  call plug#begin(s:plug_dir)
+  Plug 'neovim/nvim-lspconfig'
+  Plug 'hrsh7th/cmp-nvim-lsp'
+  Plug 'hrsh7th/cmp-buffer'
+  Plug 'hrsh7th/cmp-path'
+  Plug 'hrsh7th/cmp-cmdline'
+  Plug 'hrsh7th/nvim-cmp'
+
+  " For vsnip users.
+  Plug 'hrsh7th/cmp-vsnip'
+  Plug 'hrsh7th/vim-vsnip'
+
+  " For luasnip users.
+  " Plug 'L3MON4D3/LuaSnip'
+  " Plug 'saadparwaiz1/cmp_luasnip'
+
+  " For ultisnips users.
+  " Plug 'SirVer/ultisnips'
+  " Plug 'quangnguyen30192/cmp-nvim-ultisnips'
+
+  " For snippy users.
+  " Plug 'dcampos/nvim-snippy'
+  " Plug 'dcampos/cmp-snippy'
+
+  call plug#end()
+
+  set completeopt=menu,menuone,noselect
+
+  lua <<EOF
+    local cmp = require'cmp'
+
+    -- Global setup.
+    cmp.setup({
+      snippet = {
+        expand = function(args)
+          vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+          -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+          -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+          -- require'snippy'.expand_snippet(args.body) -- For `snippy` users.
+        end,
+      },
+      mapping = {
+        ['<C-d>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
+        ['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
+        ['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
+        ['<C-e>'] = cmp.mapping({
+          i = cmp.mapping.abort(),
+          c = cmp.mapping.close(),
+        }),
+        ['<CR>'] = cmp.mapping.confirm({ select = true }),
+      },
+      sources = cmp.config.sources({
+        { name = 'nvim_lsp' },
+        { name = 'vsnip' }, -- For vsnip users.
+        -- { name = 'luasnip' }, -- For luasnip users.
+        -- { name = 'ultisnips' }, -- For ultisnips users.
+        -- { name = 'snippy' }, -- For snippy users.
+      }, {
+        { name = 'buffer' },
+      })
+    })
+
+    -- `/` cmdline setup.
+    cmp.setup.cmdline('/', {
+      sources = {
+        { name = 'buffer' }
+      }
+    })
+
+    -- `:` cmdline setup.
+    cmp.setup.cmdline(':', {
+      sources = cmp.config.sources({
+        { name = 'path' }
+      }, {
+        { name = 'cmdline' }
+      })
+    })
+
+    -- Setup lspconfig.
+    local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+    require('lspconfig')[%YOUR_LSP_SERVER%].setup {
+      capabilities = capabilities
+    }
+  EOF
+<
+
+==============================================================================
+Function                                                        *cmp-function*
+
+*cmp.visible()*
+
+  Return the completion menu is visible or not.
+
+*cmp.get_selected_entry()*
+
+  Return current selected entry. (contains preselected)
+
+*cmp.get_active_entry()*
+
+  Return current selected entry. (without preselected)
+
+*cmp.close()*
+
+  Just close the completion menu.
+
+*cmp.abort()*
+
+  Closes the completion menu and restore the current line to the state when it was started current completion.
+
+*cmp.select_next_item(option: { behavior = cmp.SelectBehavior })
+
+  Select next item.
+
+*cmp.select_prev_item(option: { behavior = cmp.SelectBehavior })
+
+  Select prev item.
+
+*cmp.scroll_docs(delta: number)*
+
+  Scroll docs if it visible.
+
+*cmp.complete()*
+
+  Invoke manual completion.
+
+*cmp.confirm(option: cmp.ConfirmOption)*
+
+  Confirm current selected completion item.
+
+
+
+==============================================================================
+Mapping                                                          *cmp-mapping*
+
+The nvim-cmp's mapping mechanism is a bit complex. But I think it is flexible and user-friendly.
+
+First, You can specify the mapping via Lua functions.
+
+>
+  cmp.setup {
+    mapping = {
+      ['<CR>'] = function(fallback)
+        if cmp.visible() then
+          cmp.confirm()
+        else
+          fallback()
+        end
+      end
+    }
+  }
+<
+
+The `fallback` represents your pre-defined key-mapping.
+For example, if you are using pair-wise plugin, it may automatically define the key-mapping.
+nvim-cmp's mapping will overwrite it but you can call `fallback` function to use pre-defined mapping.
+
+
+You can also use built-in mapping helpers.
+
+*cmp.mapping.close()*
+*cmp.mapping.abort()*
+*cmp.mapping.select_next_item(option: { behavior = cmp.SelectBehavior })*
+*cmp.mapping.select_prev_item(option: { behavior = cmp.SelectBehavior })*
+*cmp.mapping.scroll_docs(delta)*
+*cmp.mapping.complete()*
+*cmp.mapping.confirm(option: cmp.ConfirmOption)*
+
+>
+  cmp.setup {
+    mapping = {
+      ['<CR>'] = cmp.mapping.confirm()
+    }
+  }
+<
+
+
+==============================================================================
+Command                                                          *cmp-command*
+
+*CmpStatus*
+
+Prints source statuses for the current buffer.
+Sometimes `unknown` source will be printed (e.g. `cmp-nvim-lsp`) but it isn't problem.
+That the reason is the `cmp-nvim-lsp` will registered lazily.
+
+
+
+==============================================================================
+Highlight                                                      *cmp-highlight*
+
+
+
+
+==============================================================================
+ vim:tw=78:ts=4:et:ft=help:norl:
+
