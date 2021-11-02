@@ -1,3 +1,4 @@
+local mapping = require('cmp.config.mapping')
 local cache = require('cmp.utils.cache')
 local keymap = require('cmp.utils.keymap')
 local misc = require('cmp.utils.misc')
@@ -91,9 +92,11 @@ end
 ---@return cmp.ConfigSchema
 config.normalize = function(c)
   if c.mapping then
+    local normalized = {}
     for k, v in pairs(c.mapping) do
-      c.mapping[keymap.normalize(k)] = v
+      normalized[keymap.normalize(k)] = mapping(v, { 'i' })
     end
+    c.mapping = normalized
   end
   return c
 end

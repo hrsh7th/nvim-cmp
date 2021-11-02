@@ -1,5 +1,17 @@
 local api = {}
 
+api.get_mode = function()
+  if api.is_insert_mode() then
+    return 'i'
+  elseif api.is_visual_mode() then
+    return 'x'
+  elseif api.is_select_mode() then
+    return 's'
+  elseif api.is_cmdline_mode() then
+    return 'c'
+  end
+end
+
 api.is_insert_mode = function()
   return vim.tbl_contains({
     'i',

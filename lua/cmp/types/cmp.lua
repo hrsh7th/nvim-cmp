@@ -50,6 +50,7 @@ cmp.ItemField.Menu = 'menu'
 ---@field public __call fun(c: cmp.ConfigSchema)
 ---@field public buffer fun(c: cmp.ConfigSchema)
 ---@field public global fun(c: cmp.ConfigSchema)
+---@field public cmdline fun(type: string, c: cmp.ConfigSchema)
 
 ---@class cmp.SourceBaseApiParams
 ---@field public option table
@@ -58,6 +59,12 @@ cmp.ItemField.Menu = 'menu'
 ---@field public context cmp.Context
 ---@field public offset number
 ---@field public completion_context lsp.CompletionContext
+
+---@class cmp.Mapping
+---@field public i nil|function(fallback: function): void
+---@field public c nil|function(fallback: function): void
+---@field public x nil|function(fallback: function): void
+---@field public s nil|function(fallback: function): void
 
 ---@class cmp.ConfigSchema
 ---@field private revision number
@@ -69,7 +76,7 @@ cmp.ItemField.Menu = 'menu'
 ---@field public sorting cmp.SortingConfig
 ---@field public formatting cmp.FormattingConfig
 ---@field public snippet cmp.SnippetConfig
----@field public mapping table<string, fun(core: cmp.Core, fallback: function)>
+---@field public mapping table<string, cmp.Mapping>
 ---@field public sources cmp.SourceConfig[]
 ---@field public experimental cmp.ExperimentalConfig
 

@@ -104,14 +104,10 @@ end
 
 ---Keypress handler
 core.on_keymap = function(self, keys, fallback)
-  for key, action in pairs(config.get().mapping) do
-    if keymap.equals(key, keys) then
-      if type(action) == 'function' then
-        action(fallback)
-      else
-        action.invoke(fallback)
-      end
-      return
+  local mode = api.get_mode()
+  for key, mapping in pairs(config.get().mapping) do
+    if keymap.equals(key, keys) and mapping[mode] then
+      return mapping[mode](fallback)
     end
   end
 
@@ -139,14 +135,8 @@ end
 
 ---Prepare completion
 core.prepare = function(self)
-  for keys, action in pairs(config.get().mapping) do
-    if type(action) == 'function' then
-      action = {
-        modes = { 'i' },
-        action = action,
-      }
-    end
-    for _, mode in ipairs(action.modes) do
+  for keys, mapping in pairs(config.get().mapping) do
+    for mode in pairs(mapping) do
       keymap.listen(mode, keys, function(...)
         self:on_keymap(...)
       end)
