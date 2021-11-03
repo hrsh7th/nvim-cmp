@@ -1,5 +1,7 @@
 local api = {}
 
+api.in_insert_enter_autocmd = nil
+
 api.get_mode = function()
   if api.is_insert_mode() then
     return 'i'
@@ -17,7 +19,7 @@ api.is_insert_mode = function()
     'i',
     'ic',
     'ix',
-  }, vim.api.nvim_get_mode().mode) or vim.v.insertmode == 'i'
+  }, vim.api.nvim_get_mode().mode)
 end
 
 api.is_cmdline_mode = function()

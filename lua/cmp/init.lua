@@ -5,6 +5,7 @@ local feedkeys = require('cmp.utils.feedkeys')
 local autocmd = require('cmp.utils.autocmd')
 local keymap = require('cmp.utils.keymap')
 local misc = require('cmp.utils.misc')
+local api  = require('cmp.utils.api')
 
 local cmp = {}
 
@@ -270,10 +271,13 @@ cmp.setup = setmetatable({
 })
 
 autocmd.subscribe('InsertEnter', function()
-  if config.enabled() then
-    cmp.core:prepare()
-    cmp.core:on_change('InsertEnter')
-  end
+  --Avoid invalid mode detection on `InsertEnter` autocmd.
+  vim.schedule(function()
+    if config.enabled() then
+      cmp.core:prepare()
+      cmp.core:on_change('InsertEnter')
+    end
+  end)
 end)
 
 autocmd.subscribe('TextChanged', function()
