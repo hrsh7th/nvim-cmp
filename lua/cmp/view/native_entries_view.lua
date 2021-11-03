@@ -78,7 +78,7 @@ end
 
 native_entries_view.close = function(self)
   if api.is_suitable_mode() then
-    vim.api.nvim_select_popupmenu_item(-1, false, true, {})
+    vim.api.nvim_select_popupmenu_item(-1, false, false, {})
   end
   self.offset = -1
   self.entries = {}
