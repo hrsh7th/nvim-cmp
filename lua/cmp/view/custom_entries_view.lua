@@ -168,6 +168,7 @@ custom_entries_view.open = function(self, offset, entries)
     col = math.max(0, col),
     width = width,
     height = height,
+    border = config.get().completion.border,
     zindex = 1001,
   })
   if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
