@@ -26,19 +26,15 @@ ghost_text_view.new = function()
         return
       end
 
-      local cursor = vim.api.nvim_win_get_cursor(0)
-      if string.sub(vim.api.nvim_get_current_line(), cursor[2] + 1) ~= '' then
+      local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+      local line = vim.api.nvim_get_current_line()
+      if string.sub(line, col + 1) ~= '' then
         return
       end
 
-      local diff = 1 + cursor[2] - self.entry:get_offset()
-      local text = self.entry:get_insert_text()
-      if self.entry.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-        text = vim.lsp.util.parse_snippet(text)
-      end
-      text = string.sub(str.oneline(text), diff + 1)
+      local text = self.text_gen(self, line, col)
       if #text > 0 then
-        vim.api.nvim_buf_set_extmark(0, ghost_text_view.ns, cursor[1] - 1, cursor[2], {
+        vim.api.nvim_buf_set_extmark(0, ghost_text_view.ns, row - 1, col, {
           right_gravity = false,
           virt_text = { { text, c.hl_group or 'Comment' } },
           virt_text_pos = 'overlay',
@@ -49,6 +45,30 @@ ghost_text_view.new = function()
     end,
   })
   return self
+end
+
+---Generate the ghost text
+---  This function calculates the bytes of the entry to display calculating the number
+---  of character differences instead of just byte difference.
+ghost_text_view.text_gen = function(self, line, cursor_col)
+  local word = self.entry:get_insert_text()
+  if self.entry.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
+    word = vim.lsp.util.parse_snippet(word)
+  end
+  word = str.oneline(word)
+  local word_clen = vim.str_utfindex(word)
+  local cword = string.sub(line, self.entry:get_offset(), cursor_col)
+  local cword_clen = vim.str_utfindex(cword)
+  -- Number of characters from entry text (word) to be displayed as ghost thext
+  local nchars = word_clen - cword_clen
+  -- Missing characters to complete the entry text
+  local text
+  if nchars > 0 then
+    text = string.sub(word, vim.str_byteindex(word, word_clen - nchars) + 1)
+  else
+    text = ""
+  end
+  return text
 end
 
 ---Show ghost text
