@@ -96,7 +96,8 @@ keymap.listen = function(mode, lhs, callback)
   lhs = keymap.normalize(keymap.to_keymap(lhs))
 
   local existing = keymap.get_mapping(mode, lhs)
-  if string.match(existing.rhs, vim.pesc('v:lua.cmp.utils.keymap')) then
+  local id = string.match(existing.rhs, 'v:lua%.cmp%.utils%.keymap%.set_map%((%d+)%)')
+  if id and keymap.set_map.callbacks[tonumber(id, 10)] then
     return
   end
 
