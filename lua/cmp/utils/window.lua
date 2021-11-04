@@ -99,8 +99,12 @@ window.set_style = function(self, style)
   if vim.o.columns and vim.o.columns <= style.col + style.width then
     style.width = vim.o.columns - style.col - 1
   end
-  if vim.o.lines and vim.o.lines <= style.row + style.height then
-    style.height = vim.o.lines - style.row - 1
+  if vim.o.lines then
+    local border_offset = self:border_offset()
+    style.height = math.max(1, style.height - border_offset)
+    if vim.o.lines <= style.row + style.height then
+      style.height = vim.o.lines - style.row - border_offset - 1
+    end
   end
   self.style = style
   self.style.zindex = self.style.zindex or 1
@@ -127,19 +131,6 @@ window.open = function(self, style)
 
   if self.style.width < 1 or self.style.height < 1 then
     return
-  end
-
-  if self:has_scrollbar() then
-    -- when there are too many options to fit on the screen, the height needs to be adjusted to prevent collision with the cursorline
-    -- NOTE: setting `self.style.row`, while more intuitive, will do nothing to stop the above.
-    self.style.height = math.max(1, self.style.height - self:border_offset())
-  end
-
-  -- WARN: must come after the check for `has_scrollbar` above.
-  --       this adjustment can cause a scrollbar to appear, which means the above will overcorrect.
-  if self.style.row > 0 then
-    -- popups under the cursor need more offset, even without a scrollbar
-    self.style.height = math.max(1, self.style.height - 2)
   end
 
   if self.win and vim.api.nvim_win_is_valid(self.win) then
