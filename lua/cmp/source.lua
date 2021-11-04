@@ -303,7 +303,7 @@ source.complete = function(self, ctx, callback)
       option = self:get_config().opts,
       completion_context = completion_context,
     },
-    self.complete_dedup(vim.schedule_wrap(misc.once(function(response)
+    self.complete_dedup(vim.schedule_wrap(function(response)
       response = response or {}
 
       self.incomplete = response.isIncomplete or false
@@ -336,7 +336,7 @@ source.complete = function(self, ctx, callback)
         self.status = prev_status
       end
       callback()
-    end)))
+    end))
   )
   return true
 end
