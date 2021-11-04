@@ -9,6 +9,7 @@ local api = require('cmp.utils.api')
 ---@field public col number
 ---@field public width number
 ---@field public height number
+---@field public border string|string[]|nil
 ---@field public zindex number|nil
 
 ---@class cmp.Window
@@ -22,7 +23,7 @@ local api = require('cmp.utils.api')
 ---@field public cache cmp.Cache
 local window = {}
 
---- @param style table the `window.style`
+--- @param style cmp.WindowStyle
 --- @return integer row the offset needed to account for a border from the current cursor
 window.border_offset = function(style)
   local border_offset = 0 -- default: no border, no offset
@@ -34,7 +35,7 @@ window.border_offset = function(style)
   return border_offset
 end
 
---- @param style table the `window.style`
+--- @param style cmp.WindowStyle
 --- @return integer row, integer column the offset needed to account for a border from the current cursor
 window.border_offset_scrollbar = function(style)
   if style.border then
