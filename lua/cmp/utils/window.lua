@@ -114,7 +114,7 @@ window.set_style = function(self, style)
   end
 
   -- If the popup will open above the cursor
-  if -(vim.fn.line 'w0' - vim.api.nvim_win_get_cursor(0)[1]) > style.row then
+  if vim.fn.screenrow() > style.row then
     style.height = style.height - border_offset
   end
 
