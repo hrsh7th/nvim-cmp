@@ -22,6 +22,27 @@ local api = require('cmp.utils.api')
 ---@field public cache cmp.Cache
 local window = {}
 
+window.border_offset = function(self)
+  local border_offset = 0 -- default: no border, no offset
+
+  if self.style.border then
+    local border_type = type(self.style.border)
+
+    if border_type == 'string' then
+      border_offset = 2 -- all the preset borders pad the height by two
+    elseif border_type == 'table' then
+      -- if it's a table, we have to check manually to see if it has a top and bottom border
+      border_offset = (self.style.border[2] ~= '' and 1 or 0) + (self.style.border[6] ~= '' and 1 or 0)
+    end
+
+    if self.style.row > 0 then
+      border_offset = border_offset + 1 -- popups under the cursor need more offset
+    end
+  end
+
+  return border_offset
+end
+
 ---new
 ---@return cmp.Window
 window.new = function()
