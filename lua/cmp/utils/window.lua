@@ -34,10 +34,6 @@ window.border_offset = function(self)
       -- if it's a table, we have to check manually to see if it has a top and bottom border
       border_offset = (self.style.border[2] ~= '' and 1 or 0) + (self.style.border[6] ~= '' and 1 or 0)
     end
-
-    if self.style.row > 0 then
-      border_offset = border_offset + 1 -- popups under the cursor need more offset
-    end
   end
 
   return border_offset
@@ -135,8 +131,15 @@ window.open = function(self, style)
 
   if self:has_scrollbar() then
     -- when there are too many options to fit on the screen, the height needs to be adjusted to prevent collision with the cursorline
-    -- WARN: setting `self.style.row`, while more intuitive, will do nothing to stop the above.
+    -- NOTE: setting `self.style.row`, while more intuitive, will do nothing to stop the above.
     self.style.height = math.max(1, self.style.height - self:border_offset())
+  end
+
+  -- WARN: must come after the check for `has_scrollbar` above.
+  --       this adjustment can cause a scrollbar to appear, which means the above will overcorrect.
+  if self.style.row > 0 then
+    -- popups under the cursor need more offset, even without a scrollbar
+    self.style.height = math.max(1, self.style.height - 2)
   end
 
   if self.win and vim.api.nvim_win_is_valid(self.win) then
