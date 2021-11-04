@@ -36,7 +36,7 @@ window.border_offset = function(style)
 end
 
 --- @param style cmp.WindowStyle
---- @return integer row, integer column the offset needed to account for a border from the current cursor
+--- @return integer row, integer column the offset needed to account for the scrollbar
 window.border_offset_scrollbar = function(style)
   if style.border then
     -- since its centered, we only want half the normal border offset
