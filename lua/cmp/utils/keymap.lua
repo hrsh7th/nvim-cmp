@@ -69,7 +69,7 @@ keymap.backspace = function(count)
     return ''
   end
   local keys = {}
-  table.insert(keys, keymap.t(string.rep('<BS>', count)))
+  table.insert(keys, keymap.t(string.rep(keymap.undojoin() .. '<Left><Del>', count)))
   return table.concat(keys, '')
 end
 
