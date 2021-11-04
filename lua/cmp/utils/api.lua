@@ -9,6 +9,8 @@ api.get_mode = function()
     return 'x'
   elseif api.is_select_mode() then
     return 's'
+  elseif api.is_terminal_mode() then
+    return 't'
   elseif api.is_cmdline_mode() then
     return 'c'
   end
@@ -30,6 +32,12 @@ api.is_cmdline_mode = function()
   return is_cmdline_mode and vim.fn.getcmdtype() ~= '='
 end
 
+api.is_terminal_mode = function()
+  return vim.tbl_contains({
+    't',
+  }, vim.api.nvim_get_mode().mode)
+end
+
 api.is_select_mode = function()
   return vim.tbl_contains({
     's',
@@ -45,7 +53,7 @@ api.is_visual_mode = function()
 end
 
 api.is_suitable_mode = function()
-  return api.is_insert_mode() or api.is_cmdline_mode()
+  return api.is_insert_mode() or api.is_cmdline_mode() or api.is_terminal_mode()
 end
 
 api.get_current_line = function()
@@ -58,6 +66,11 @@ end
 api.get_cursor = function()
   if api.is_cmdline_mode() then
     return { vim.o.lines - (vim.api.nvim_get_option('cmdheight') or 1) + 1, vim.fn.getcmdpos() - 1 }
+  elseif api.is_terminal_mode() then
+    local cursor = vim.api.nvim_win_get_cursor(0)
+    cursor[2] = cursor[2] + 1
+    print(vim.inspect(cursor))
+    return cursor
   end
   return vim.api.nvim_win_get_cursor(0)
 end

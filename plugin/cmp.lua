@@ -21,8 +21,28 @@ vim.cmd [[
     autocmd ColorScheme * call v:lua.cmp.plugin.colorscheme()
     autocmd CmdlineEnter * call v:lua.cmp.plugin.cmdline.enter()
     autocmd CmdlineLeave * call v:lua.cmp.plugin.cmdline.leave()
+    autocmd TermEnter * call v:lua.cmp.plugin.term.enter()
+    autocmd TermLeave * call v:lua.cmp.plugin.term.leave()
   augroup END
 ]]
+
+local term_timer = vim.loop.new_timer()
+misc.set(_G, { 'cmp', 'plugin', 'term', 'enter' }, function()
+  require('cmp.utils.autocmd').emit('InsertEnter')
+
+  local cursor = api.get_cursor()
+  term_timer:start(100, 100, vim.schedule_wrap(function()
+    local new_cursor = api.get_cursor()
+    if cursor[1] ~= new_cursor[1] or cursor[2] ~= new_cursor[2] then
+      cursor = new_cursor
+      require('cmp.utils.autocmd').emit('TextChanged')
+    end
+  end))
+end)
+misc.set(_G, { 'cmp', 'plugin', 'term', 'leave' }, function()
+  term_timer:stop()
+  require('cmp.utils.autocmd').emit('InsertLeave')
+end)
 
 misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'enter' }, function()
   if config.get().experimental.native_menu then
@@ -41,7 +61,6 @@ misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'enter' }, function()
     end
   end
 end)
-
 misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'leave' }, function()
   if config.get().experimental.native_menu then
     return
