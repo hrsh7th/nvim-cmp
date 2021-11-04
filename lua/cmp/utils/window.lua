@@ -41,6 +41,24 @@ window.border_offset = function(style)
   return border_offset
 end
 
+--- @param style table the `window.style`
+--- @return integer row, integer column the offset needed to account for a border from the current cursor
+window.border_offset_scrollbar = function(style)
+  if style.border then
+    local border_type = type(style.border)
+    local border_offset_row = window.border_offset(style) / 2  -- since its centered, we only want half the normal border offset
+
+    if border_type == 'string' then
+      return border_offset_row, 1 -- all the preset borders pad the height by one
+    elseif border_type == 'table' then
+      -- if it's a table, we have to check manually to see if it has a right border
+      return border_offset_row, (style.border[4] ~= '' and 1 or 0)
+    end
+  end
+
+  return 0, 0
+end
+
 ---new
 ---@return cmp.Window
 window.new = function()
@@ -160,14 +178,14 @@ window.update = function(self)
     local info = self:info()
     local bar_height = math.ceil(info.height * (info.height / total))
     local bar_offset = math.min(info.height - bar_height, math.floor(info.height * (vim.fn.getwininfo(self.win)[1].topline / total)))
-    local border_offset = self:border_offset() / 2 -- since its centered, we only want half the normal border offset
+    local border_offset_row, border_offset_col = window.border_offset_scrollbar(self.style)
     local style1 = {}
     style1.relative = 'editor'
     style1.style = 'minimal'
     style1.width = 1
     style1.height = info.height
-    style1.row = info.row + border_offset
-    style1.col = info.col + info.width - (info.has_scrollbar and 1 or 0)
+    style1.row = info.row + border_offset_row
+    style1.col = info.col + info.width - (info.has_scrollbar and 1 or 0) - border_offset_col
     style1.zindex = (self.style.zindex and (self.style.zindex + 1) or 1)
     if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
       vim.api.nvim_win_set_config(self.swin1, style1)
@@ -181,8 +199,8 @@ window.update = function(self)
     style2.style = 'minimal'
     style2.width = 1
     style2.height = bar_height
-    style2.row = info.row + bar_offset + border_offset
-    style2.col = info.col + info.width - (info.has_scrollbar and 1 or 0)
+    style2.row = info.row + bar_offset + border_offset_row
+    style2.col = info.col + info.width - (info.has_scrollbar and 1 or 0) - border_offset_col
     style2.zindex = (self.style.zindex and (self.style.zindex + 2) or 2)
     if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
       vim.api.nvim_win_set_config(self.swin2, style2)
