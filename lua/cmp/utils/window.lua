@@ -133,6 +133,12 @@ window.open = function(self, style)
     return
   end
 
+  if self:has_scrollbar() then
+    -- when there are too many options to fit on the screen, the height needs to be adjusted to prevent collision with the cursorline
+    -- WARN: setting `self.style.row`, while more intuitive, will do nothing to stop the above.
+    self.style.height = math.max(1, self.style.height - self:border_offset())
+  end
+
   if self.win and vim.api.nvim_win_is_valid(self.win) then
     vim.api.nvim_win_set_config(self.win, self.style)
   else
