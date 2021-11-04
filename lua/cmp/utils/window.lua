@@ -99,13 +99,17 @@ window.set_style = function(self, style)
   if vim.o.columns and vim.o.columns <= style.col + style.width then
     style.width = vim.o.columns - style.col - 1
   end
-  if vim.o.lines then
-    local border_offset = self:border_offset()
-    style.height = math.max(1, style.height - border_offset)
-    if vim.o.lines <= style.row + style.height then
-      style.height = vim.o.lines - style.row - border_offset - 1
-    end
+
+  local border_offset = self:border_offset()
+
+  if vim.o.lines and vim.o.lines <= style.row + style.height then
+    style.height = vim.o.lines - style.row - border_offset - 1
   end
+
+  if -(vim.fn.line 'w0' - vim.api.nvim_win_get_cursor(0)[1]) > style.row then
+    style.row = style.row - border_offset
+  end
+
   self.style = style
   self.style.zindex = self.style.zindex or 1
 end
