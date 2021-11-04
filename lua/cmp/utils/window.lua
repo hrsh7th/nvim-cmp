@@ -28,14 +28,7 @@ window.border_offset = function(style)
   local border_offset = 0 -- default: no border, no offset
 
   if style.border then
-    local border_type = type(style.border)
-
-    if border_type == 'string' then
-      border_offset = 2 -- all the preset borders pad the height by two
-    elseif border_type == 'table' then
-      -- if it's a table, we have to check manually to see if it has a top and bottom border
-      border_offset = (style.border[2] ~= '' and 1 or 0) + (style.border[6] ~= '' and 1 or 0)
-    end
+    border_offset = (style.border[2] ~= '' and 1 or 0) + (style.border[6] ~= '' and 1 or 0)
   end
 
   return border_offset
@@ -45,15 +38,8 @@ end
 --- @return integer row, integer column the offset needed to account for a border from the current cursor
 window.border_offset_scrollbar = function(style)
   if style.border then
-    local border_type = type(style.border)
-    local border_offset_row = window.border_offset(style) / 2  -- since its centered, we only want half the normal border offset
-
-    if border_type == 'string' then
-      return border_offset_row, 1 -- all the preset borders pad the height by one
-    elseif border_type == 'table' then
-      -- if it's a table, we have to check manually to see if it has a right border
-      return border_offset_row, (style.border[4] ~= '' and 1 or 0)
-    end
+    -- since its centered, we only want half the normal border offset
+    return window.border_offset(style) / 2, style.border[4] ~= '' and 1 or 0
   end
 
   return 0, 0
