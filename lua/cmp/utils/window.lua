@@ -114,8 +114,10 @@ window.set_style = function(self, style)
   end
 
   -- If the popup will open above the cursor
-  if vim.fn.screenrow() > style.row then
-    style.height = style.height - border_offset
+  if vim.fn.screenrow() - 1 > style.row then
+    style.height = math.max(1, style.height - border_offset)
+    -- If there is so little space that the `height` is one, make more space by adjusting the row.
+    if style.height == 1 then style.row = style.row - 1 end
   end
 
   self.style = style
