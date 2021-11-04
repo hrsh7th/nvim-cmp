@@ -22,17 +22,19 @@ local api = require('cmp.utils.api')
 ---@field public cache cmp.Cache
 local window = {}
 
-window.border_offset = function(self)
+--- @param style table the `window.style`
+--- @return integer row the offset needed to account for a border from the current cursor
+window.border_offset = function(style)
   local border_offset = 0 -- default: no border, no offset
 
-  if self.style.border then
-    local border_type = type(self.style.border)
+  if style.border then
+    local border_type = type(style.border)
 
     if border_type == 'string' then
       border_offset = 2 -- all the preset borders pad the height by two
     elseif border_type == 'table' then
       -- if it's a table, we have to check manually to see if it has a top and bottom border
-      border_offset = (self.style.border[2] ~= '' and 1 or 0) + (self.style.border[6] ~= '' and 1 or 0)
+      border_offset = (style.border[2] ~= '' and 1 or 0) + (style.border[6] ~= '' and 1 or 0)
     end
   end
 
@@ -100,12 +102,13 @@ window.set_style = function(self, style)
     style.width = vim.o.columns - style.col - 1
   end
 
-  local border_offset = self:border_offset()
+  local border_offset = window.border_offset(style)
 
   if vim.o.lines and vim.o.lines <= style.row + style.height then
     style.height = vim.o.lines - style.row - border_offset - 1
   end
 
+  -- If the popup will open above the cursor
   if -(vim.fn.line 'w0' - vim.api.nvim_win_get_cursor(0)[1]) > style.row then
     style.row = style.row - border_offset
   end
