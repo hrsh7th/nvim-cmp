@@ -35,6 +35,18 @@ async.throttle = function(fn, timeout)
   })
 end
 
+---Control async tasks.
+async.step = function(...)
+  local tasks = { ... }
+  local next
+  next = function()
+    if #tasks > 0 then
+      table.remove(tasks, 1)(next)
+    end
+  end
+  table.remove(tasks, 1)(next)
+end
+
 ---Timeout callback function
 ---@param fn function
 ---@param timeout number

@@ -304,113 +304,98 @@ core.confirm = function(self, e, option, callback)
   debug.log('entry.confirm', e:get_completion_item())
 
   local release = self:suspend()
-  local ctx = self:get_context()
 
   -- Close menus.
   self.view:close()
 
   -- Simulate `<C-y>` behavior.
-  local confirm = {}
-  table.insert(confirm, keymap.backspace(ctx.cursor.character - misc.to_utfindex(e.context.cursor_before_line, e:get_offset())))
-  table.insert(confirm, e:get_word())
-  feedkeys.call(table.concat(confirm, ''), 'nt', function()
-    -- Restore to the requested state.
+  async.step(function(next)
+    local ctx = context.new()
+    local confirm = {}
+    table.insert(confirm, keymap.backspace(ctx.cursor.character - misc.to_utfindex(e.context.cursor_before_line, e:get_offset())))
+    table.insert(confirm, e:get_word())
+    feedkeys.call(table.concat(confirm, ''), 'nt', next)
+
+  -- Restore to the requested state.
+  end, function(next)
     local restore = {}
     table.insert(restore, keymap.backspace(vim.str_utfindex(e:get_word())))
     table.insert(restore, string.sub(e.context.cursor_before_line, e:get_offset()))
-    feedkeys.call(table.concat(restore, ''), 'n', function()
-      --@see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/suggestController.ts#L334
-      if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) == 0 then
-        local pre = context.new()
-        e:resolve(function()
-          local new = context.new()
-          local text_edits = misc.safe(e:get_completion_item().additionalTextEdits) or {}
-          if #text_edits == 0 then
-            return
-          end
+    feedkeys.call(table.concat(restore, ''), 'n', next)
 
-          local has_cursor_line_text_edit = (function()
-            local minrow = math.min(pre.cursor.row, new.cursor.row)
-            local maxrow = math.max(pre.cursor.row, new.cursor.row)
-            for _, te in ipairs(text_edits) do
-              local srow = te.range.start.line + 1
-              local erow = te.range['end'].line + 1
-              if srow <= minrow and maxrow <= erow then
-                return true
-              end
-            end
-            return false
-          end)()
-          if has_cursor_line_text_edit then
-            return
-          end
-          vim.fn['cmp#apply_text_edits'](new.bufnr, text_edits)
-        end)
-      else
-        vim.fn['cmp#apply_text_edits'](ctx.bufnr, e:get_completion_item().additionalTextEdits)
-      end
-
-      -- Prepare completion item for confirmation
-      local completion_item = misc.copy(e:get_completion_item())
-      if not misc.safe(completion_item.textEdit) then
-        completion_item.textEdit = {}
-        completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.word or completion_item.label
-      end
-      local behavior = option.behavior or config.get().confirmation.default_behavior
-      if behavior == types.cmp.ConfirmBehavior.Replace then
-        completion_item.textEdit.range = e:get_replace_range()
-      else
-        completion_item.textEdit.range = e:get_insert_range()
-      end
-
-      local keys = {}
-      if e.context.cursor.character < completion_item.textEdit.range['end'].character then
-        table.insert(keys, keymap.t(string.rep('<Del>', completion_item.textEdit.range['end'].character - e.context.cursor.character)))
-      end
-      if completion_item.textEdit.range.start.character < e.context.cursor.character then
-        table.insert(keys, keymap.backspace(e.context.cursor.character - completion_item.textEdit.range.start.character))
-      end
-      table.insert(keys, keymap.undobreak())
-
-      local is_snippet = completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet
-      if is_snippet then
-        table.insert(keys, e:get_word())
-      else
-        table.insert(keys, completion_item.textEdit.newText)
-      end
-
-      feedkeys.call(table.concat(keys, ''), 'n', function()
-        if is_snippet then
-          -- remove snippet prefix without changing `dot` register.
-          local snippet_ctx = context.new()
-          vim.fn['cmp#apply_text_edits'](ctx.bufnr, { {
-            range = {
-              start = {
-                line = snippet_ctx.cursor.line,
-                character = snippet_ctx.cursor.character - vim.str_utfindex(e:get_word()),
-              },
-              ['end'] = snippet_ctx.cursor,
-            },
-            newText = '',
-          } })
-          config.get().snippet.expand({
-            body = completion_item.textEdit.newText,
-            insert_text_mode = completion_item.insertTextMode,
-          })
+  -- Async additionalTextEdits @see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/suggestController.ts#L334
+  end, function(next)
+    if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) == 0 then
+      local pre = context.new()
+      e:resolve(function()
+        local new = context.new()
+        local text_edits = misc.safe(e:get_completion_item().additionalTextEdits) or {}
+        if #text_edits == 0 then
+          return
         end
-        e:execute(vim.schedule_wrap(function()
-          release()
-          self.event:emit('confirm_done', e)
-          --For backward compatibility
-          if config.get().event.on_confirm_done then
-            config.get().event.on_confirm_done(e)
+
+        local has_cursor_line_text_edit = (function()
+          local minrow = math.min(pre.cursor.row, new.cursor.row)
+          local maxrow = math.max(pre.cursor.row, new.cursor.row)
+          for _, te in ipairs(text_edits) do
+            local srow = te.range.start.line + 1
+            local erow = te.range['end'].line + 1
+            if srow <= minrow and maxrow <= erow then
+              return true
+            end
           end
-          if callback then
-            callback()
-          end
-        end))
+          return false
+        end)()
+        if has_cursor_line_text_edit then
+          return
+        end
+        vim.fn['cmp#apply_text_edits'](new.bufnr, text_edits)
       end)
-    end)
+    else
+      vim.fn['cmp#apply_text_edits'](vim.api.nvim_get_current_buf(), e:get_completion_item().additionalTextEdits)
+    end
+    next()
+
+  -- Expand completion item
+  end, function(next)
+    local ctx = context.new()
+    local completion_item = misc.copy(e:get_completion_item())
+    if not misc.safe(completion_item.textEdit) then
+      completion_item.textEdit = {}
+      completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.word or completion_item.label
+    end
+    local behavior = option.behavior or config.get().confirmation.default_behavior
+    if behavior == types.cmp.ConfirmBehavior.Replace then
+      completion_item.textEdit.range = e:get_replace_range()
+    else
+      completion_item.textEdit.range = e:get_insert_range()
+    end
+
+    local is_snippet = completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet
+    local new_text = completion_item.textEdit.newText
+    completion_item.textEdit.range.start.line = ctx.cursor.line
+    completion_item.textEdit.range.start.character = ctx.cursor.character - (e.context.cursor.character - completion_item.textEdit.range.start.character)
+    completion_item.textEdit.range['end'].line = ctx.cursor.line
+    completion_item.textEdit.range['end'].character = ctx.cursor.character + (completion_item.textEdit.range['end'].character - e.context.cursor.character)
+    if is_snippet then
+      completion_item.textEdit.newText = ''
+    end
+    vim.fn['cmp#apply_text_edits'](ctx.bufnr, { completion_item.textEdit })
+    if is_snippet then
+      config.get().snippet.expand({
+        body = new_text,
+        insert_text_mode = completion_item.insertTextMode,
+      })
+    end
+    next()
+  end, function()
+    e:execute(vim.schedule_wrap(function()
+      release()
+      self.event:emit('confirm_done', e)
+      if callback then
+        callback()
+      end
+    end))
   end)
 end
 
