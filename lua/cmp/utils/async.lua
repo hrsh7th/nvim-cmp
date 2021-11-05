@@ -39,9 +39,9 @@ end
 async.step = function(...)
   local tasks = { ... }
   local next
-  next = function()
+  next = function(...)
     if #tasks > 0 then
-      table.remove(tasks, 1)(next)
+      table.remove(tasks, 1)(next, ...)
     end
   end
   table.remove(tasks, 1)(next)
