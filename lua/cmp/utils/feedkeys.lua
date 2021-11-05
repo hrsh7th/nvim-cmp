@@ -21,7 +21,7 @@ feedkeys.call = setmetatable({
       table.insert(queue, { keymap.t('<Cmd>set %slazyredraw<CR>'):format(vim.o.lazyredraw and '' or 'no'), 'n' })
       table.insert(queue, { keymap.t('<Cmd>set eventignore=%s<CR>'):format(vim.o.eventignore or ''), 'n' })
     end
-    if #keys > 0 or callback then
+    if callback then
       local id = misc.id('cmp.utils.feedkeys.call')
       self.callbacks[id] = function()
         if callback then

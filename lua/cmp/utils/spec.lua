@@ -8,9 +8,21 @@ spec.before = function()
   vim.cmd([[
     bdelete!
     enew!
+    imapclear
+    imapclear <buffer>
+    cmapclear
+    cmapclear <buffer>
+    smapclear
+    smapclear <buffer>
+    xmapclear
+    xmapclear <buffer>
+    tmapclear
+    tmapclear <buffer>
+    setlocal noswapfile
     setlocal virtualedit=all
     setlocal completeopt=menu,menuone,noselect
   ]])
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, true, true), 'x', true)
 end
 
 spec.state = function(text, row, col)
