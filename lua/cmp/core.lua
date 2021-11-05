@@ -314,6 +314,7 @@ core.confirm = function(self, e, option, callback)
     local confirm = {}
     table.insert(confirm, keymap.backspace(ctx.cursor.character - misc.to_utfindex(e.context.cursor_before_line, e:get_offset())))
     table.insert(confirm, e:get_word())
+    table.insert(confirm, keymap.undobreak())
     feedkeys.call(table.concat(confirm, ''), 'nt', next)
 
   -- Restore to the requested state.
@@ -388,6 +389,8 @@ core.confirm = function(self, e, option, callback)
       })
     end
     next()
+
+  -- Finalize
   end, function()
     e:execute(vim.schedule_wrap(function()
       release()
