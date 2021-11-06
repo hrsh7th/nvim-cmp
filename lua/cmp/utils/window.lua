@@ -107,17 +107,23 @@ window.set_style = function(self, style)
     style.width = vim.o.columns - style.col - 1
   end
 
-  local border_offset = window.border_offset(style)
+  -- If there too little space on the right side of the screen.
+  if vim.o.columns and vim.o.columns <= style.col + style.width + border_offset_col + 1 then
+    style.col = math.max(1, vim.o.columns - style.width - border_offset_col - 1)
+  end
 
-  if vim.o.lines and vim.o.lines <= style.row + style.height then
+  if vim.o.lines and vim.o.lines <= style.row + style.height + border_offset + 1 then
     style.height = vim.o.lines - style.row - border_offset - 1
   end
 
   -- If the popup will open above the cursor
   if vim.fn.screenrow() - 1 > style.row then
-    style.height = math.max(1, style.height - border_offset)
-    -- If there is so little space that the `height` is one, make more space by adjusting the row.
-    if style.height == 1 then style.row = style.row - 1 end
+    -- shrink row by `border_offset_row`
+    style.row = style.row - border_offset_row
+    if style.row < 0 then -- compensate for negative row with height adjustment
+      style.height = style.height + style.row
+      style.row = 0
+    end
   end
 
   self.style = style
