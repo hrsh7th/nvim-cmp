@@ -73,12 +73,12 @@ return function()
     },
 
     completion = {
-      keyword_length = 1,
-      keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
       autocomplete = {
         types.cmp.TriggerEvent.TextChanged,
       },
       completeopt = 'menu,menuone,noselect',
+      keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
+      keyword_length = 1,
     },
 
     formatting = {
