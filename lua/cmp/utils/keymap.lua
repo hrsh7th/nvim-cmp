@@ -16,7 +16,7 @@ end
 keymap.normalize = function(keys)
   vim.api.nvim_set_keymap('t', '<Plug>(cmp.utils.keymap.normalize)', keys, {})
   for _, map in ipairs(vim.api.nvim_get_keymap('t')) do
-    if map.lhs == '<Plug>(cmp.utils.keymap.normalize)' then
+    if keymap.equals(map.lhs, '<Plug>(cmp.utils.keymap.normalize)') then
       return map.rhs
     end
   end
@@ -196,7 +196,7 @@ keymap.evacuate = function(bufnr, mode, lhs)
   elseif not map.noremap then
     -- remap & non-expr mapping should be checked if recursive or not.
     rhs = keymap.recursive(bufnr, mode, lhs, rhs)
-    if rhs == map.rhs or map.noremap then
+    if keymap.equals(rhs, map.rhs) or map.noremap then
       return { keys = rhs, mode = 'it' .. (map.noremap and 'n' or '') }
     end
   else
