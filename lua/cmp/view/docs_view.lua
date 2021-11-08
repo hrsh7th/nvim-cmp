@@ -13,6 +13,7 @@ docs_view.new = function()
   self.window:option('conceallevel', 2)
   self.window:option('concealcursor', 'n')
   self.window:option('foldenable', false)
+  self.window:option('linebreak', true)
   self.window:option('scrolloff', 0)
   self.window:option('wrap', true)
   return self
