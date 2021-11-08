@@ -12,22 +12,19 @@ feedkeys.call = setmetatable({
     end
 
     local is_insert = string.match(mode, 'i') ~= nil
+    local is_immediate = string.match(mode, 'x') ~= nil
 
     local queue = {}
     if #keys > 0 then
       table.insert(queue, { keymap.t('<Cmd>set lazyredraw<CR>'), 'n' })
       table.insert(queue, { keymap.t('<Cmd>set eventignore=all<CR>'), 'n' })
-      table.insert(queue, { keys, string.gsub(mode, '[it]', ''), true })
+      table.insert(queue, { keys, string.gsub(mode, '[itx]', ''), true })
       table.insert(queue, { keymap.t('<Cmd>set %slazyredraw<CR>'):format(vim.o.lazyredraw and '' or 'no'), 'n' })
       table.insert(queue, { keymap.t('<Cmd>set eventignore=%s<CR>'):format(vim.o.eventignore or ''), 'n' })
     end
     if callback then
       local id = misc.id('cmp.utils.feedkeys.call')
-      self.callbacks[id] = function()
-        if callback then
-          callback()
-        end
-      end
+      self.callbacks[id] = callback
       table.insert(queue, { keymap.t('<Cmd>call v:lua.cmp.utils.feedkeys.call.run(%s)<CR>'):format(id), 'n', true })
     end
 
@@ -39,6 +36,9 @@ feedkeys.call = setmetatable({
       for i = 1, #queue do
         vim.api.nvim_feedkeys(queue[i][1], queue[i][2], queue[i][3])
       end
+    end
+    if is_immediate then
+      vim.api.nvim_feedkeys('', 'x', true)
     end
   end,
 })

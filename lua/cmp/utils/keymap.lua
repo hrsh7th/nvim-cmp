@@ -258,7 +258,7 @@ keymap.set_map = setmetatable({
   end
 })
 misc.set(_G, { 'cmp', 'utils', 'keymap', 'set_map' }, function(id)
-  return keymap.set_map.callbacks[id]()
+  return keymap.set_map.callbacks[id]() or ''
 end)
 
 return keymap

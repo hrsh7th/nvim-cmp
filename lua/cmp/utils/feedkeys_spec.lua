@@ -7,9 +7,10 @@ describe('feedkeys', function()
   before_each(spec.before)
 
   it('dot-repeat', function()
-    feedkeys.call(keymap.t('iaiueo<Esc>'), 'n', function()
-      assert.are.equal(vim.fn.getreg('.'), keymap.t('aiueo'))
+    local reg
+    feedkeys.call(keymap.t('iaiueo<Esc>'), 'nx', function()
+      reg = vim.fn.getreg('.')
     end)
-    feedkeys.call('', 'nx')
+    assert.are.equal(reg, keymap.t('aiueo'))
   end)
 end)
