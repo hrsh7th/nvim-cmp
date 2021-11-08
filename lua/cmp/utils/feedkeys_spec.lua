@@ -14,8 +14,17 @@ describe('feedkeys', function()
     assert.are.equal(reg, keymap.t('aiueo'))
   end)
 
+  it('textwidth', function()
+    vim.cmd([[setlocal textwidth=6]])
+    feedkeys.call(keymap.t('iaiueo '), 'nx')
+    feedkeys.call(keymap.t('aaiueoaiueo'), 'nx')
+    assert.are.same(vim.api.nvim_buf_get_lines(0, 0, -1, false), {
+      'aiueo aiueoaiueo',
+    })
+  end)
+
   it('autoindent', function()
-    vim.cmd([[set indentkeys+==end]])
+    vim.cmd([[setlocal indentkeys+==end]])
     feedkeys.call(keymap.t('iif<CR><Tab>end') .. keymap.autoindent(), 'nx')
     assert.are.same(vim.api.nvim_buf_get_lines(0, 0, -1, false), {
       'if',
