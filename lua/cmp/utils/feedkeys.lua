@@ -17,9 +17,11 @@ feedkeys.call = setmetatable({
     local queue = {}
     if #keys > 0 then
       table.insert(queue, { keymap.t('<Cmd>set lazyredraw<CR>'), 'n' })
+      table.insert(queue, { keymap.t('<Cmd>set paste<CR>'), 'n' })
       table.insert(queue, { keymap.t('<Cmd>set eventignore=all<CR>'), 'n' })
       table.insert(queue, { keys, string.gsub(mode, '[itx]', ''), true })
       table.insert(queue, { keymap.t('<Cmd>set %slazyredraw<CR>'):format(vim.o.lazyredraw and '' or 'no'), 'n' })
+      table.insert(queue, { keymap.t('<Cmd>set %spaste<CR>'):format(vim.o.paste and '' or 'no'), 'n' })
       table.insert(queue, { keymap.t('<Cmd>set eventignore=%s<CR>'):format(vim.o.eventignore or ''), 'n' })
     end
 
