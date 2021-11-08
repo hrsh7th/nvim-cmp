@@ -301,27 +301,31 @@ custom_entries_view._select = function(self, cursor, option)
   self.event:emit('change')
 end
 
-custom_entries_view._insert = function(self, word)
-  word = word or ''
-
-  if api.is_cmdline_mode() then
-    local cursor = api.get_cursor()
-    local length = vim.str_utfindex(string.sub(api.get_current_line(), self.offset, cursor[2]))
-    vim.api.nvim_feedkeys(keymap.backspace(length) .. word, 'int', true)
-  else
-    local release = require('cmp').core:suspend()
-    feedkeys.call('', 'n', function()
+custom_entries_view._insert = setmetatable({
+  pending = false,
+}, {
+  __call = function(this, self, word)
+    word = word or ''
+    if api.is_cmdline_mode() then
       local cursor = api.get_cursor()
       local length = vim.str_utfindex(string.sub(api.get_current_line(), self.offset, cursor[2]))
-      feedkeys.call(
-        keymap.backspace(length) .. word,
-        'int',
-        vim.schedule_wrap(function()
+      vim.api.nvim_feedkeys(keymap.backspace(length) .. word, 'int', true)
+    else
+      if this.pending then
+        return
+      end
+      this.pending = true
+
+      local release = require('cmp').suspend()
+      feedkeys.call('', '', function()
+        local cursor = api.get_cursor()
+        feedkeys.call(keymap.backspace(1 + cursor[2] - self.offset) .. word, 'int', vim.schedule_wrap(function()
+          this.pending = false
           release()
-        end)
-      )
-    end)
+        end))
+      end)
+    end
   end
-end
+})
 
 return custom_entries_view
