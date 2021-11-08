@@ -73,7 +73,7 @@ end
 
 api.get_cursor_before_line = function()
   local cursor = api.get_cursor()
-  return string.sub(api.get_current_line(), 1, cursor[2] + 1)
+  return string.sub(api.get_current_line(), 1, cursor[2])
 end
 
 return api
