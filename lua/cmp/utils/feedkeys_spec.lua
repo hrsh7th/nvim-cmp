@@ -13,4 +13,13 @@ describe('feedkeys', function()
     end)
     assert.are.equal(reg, keymap.t('aiueo'))
   end)
+
+  it('autoindent', function()
+    vim.cmd([[set indentkeys+==end]])
+    feedkeys.call(keymap.t('iif<CR><Tab>end') .. keymap.autoindent(), 'nx')
+    assert.are.same(vim.api.nvim_buf_get_lines(0, 0, -1, false), {
+      'if',
+      'end'
+    })
+  end)
 end)
