@@ -103,17 +103,17 @@ end
 ---Set style.
 ---@param style cmp.WindowStyle
 window.set_style = function(self, style)
-  if vim.o.columns and vim.o.columns <= style.col + style.width then
-    style.width = vim.o.columns - style.col - 1
-  end
+  local border_offset_row = window.border_offset(style)
+  local _, border_offset_col = window.border_offset_scrollbar(style)
+  border_offset_col = border_offset_col * 2
 
   -- If there too little space on the right side of the screen.
   if vim.o.columns and vim.o.columns <= style.col + style.width + border_offset_col + 1 then
     style.col = math.max(1, vim.o.columns - style.width - border_offset_col - 1)
   end
 
-  if vim.o.lines and vim.o.lines <= style.row + style.height + border_offset + 1 then
-    style.height = vim.o.lines - style.row - border_offset - 1
+  if vim.o.lines and vim.o.lines <= style.row + style.height + border_offset_row + 1 then
+    style.height = vim.o.lines - style.row - border_offset_row - 1
   end
 
   -- If the popup will open above the cursor
