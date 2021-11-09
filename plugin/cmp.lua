@@ -20,7 +20,6 @@ vim.cmd [[
     autocmd CompleteDone * lua require'cmp.utils.autocmd'.emit('CompleteDone')
     autocmd ColorScheme * call v:lua.cmp.plugin.colorscheme()
     autocmd CmdlineEnter * call v:lua.cmp.plugin.cmdline.enter()
-    autocmd CmdlineLeave * call v:lua.cmp.plugin.cmdline.leave()
   augroup END
 ]]
 
@@ -28,26 +27,24 @@ misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'enter' }, function()
   if config.get().experimental.native_menu then
     return
   end
-  local cmdtype = vim.fn.expand('<afile>')
-  if cmdtype ~= '=' then
-    if api.is_cmdline_mode() then
-      vim.cmd [[
-        augroup cmp-cmdline
-          autocmd!
-          autocmd CmdlineChanged * lua require'cmp.utils.autocmd'.emit('TextChanged')
-        augroup END
-      ]]
-      require('cmp.utils.autocmd').emit('CmdlineEnter')
-    end
+  if vim.fn.expand('<afile>')~= '=' then
+    vim.schedule(function()
+      if api.is_cmdline_mode() then
+        vim.cmd [[
+          augroup cmp-cmdline
+            autocmd!
+            autocmd CmdlineChanged * lua require'cmp.utils.autocmd'.emit('TextChanged')
+            autocmd CmdlineLeave * call v:lua.cmp.plugin.cmdline.leave()
+          augroup END
+        ]]
+        require('cmp.utils.autocmd').emit('CmdlineEnter')
+      end
+    end)
   end
 end)
 
 misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'leave' }, function()
-  if config.get().experimental.native_menu then
-    return
-  end
-  local cmdtype = vim.fn.expand('<afile>')
-  if cmdtype ~= '=' then
+  if vim.fn.expand('<afile>') ~= '=' then
     vim.cmd [[
       augroup cmp-cmdline
         autocmd!

@@ -68,7 +68,7 @@ end
 ---@return number|nil
 context.get_offset = function(self, keyword_pattern)
   return self.cache:ensure({ 'get_offset', keyword_pattern, self.cursor_before_line }, function()
-    return pattern.offset(keyword_pattern .. '$', self.cursor_before_line) or self.cursor.col
+    return pattern.offset(keyword_pattern .. '\\m$', self.cursor_before_line) or self.cursor.col
   end)
 end
 
