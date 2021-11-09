@@ -271,7 +271,7 @@ cmp.setup = setmetatable({
 })
 
 autocmd.subscribe('InsertEnter', function()
-  feedkeys.call('', '', function()
+  feedkeys.call('', 'i', function()
     if config.enabled() then
       cmp.core:prepare()
       cmp.core:on_change('InsertEnter')
