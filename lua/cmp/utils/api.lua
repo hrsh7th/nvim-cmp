@@ -1,51 +1,40 @@
 local api = {}
 
-api.in_insert_enter_autocmd = nil
+local CTRL_V = vim.api.nvim_replace_termcodes('<C-v>', true, true, true)
+local CTRL_S = vim.api.nvim_replace_termcodes('<C-s>', true, true, true)
 
 api.get_mode = function()
-  if api.is_insert_mode() then
-    return 'i'
-  elseif api.is_visual_mode() then
-    return 'x'
-  elseif api.is_select_mode() then
-    return 's'
-  elseif api.is_cmdline_mode() then
-    return 'c'
+  local mode = vim.api.nvim_get_mode().mode:sub(1, 1)
+  if mode == 'i' then
+    return 'i'  -- insert
+  elseif mode == 'v' or mode == 'V' or mode == CTRL_V then
+    return 'x'  -- visual
+  elseif mode == 's' or mode == 'S' or mode == CTRL_S then
+    return 's'  -- select
+  elseif mode == 'c' and vim.fn.getcmdtype() ~= '=' then
+    return 'c'  -- cmdline
   end
 end
 
 api.is_insert_mode = function()
-  return vim.tbl_contains({
-    'i',
-    'ic',
-    'ix',
-  }, vim.api.nvim_get_mode().mode)
+  return api.get_mode() == 'i'
 end
 
 api.is_cmdline_mode = function()
-  local is_cmdline_mode = vim.tbl_contains({
-    'c',
-    'cv',
-  }, vim.api.nvim_get_mode().mode)
-  return is_cmdline_mode and vim.fn.getcmdtype() ~= '='
+  return api.get_mode() == 'c'
 end
 
 api.is_select_mode = function()
-  return vim.tbl_contains({
-    's',
-    'S',
-  }, vim.api.nvim_get_mode().mode)
+  return api.get_mode() == 's'
 end
 
 api.is_visual_mode = function()
-  return vim.tbl_contains({
-    'v',
-    'V',
-  }, vim.api.nvim_get_mode().mode)
+  return api.get_mode() == 'x'
 end
 
 api.is_suitable_mode = function()
-  return api.is_insert_mode() or api.is_cmdline_mode()
+  local mode = api.get_mode()
+  return mode == 'i' or mode == 'c'
 end
 
 api.get_current_line = function()
