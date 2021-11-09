@@ -277,6 +277,23 @@ autocmd.subscribe('InsertEnter', function()
   end)
 end)
 
+autocmd.subscribe('InsertLeave', function()
+  cmp.core:reset()
+  cmp.core.view:close()
+end)
+
+autocmd.subscribe('CmdlineEnter', function()
+  if config.enabled() then
+    cmp.core:prepare()
+    cmp.core:on_change('InsertEnter')
+  end
+end)
+
+autocmd.subscribe('CmdlineLeave', function()
+  cmp.core:reset()
+  cmp.core.view:close()
+end)
+
 autocmd.subscribe('TextChanged', function()
   if config.enabled() then
     cmp.core:on_change('TextChanged')
@@ -287,11 +304,6 @@ autocmd.subscribe('CursorMoved', function()
   if config.enabled() then
     cmp.core:on_moved()
   end
-end)
-
-autocmd.subscribe('InsertLeave', function()
-  cmp.core:reset()
-  cmp.core.view:close()
 end)
 
 cmp.event:on('confirm_done', function(e)

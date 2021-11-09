@@ -37,7 +37,7 @@ misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'enter' }, function()
           autocmd CmdlineChanged * lua require'cmp.utils.autocmd'.emit('TextChanged')
         augroup END
       ]]
-      require('cmp.utils.autocmd').emit('InsertEnter')
+      require('cmp.utils.autocmd').emit('CmdlineEnter')
     end
   end
 end)
@@ -53,7 +53,7 @@ misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'leave' }, function()
         autocmd!
       augroup END
     ]]
-    require('cmp.utils.autocmd').emit('InsertLeave')
+    require('cmp.utils.autocmd').emit('CmdlineLeave')
   end
 end)
 
