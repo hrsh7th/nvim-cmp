@@ -24,23 +24,21 @@ local api = require('cmp.utils.api')
 local window = {}
 
 --- @param style cmp.WindowStyle
---- @return integer row the offset needed to account for a border from the current cursor
+--- @return integer row the offset needed to account for the popup window
 window.border_offset = function(style)
-  local border_offset = 0 -- default: no border, no offset
-
   if style.border then
-    border_offset = (style.border[2] ~= '' and 1 or 0) + (style.border[6] ~= '' and 1 or 0)
+    return (style.border[2] ~= '' and 1 or 0) + (style.border[6] ~= '' and 1 or 0)
   end
 
-  return border_offset
+  return 0
 end
 
 --- @param style cmp.WindowStyle
 --- @return integer row, integer column the offset needed to account for the scrollbar
 window.border_offset_scrollbar = function(style)
   if style.border then
-    -- since its centered, we only want half the normal border offset
-    return window.border_offset(style) / 2, style.border[4] ~= '' and 1 or 0
+    -- We want to center the scrollbar vertically, and reduce the column by one if necessary
+    return style.border[2] ~= '' and 1 or 0, style.border[4] ~= '' and 1 or 0
   end
 
   return 0, 0
@@ -103,23 +101,16 @@ end
 ---Set style.
 ---@param style cmp.WindowStyle
 window.set_style = function(self, style)
-  local border_offset_row = window.border_offset(style)
-  local _, border_offset_col = window.border_offset_scrollbar(style)
-  border_offset_col = border_offset_col * 2
+  local border_offset = window.border_offset(style)
 
-  -- If there too little space on the right side of the screen.
-  if vim.o.columns and vim.o.columns <= style.col + style.width + border_offset_col + 1 then
-    style.col = math.max(1, vim.o.columns - style.width - border_offset_col - 1)
-  end
-
-  if vim.o.lines and vim.o.lines <= style.row + style.height + border_offset_row + 1 then
-    style.height = vim.o.lines - style.row - border_offset_row - 1
+  if vim.o.lines and vim.o.lines <= style.row + style.height + border_offset + 1 then
+    style.height = vim.o.lines - style.row - border_offset - 1
   end
 
   -- If the popup will open above the cursor
   if vim.fn.screenrow() - 1 > style.row then
     -- shrink row by `border_offset_row`
-    style.row = style.row - border_offset_row
+    style.row = style.row - border_offset
     if style.row < 0 then -- compensate for negative row with height adjustment
       style.height = style.height + style.row
       style.row = 0
