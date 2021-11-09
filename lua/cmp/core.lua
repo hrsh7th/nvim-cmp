@@ -308,21 +308,20 @@ core.confirm = function(self, e, option, callback)
   -- Close menus.
   self.view:close()
 
-  -- Simulate `<C-y>` behavior.
+  -- Simulate <C-y> behavior and store the `.` register.
   async.step(function(next)
     local ctx = context.new()
-    local confirm = {}
-    table.insert(confirm, keymap.backspace(ctx.cursor.character - misc.to_utfindex(e.context.cursor_before_line, e:get_offset())))
-    table.insert(confirm, e:get_word())
-    table.insert(confirm, keymap.undobreak())
-    feedkeys.call(table.concat(confirm, ''), 'nt', next)
+    local keys = {}
+    table.insert(keys, keymap.backspace(ctx.cursor.character - vim.str_utfindex(ctx.cursor_line, e:get_offset() - 1)))
+    table.insert(keys, e:get_word())
+    table.insert(keys, keymap.undobreak())
+    feedkeys.call(table.concat(keys, ''), 'nt', next)
 
-  -- Restore to the requested state.
+  -- Restore the state again without modify the `.` register.
   end, function(next)
-    local restore = {}
-    table.insert(restore, keymap.backspace(vim.str_utfindex(e:get_word())))
-    table.insert(restore, string.sub(e.context.cursor_before_line, e:get_offset()))
-    feedkeys.call(table.concat(restore, ''), 'n', next)
+    vim.api.nvim_set_current_line(e.context.cursor_line)
+    vim.api.nvim_win_set_cursor(0, { e.context.cursor.row, e.context.cursor.col - 1 })
+    next()
 
   -- Async additionalTextEdits @see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/suggestController.ts#L334
   end, function(next)
