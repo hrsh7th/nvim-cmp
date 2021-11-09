@@ -72,32 +72,6 @@ context.get_offset = function(self, keyword_pattern)
   end)
 end
 
----if cursor moves from left to right.
----@param self cmp.Context
-context.is_forwarding = function(self)
-  local prev = self.prev_context
-  local curr = self
-
-  return prev.bufnr == curr.bufnr and prev.cursor.row == curr.cursor.row and prev.cursor.col < curr.cursor.col
-end
-
----Return if this context is continueing previous context.
-context.continue = function(self, offset)
-  local prev = self.prev_context
-  local curr = self
-
-  if curr.bufnr ~= prev.bufnr then
-    return false
-  end
-  if curr.cursor.row ~= prev.cursor.row then
-    return false
-  end
-  if curr.cursor.col < offset then
-    return false
-  end
-  return true
-end
-
 ---Return if this context is changed from previous context or not.
 ---@return boolean
 context.changed = function(self, ctx)
