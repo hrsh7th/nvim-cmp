@@ -271,8 +271,7 @@ cmp.setup = setmetatable({
 })
 
 autocmd.subscribe('InsertEnter', function()
-  --Avoid invalid mode detection on `InsertEnter` autocmd.
-  vim.schedule(function()
+  feedkeys.call('', '', function()
     if config.enabled() then
       cmp.core:prepare()
       cmp.core:on_change('InsertEnter')
