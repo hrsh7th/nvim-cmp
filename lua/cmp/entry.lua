@@ -59,7 +59,13 @@ entry.get_offset = function(self)
     if misc.safe(self.completion_item.textEdit) then
       local range = misc.safe(self.completion_item.textEdit.insert) or misc.safe(self.completion_item.textEdit.range)
       if range then
-        local c = misc.to_vimindex(self.context.cursor_line, range.start.character)
+        local c = misc.to_vimindex(self.context.cursor_before_line, range.start.character)
+
+        -- Check already inserted text is the same as the TextEdit.newText.
+        if str.has_prefix(self.completion_item.textEdit.newText, string.sub(self.context.cursor_before_line, c, self.source_offset - 1)) then
+          return self.source_offset
+        end
+
         for idx = c, self.source_offset do
           if not char.is_white(string.byte(self.context.cursor_line, idx)) then
             offset = idx
@@ -109,9 +115,19 @@ entry.get_word = function(self)
     local word
     if misc.safe(self.completion_item.textEdit) then
       word = str.trim(self.completion_item.textEdit.newText)
-      local overwrite = self:get_overwrite()
-      if 0 < overwrite[2] or self.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-        word = str.get_word(word, string.byte(self.context.cursor_after_line, 1))
+
+      local range = misc.safe(self.completion_item.textEdit.insert) or misc.safe(self.completion_item.textEdit.range)
+      if range then
+        local c = misc.to_vimindex(self.context.cursor_before_line, range.start.character)
+        -- Check already inserted text is the same as the TextEdit.newText.
+        if str.has_prefix(self.completion_item.textEdit.newText, string.sub(self.context.cursor_before_line, c, self.source_offset - 1)) then
+          word = string.sub(self.completion_item.textEdit.newText, 1 + self.source_offset - c)
+        end
+
+        local overwrite = self:get_overwrite()
+        if 0 < overwrite[2] or self.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
+          word = str.get_word(word, string.byte(self.context.cursor_after_line, 1))
+        end
       end
     elseif misc.safe(self.completion_item.insertText) then
       word = str.trim(self.completion_item.insertText)
@@ -157,12 +173,12 @@ entry.get_filter_text = function(self)
       local diff = self.source_offset - self:get_offset()
       if diff > 0 then
         if char.is_symbol(string.byte(self.context.cursor_line, self:get_offset())) then
-          local prefix = string.sub(self.context.cursor_line, self:get_offset(), self:get_offset() + diff)
-          if string.find(word, prefix, 1, true) ~= 1 then
-            word = prefix .. word
-          end
+        local prefix = string.sub(self.context.cursor_line, self:get_offset(), self:get_offset() + diff)
+        if string.find(word, prefix, 1, true) ~= 1 then
+          word = prefix .. word
         end
       end
+    end
     end
 
     return word

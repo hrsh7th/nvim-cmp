@@ -100,7 +100,7 @@ describe('entry', function()
         },
       },
     })
-    assert.are.equal(e:get_vim_item(4).word, '->foo')
+    assert.are.equal(e:get_vim_item(e:get_offset()).word, '->foo')
     assert.are.equal(e:get_filter_text(), '.foo')
   end)
 
@@ -110,7 +110,7 @@ describe('entry', function()
     local e = entry.new(state.manual(), state.source(), {
       label = 'catch',
     })
-    -- The offset will be 18 in this situation because the server returns `[Symbol]` as candidate.
+    -- The suggest_offset will be 18 but e:get_offset() will be 19 because the server returns `[Symbol]` as candidate.
     assert.are.equal(e:get_vim_item(18).word, '.catch')
     assert.are.equal(e:get_filter_text(), 'catch')
   end)
@@ -135,8 +135,32 @@ describe('entry', function()
         },
       },
     })
-    assert.are.equal(e:get_vim_item(18).word, '[Symbol]')
+    assert.are.equal(e:get_vim_item(e:get_offset()).word, '[Symbol]')
     assert.are.equal(e:get_filter_text(), '.Symbol')
+  end)
+
+  it('[typescript-language-server] 3', function()
+    local state = spec.state('import { GetStaticP }', 1, 20)
+    state.input('r')
+    local e = entry.new(state.manual(), state.source(), {
+      label = "GetStaticProps",
+      textEdit = {
+        newText = "import { GetStaticProps$1 } from 'next';",
+        range = {
+          ['end'] = {
+            character = 20,
+            line = 1
+          },
+          start = {
+            character = 0,
+            line = 1
+          }
+        }
+      }
+    })
+    print(vim.inspect({ word = e:get_word() }))
+    print(vim.inspect({ vim_item = e:get_vim_item(e:get_offset()) }))
+    print(vim.inspect({ filter_text = e:get_filter_text() }))
   end)
 
   it('[lua-language-server] 1', function()
@@ -162,7 +186,7 @@ describe('entry', function()
         },
       },
     })
-    assert.are.equal(e:get_vim_item(19).word, 'cmp.config')
+    assert.are.equal(e:get_vim_item(e:get_offset()).word, 'cmp.config')
     assert.are.equal(e:get_filter_text(), 'cmp.config')
 
     -- press '
@@ -184,7 +208,7 @@ describe('entry', function()
         },
       },
     })
-    assert.are.equal(e:get_vim_item(19).word, 'cmp.config')
+    assert.are.equal(e:get_vim_item(e:get_offset()).word, 'cmp.config')
     assert.are.equal(e:get_filter_text(), 'cmp.config')
   end)
 
@@ -211,7 +235,7 @@ describe('entry', function()
         },
       },
     })
-    assert.are.equal(e:get_vim_item(19).word, 'lua.cmp.config')
+    assert.are.equal(e:get_vim_item(e:get_offset()).word, 'lua.cmp.config')
     assert.are.equal(e:get_filter_text(), 'lua.cmp.config')
 
     -- press '
@@ -233,7 +257,7 @@ describe('entry', function()
         },
       },
     })
-    assert.are.equal(e:get_vim_item(19).word, 'lua.cmp.config')
+    assert.are.equal(e:get_vim_item(e:get_offset()).word, 'lua.cmp.config')
     assert.are.equal(e:get_filter_text(), 'lua.cmp.config')
   end)
 
