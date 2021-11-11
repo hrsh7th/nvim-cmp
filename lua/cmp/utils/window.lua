@@ -15,8 +15,7 @@ local api = require('cmp.utils.api')
 ---@class cmp.Window
 ---@field public name string
 ---@field public win number|nil
----@field public swin1 number|nil
----@field public swin2 number|nil
+---@field public swin number|nil
 ---@field public style cmp.WindowStyle
 ---@field public opt table<string, any>
 ---@field public buffer_opt table<string, any>
@@ -50,8 +49,7 @@ window.new = function()
   local self = setmetatable({}, { __index = window })
   self.name = misc.id('cmp.utils.window.new')
   self.win = nil
-  self.swin1 = nil
-  self.swin2 = nil
+  self.swin = nil
   self.style = {}
   self.cache = cache.new()
   self.opt = {}
@@ -174,28 +172,22 @@ window.update = function(self)
     style2.row = info.row + bar_offset + border_offset_row
     style2.col = info.col + info.width - (info.has_scrollbar and 1 or 0) - border_offset_col
     style2.zindex = (self.style.zindex and (self.style.zindex + 2) or 2)
-    if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
-      vim.api.nvim_win_set_config(self.swin2, style2)
+    if self.swin and vim.api.nvim_win_is_valid(self.swin) then
+      vim.api.nvim_win_set_config(self.swin, style2)
     else
       style2.noautocmd = true
       local sbuf2 = buffer.ensure(self.name .. 'sbuf2')
-      self.swin2 = vim.api.nvim_open_win(sbuf2, false, style2)
-      vim.api.nvim_win_set_option(self.swin2, 'winhighlight', 'EndOfBuffer:PmenuThumb,NormalFloat:CmpItemMenuThumb')
+      self.swin = vim.api.nvim_open_win(sbuf2, false, style2)
+      vim.api.nvim_win_set_option(self.swin, 'winhighlight', 'EndOfBuffer:PmenuThumb,NormalFloat:CmpItemMenuThumb')
 
       local replace = {}
       for i = 1, style2.height do replace[i] = '║' end
 
       vim.api.nvim_buf_set_lines(sbuf2, 0, 1, true, replace)
     end
-  else
-    if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
-      vim.api.nvim_win_hide(self.swin1)
-      self.swin1 = nil
-    end
-    if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
-      vim.api.nvim_win_hide(self.swin2)
-      self.swin2 = nil
-    end
+  elseif self.swin and vim.api.nvim_win_is_valid(self.swin) then
+    vim.api.nvim_win_hide(self.swin)
+    self.swin = nil
   end
 
   -- In cmdline, vim does not redraw automatically.
@@ -213,13 +205,9 @@ window.close = function(self)
       vim.api.nvim_win_hide(self.win)
       self.win = nil
     end
-    if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
-      vim.api.nvim_win_hide(self.swin1)
-      self.swin1 = nil
-    end
-    if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
-      vim.api.nvim_win_hide(self.swin2)
-      self.swin2 = nil
+    if self.swin and vim.api.nvim_win_is_valid(self.swin) then
+      vim.api.nvim_win_hide(self.swin)
+      self.swin = nil
     end
   end
 end
