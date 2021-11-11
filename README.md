@@ -418,6 +418,8 @@ cmp.setup {
 }
 ```
 
+See the [wiki](https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance#basic-customisations) for more info on customizing menu appearance.
+
 #### experimental.native_menu (type: boolean)
 
 Use vim's native completion menu instead of custom floating menu.
