@@ -89,6 +89,7 @@ misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
+  highlight.inherit('CmpItemMenuThumb', 'PmenuThumb', {})
 end)
 _G.cmp.plugin.colorscheme()
 
