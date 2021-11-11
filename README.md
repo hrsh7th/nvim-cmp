@@ -418,57 +418,7 @@ cmp.setup {
 }
 ```
 
-Or, if you prefer not using an extra plugin for icons and source:
-
-```lua
--- Define icons
-local kind_icons = {
-  Text = "",
-  Method = "",
-  Function = "",
-  Constructor = "",
-  Field = "",
-  Variable = "",
-  Class = "ﴯ",
-  Interface = "",
-  Module = "",
-  Property = "ﰠ",
-  Unit = "",
-  Value = "",
-  Enum = "",
-  Keyword = "",
-  Snippet = "",
-  Color = "",
-  File = "",
-  Reference = "",
-  Folder = "",
-  EnumMember = "",
-  Constant = "",
-  Struct = "",
-  Event = "",
-  Operator = "",
-  TypeParameter = ""
-}
-
-local lspkind = require('lspkind')
-cmp.setup {
-  formatting = {
-    format = function(entry, vim_item)
-      -- Kind icons
-      vim_item.kind = string.format('%s %s', kind_icons[vim_item.kind], vim_item.kind)
-      -- Source
-      vim_item.menu = ({
-        buffer = "Buffer",
-        nvim_lsp = "[LSP]",
-        luasnip = "[LuaSnip]",
-        nvim_lua = "[Lua]",
-        latex_symbols = "[LaTeX]",
-      })[entry.source.name]
-      return vim_item
-    end
-  },
-}
-```
+See the [wiki](https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance#basic-customisations) for more info on customizing menu appearance.
 
 #### experimental.native_menu (type: boolean)
 
