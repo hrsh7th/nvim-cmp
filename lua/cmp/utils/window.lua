@@ -165,21 +165,7 @@ window.update = function(self)
     local bar_height = math.ceil(info.height * (info.height / total))
     local bar_offset = math.min(info.height - bar_height, math.floor(info.height * (vim.fn.getwininfo(self.win)[1].topline / total)))
     local border_offset_row, border_offset_col = window.border_offset_scrollbar(self.style)
-    local style1 = {}
-    style1.relative = 'editor'
-    style1.style = 'minimal'
-    style1.width = 1
-    style1.height = info.height
-    style1.row = info.row + border_offset_row
-    style1.col = info.col + info.width - (info.has_scrollbar and 1 or 0) - border_offset_col
-    style1.zindex = (self.style.zindex and (self.style.zindex + 1) or 1)
-    if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
-      vim.api.nvim_win_set_config(self.swin1, style1)
-    else
-      style1.noautocmd = true
-      self.swin1 = vim.api.nvim_open_win(buffer.ensure(self.name .. 'sbuf1'), false, style1)
-      vim.api.nvim_win_set_option(self.swin1, 'winhighlight', 'EndOfBuffer:PmenuSbar,Normal:PmenuSbar,NormalNC:PmenuSbar,NormalFloat:PmenuSbar')
-    end
+
     local style2 = {}
     style2.relative = 'editor'
     style2.style = 'minimal'
@@ -192,8 +178,14 @@ window.update = function(self)
       vim.api.nvim_win_set_config(self.swin2, style2)
     else
       style2.noautocmd = true
-      self.swin2 = vim.api.nvim_open_win(buffer.ensure(self.name .. 'sbuf2'), false, style2)
-      vim.api.nvim_win_set_option(self.swin2, 'winhighlight', 'EndOfBuffer:PmenuThumb,Normal:PmenuThumb,NormalNC:PmenuThumb,NormalFloat:PmenuThumb')
+      local sbuf2 = buffer.ensure(self.name .. 'sbuf2')
+      self.swin2 = vim.api.nvim_open_win(sbuf2, false, style2)
+      vim.api.nvim_win_set_option(self.swin2, 'winhighlight', 'EndOfBuffer:PmenuThumb,NormalFloat:CmpItemMenuThumb')
+
+      local replace = {}
+      for i = 1, style2.height do replace[i] = '║' end
+
+      vim.api.nvim_buf_set_lines(sbuf2, 0, 1, true, replace)
     end
   else
     if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
