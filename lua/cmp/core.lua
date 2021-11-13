@@ -417,7 +417,7 @@ core.confirm = function(self, e, option, callback)
           position.character = vim.str_utfindex(texts[#texts])
         end
         local pos = types.lsp.Position.to_vim(0, position)
-        vim.api.nvim_win_set_cursor(0, pos.row, pos.col - 1)
+        vim.api.nvim_win_set_cursor(0, { pos.row, pos.col - 1 })
       end
       next()
     else
