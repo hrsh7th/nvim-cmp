@@ -88,16 +88,19 @@ cmp.ItemField.Menu = 'menu'
 
 ---@class cmp.CompletionConfig
 ---@field public autocomplete cmp.TriggerEvent[]
+---@field public border string|string[]
 ---@field public completeopt string
----@field public keyword_pattern string
----@field public keyword_length number
 ---@field public get_trigger_characters fun(trigger_characters: string[]): string[]
+---@field public keyword_length number
+---@field public keyword_pattern string
+---@field public thin_scrollbar boolean|nil
 
 ---@class cmp.DocumentationConfig
----@field public border string[]
----@field public winhighlight string
----@field public maxwidth number|nil
+---@field public border string|string[]
 ---@field public maxheight number|nil
+---@field public maxwidth number|nil
+---@field public thin_scrollbar boolean|nil
+---@field public winhighlight string
 ---@field public zindex number|nil
 
 ---@class cmp.ConfirmationConfig
