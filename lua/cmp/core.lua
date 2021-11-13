@@ -407,6 +407,17 @@ core.confirm = function(self, e, option, callback)
           body = new_text,
           insert_text_mode = completion_item.insertTextMode,
         })
+      else
+        local texts = vim.split(completion_item.textEdit.newText, '\n')
+        local position = completion_item.textEdit.range.start
+        position.line = position.line + (#texts - 1)
+        if #texts == 1 then
+          position.character = position.character + vim.str_utfindex(texts[1])
+        else
+          position.character = vim.str_utfindex(texts[#texts])
+        end
+        local pos = types.lsp.Position.to_vim(0, position)
+        vim.api.nvim_win_set_cursor(0, pos.row, pos.col - 1)
       end
       next()
     else
