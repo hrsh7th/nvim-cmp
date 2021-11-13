@@ -6,13 +6,13 @@ local CTRL_S = vim.api.nvim_replace_termcodes('<C-s>', true, true, true)
 api.get_mode = function()
   local mode = vim.api.nvim_get_mode().mode:sub(1, 1)
   if mode == 'i' then
-    return 'i'  -- insert
+    return 'i' -- insert
   elseif mode == 'v' or mode == 'V' or mode == CTRL_V then
-    return 'x'  -- visual
+    return 'x' -- visual
   elseif mode == 's' or mode == 'S' or mode == CTRL_S then
-    return 's'  -- select
+    return 's' -- select
   elseif mode == 'c' and vim.fn.getcmdtype() ~= '=' then
-    return 'c'  -- cmdline
+    return 'c' -- cmdline
   end
 end
 

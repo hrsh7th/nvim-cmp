@@ -6,7 +6,6 @@ local source = require('cmp.source')
 local keymap = require('cmp.utils.keymap')
 
 describe('cmp.core', function()
-
   describe('confirm #confirm', function()
     before_each(spec.before)
 
@@ -15,12 +14,14 @@ describe('cmp.core', function()
       local s = source.new('spec', {
         complete = function(_, _, callback)
           callback({ completion_item })
-        end
+        end,
       })
       c:register_source(s)
       feedkeys.call(request, 'n', function()
         c:complete(c:get_context({ reason = types.cmp.ContextReason.Manual }))
-        vim.wait(5000, function() return #c.sources[s.id].entries > 0 end)
+        vim.wait(5000, function()
+          return #c.sources[s.id].entries > 0
+        end)
       end)
       feedkeys.call(filter, 'n', function()
         c:confirm(c.sources[s.id].entries[1], {})
@@ -37,7 +38,7 @@ describe('cmp.core', function()
 
     it('label only', function()
       local state = confirm('iA', 'IU', {
-        label = 'AIUEO'
+        label = 'AIUEO',
       })
       assert.are.same(state.buffer, { 'AIUEO' })
       assert.are.same(state.cursor, { 1, 5 })
@@ -54,10 +55,10 @@ describe('cmp.core', function()
             },
             ['end'] = {
               line = 0,
-              character = 6
-            }
+              character = 6,
+            },
           },
-          newText = 'foo\nbar\nbaz'
+          newText = 'foo\nbar\nbaz',
         },
       })
       assert.are.same(state.buffer, { '***foo', 'bar', 'baz***' })
@@ -73,7 +74,5 @@ describe('cmp.core', function()
       assert.are.same(state.buffer, { 'AIUEO()' })
       assert.are.same(state.cursor, { 1, 6 })
     end)
-
   end)
-
 end)
