@@ -319,14 +319,23 @@ core.confirm = function(self, e, option, callback)
 
   -- Restore the state again without modify the `.` register.
   end, function(next)
+    local ctx = context.new()
     if api.is_cmdline_mode() then
-      local ctx = context.new()
       local keys = {}
       table.insert(keys, keymap.backspace(ctx.cursor.character - vim.str_utfindex(ctx.cursor_line, e:get_offset() - 1)))
       table.insert(keys, string.sub(e.context.cursor_before_line, e:get_offset()))
       feedkeys.call(table.concat(keys, ''), 'nt', next)
     else
-      vim.api.nvim_set_current_line(e.context.cursor_line)
+      vim.api.nvim_buf_set_text(
+        0,
+        ctx.cursor.row - 1,
+        e:get_offset() - 1,
+        ctx.cursor.row - 1,
+        ctx.cursor.col - 1,
+        {
+          string.sub(e.context.cursor_before_line, e:get_offset())
+        }
+      )
       vim.api.nvim_win_set_cursor(0, { e.context.cursor.row, e.context.cursor.col - 1 })
       next()
     end
