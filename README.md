@@ -156,7 +156,7 @@ Defines the action of each key mapping. The following lists all the built-in act
 - `cmp.mapping.abort()`
 - `cmp.mapping.confirm({ select = bool, behavior = cmp.ConfirmBehavior.{Insert,Replace} })`: If `select` is true and you haven't select any item, automatically selects the first item.
 
-You can configure `nvim-cmp` to use these `cmd.mapping` like this:
+You can configure `nvim-cmp` to use these `cmp.mapping` like this:
 
 ```lua
 mapping = {
