@@ -66,7 +66,7 @@ ghost_text_view.text_gen = function(self, line, cursor_col)
   if nchars > 0 then
     text = string.sub(word, vim.str_byteindex(word, word_clen - nchars) + 1)
   else
-    text = ""
+    text = ''
   end
   return text
 end

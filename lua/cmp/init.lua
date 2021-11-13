@@ -5,7 +5,6 @@ local feedkeys = require('cmp.utils.feedkeys')
 local autocmd = require('cmp.utils.autocmd')
 local keymap = require('cmp.utils.keymap')
 local misc = require('cmp.utils.misc')
-local api  = require('cmp.utils.api')
 
 local cmp = {}
 

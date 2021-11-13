@@ -81,7 +81,7 @@ keymap.autoindent = function()
   table.insert(keys, keymap.t('<Cmd>setlocal indentkeys+=!^F<CR>'))
   table.insert(keys, keymap.t('<C-f>'))
   table.insert(keys, keymap.t('<Cmd>setlocal %scindent<CR>'):format(vim.bo.cindent and '' or 'no'))
-  table.insert(keys, keymap.t('<Cmd>setlocal indentkeys=%s<CR>'):format(vim.bo.indentkeys:gsub( '|', '\\|')))
+  table.insert(keys, keymap.t('<Cmd>setlocal indentkeys=%s<CR>'):format(vim.bo.indentkeys:gsub('|', '\\|')))
   return table.concat(keys, '')
 end
 
@@ -110,9 +110,12 @@ keymap.listen = function(mode, lhs, callback)
       return vim.api.nvim_feedkeys(keymap.t(fallback.keys), fallback.mode, true)
     end
 
-    callback(lhs, misc.once(function()
-      vim.api.nvim_feedkeys(keymap.t(fallback.keys), fallback.mode, true)
-    end))
+    callback(
+      lhs,
+      misc.once(function()
+        vim.api.nvim_feedkeys(keymap.t(fallback.keys), fallback.mode, true)
+      end)
+    )
   end, {
     expr = false,
     noremap = true,
@@ -237,7 +240,7 @@ end
 
 ---Set keymapping
 keymap.set_map = setmetatable({
-  callbacks = {}
+  callbacks = {},
 }, {
   __call = function(self, bufnr, mode, lhs, rhs, opts)
     if type(rhs) == 'function' then
@@ -255,7 +258,7 @@ keymap.set_map = setmetatable({
     else
       vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, opts)
     end
-  end
+  end,
 })
 misc.set(_G, { 'cmp', 'utils', 'keymap', 'set_map' }, function(id)
   return keymap.set_map.callbacks[id]() or ''

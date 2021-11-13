@@ -1,6 +1,7 @@
 local context = require('cmp.context')
 local source = require('cmp.source')
 local types = require('cmp.types')
+local config = require('cmp.config')
 
 local spec = {}
 
@@ -22,7 +23,28 @@ spec.before = function()
     setlocal virtualedit=all
     setlocal completeopt=menu,menuone,noselect
   ]])
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, true, true), 'x', true)
+  config.set_global({
+    sources = {
+      { name = 'spec' },
+    },
+    snippet = {
+      expand = function(args)
+        local ctx = context.new()
+        vim.api.nvim_buf_set_text(ctx.bufnr, ctx.cursor.row - 1, ctx.cursor.col - 1, ctx.cursor.row - 1, ctx.cursor.col - 1, vim.split(string.gsub(args.body, '%$0', ''), '\n'))
+        for i, t in ipairs(vim.split(args.body, '\n')) do
+          local s = string.find(t, '$0', 1, true)
+          if s then
+            if i == 1 then
+              vim.api.nvim_win_set_cursor(0, { ctx.cursor.row, ctx.cursor.col + s - 2 })
+            else
+              vim.api.nvim_win_set_cursor(0, { ctx.cursor.row, s - 1 })
+            end
+            break
+          end
+        end
+      end,
+    },
+  })
 end
 
 spec.state = function(text, row, col)

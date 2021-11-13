@@ -319,13 +319,17 @@ custom_entries_view._insert = setmetatable({
       local release = require('cmp').suspend()
       feedkeys.call('', '', function()
         local cursor = api.get_cursor()
-        feedkeys.call(keymap.backspace(1 + cursor[2] - self.offset) .. word, 'int', vim.schedule_wrap(function()
-          this.pending = false
-          release()
-        end))
+        feedkeys.call(
+          keymap.backspace(1 + cursor[2] - self.offset) .. word,
+          'int',
+          vim.schedule_wrap(function()
+            this.pending = false
+            release()
+          end)
+        )
       end)
     end
-  end
+  end,
 })
 
 return custom_entries_view
