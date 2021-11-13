@@ -114,14 +114,14 @@ entry.get_word = function(self)
 
     local word
     if misc.safe(self.completion_item.textEdit) then
-      word = str.trim(self.completion_item.textEdit.newText)
-
       local range = misc.safe(self.completion_item.textEdit.insert) or misc.safe(self.completion_item.textEdit.range)
       if range then
+        word = self.completion_item.textEdit.newText
+
         local c = misc.to_vimindex(self.context.cursor_before_line, range.start.character)
         -- Check already inserted text is the same as the TextEdit.newText.
-        if str.has_prefix(self.completion_item.textEdit.newText, string.sub(self.context.cursor_before_line, c, self.source_offset - 1)) then
-          word = string.sub(self.completion_item.textEdit.newText, 1 + self.source_offset - c)
+        if str.has_prefix(word, string.sub(self.context.cursor_before_line, c, self.source_offset - 1)) then
+          word = string.sub(word, 1 + self.source_offset - c)
         end
 
         local overwrite = self:get_overwrite()
@@ -130,14 +130,15 @@ entry.get_word = function(self)
         end
       end
     elseif misc.safe(self.completion_item.insertText) then
-      word = str.trim(self.completion_item.insertText)
+      word = self.completion_item.insertText
       if self.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
         word = str.get_word(word)
       end
-    else
-      word = str.trim(self.completion_item.label)
     end
-    return str.oneline(word)
+    if not word then
+      word = self.completion_item.label
+    end
+    return str.trim(str.oneline(word))
   end)
 end
 
