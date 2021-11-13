@@ -102,18 +102,16 @@ end
 window.set_style = function(self, style)
   local border_offset = window.border_offset(style)
 
-  if vim.o.lines and vim.o.lines <= style.row + style.height + border_offset + 1 then
-    style.height = vim.o.lines - style.row - border_offset - 1
+  -- If the popup will open above the cursor
+  if vim.fn.screenrow() - 1 > style.row or api.is_cmdline_mode() then
+    -- shrink row by `border_offset`
+    style.row = style.row - border_offset
+    -- compensate for negative row with height adjustment
+    if style.row < 0 then style.height = style.height + style.row end
   end
 
-  -- If the popup will open above the cursor
-  if vim.fn.screenrow() - 1 > style.row then
-    -- shrink row by `border_offset_row`
-    style.row = style.row - border_offset
-    if style.row < 0 then -- compensate for negative row with height adjustment
-      style.height = style.height + style.row
-      style.row = 0
-    end
+  if vim.o.lines and vim.o.lines <= style.row + style.height + border_offset + 1 then
+    style.height = vim.o.lines - style.row - border_offset - 1
   end
 
   self.style = style
