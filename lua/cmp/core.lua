@@ -308,23 +308,21 @@ core.confirm = function(self, e, option, callback)
   -- Close menus.
   self.view:close()
 
-  -- Simulate <C-y> behavior and store the `.` register.
-  async.step(function(next)
+  feedkeys.call('', 'n', function()
     local ctx = context.new()
     local keys = {}
     table.insert(keys, keymap.backspace(ctx.cursor.character - vim.str_utfindex(ctx.cursor_line, e:get_offset() - 1)))
     table.insert(keys, e:get_word())
     table.insert(keys, keymap.undobreak())
-    feedkeys.call(table.concat(keys, ''), 'nt', next)
-
-  -- Restore the state again without modify the `.` register.
-  end, function(next)
+    feedkeys.call(table.concat(keys, ''), 'int')
+  end)
+  feedkeys.call('', 'n', function()
     local ctx = context.new()
     if api.is_cmdline_mode() then
       local keys = {}
       table.insert(keys, keymap.backspace(ctx.cursor.character - vim.str_utfindex(ctx.cursor_line, e:get_offset() - 1)))
       table.insert(keys, string.sub(e.context.cursor_before_line, e:get_offset()))
-      feedkeys.call(table.concat(keys, ''), 'nt', next)
+      feedkeys.call(table.concat(keys, ''), 'int')
     else
       vim.api.nvim_buf_set_text(
         0,
@@ -337,11 +335,9 @@ core.confirm = function(self, e, option, callback)
         }
       )
       vim.api.nvim_win_set_cursor(0, { e.context.cursor.row, e.context.cursor.col - 1 })
-      next()
     end
-
-  -- Async additionalTextEdits @see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/suggestController.ts#L334
-  end, function(next)
+  end)
+  feedkeys.call('', 'n', function()
     if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) == 0 then
       local pre = context.new()
       e:resolve(function()
@@ -371,10 +367,8 @@ core.confirm = function(self, e, option, callback)
     else
       vim.fn['cmp#apply_text_edits'](vim.api.nvim_get_current_buf(), e:get_completion_item().additionalTextEdits)
     end
-    next()
-
-  -- Expand completion item
-  end, function(next)
+  end)
+  feedkeys.call('', 'n', function()
     local ctx = context.new()
     local completion_item = misc.copy(e:get_completion_item())
     if not misc.safe(completion_item.textEdit) then
@@ -419,17 +413,15 @@ core.confirm = function(self, e, option, callback)
         local pos = types.lsp.Position.to_vim(0, position)
         vim.api.nvim_win_set_cursor(0, { pos.row, pos.col - 1 })
       end
-      next()
     else
       local keys = {}
       table.insert(keys, string.rep(keymap.t('<BS>'), diff_before))
       table.insert(keys, string.rep(keymap.t('<Del>'), diff_after))
       table.insert(keys, new_text)
-      feedkeys.call(table.concat(keys, ''), 'n', next)
+      feedkeys.call(table.concat(keys, ''), 'int')
     end
-
-  -- Finalize
-  end, function()
+  end)
+  feedkeys.call('', 'n', function()
     e:execute(vim.schedule_wrap(function()
       release()
       self.event:emit('confirm_done', e)
