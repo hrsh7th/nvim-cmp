@@ -160,7 +160,9 @@ custom_entries_view.open = function(self, offset, entries)
     width = math.min(width, vim.o.columns - 1)
     col = vim.o.columns - width - 1
   end
+  local completion = config.get().completion
 
+  self.entries_win.thin_scrollbar = completion.thin_scrollbar
   self.entries_win:open({
     relative = 'editor',
     style = 'minimal',
@@ -168,7 +170,7 @@ custom_entries_view.open = function(self, offset, entries)
     col = math.max(0, col),
     width = width,
     height = height,
-    border = config.get().completion.border,
+    border = completion.border,
     zindex = 1001,
   })
   if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
