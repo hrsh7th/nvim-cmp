@@ -59,7 +59,7 @@ describe('cmp.core', function()
         assert.are.same(state.cursor, { 1, 7 })
       end)
 
-      it('text edit', function()
+      it('textEdit', function()
         local state = confirm(keymap.t('i***AEO***<Left><Left><Left><Left><Left>'), 'IU', {
           label = 'AIUEO',
           textEdit = {
@@ -133,7 +133,7 @@ describe('cmp.core', function()
         assert.are.same(state.cursor[2], 7)
       end)
 
-      it('text edit', function()
+      it('textEdit', function()
         local state = confirm(keymap.t(':***AEO***<Left><Left><Left><Left><Left>'), 'IU', {
           label = 'AIUEO',
           textEdit = {
