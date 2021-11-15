@@ -152,15 +152,19 @@ custom_entries_view.open = function(self, offset, entries)
   local has_bottom_space = (vim.o.lines - pos[1]) >= DEFAULT_HEIGHT
   local row, col = pos[1], pos[2] - delta - 1
 
-  if not has_bottom_space and math.floor(vim.o.lines * 0.5) <= row and vim.o.lines - row <= height then
-    height = math.min(height, row - 1)
-    row = row - height - 1
-  end
-  if math.floor(vim.o.columns * 0.5) <= col and vim.o.columns - col <= width then
-    width = math.min(width, vim.o.columns - 1)
-    col = vim.o.columns - width - 1
-  end
   local completion = config.get().completion
+  local border_offset_row, border_offset_col = window.border_offset(completion)
+
+  if not has_bottom_space and math.floor(vim.o.lines * 0.5) <= row + border_offset_row and vim.o.lines - row <= height + border_offset_row then
+    height = math.min(height, row - 1)
+    row = row - height - border_offset_row - 1
+    if row < 0 then height = height + row end
+  end
+  if math.floor(vim.o.columns * 0.5) <= col + border_offset_col and vim.o.columns - col <= width + border_offset_col then
+    width = math.min(width, vim.o.columns - 1)
+    col = vim.o.columns - width - border_offset_col - 1
+    if col < 0 then width = width + col end
+  end
 
   self.entries_win.thin_scrollbar = completion.thin_scrollbar
   self.entries_win:open({

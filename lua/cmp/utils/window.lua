@@ -27,10 +27,11 @@ local window = {}
 --- @return integer row the offset needed to account for the popup window
 window.border_offset = function(style)
   if style.border then
-    return (style.border[2] ~= '' and 1 or 0) + (style.border[6] ~= '' and 1 or 0)
+    return (style.border[2] ~= '' and 1 or 0) + (style.border[6] ~= '' and 1 or 0),
+           (style.border[4] ~= '' and 1 or 0) + (style.border[8] ~= '' and 1 or 0)
   end
 
-  return 0
+  return 0, 0
 end
 
 --- @param style cmp.WindowStyle
@@ -101,14 +102,6 @@ end
 ---@param style cmp.WindowStyle
 window.set_style = function(self, style)
   local border_offset = window.border_offset(style)
-
-  -- If the popup will open above the cursor
-  if vim.fn.screenrow() - 1 > style.row or api.is_cmdline_mode() then
-    -- shrink row by `border_offset`
-    style.row = style.row - border_offset
-    -- compensate for negative row with height adjustment
-    if style.row < 0 then style.height = style.height + style.row end
-  end
 
   if vim.o.lines and vim.o.lines <= style.row + style.height + border_offset + 1 then
     style.height = vim.o.lines - style.row - border_offset - 1
