@@ -73,18 +73,6 @@ keymap.backspace = function(count)
   return table.concat(keys, '')
 end
 
----Create autoindent keys
----@return string
-keymap.autoindent = function()
-  local keys = {}
-  table.insert(keys, keymap.t('<Cmd>setlocal cindent<CR>'))
-  table.insert(keys, keymap.t('<Cmd>setlocal indentkeys+=!^F<CR>'))
-  table.insert(keys, keymap.t('<C-f>'))
-  table.insert(keys, keymap.t('<Cmd>setlocal %scindent<CR>'):format(vim.bo.cindent and '' or 'no'))
-  table.insert(keys, keymap.t('<Cmd>setlocal indentkeys=%s<CR>'):format(vim.bo.indentkeys:gsub('|', '\\|')))
-  return table.concat(keys, '')
-end
-
 ---Return two key sequence are equal or not.
 ---@param a string
 ---@param b string

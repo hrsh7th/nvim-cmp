@@ -154,7 +154,6 @@ core.on_change = function(self, trigger_event)
     self:get_context({ reason = types.cmp.ContextReason.Auto })
     return
   end
-
   self:autoindent(trigger_event, function()
     local ctx = self:get_context({ reason = types.cmp.ContextReason.Auto })
     debug.log(('ctx: `%s`'):format(ctx.cursor_before_line))
@@ -204,25 +203,15 @@ core.autoindent = function(self, trigger_event, callback)
     return callback()
   end
 
-  -- Scan indentkeys.
+  -- Reset current completion if indentkeys matched.
   for _, key in ipairs(vim.split(vim.bo.indentkeys, ',')) do
     if vim.tbl_contains({ '=' .. prefix, '0=' .. prefix }, key) then
-      local release = self:suspend()
-      vim.schedule(function() -- Check autoindent already applied.
-        if cursor_before_line == api.get_cursor_before_line() then
-          feedkeys.call(keymap.autoindent(), 'n', function()
-            release()
-            callback()
-          end)
-        else
-          callback()
-        end
-      end)
-      return
+      self:reset()
+      self:set_context(context.empty())
+      break
     end
   end
 
-  -- indentkeys does not matched.
   callback()
 end
 
@@ -429,7 +418,6 @@ core.reset = function(self)
   for _, s in pairs(self.sources) do
     s:reset()
   end
-  self:get_context() -- To prevent new event
 end
 
 return core
