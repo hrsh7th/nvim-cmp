@@ -404,16 +404,6 @@ core.confirm = function(self, e, option, callback)
           body = new_text,
           insert_text_mode = completion_item.insertTextMode,
         })
-      else
-        local texts = vim.split(completion_item.textEdit.newText, '\n')
-        local cursor = {}
-        cursor[1] = ctx.cursor.row + #texts - 1
-        if #texts == 1 then
-          cursor[2] = vim.str_byteindex(ctx.cursor_line, completion_item.textEdit.range.start.character) + #texts[1]
-        else
-          cursor[2] = #texts[#texts]
-        end
-        vim.api.nvim_win_set_cursor(0, cursor)
       end
     else
       local keys = {}
