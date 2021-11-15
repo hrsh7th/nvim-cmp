@@ -137,11 +137,11 @@ custom_entries_view.open = function(self, offset, entries)
   height = height == 0 and #self.entries or height
   height = math.min(height, #self.entries)
 
-  if (vim.o.lines - pos[1]) <= 8 and pos[1] - 8 > 0 then
-    height = math.min(height, pos[1] - 1)
+  if (vim.o.lines - pos[1]) <= height and pos[1] - height > 0 then
     pos[1] = pos[1] - height - 1
-  else
-    height = math.min(height, vim.o.lines - pos[1])
+  end
+  if (vim.o.columns - pos[2]) <= width and pos[2] - width > 0 then
+    pos[2] = vim.o.columns - width + 1
   end
 
   if width < 1 or height < 1 then
