@@ -93,13 +93,13 @@ cmp.ItemField.Menu = 'menu'
 ---@field public get_trigger_characters fun(trigger_characters: string[]): string[]
 ---@field public keyword_length number
 ---@field public keyword_pattern string
----@field public thin_scrollbar boolean|nil
+---@field public scrollbar string
 
 ---@class cmp.DocumentationConfig
 ---@field public border string|string[]
 ---@field public maxheight number|nil
 ---@field public maxwidth number|nil
----@field public thin_scrollbar boolean|nil
+---@field public scrollbar string
 ---@field public winhighlight string
 ---@field public zindex number|nil
 

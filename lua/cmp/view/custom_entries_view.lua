@@ -166,7 +166,7 @@ custom_entries_view.open = function(self, offset, entries)
     if col < 0 then width = width + col end
   end
 
-  self.entries_win.thin_scrollbar = completion.thin_scrollbar
+  self.entries_win.scrollbar = completion.scrollbar
   self.entries_win:open({
     relative = 'editor',
     style = 'minimal',

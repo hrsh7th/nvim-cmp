@@ -18,8 +18,8 @@ local api = require('cmp.utils.api')
 ---@field public swin number|nil
 ---@field public style cmp.WindowStyle
 ---@field public opt table<string, any>
----@field public thin_scrollbar boolean|nil
 ---@field public buffer_opt table<string, any>
+---@field public scrollbar string
 ---@field public cache cmp.Cache
 local window = {}
 
@@ -170,17 +170,15 @@ window.update = function(self)
       style2.noautocmd = true
       local sbuf2 = buffer.ensure(self.name .. 'sbuf2')
       self.swin = vim.api.nvim_open_win(sbuf2, false, style2)
-      local highlight = self.thin_scrollbar and 'CmpItemMenuThumb' or 'PmenuThumb'
+      local highlight = self.scrollbar ~= '' and 'CmpItemMenuThumb' or 'PmenuThumb'
       vim.api.nvim_win_set_option(self.swin, 'winhighlight', 'EndOfBuffer:'..highlight..',NormalFloat:'..highlight)
 
-      if self.thin_scrollbar then
+      if self.scrollbar ~= '' then
         local replace = {}
         for i = 1, style2.height do replace[i] = '║' end
 
         vim.api.nvim_buf_set_lines(sbuf2, 0, 1, true, replace)
       end
-
-      vim.api.nvim_buf_set_lines(sbuf2, 0, 1, true, replace)
     end
   elseif self.swin and vim.api.nvim_win_is_valid(self.swin) then
     vim.api.nvim_win_hide(self.swin)
