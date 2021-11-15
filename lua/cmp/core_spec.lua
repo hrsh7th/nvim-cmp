@@ -4,7 +4,7 @@ local types = require('cmp.types')
 local core = require('cmp.core')
 local source = require('cmp.source')
 local keymap = require('cmp.utils.keymap')
-local api    = require('cmp.utils.api')
+local api = require('cmp.utils.api')
 
 describe('cmp.core', function()
   describe('confirm', function()
