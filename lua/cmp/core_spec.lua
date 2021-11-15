@@ -4,6 +4,7 @@ local types = require('cmp.types')
 local core = require('cmp.core')
 local source = require('cmp.source')
 local keymap = require('cmp.utils.keymap')
+local api    = require('cmp.utils.api')
 
 describe('cmp.core', function()
   describe('confirm', function()
@@ -27,8 +28,12 @@ describe('cmp.core', function()
       local state = {}
       feedkeys.call('', 'x', function()
         feedkeys.call('', 'n', function()
-          state.buffer = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-          state.cursor = vim.api.nvim_win_get_cursor(0)
+          if api.is_cmdline_mode() then
+            state.buffer = { api.get_current_line() }
+          else
+            state.buffer = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+          end
+          state.cursor = api.get_cursor()
         end)
       end)
       return state
@@ -105,6 +110,48 @@ describe('cmp.core', function()
         })
         assert.are.same(state.buffer, { '***foo', 'bar', 'baz***' })
         assert.are.same(state.cursor, { 2, 2 })
+      end)
+    end)
+
+    describe('cmdline-mode', function()
+      before_each(spec.before)
+
+      it('label', function()
+        local state = confirm(':A', 'IU', {
+          label = 'AIUEO',
+        })
+        assert.are.same(state.buffer, { 'AIUEO' })
+        assert.are.same(state.cursor[2], 5)
+      end)
+
+      it('insertText', function()
+        local state = confirm(':A', 'IU', {
+          label = 'AIUEO',
+          insertText = '_AIUEO_',
+        })
+        assert.are.same(state.buffer, { '_AIUEO_' })
+        assert.are.same(state.cursor[2], 7)
+      end)
+
+      it('text edit', function()
+        local state = confirm(keymap.t(':***AEO***<Left><Left><Left><Left><Left>'), 'IU', {
+          label = 'AIUEO',
+          textEdit = {
+            range = {
+              start = {
+                line = 0,
+                character = 3,
+              },
+              ['end'] = {
+                line = 0,
+                character = 6,
+              },
+            },
+            newText = 'foobarbaz',
+          },
+        })
+        assert.are.same(state.buffer, { '***foobarbaz***' })
+        assert.are.same(state.cursor[2], 12)
       end)
     end)
   end)

@@ -45,6 +45,11 @@ spec.before = function()
       end,
     },
   })
+  config.set_cmdline({
+    sources = {
+      { name = 'spec' },
+    },
+  }, ':')
 end
 
 spec.state = function(text, row, col)
