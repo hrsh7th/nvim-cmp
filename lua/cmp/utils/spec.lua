@@ -37,7 +37,7 @@ spec.before = function()
             if i == 1 then
               vim.api.nvim_win_set_cursor(0, { ctx.cursor.row, ctx.cursor.col + s - 2 })
             else
-              vim.api.nvim_win_set_cursor(0, { ctx.cursor.row, s - 1 })
+              vim.api.nvim_win_set_cursor(0, { ctx.cursor.row + i - 1, s - 1 })
             end
             break
           end

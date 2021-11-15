@@ -6,9 +6,7 @@ local source = require('cmp.source')
 local keymap = require('cmp.utils.keymap')
 
 describe('cmp.core', function()
-  describe('confirm #confirm', function()
-    before_each(spec.before)
-
+  describe('confirm', function()
     local confirm = function(request, filter, completion_item)
       local c = core.new()
       local s = source.new('spec', {
@@ -36,43 +34,78 @@ describe('cmp.core', function()
       return state
     end
 
-    it('label only', function()
-      local state = confirm('iA', 'IU', {
-        label = 'AIUEO',
-      })
-      assert.are.same(state.buffer, { 'AIUEO' })
-      assert.are.same(state.cursor, { 1, 5 })
-    end)
+    describe('insert-mode', function()
+      before_each(spec.before)
 
-    it('text edit', function()
-      local state = confirm(keymap.t('i***AEO***<Left><Left><Left><Left><Left>'), 'IU', {
-        label = 'AIUEO',
-        textEdit = {
-          range = {
-            start = {
-              line = 0,
-              character = 3,
+      it('label', function()
+        local state = confirm('iA', 'IU', {
+          label = 'AIUEO',
+        })
+        assert.are.same(state.buffer, { 'AIUEO' })
+        assert.are.same(state.cursor, { 1, 5 })
+      end)
+
+      it('insertText', function()
+        local state = confirm('iA', 'IU', {
+          label = 'AIUEO',
+          insertText = '_AIUEO_',
+        })
+        assert.are.same(state.buffer, { '_AIUEO_' })
+        assert.are.same(state.cursor, { 1, 7 })
+      end)
+
+      it('text edit', function()
+        local state = confirm(keymap.t('i***AEO***<Left><Left><Left><Left><Left>'), 'IU', {
+          label = 'AIUEO',
+          textEdit = {
+            range = {
+              start = {
+                line = 0,
+                character = 3,
+              },
+              ['end'] = {
+                line = 0,
+                character = 6,
+              },
             },
-            ['end'] = {
-              line = 0,
-              character = 6,
-            },
+            newText = 'foo\nbar\nbaz',
           },
-          newText = 'foo\nbar\nbaz',
-        },
-      })
-      assert.are.same(state.buffer, { '***foo', 'bar', 'baz***' })
-      assert.are.same(state.cursor, { 3, 3 })
-    end)
+        })
+        assert.are.same(state.buffer, { '***foo', 'bar', 'baz***' })
+        assert.are.same(state.cursor, { 3, 3 })
+      end)
 
-    it('snippet', function()
-      local state = confirm('iA', 'IU', {
-        label = 'AIUEO',
-        insertText = 'AIUEO($0)',
-        insertTextFormat = types.lsp.InsertTextFormat.Snippet,
-      })
-      assert.are.same(state.buffer, { 'AIUEO()' })
-      assert.are.same(state.cursor, { 1, 6 })
+      it('insertText & snippet', function()
+        local state = confirm('iA', 'IU', {
+          label = 'AIUEO',
+          insertText = 'AIUEO($0)',
+          insertTextFormat = types.lsp.InsertTextFormat.Snippet,
+        })
+        assert.are.same(state.buffer, { 'AIUEO()' })
+        assert.are.same(state.cursor, { 1, 6 })
+      end)
+
+      it('textEdit & snippet', function()
+        local state = confirm(keymap.t('i***AEO***<Left><Left><Left><Left><Left>'), 'IU', {
+          label = 'AIUEO',
+          insertTextFormat = types.lsp.InsertTextFormat.Snippet,
+          textEdit = {
+            range = {
+              start = {
+                line = 0,
+                character = 3,
+              },
+              ['end'] = {
+                line = 0,
+                character = 6,
+              },
+            },
+            newText = 'foo\nba$0r\nbaz',
+          },
+        })
+        assert.are.same(state.buffer, { '***foo', 'bar', 'baz***' })
+        assert.are.same(state.cursor, { 2, 2 })
+      end)
     end)
   end)
 end)
