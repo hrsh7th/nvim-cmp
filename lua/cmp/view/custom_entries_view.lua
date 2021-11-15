@@ -9,6 +9,8 @@ local api = require('cmp.utils.api')
 
 local SIDE_PADDING = 1
 
+local DEFAULT_HEIGHT = 10 -- @see https://github.com/vim/vim/blob/master/src/popupmenu.c#L45
+
 ---@class cmp.CustomEntriesView
 ---@field private entries_win cmp.Window
 ---@field private offset number
@@ -132,25 +134,23 @@ custom_entries_view.open = function(self, offset, entries)
   width = width + self.column_width.kind + (self.column_width.menu > 0 and 1 or 0)
   width = width + self.column_width.menu + 1
 
-  local pos = api.get_screen_cursor()
   local height = vim.api.nvim_get_option('pumheight')
-  height = height == 0 and #self.entries or height
+  height = height ~= 0 and height or DEFAULT_HEIGHT
   height = math.min(height, #self.entries)
 
-  if (vim.o.lines - pos[1]) <= height and pos[1] - height > 0 then
-    pos[1] = pos[1] - height - 1
-  end
-  if (vim.o.columns - pos[2]) <= width and pos[2] - width > 0 then
-    pos[2] = vim.o.columns - width + 1
-  end
-
-  if width < 1 or height < 1 then
-    return
-  end
-
+  local pos = api.get_screen_cursor()
   local cursor = api.get_cursor()
   local delta = cursor[2] + 1 - self.offset
   local row, col = pos[1], pos[2] - delta - 1
+
+  if math.floor(vim.o.lines * 0.5) <= row and vim.o.lines - row <= height then
+    height = math.min(height, row - 1)
+    row = row - height - 1
+  end
+  if math.floor(vim.o.columns * 0.5) <= col and vim.o.columns - col <= width then
+    width = math.min(width, vim.o.columns - 1)
+    col = vim.o.columns - width - 1
+  end
 
   self.entries_win:open({
     relative = 'editor',
