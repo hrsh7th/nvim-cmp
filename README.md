@@ -151,7 +151,7 @@ Defines the action of each key mapping. The following lists all the built-in act
 - `cmp.mapping.select_prev_item({ cmp.SelectBehavior.{Insert,Select} })`
 - `cmp.mapping.select_next_item({ cmp.SelectBehavior.{Insert,Select} })`
 - `cmp.mapping.scroll_docs(number)`
-- `cmp.mapping.complete()`
+- `cmp.mapping.complete({ reason = cmp.ContextReason.{Manual,Auto} })`
 - `cmp.mapping.close()`
 - `cmp.mapping.abort()`
 - `cmp.mapping.confirm({ select = bool, behavior = cmp.ConfirmBehavior.{Insert,Replace} })`: If `select` is true and you haven't select any item, automatically selects the first item.
@@ -508,9 +508,12 @@ NOTE: The `preselected` entry does not returned from this method.
 
 Confirms the current selected item, if possible. If `select` is true and no item has been selected, selects the first item.
 
-#### `cmp.complete()`
+#### `cmp.complete({ reason = cmp.ContextReason.{Manual,Auto} })`
 
 Invokes manual completion.
+
+NOTE: manual completion overrules some checks autocompletion does like `keyword_length`.
+To make it behave like autocompletion instead, you can overwrite the reason in the argument.
 
 #### `cmp.close()`
 
