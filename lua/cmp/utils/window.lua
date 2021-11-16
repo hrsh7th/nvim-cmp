@@ -175,7 +175,7 @@ window.update = function(self)
 
       if self.scrollbar ~= '' then
         local replace = {}
-        for i = 1, style2.height do replace[i] = '║' end
+        for i = 1, style2.height do replace[i] = self.scrollbar end
 
         vim.api.nvim_buf_set_lines(sbuf2, 0, 1, true, replace)
       end
