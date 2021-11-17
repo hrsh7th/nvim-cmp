@@ -15,12 +15,13 @@ local char = require('cmp.utils.char')
 ---@field public source any
 ---@field public cache cmp.Cache
 ---@field public revision number
----@field public context cmp.Context
 ---@field public incomplete boolean
 ---@field public is_triggered_by_symbol boolean
 ---@field public entries cmp.Entry[]
 ---@field public offset number
 ---@field public request_offset number
+---@field public context cmp.Context
+---@field public completion_context lsp.CompletionContext|nil
 ---@field public status cmp.SourceStatus
 ---@field public complete_dedup function
 local source = {}
@@ -50,11 +51,12 @@ source.reset = function(self)
   self.cache:clear()
   self.revision = self.revision + 1
   self.context = context.empty()
-  self.request_offset = -1
   self.is_triggered_by_symbol = false
   self.incomplete = false
   self.entries = {}
   self.offset = -1
+  self.request_offset = -1
+  self.completion_context = nil
   self.status = source.SourceStatus.WAITING
   self.complete_dedup(function() end)
 end
@@ -245,34 +247,31 @@ source.complete = function(self, ctx, callback)
     completion_context = {
       triggerKind = types.lsp.CompletionTriggerKind.Invoked,
     }
-  else
-    if vim.tbl_contains(self:get_trigger_characters(), before_char) then
-      completion_context = {
-        triggerKind = types.lsp.CompletionTriggerKind.TriggerCharacter,
-        triggerCharacter = before_char,
-      }
-    elseif ctx:get_reason() ~= types.cmp.ContextReason.TriggerOnly then
-      if self:get_keyword_length() <= (ctx.cursor.col - offset) then
-        if self.incomplete and self.context.cursor.col ~= ctx.cursor.col then
-          completion_context = {
-            triggerKind = types.lsp.CompletionTriggerKind.TriggerForIncompleteCompletions,
-          }
-        elseif not vim.tbl_contains({ self.request_offset, self.offset }, offset) then
-          completion_context = {
-            triggerKind = types.lsp.CompletionTriggerKind.Invoked,
-          }
-        end
+  elseif vim.tbl_contains(self:get_trigger_characters(), before_char) then
+    completion_context = {
+      triggerKind = types.lsp.CompletionTriggerKind.TriggerCharacter,
+      triggerCharacter = before_char,
+    }
+  elseif ctx:get_reason() ~= types.cmp.ContextReason.TriggerOnly then
+    if self:get_keyword_length() <= (ctx.cursor.col - offset) then
+      if self.incomplete and self.context.cursor.col ~= ctx.cursor.col then
+        completion_context = {
+          triggerKind = types.lsp.CompletionTriggerKind.TriggerForIncompleteCompletions,
+        }
+      elseif not vim.tbl_contains({ self.request_offset, self.offset }, offset) then
+        completion_context = {
+          triggerKind = types.lsp.CompletionTriggerKind.Invoked,
+        }
       end
     else
-      self:reset()
+      self:reset() -- Should clear current completion if the TriggerKind isn't TriggerCharacter or Manual and keyword length does not enough.
     end
+  else
+    self:reset() -- Should clear current completion if ContextReason is TriggerOnly and the triggerCharacter isn't matched
   end
 
+  -- Does not perform completions.
   if not completion_context then
-    if not vim.tbl_contains({ self.request_offset, self.offset }, offset) then
-      self:reset()
-    end
-    debug.log(self:get_debug_name(), 'skip completion')
     return
   end
 
@@ -283,9 +282,10 @@ source.complete = function(self, ctx, callback)
   debug.log(self:get_debug_name(), 'request', offset, vim.inspect(completion_context))
   local prev_status = self.status
   self.status = source.SourceStatus.FETCHING
-  self.request_offset = offset
   self.offset = offset
+  self.request_offset = offset
   self.context = ctx
+  self.completion_context = completion_context
   self.source:complete(
     {
       context = ctx,
@@ -319,8 +319,9 @@ source.complete = function(self, ctx, callback)
           self.revision = self.revision + 1
         end
       else
-        debug.log(self:get_debug_name(), 'continue', 'nil')
-        if completion_context.triggerKind == types.lsp.CompletionTriggerKind.TriggerCharacter then
+        -- The completion will be invoked when pressing <CR> if the trigger characters contain the <Space>.
+        -- If the server returns an empty response in such a case, should invoke the keyword completion on the next keypress.
+        if offset == ctx.cursor.col then
           self:reset()
         end
         self.status = prev_status
