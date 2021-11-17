@@ -38,19 +38,19 @@ config.set_buffer = function(c, bufnr)
 end
 
 ---Set configuration for cmdline
-config.set_cmdline = function(c, type)
-  local revision = (config.cmdline[type] or {}).revision or 1
-  config.cmdline[type] = c
-  config.cmdline[type].revision = revision + 1
+config.set_cmdline = function(c, cmdtype)
+  local revision = (config.cmdline[cmdtype] or {}).revision or 1
+  config.cmdline[cmdtype] = c
+  config.cmdline[cmdtype].revision = revision + 1
 end
 
 ---@return cmp.ConfigSchema
 config.get = function()
   local global = config.global
   if api.is_cmdline_mode() then
-    local type = vim.fn.getcmdtype()
-    local cmdline = config.cmdline[type] or { revision = 1, sources = {} }
-    return config.cache:ensure({ 'get_cmdline', type, global.revision or 0, cmdline.revision or 0 }, function()
+    local cmdtype = vim.fn.getcmdtype()
+    local cmdline = config.cmdline[cmdtype] or { revision = 1, sources = {} }
+    return config.cache:ensure({ 'get_cmdline', cmdtype, global.revision or 0, cmdline.revision or 0 }, function()
       return misc.merge(config.normalize(cmdline), config.normalize(global))
     end)
   else
