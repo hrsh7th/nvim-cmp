@@ -14,8 +14,8 @@ local api = require('cmp.utils.api')
 local event = require('cmp.utils.event')
 
 local SOURCE_TIMEOUT = 500
-local THROTTLE_TIME = 120
-local DEBOUNCE_TIME = 20
+local THROTTLE_TIME = 100
+local DEBOUNCE_TIME = 50
 
 ---@class cmp.Core
 ---@field public suspending boolean
@@ -250,32 +250,22 @@ end
 ---Update completion menu
 core.filter = async.throttle(
   vim.schedule_wrap(function(self)
-    if not api.is_suitable_mode() then
+    local ignore = false
+    ignore = ignore or not api.is_suitable_mode()
+    ignore = ignore or self.view:get_active_entry()
+    if ignore then
       return
     end
-    if self.view:get_active_entry() ~= nil then
-      return
-    end
-    local ctx = self:get_context()
 
-    -- To wait for processing source for that's timeout.
     local sources = {}
     for _, s in ipairs(self:get_sources({ source.SourceStatus.FETCHING, source.SourceStatus.COMPLETED })) do
       local time = SOURCE_TIMEOUT - s:get_fetching_time()
       if not s.incomplete and time > 0 then
-        if #sources == 0 then
-          self.filter.stop()
-          self.filter.timeout = time + 1
-          self:filter()
-          return
-        end
         break
       end
       table.insert(sources, s)
     end
-    self.filter.timeout = THROTTLE_TIME
-
-    self.view:open(ctx, sources)
+    self.view:open(self:get_context(), sources)
   end),
   THROTTLE_TIME
 )
