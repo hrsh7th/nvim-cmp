@@ -229,19 +229,14 @@ end
 ---@return boolean Return true if not trigger completion.
 source.complete = function(self, ctx, callback)
   local offset = ctx:get_offset(self:get_keyword_pattern())
-  if ctx.cursor.col <= offset then
-    self:reset()
-  end
 
+  -- NOTE: This implementation is nvim-cmp specific.
+  -- We trigger new completion after core.confirm but we check only the symbol trigger_character in this case.
   local before_char = string.sub(ctx.cursor_before_line, -1)
-  local before_char_iw = string.match(ctx.cursor_before_line, '(.)%s*$') or before_char
-
   if ctx:get_reason() == types.cmp.ContextReason.TriggerOnly then
-    if string.match(before_char, '^%a+$') then
+    before_char = string.match(ctx.cursor_before_line, '(.)%s*$')
+    if not char.is_symbol(string.byte(before_char)) then
       before_char = ''
-    end
-    if string.match(before_char_iw, '^%a+$') then
-      before_char_iw = ''
     end
   end
 
@@ -255,11 +250,6 @@ source.complete = function(self, ctx, callback)
       completion_context = {
         triggerKind = types.lsp.CompletionTriggerKind.TriggerCharacter,
         triggerCharacter = before_char,
-      }
-    elseif vim.tbl_contains(self:get_trigger_characters(), before_char_iw) then
-      completion_context = {
-        triggerKind = types.lsp.CompletionTriggerKind.TriggerCharacter,
-        triggerCharacter = before_char_iw,
       }
     elseif ctx:get_reason() ~= types.cmp.ContextReason.TriggerOnly then
       if self:get_keyword_length() <= (ctx.cursor.col - offset) then
@@ -279,7 +269,7 @@ source.complete = function(self, ctx, callback)
   end
 
   if not completion_context then
-    if ctx:get_reason() == types.cmp.ContextReason.TriggerOnly then
+    if not vim.tbl_contains({ self.request_offset, self.offset }, offset) then
       self:reset()
     end
     debug.log(self:get_debug_name(), 'skip completion')
