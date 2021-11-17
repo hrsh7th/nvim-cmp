@@ -180,11 +180,15 @@ view._get_entries_view = function(self)
 
   if c.experimental.native_menu then
     self.native_entries_view.event:on('change', function()
+      self.on_entry_change.timeout = c.documentation.delay
+      self.on_entry_change.stop()
       self:on_entry_change()
     end)
     return self.native_entries_view
   else
     self.custom_entries_view.event:on('change', function()
+      self.on_entry_change.timeout = c.documentation.delay
+      self.on_entry_change.stop()
       self:on_entry_change()
     end)
     return self.custom_entries_view
@@ -221,7 +225,7 @@ view.on_entry_change = async.throttle(
       self.ghost_text_view:hide()
     end
   end),
-  20
+  config.get().documentation.delay
 )
 
 return view

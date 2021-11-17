@@ -88,6 +88,7 @@ cmp.ItemField.Menu = 'menu'
 ---@field public get_trigger_characters fun(trigger_characters: string[]): string[]
 
 ---@class cmp.DocumentationConfig
+---@field public delay number
 ---@field public border string[]
 ---@field public winhighlight string
 ---@field public maxwidth number|nil

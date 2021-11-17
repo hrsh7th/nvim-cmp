@@ -376,6 +376,10 @@ If set to `false`, the documentation of each item will not be shown.
 Else, a table representing documentation configuration should be provided.
 The following are the possible options:
 
+#### documentation.delay (type: number)
+
+Delay in milliseconds before requesting documentation from the source.
+
 #### documentation.border (type: string[])
 
 Border characters used for documentation window.

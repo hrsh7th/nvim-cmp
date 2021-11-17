@@ -31,6 +31,7 @@ return function()
     preselect = types.cmp.PreselectMode.Item,
 
     documentation = {
+      delay = 20,
       border = { '', '', '', ' ', '', '', '', ' ' },
       winhighlight = 'NormalFloat:NormalFloat,FloatBorder:NormalFloat',
       maxwidth = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
