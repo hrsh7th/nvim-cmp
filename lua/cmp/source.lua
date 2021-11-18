@@ -237,7 +237,7 @@ source.complete = function(self, ctx, callback)
   local before_char = string.sub(ctx.cursor_before_line, -1)
   if ctx:get_reason() == types.cmp.ContextReason.TriggerOnly then
     before_char = string.match(ctx.cursor_before_line, '(.)%s*$')
-    if not char.is_symbol(string.byte(before_char)) then
+    if not before_char or not char.is_symbol(string.byte(before_char)) then
       before_char = ''
     end
   end
