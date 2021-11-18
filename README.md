@@ -37,7 +37,7 @@ Setup
 
 ### Recommended Configuration
 
-This example configuration uses `vim-plug` as the plugin manager.
+This example configuration uses `vim-plug` as the plugin manager and `vim-vsnip` as snippet plugin.
 
 ```viml
 call plug#begin(s:plug_dir)
@@ -128,11 +128,15 @@ lua <<EOF
   }
 EOF
 ```
+Also, checkout [mappings](https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings) section in the [wiki](https://github.com/hrsh7th/nvim-cmp/wiki) for example `<Tab>` mappings and integration with snippets.
 
 ### Where can I find more completion sources?
 
 You can search for various completion sources [here](https://github.com/topics/nvim-cmp).
 
+### How can I get my completion menu to look cool?
+
+Please see the corresponding [FAQ](#how-to-show-name-of-item-kind-and-source-like-compe) section.
 
 Configuration options
 ====================
@@ -646,7 +650,7 @@ formatting = {
     })}),
 },
 ```
-
+See [Menu appearance](https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance) section from the [wiki](https://github.com/hrsh7th/nvim-cmp/wiki) for more information.
 
 #### How to set up mappings?
 
