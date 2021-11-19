@@ -137,7 +137,7 @@ You can search for various completion sources [here](https://github.com/topics/n
 
 ### Where can I find the advanced configuration examples?
 
-Please see the corresponding [FAQ](#how-to-show-name-of-item-kind-and-source-like-compe) section or [Wiki pages](https://github.com/hrsh7th/nvim-cmp/wiki).
+Please see the corresponding [FAQ](#how-to-show-name-of-item-kind-and-source-like-compe) section, as well as the [`completion.border`](#completion.border) and [`completion.scrollbar`](#completion.scrollbar) options.
 
 
 Advanced configuration example
