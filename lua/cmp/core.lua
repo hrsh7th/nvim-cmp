@@ -224,23 +224,27 @@ core.complete = function(self, ctx)
   self:set_context(ctx)
 
   for _, s in ipairs(self:get_sources({ source.SourceStatus.WAITING, source.SourceStatus.COMPLETED })) do
-    s:complete(
-      ctx,
-      (function(src)
-        local callback
-        callback = function()
-          local new = context.new(ctx)
-          if new:changed(new.prev_context) and ctx == self.context then
-            src:complete(new, callback)
-          else
-            self.filter.stop()
-            self.filter.timeout = DEBOUNCE_TIME
-            self:filter()
+    local callback
+    callback = (function(s_)
+      return function ()
+        local new = context.new(ctx)
+        if new:changed(s_.context) then
+          s_:complete(new, callback)
+        else
+          for _, s__ in ipairs(self:get_sources({ source.SourceStatus.FETCHING })) do
+            if s_ == s__ then
+              break
+            end
+            if not s__.incomplete and SOURCE_TIMEOUT > s__:get_fetching_time() then
+              return
+            end
           end
+          self.filter.timeout = self.view:visible() and THROTTLE_TIME or 0
+          self:filter()
         end
-        return callback
-      end)(s)
-    )
+      end
+    end)(s)
+    s:complete(ctx, callback)
   end
 
   self.filter.timeout = THROTTLE_TIME
@@ -250,6 +254,8 @@ end
 ---Update completion menu
 core.filter = async.throttle(
   vim.schedule_wrap(function(self)
+    self.filter.timeout = THROTTLE_TIME
+
     local ignore = false
     ignore = ignore or not api.is_suitable_mode()
     ignore = ignore or self.view:get_active_entry()
@@ -259,8 +265,7 @@ core.filter = async.throttle(
 
     local sources = {}
     for _, s in ipairs(self:get_sources({ source.SourceStatus.FETCHING, source.SourceStatus.COMPLETED })) do
-      local time = SOURCE_TIMEOUT - s:get_fetching_time()
-      if not s.incomplete and time > 0 then
+      if not s.incomplete and SOURCE_TIMEOUT > s:get_fetching_time() then
         break
       end
       table.insert(sources, s)
