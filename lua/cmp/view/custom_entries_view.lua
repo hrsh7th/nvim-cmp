@@ -149,13 +149,12 @@ custom_entries_view.open = function(self, offset, entries)
   local pos = api.get_screen_cursor()
   local cursor = api.get_cursor()
   local delta = cursor[2] + 1 - self.offset
-  local has_bottom_space = (vim.o.lines - pos[1]) >= DEFAULT_HEIGHT
   local row, col = pos[1], pos[2] - delta - 1
 
   local completion = config.get().completion
   local border_offset_row, border_offset_col = window.border_offset(completion)
 
-  if not has_bottom_space and math.floor(vim.o.lines * 0.5) <= row + border_offset_row and vim.o.lines - row <= height + border_offset_row then
+  if math.floor(vim.o.lines * 0.5) <= row + border_offset_row and vim.o.lines - row - border_offset_row <= math.min(DEFAULT_HEIGHT, height) then
     height = math.min(height, row - 1)
     row = row - height - border_offset_row - 1
     if row < 0 then height = height + row end
