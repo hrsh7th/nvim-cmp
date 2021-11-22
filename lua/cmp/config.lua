@@ -78,9 +78,6 @@ config.get_source_config = function(name)
   local c = config.get()
   for _, s in ipairs(c.sources) do
     if s.name == name then
-      if type(s.opts) ~= 'table' then
-        s.opts = {}
-      end
       return s
     end
   end
@@ -98,7 +95,23 @@ config.normalize = function(c)
     end
     c.mapping = normalized
   end
+
+  if c.sources then
+    for _, s in ipairs(c.sources) do
+      if s.opts and not s.option then
+        s.option = s.opts
+        s.opts = nil
+        vim.api.nvim_echo({
+          { '[nvim-cmp] ', 'Normal' }, { 'sources[number].opts', 'WarningMsg' }, { ' is deprecated.\n', 'Normal' },
+          { '[nvim-cmp] Please use ', 'Normal' }, { 'sources[number].option', 'WarningMsg' }, { ' instead.', 'Normal' }
+        }, true, {})
+      end
+      s.option = s.option or {}
+    end
+  end
+
   return c
 end
 
 return config
+

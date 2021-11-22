@@ -48,4 +48,14 @@ describe('misc', function()
     })
     assert.are.equal(merged.a, nil)
   end)
+
+  it('readonly', function()
+    local o = { a = 1, b = 2 }
+    local r = misc.readonly(o)
+    assert.are.equal(r.a, 1)
+    assert.has_error(function()
+      r.a = 5
+    end)
+  end)
+
 end)

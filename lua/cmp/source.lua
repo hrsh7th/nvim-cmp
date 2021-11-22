@@ -185,6 +185,24 @@ source.is_available = function(self)
   return true
 end
 
+---Get trigger_characters
+---@return string[]
+source.get_trigger_characters = function(self)
+  local c = self:get_config()
+  if c.trigger_characters then
+    return c.trigger_characters
+  end
+
+  local trigger_characters = {}
+  if self.source.get_trigger_characters then
+    trigger_characters = self.source:get_trigger_characters(misc.readonly(self:get_config())) or {}
+  end
+  if config.get().completion.get_trigger_characters then
+    return config.get().completion.get_trigger_characters(trigger_characters)
+  end
+  return trigger_characters
+end
+
 ---Get keyword_pattern
 ---@return string
 source.get_keyword_pattern = function(self)
@@ -193,9 +211,7 @@ source.get_keyword_pattern = function(self)
     return c.keyword_pattern
   end
   if self.source.get_keyword_pattern then
-    return self.source:get_keyword_pattern({
-      option = self:get_config().opts,
-    })
+    return self.source:get_keyword_pattern(misc.readonly(c))
   end
   return config.get().completion.keyword_pattern
 end
@@ -208,21 +224,6 @@ source.get_keyword_length = function(self)
     return c.keyword_length
   end
   return config.get().completion.keyword_length or 1
-end
-
----Get trigger_characters
----@return string[]
-source.get_trigger_characters = function(self)
-  local trigger_characters = {}
-  if self.source.get_trigger_characters then
-    trigger_characters = self.source:get_trigger_characters({
-      option = self:get_config().opts,
-    }) or {}
-  end
-  if config.get().completion.get_trigger_characters then
-    return config.get().completion.get_trigger_characters(trigger_characters)
-  end
-  return trigger_characters
 end
 
 ---Invoke completion
@@ -287,12 +288,11 @@ source.complete = function(self, ctx, callback)
   self.context = ctx
   self.completion_context = completion_context
   self.source:complete(
-    {
-      context = ctx,
+    vim.tbl_extend('keep', misc.copy(self:get_config()), {
       offset = self.offset,
-      option = self:get_config().opts,
+      context = ctx,
       completion_context = completion_context,
-    },
+    }),
     self.complete_dedup(vim.schedule_wrap(function(response)
       response = response or {}
 

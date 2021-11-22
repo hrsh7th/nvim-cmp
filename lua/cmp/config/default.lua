@@ -17,9 +17,6 @@ return function()
       completeopt = 'menu,menuone,noselect',
       keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
       keyword_length = 1,
-      get_trigger_characters = function(trigger_characters)
-        return trigger_characters
-      end,
     },
 
     snippet = {
