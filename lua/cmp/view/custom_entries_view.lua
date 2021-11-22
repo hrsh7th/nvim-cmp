@@ -134,15 +134,16 @@ custom_entries_view.open = function(self, offset, entries)
   width = width + self.column_width.menu + 1
 
   local height = vim.api.nvim_get_option('pumheight')
-  height = height ~= 0 and height or DEFAULT_HEIGHT
+  height = height ~= 0 and height or #self.entries
   height = math.min(height, #self.entries)
 
   local pos = api.get_screen_cursor()
   local cursor = api.get_cursor()
   local delta = cursor[2] + 1 - self.offset
+  local has_bottom_space = (vim.o.lines - pos[1]) >= DEFAULT_HEIGHT
   local row, col = pos[1], pos[2] - delta - 1
 
-  if math.floor(vim.o.lines * 0.5) <= row and vim.o.lines - row <= height then
+  if not has_bottom_space and math.floor(vim.o.lines * 0.5) <= row and vim.o.lines - row <= height then
     height = math.min(height, row - 1)
     row = row - height - 1
   end
