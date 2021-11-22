@@ -57,5 +57,4 @@ describe('misc', function()
       r.a = 5
     end)
   end)
-
 end)

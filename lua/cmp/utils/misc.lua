@@ -177,7 +177,7 @@ misc.readonly = function(tbl)
     __index = tbl,
     __newindex = function()
       error('this table is readonly.')
-    end
+    end,
   })
 end
 

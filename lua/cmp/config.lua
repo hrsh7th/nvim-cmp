@@ -102,8 +102,12 @@ config.normalize = function(c)
         s.option = s.opts
         s.opts = nil
         vim.api.nvim_echo({
-          { '[nvim-cmp] ', 'Normal' }, { 'sources[number].opts', 'WarningMsg' }, { ' is deprecated.\n', 'Normal' },
-          { '[nvim-cmp] Please use ', 'Normal' }, { 'sources[number].option', 'WarningMsg' }, { ' instead.', 'Normal' }
+          { '[nvim-cmp] ', 'Normal' },
+          { 'sources[number].opts', 'WarningMsg' },
+          { ' is deprecated.\n', 'Normal' },
+          { '[nvim-cmp] Please use ', 'Normal' },
+          { 'sources[number].option', 'WarningMsg' },
+          { ' instead.', 'Normal' },
         }, true, {})
       end
       s.option = s.option or {}
@@ -114,4 +118,3 @@ config.normalize = function(c)
 end
 
 return config
-
