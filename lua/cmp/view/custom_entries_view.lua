@@ -159,7 +159,7 @@ custom_entries_view.open = function(self, offset, entries)
     row = row - height - border_offset_row - 1
     if row < 0 then height = height + row end
   end
-  if math.floor(vim.o.columns * 0.5) <= col + border_offset_col and vim.o.columns - col <= width + border_offset_col then
+  if math.floor(vim.o.columns * 0.5) <= col + border_offset_col and vim.o.columns - col - border_offset_col <= width then
     width = math.min(width, vim.o.columns - 1)
     col = vim.o.columns - width - border_offset_col - 1
     if col < 0 then width = width + col end
