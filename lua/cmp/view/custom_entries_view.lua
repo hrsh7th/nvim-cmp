@@ -301,8 +301,13 @@ custom_entries_view._insert = setmetatable({
       local release = require('cmp').suspend()
       feedkeys.call('', '', function()
         local cursor = api.get_cursor()
+        local keys = {}
+        table.insert(keys, keymap.t('<Cmd>set indentkeys=<CR>'))
+        table.insert(keys, keymap.backspace(1 + cursor[2] - self.offset))
+        table.insert(keys, word)
+        table.insert(keys, keymap.t('<Cmd>set indentkeys=%s<CR>'):format(vim.fn.escape(vim.bo.indentkeys, ' "|\\')))
         feedkeys.call(
-          keymap.backspace(1 + cursor[2] - self.offset) .. word,
+          table.concat(keys, ''),
           'int',
           vim.schedule_wrap(function()
             this.pending = false
