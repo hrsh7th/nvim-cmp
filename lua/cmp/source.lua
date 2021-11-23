@@ -195,7 +195,7 @@ source.get_trigger_characters = function(self)
 
   local trigger_characters = {}
   if self.source.get_trigger_characters then
-    trigger_characters = self.source:get_trigger_characters(misc.readonly(self:get_config())) or {}
+    trigger_characters = self.source:get_trigger_characters(misc.copy(c)) or {}
   end
   if config.get().completion.get_trigger_characters then
     return config.get().completion.get_trigger_characters(trigger_characters)
@@ -211,7 +211,7 @@ source.get_keyword_pattern = function(self)
     return c.keyword_pattern
   end
   if self.source.get_keyword_pattern then
-    return self.source:get_keyword_pattern(misc.readonly(c))
+    return self.source:get_keyword_pattern(misc.copy(c))
   end
   return config.get().completion.keyword_pattern
 end
