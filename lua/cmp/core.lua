@@ -228,7 +228,7 @@ core.complete = function(self, ctx)
     callback = (function(s_)
       return function ()
         local new = context.new(ctx)
-        if new:changed(s_.context) then
+        if s_.incomplete and new:changed(s_.context) then
           s_:complete(new, callback)
         else
           for _, s__ in ipairs(self:get_sources({ source.SourceStatus.FETCHING })) do
