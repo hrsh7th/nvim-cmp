@@ -144,9 +144,10 @@ end
 
 ---Safe version of vim.str_utfindex
 ---@param text string
----@param vimindex number
+---@param vimindex number|nil
 ---@return number
 misc.to_utfindex = function(text, vimindex)
+  vimindex = vimindex or #text + 1
   return vim.str_utfindex(text, math.max(0, math.min(vimindex - 1, #text)))
 end
 
@@ -155,6 +156,7 @@ end
 ---@param utfindex number
 ---@return number
 misc.to_vimindex = function(text, utfindex)
+  utfindex = utfindex or #text
   for i = utfindex, 1, -1 do
     local s, v = pcall(function()
       return vim.str_byteindex(text, i) + 1

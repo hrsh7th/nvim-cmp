@@ -15,7 +15,6 @@ local event = require('cmp.utils.event')
 
 local SOURCE_TIMEOUT = 500
 local THROTTLE_TIME = 100
-local DEBOUNCE_TIME = 50
 
 ---@class cmp.Core
 ---@field public suspending boolean
@@ -226,7 +225,7 @@ core.complete = function(self, ctx)
   for _, s in ipairs(self:get_sources({ source.SourceStatus.WAITING, source.SourceStatus.COMPLETED })) do
     local callback
     callback = (function(s_)
-      return function ()
+      return function()
         local new = context.new(ctx)
         if s_.incomplete and new:changed(s_.context) then
           s_:complete(new, callback)
@@ -295,7 +294,7 @@ core.confirm = function(self, e, option, callback)
   feedkeys.call('', 'n', function()
     local ctx = context.new()
     local keys = {}
-    table.insert(keys, keymap.backspace(ctx.cursor.character - vim.str_utfindex(ctx.cursor_line, e:get_offset() - 1)))
+    table.insert(keys, keymap.backspace(ctx.cursor.character - misc.to_utfindex(ctx.cursor_line, e:get_offset())))
     table.insert(keys, e:get_word())
     table.insert(keys, keymap.undobreak())
     feedkeys.call(table.concat(keys, ''), 'int')
@@ -304,7 +303,7 @@ core.confirm = function(self, e, option, callback)
     local ctx = context.new()
     if api.is_cmdline_mode() then
       local keys = {}
-      table.insert(keys, keymap.backspace(ctx.cursor.character - vim.str_utfindex(ctx.cursor_line, e:get_offset() - 1)))
+      table.insert(keys, keymap.backspace(ctx.cursor.character - misc.to_utfindex(ctx.cursor_line, e:get_offset())))
       table.insert(keys, string.sub(e.context.cursor_before_line, e:get_offset()))
       feedkeys.call(table.concat(keys, ''), 'int')
     else
@@ -377,9 +376,9 @@ core.confirm = function(self, e, option, callback)
       local position = completion_item.textEdit.range.start
       position.line = position.line + (#texts - 1)
       if #texts == 1 then
-        position.character = position.character + vim.str_utfindex(texts[1])
+        position.character = position.character + misc.to_utfindex(texts[1])
       else
-        position.character = vim.str_utfindex(texts[#texts])
+        position.character = misc.to_utfindex(texts[#texts])
       end
       local pos = types.lsp.Position.to_vim(0, position)
       vim.api.nvim_win_set_cursor(0, { pos.row, pos.col - 1 })
