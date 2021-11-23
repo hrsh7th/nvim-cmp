@@ -23,7 +23,7 @@ config.cmdline = {}
 ---Set configuration for global.
 ---@param c cmp.ConfigSchema
 config.set_global = function(c)
-  config.global = misc.merge(c, config.global)
+  config.global = misc.merge(config.normalize(c), config.normalize(config.global))
   config.global.revision = config.global.revision or 1
   config.global.revision = config.global.revision + 1
 end
