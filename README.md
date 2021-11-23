@@ -255,7 +255,7 @@ which defines the source name as `buffer`.
 
 The source name.
 
-#### sources[number].opts (type: table)
+#### sources[number].option (type: table)
 
 The source customization options. It is defined by each source.
 

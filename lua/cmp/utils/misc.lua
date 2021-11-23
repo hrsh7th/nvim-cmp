@@ -168,6 +168,19 @@ misc.to_vimindex = function(text, utfindex)
   return utfindex + 1
 end
 
+---Return readonly version object
+---@generic T
+---@param tbl T
+---@return T
+misc.readonly = function(tbl)
+  return setmetatable({}, {
+    __index = tbl,
+    __newindex = function()
+      error('this table is readonly.')
+    end,
+  })
+end
+
 ---Mark the function as deprecated
 misc.deprecated = function(fn, msg)
   local printed = false

@@ -52,12 +52,11 @@ cmp.ItemField.Menu = 'menu'
 ---@field public global fun(c: cmp.ConfigSchema)
 ---@field public cmdline fun(type: string, c: cmp.ConfigSchema)
 
----@class cmp.SourceBaseApiParams
----@field public option table
+---@class cmp.SourceApiParams: cmp.SourceConfig
 
----@class cmp.SourceCompletionApiParams : cmp.SourceBaseApiParams
----@field public context cmp.Context
+---@class cmp.SourceCompletionApiParams : cmp.SourceConfig
 ---@field public offset number
+---@field public context cmp.Context
 ---@field public completion_context lsp.CompletionContext
 
 ---@class cmp.Mapping
@@ -118,11 +117,12 @@ cmp.ItemField.Menu = 'menu'
 
 ---@class cmp.SourceConfig
 ---@field public name string
----@field public opts table
+---@field public option table|nil
 ---@field public priority number|nil
----@field public keyword_pattern string
----@field public keyword_length number
----@field public max_item_count number
----@field public group_index number
+---@field public trigger_characters string[]|nil
+---@field public keyword_pattern string|nil
+---@field public keyword_length number|nil
+---@field public max_item_count number|nil
+---@field public group_index number|nil
 
 return cmp
