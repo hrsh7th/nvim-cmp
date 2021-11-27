@@ -382,11 +382,6 @@ sorting.comparators~
   The function to customize the sorting behavior.
   You can use built-in comparators via `cmp.config.compare.*`.
 
-                                                  *cmp-config.formatting.fields*
-formatting.fields~
-  `cmp.ItemField[]`
-  The array of completion menu field to specify the order of them.
-
                                                             *cmp-config.sources*
 sources~
   `cmp.SourceConfig[]`
