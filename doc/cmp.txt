@@ -321,7 +321,7 @@ enabled~
   `boolean | fun(): boolean`
   You can control nvim-cmp should work or not via this option.
 
-                                                     *cmp-config.snippet.expand*
+                                                          *cmp-config.preselect*
 preselect~
   `cmp.PreselectMode`
 
