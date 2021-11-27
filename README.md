@@ -480,7 +480,7 @@ The kind field.
 #### `CmpItemKind%KIND_NAME%`
 
 The specific kind highlights.
-You can see the name on [lsp.lua:L189](./lua/cmp/types/lsp.lua).
+You can see the name on [lsp.lua#L108](./lua/cmp/types/lsp.lua#L108).
 
 For example, You can change the highlight like this if you want to override only the `Method` kind.
 
