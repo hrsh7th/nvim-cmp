@@ -134,9 +134,9 @@ Also, checkout [mappings](https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappi
 
 You can search for various completion sources [here](https://github.com/topics/nvim-cmp).
 
-### How can I get my completion menu to look cool?
+### Where can I find the advanced configuration examples?
 
-Please see the corresponding [FAQ](#how-to-show-name-of-item-kind-and-source-like-compe) section.
+Please see the corresponding [FAQ](#how-to-show-name-of-item-kind-and-source-like-compe) section or [Wiki pages](https://github.com/hrsh7th/nvim-cmp/wiki).
 
 Configuration options
 ====================
