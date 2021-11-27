@@ -118,21 +118,27 @@ native_entries_view.preselect = function(self, index)
 end
 
 native_entries_view.select_next_item = function(self, option)
+  local callback = function()
+    self.event:emit('change')
+  end
   if self:visible() then
     if (option.behavior or types.cmp.SelectBehavior.Insert) == types.cmp.SelectBehavior.Insert then
-      feedkeys.call(keymap.t('<C-n>'), 'n')
+      feedkeys.call(keymap.t('<C-n>'), 'n', callback)
     else
-      feedkeys.call(keymap.t('<Down>'), 'n')
+      feedkeys.call(keymap.t('<Down>'), 'n', callback)
     end
   end
 end
 
 native_entries_view.select_prev_item = function(self, option)
+  local callback = function()
+    self.event:emit('change')
+  end
   if self:visible() then
     if (option.behavior or types.cmp.SelectBehavior.Insert) == types.cmp.SelectBehavior.Insert then
-      feedkeys.call(keymap.t('<C-p>'), 'n')
+      feedkeys.call(keymap.t('<C-p>'), 'n', callback)
     else
-      feedkeys.call(keymap.t('<Up>'), 'n')
+      feedkeys.call(keymap.t('<Up>'), 'n', callback)
     end
   end
 end
