@@ -321,7 +321,7 @@ enabled~
   `boolean | fun(): boolean`
   You can control nvim-cmp should work or not via this option.
 
-                                                     *cmp-config.snippet.expand*
+                                                          *cmp-config.preselect*
 preselect~
   `cmp.PreselectMode`
 
@@ -381,11 +381,6 @@ sorting.comparators~
   `(fun(entry1: cmp.Entry, entry2: cmp.Entry): boolean | nil)[]`
   The function to customize the sorting behavior.
   You can use built-in comparators via `cmp.config.compare.*`.
-
-                                                  *cmp-config.formatting.fields*
-formatting.fields~
-  `cmp.ItemField[]`
-  The array of completion menu field to specify the order of them.
 
                                                             *cmp-config.sources*
 sources~
