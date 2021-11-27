@@ -14,6 +14,7 @@ Command                                                            |cmp-command|
 Highlight                                                        |cmp-highlight|
 Autocmd                                                            |cmp-autocmd|
 Config                                                              |cmp-config|
+FAQ                                                                    |cmp-faq|
 
 
 
@@ -249,7 +250,8 @@ You can also use built-in mapping helpers.
 
   *cmp.mapping.confirm* (option: cmp.ConfirmOption)
     Accept current selected completion item.
-    If you didn't select any items and specified the `{ select = true }`, nvim-cmp will automatically select the first item.
+    If you didn't select any items and specified the `{ select = true }`,
+    nvim-cmp will automatically select the first item.
 >
     cmp.setup {
       mapping = {
@@ -296,7 +298,6 @@ Highlight                                                        *cmp-highlight*
 >
     highlight CmpItemKindMethod guibg=NONE guifg=Orange
 <
-
 *CmpItemMenu*
   The menu field's highlight group.
 
@@ -320,7 +321,7 @@ enabled~
   `boolean | fun(): boolean`
   You can control nvim-cmp should work or not via this option.
 
-                                                            *cmp-config.snippet.expand*
+                                                     *cmp-config.snippet.expand*
 preselect~
   `cmp.PreselectMode`
 
@@ -334,52 +335,54 @@ mapping~
   `table<string, fun(fallback: function)`
   See |cmp-mapping| section.
 
-                                                            *cmp-config.snippet.expand*
+                                                     *cmp-config.snippet.expand*
 snippet.expand~
   `fun(option: cmp.SnippetExpansionParams)`
   The snippet expansion function. You must integrate your snippet engine plugin via this.
 
-                                                            *cmp-config.completion.keyword_length*
+                                          *cmp-config.completion.keyword_length*
 completion.keyword_length~
   `number`
-  The number value to trigger auto-completion.
+  The default number value to trigger auto-completion.
 
-                                                            *cmp-config.completion.keyword_pattern*
+                                         *cmp-config.completion.keyword_pattern*
 completion.keyword_pattern~
   `string`
-  The keyword pattern.
+  The default keyword pattern.
 
-                                                            *cmp-config.completion.autocomplete*
+                                            *cmp-config.completion.autocomplete*
 completion.autocomplete~
   `cmp.TriggerEvent[] | false`
   The auto-completion trigger events. If you specify this value to false, the
   nvim-cmp does not completion automatically but you can still use the manual
   completion though.
 
-                                                            *cmp-config.formatting.format*
+                                                  *cmp-config.formatting.format*
 formatting.format~
   `fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem`
   The function to customize the completion menu appearance. See |complete-items|.
 
-                                                            *cmp-config.formatting.fields*
+                                                  *cmp-config.formatting.fields*
 formatting.fields~
   `cmp.ItemField[]`
   The array of completion menu field to specify the order of them.
 
-                                                            *cmp-config.sorting.priority_weight*
+                                            *cmp-config.sorting.priority_weight*
 sorting.priority_weight~
   `number`
-  Specifically, each item's original priority (given by its corresponding source) will be increased by `#sources - (source_index - 1)` multiplied by `priority_weight`.
+  Specifically, each item's original priority (given by its corresponding source) will be
+  increased by `#sources - (source_index - 1)` multiplied by `priority_weight`.
   That is, the final priority is calculated by the following formula:
 >
   final_score = orig_score + ((#sources - (source_index - 1)) * sorting.priority_weight)
 <
-                                                            *cmp-config.sorting.comparators*
+                                                *cmp-config.sorting.comparators*
 sorting.comparators~
   `(fun(entry1: cmp.Entry, entry2: cmp.Entry): boolean | nil)[]`
-  The function to customize the sorting behavior. You can use built-in comparators via `cmp.config.compare.*`.
+  The function to customize the sorting behavior.
+  You can use built-in comparators via `cmp.config.compare.*`.
 
-                                                            *cmp-config.formatting.fields*
+                                                  *cmp-config.formatting.fields*
 formatting.fields~
   `cmp.ItemField[]`
   The array of completion menu field to specify the order of them.
@@ -390,47 +393,48 @@ sources~
   Array of the source configuration to use.
   The order will be used to the completion menu's sort order.
 
-                                                            *cmp-config.sources[n].name*
+                                                    *cmp-config.sources[n].name*
 sources[n].name~
   `string`
   The source name.
 
-                                                            *cmp-config.sources[n].option*
+                                                  *cmp-config.sources[n].option*
 sources[n].option~
   `table`
   The source specific custom option that defined by the source.
 
-                                                            *cmp-config.sources[n].keyword_length*
+                                          *cmp-config.sources[n].keyword_length*
 sources[n].keyword_length~
   `number`
   The source specific keyword length to trigger auto completion.
 
-                                                            *cmp-config.sources[n].keyword_pattern*
+                                         *cmp-config.sources[n].keyword_pattern*
 sources[n].keyword_pattern~
   `number`
   The source specific keyword pattern.
 
-                                                            *cmp-config.sources[n].trigger_characters*
+                                      *cmp-config.sources[n].trigger_characters*
 sources[n].trigger_characters~
   `string[]`
   The source specific keyword pattern.
 
-                                                            *cmp-config.sources[n].priority*
+                                                *cmp-config.sources[n].priority*
 sources[n].priority~
   `number`
   The source specific priority value.
 
-                                                            *cmp-config.sources[n].max_item_count*
+                                          *cmp-config.sources[n].max_item_count*
 sources[n].max_item_count~
   `number`
   The source specific item count.
 
-                                                            *cmp-config.sources[n].group_index*
+                                             *cmp-config.sources[n].group_index*
 sources[n].group_index~
   `number`
   The source group index.
 
-  For example, You can specify the `buffer` source group index to bigger number if you don't want to see the buffer source items when the nvim-lsp source is available.
+  For example, You can specify the `buffer` source group index to bigger number
+  if you don't want to see the buffer source items when the nvim-lsp source is available.
 >
     cmp.setup {
       sources = {
@@ -449,17 +453,20 @@ sources[n].group_index~
       })
     }
 <
-                                                            *cmp-config.experimental.ghost_text*
+                                            *cmp-config.experimental.ghost_text*
 experimental.ghost_text~
   `boolean | { hl_group = string }`
   The boolean value to enable or disable the ghost_text feature.
 
-                                                            *cmp-config.experimental.native_menu*
+                                           *cmp-config.experimental.native_menu*
 experimental.native_menu~
   `boolean`
   The boolean value to enable or disable the native completion menu.
 
 
+
+==============================================================================
+FAQ                                                                    *cmp-faq*
 
 ==============================================================================
  vim:tw=78:ts=4:et:ft=help:norl:
