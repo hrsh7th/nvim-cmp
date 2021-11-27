@@ -264,6 +264,10 @@ The source customization options. It is defined by each source.
 The priority of the source.  If you don't specify it, the source priority will
 be determined by the default algorithm (see `sorting.priority_weight`).
 
+#### sources[number].trigger_characters (type: string[])
+
+The source specific triggerCharacters for override.
+
 #### sources[number].keyword_pattern (type: string)
 
 The source specific keyword_pattern for override.
@@ -472,6 +476,18 @@ The fuzzy matched characters highlight.
 #### `CmpItemKind`
 
 The kind field.
+
+#### `CmpItemKind%KIND_NAME%`
+
+The specific kind highlights.
+You can see the name on [lsp.lua:L189](./lua/cmp/types/lsp.lua).
+
+For example, You can change the highlight like this if you want to override only the `Method` kind.
+
+```
+highlight! CmpItemKindMethod guibg=NONE guifg=LightYellow
+```
+
 
 #### `CmpItemMenu`
 

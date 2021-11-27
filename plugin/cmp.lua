@@ -5,6 +5,7 @@ vim.g.loaded_cmp = true
 
 local api = require "cmp.utils.api"
 local misc = require('cmp.utils.misc')
+local types = require('cmp.types')
 local config = require('cmp.config')
 local highlight = require('cmp.utils.highlight')
 
@@ -78,6 +79,11 @@ misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
+  for name in pairs(types.lsp.CompletionItemKind) do
+    if type(name) == 'string' then
+      vim.cmd(([[highlight! default link CmpItemKind%sDefault CmpItemKindDefault]]):format(name))
+    end
+  end
   highlight.inherit('CmpItemMenuDefault', 'Pmenu', {
     guibg = 'NONE',
     ctermbg = 'NONE',
@@ -103,6 +109,14 @@ end
 
 if vim.fn.hlexists('CmpItemKind') ~= 1 then
   vim.cmd [[highlight! default link CmpItemKind CmpItemKindDefault]]
+end
+for name in pairs(types.lsp.CompletionItemKind) do
+  if type(name) == 'string' then
+    local hi = ('CmpItemKind%s'):format(name)
+    if vim.fn.hlexists(hi) ~= 1 then
+      vim.cmd(([[highlight! default link %s %sDefault]]):format(hi, hi))
+    end
+  end
 end
 
 if vim.fn.hlexists('CmpItemMenu') ~= 1 then
