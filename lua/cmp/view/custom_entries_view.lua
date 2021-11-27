@@ -290,7 +290,7 @@ custom_entries_view._insert = setmetatable({
     word = word or ''
     if api.is_cmdline_mode() then
       local cursor = api.get_cursor()
-      local length = vim.str_utfindex(string.sub(api.get_current_line(), self.offset, cursor[2]))
+      local length = vim.fn.strchars(string.sub(api.get_current_line(), self.offset, cursor[2]), true)
       vim.api.nvim_feedkeys(keymap.backspace(length) .. word, 'int', true)
     else
       if this.pending then
@@ -301,9 +301,10 @@ custom_entries_view._insert = setmetatable({
       local release = require('cmp').suspend()
       feedkeys.call('', '', function()
         local cursor = api.get_cursor()
+        local length = vim.fn.strchars(string.sub(api.get_current_line(), self.offset, cursor[2]), true)
         local keys = {}
         table.insert(keys, keymap.t('<Cmd>set indentkeys=<CR>'))
-        table.insert(keys, keymap.backspace(1 + cursor[2] - self.offset))
+        table.insert(keys, keymap.backspace(length))
         table.insert(keys, word)
         table.insert(keys, keymap.t('<Cmd>set indentkeys=%s<CR>'):format(vim.fn.escape(vim.bo.indentkeys, ' "|\\')))
         feedkeys.call(
