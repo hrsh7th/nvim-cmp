@@ -48,5 +48,4 @@ describe('misc', function()
     })
     assert.are.equal(merged.a, nil)
   end)
-
 end)

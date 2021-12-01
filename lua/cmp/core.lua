@@ -230,17 +230,17 @@ core.complete = function(self, ctx)
         if s_.incomplete and new:changed(s_.context) then
           s_:complete(new, callback)
         else
-        for _, s__ in ipairs(self:get_sources({ source.SourceStatus.FETCHING })) do
-          if s_ == s__ then
-            break
+          for _, s__ in ipairs(self:get_sources({ source.SourceStatus.FETCHING })) do
+            if s_ == s__ then
+              break
+            end
+            if not s__.incomplete and SOURCE_TIMEOUT > s__:get_fetching_time() then
+              return
+            end
           end
-          if not s__.incomplete and SOURCE_TIMEOUT > s__:get_fetching_time() then
-            return
-          end
+          self.filter.timeout = self.view:visible() and THROTTLE_TIME or 0
+          self:filter()
         end
-        self.filter.timeout = self.view:visible() and THROTTLE_TIME or 0
-        self:filter()
-      end
       end
     end)(s)
     s:complete(ctx, callback)
