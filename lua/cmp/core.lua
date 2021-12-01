@@ -314,8 +314,8 @@ core.confirm = function(self, e, option, callback)
     end
   end)
   feedkeys.call('', 'n', function()
+    local ctx = context.new()
     if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) == 0 then
-      local pre = context.new()
       e:resolve(function()
         local new = context.new()
         local text_edits = misc.safe(e:get_completion_item().additionalTextEdits) or {}
@@ -324,8 +324,8 @@ core.confirm = function(self, e, option, callback)
         end
 
         local has_cursor_line_text_edit = (function()
-          local minrow = math.min(pre.cursor.row, new.cursor.row)
-          local maxrow = math.max(pre.cursor.row, new.cursor.row)
+          local minrow = math.min(ctx.cursor.row, new.cursor.row)
+          local maxrow = math.max(ctx.cursor.row, new.cursor.row)
           for _, te in ipairs(text_edits) do
             local srow = te.range.start.line + 1
             local erow = te.range['end'].line + 1
@@ -338,10 +338,10 @@ core.confirm = function(self, e, option, callback)
         if has_cursor_line_text_edit then
           return
         end
-        vim.fn['cmp#apply_text_edits'](new.bufnr, text_edits)
+        vim.lsp.util.apply_text_edits(text_edits, ctx.bufnr)
       end)
     else
-      vim.fn['cmp#apply_text_edits'](vim.api.nvim_get_current_buf(), e:get_completion_item().additionalTextEdits)
+      vim.lsp.util.apply_text_edits(e:get_completion_item().additionalTextEdits, ctx.bufnr)
     end
   end)
   feedkeys.call('', 'n', function()
@@ -371,7 +371,7 @@ core.confirm = function(self, e, option, callback)
       if is_snippet then
         completion_item.textEdit.newText = ''
       end
-      vim.fn['cmp#apply_text_edits'](ctx.bufnr, { completion_item.textEdit })
+      vim.lsp.util.apply_text_edits({ completion_item.textEdit }, ctx.bufnr)
       local texts = vim.split(completion_item.textEdit.newText, '\n')
       local position = completion_item.textEdit.range.start
       position.line = position.line + (#texts - 1)
