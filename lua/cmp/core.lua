@@ -265,6 +265,9 @@ core.filter = async.throttle(
     local sources = {}
     for _, s in ipairs(self:get_sources({ source.SourceStatus.FETCHING, source.SourceStatus.COMPLETED })) do
       if not s.incomplete and SOURCE_TIMEOUT > s:get_fetching_time() then
+        -- Reserve filter call for timeout.
+        self.filter.timeout = SOURCE_TIMEOUT - s:get_fetching_time()
+        self:filter()
         break
       end
       table.insert(sources, s)
