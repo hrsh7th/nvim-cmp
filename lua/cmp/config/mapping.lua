@@ -13,7 +13,7 @@ mapping = setmetatable({}, {
 })
 
 ---Invoke completion
----@param option cmp.ContextOption
+---@param option cmp.CompleteParams
 mapping.complete = function(option)
   return function(fallback)
     if not require('cmp').complete(option) then

@@ -52,12 +52,14 @@ cmp.get_config = function()
 end
 
 ---Invoke completion manually
----@param option cmp.ContextOption
+---@param option cmp.CompleteParams
 cmp.complete = function(option)
   option = option or {}
-  option.reason = option.reason or cmp.ContextReason.Manual
 
-  cmp.core:complete(cmp.core:get_context(option))
+  cmp.core:complete(
+    cmp.core:get_context({ reason = option.reason or cmp.ContextReason.Manual }),
+    option.sources
+  )
   return true
 end
 

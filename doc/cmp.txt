@@ -23,7 +23,8 @@ Abstract                                                          *cmp-abstract*
 
 This is nvim-cmp's document.
 
-1. The `cmp` object that appears in this docs is the return value of `require('cmp')`.
+1. This docs uses the type definition notation like `{lsp,cmp,vim}.*`
+  - You can find it `../lua/cmp/types/init.lua`.
 
 
 
@@ -174,10 +175,22 @@ NOTE: You can call these functions in mapping via `<Cmd>require('cmp').complete(
   Scroll docs if it visible.
 
 *cmp.complete* (option: { reason = cmp.ContextReason })
-  Invoke manual completion.
+  Invoke completion.
 
-*cmp.confirm* (option: cmp.ConfirmOption)
-  Confirm current selected completion item.
+  The following configurations defines the key mapping to invoke only snippet completion.
+>
+  cmp.setup {
+    mapping = {
+      ['<C-s>'] = cmp.mapping.complete({ sources = { { name = 'vsnip' } } })
+    }
+  }
+< >
+  inoremap <C-S> <Cmd>require('cmp').complete({ sources = { { name = 'vsnip' } } })
+<
+*cmp.confirm* (option: cmp.ConfirmOption, callback: function)
+  Accept current selected completion item.
+  If you didn't select any items and specified the `{ select = true }` for
+  this, nvim-cmp will automatically select the first item.
 
 *cmp.event:on* ('%EVENT_NAME%, callback)
   Subscribe nvim-cmp's events below.
@@ -231,34 +244,26 @@ And you can specify the different mapping function for each modes.
 You can also use built-in mapping helpers.
 
   *cmp.mapping.close* ()
-    Close the completion menu.
+    Same as |cmp.close|
 
   *cmp.mapping.abort* ()
-    Closes the completion menu and restore the current line to the state when completion was started.
+    Same as |cmp.abort|
 
   *cmp.mapping.select_next_item* (option: { behavior = cmp.SelectBehavior })
-    Select the next completion item. (NOTE: This function can be used with omni completion menu)
+    Same as |cmp.select_next_item|
 
   *cmp.mapping.select_prev_item* (option: { behavior = cmp.SelectBehavior })
-    Select the prev completion item. (NOTE: This function can be used with omni completion menu)
+    Same as |cmp.select_prev_item|
 
   *cmp.mapping.scroll_docs* (delta: number)
-    Scroll the documentation window if it's visible.
+    Same as |cmp.scroll_docs|
 
-  *cmp.mapping.complete* (option: { reason = cmp.ContextReason })
-    Invoke completion.
+  *cmp.mapping.complete* (option: cmp.CompleteParams)
+    Same as |cmp.complete|
 
   *cmp.mapping.confirm* (option: cmp.ConfirmOption)
-    Accept current selected completion item.
-    If you didn't select any items and specified the `{ select = true }`,
-    nvim-cmp will automatically select the first item.
->
-    cmp.setup {
-      mapping = {
-        ['<CR>'] = cmp.mapping.confirm({ select = true })
-      }
-    }
-<
+    Same as |cmp.confirm|
+
 The built-in mapping helper is only available as a configuration option.
 If you want to call the nvim-cmp features directly, please use |cmp-function| instead.
 

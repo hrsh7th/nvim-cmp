@@ -14,13 +14,13 @@ local api = require('cmp.utils.api')
 local event = require('cmp.utils.event')
 
 local SOURCE_TIMEOUT = 500
-local THROTTLE_TIME = 100
+local THROTTLE_TIME = 120
 
 ---@class cmp.Core
 ---@field public suspending boolean
 ---@field public view cmp.View
 ---@field public sources cmp.Source[]
----@field public sources_by_name table<string, cmp.Source>
+---@field public source_configs cmp.SourceConfig[]
 ---@field public context cmp.Context
 ---@field public event cmp.Event
 local core = {}
@@ -29,7 +29,7 @@ core.new = function()
   local self = setmetatable({}, { __index = core })
   self.suspending = false
   self.sources = {}
-  self.sources_by_name = {}
+  self.source_configs = {}
   self.context = context.new()
   self.event = event.new()
   self.view = view.new()
@@ -43,19 +43,11 @@ end
 ---@param s cmp.Source
 core.register_source = function(self, s)
   self.sources[s.id] = s
-  if not self.sources_by_name[s.name] then
-    self.sources_by_name[s.name] = {}
-  end
-  table.insert(self.sources_by_name[s.name], s)
 end
 
 ---Unregister source
 ---@param source_id string
 core.unregister_source = function(self, source_id)
-  local name = self.sources[source_id].name
-  self.sources_by_name[name] = vim.tbl_filter(function(s)
-    return s.id ~= source_id
-  end, self.sources_by_name[name])
   self.sources[source_id] = nil
 end
 
@@ -85,14 +77,24 @@ core.suspend = function(self)
 end
 
 ---Get sources that sorted by priority
----@param statuses cmp.SourceStatus[]
+---@param filter cmp.SourceStatus[]|fun(s: cmp.Source): boolean
 ---@return cmp.Source[]
-core.get_sources = function(self, statuses)
+core.get_sources = function(self, filter)
+  local f = function(s)
+    if type(filter) == 'table' then
+      return vim.tbl_contains(filter, s.status)
+    elseif type(filter) == 'function' then
+      return filter(s)
+    end
+    return true
+  end
+
   local sources = {}
-  for _, c in pairs(config.get().sources) do
-    for _, s in ipairs(self.sources_by_name[c.name] or {}) do
-      if not statuses or vim.tbl_contains(statuses, s.status) then
-        if s:is_available() then
+  local source_configs = #self.source_configs > 0 and self.source_configs or config.get().sources
+  for _, c in pairs(source_configs) do
+    for _, s in pairs(self.sources) do
+      if c.name == s.name then
+        if s:is_available() and f(s) then
           table.insert(sources, s)
         end
       end
@@ -216,13 +218,18 @@ end
 
 ---Invoke completion
 ---@param ctx cmp.Context
-core.complete = function(self, ctx)
+---@param source_configs? cmp.SourceConfig[]
+core.complete = function(self, ctx, source_configs)
   if not api.is_suitable_mode() then
     return
   end
-  self:set_context(ctx)
 
-  for _, s in ipairs(self:get_sources()) do
+  self:set_context(ctx)
+  self.source_configs = source_configs or self.source_configs
+
+  -- Invoke completion sources.
+  local sources = self:get_sources()
+  for _, s in ipairs(sources) do
     local callback
     callback = (function(s_)
       return function()
@@ -272,7 +279,25 @@ core.filter = async.throttle(
       end
       table.insert(sources, s)
     end
-    self.view:open(self:get_context(), sources)
+
+    local ctx = self:get_context()
+
+    -- Display completion results.
+    self.view:open(ctx, sources)
+
+    -- Check specific source config.
+    if #self.source_configs > 0 then
+      if #self:get_sources(function(s)
+        if s.status == source.SourceStatus.FETCHING then
+          return true
+        elseif s.status == source.SourceStatus.COMPLETED and #s:get_entries(ctx) > 0 then
+          return true
+        end
+        return false
+      end) == 0 then
+        self.source_configs = {}
+      end
+    end
   end),
   THROTTLE_TIME
 )

@@ -46,6 +46,10 @@ cmp.ItemField.Menu = 'menu'
 ---@field public body string
 ---@field public insert_text_mode number
 
+---@class cmp.CompleteParams
+---@field public reason? cmp.ContextReason
+---@field public sources? cmp.SourceConfig[]
+
 ---@class cmp.Setup
 ---@field public __call fun(c: cmp.ConfigSchema)
 ---@field public buffer fun(c: cmp.ConfigSchema)
