@@ -56,10 +56,7 @@ end
 cmp.complete = function(option)
   option = option or {}
 
-  cmp.core:complete(
-    cmp.core:get_context({ reason = option.reason or cmp.ContextReason.Manual }),
-    option.sources
-  )
+  cmp.core:complete(cmp.core:get_context({ reason = option.reason or cmp.ContextReason.Manual }), option.sources)
   return true
 end
 
