@@ -137,7 +137,7 @@ NOTE:
 ==============================================================================
 Function                                                          *cmp-function*
 
-NOTE: You can call these functions in mapping via `<Cmd>require('cmp').complete()<CR>`.
+NOTE: You can call these functions in mapping via `<Cmd>lua require('cmp').complete()<CR>`.
 
 *cmp.setup* (config: cmp.ConfigSchema)
   Setup global configuration. See configuration option.
@@ -185,7 +185,7 @@ NOTE: You can call these functions in mapping via `<Cmd>require('cmp').complete(
     }
   }
 < >
-  inoremap <C-S> <Cmd>require('cmp').complete({ sources = { { name = 'vsnip' } } })
+  inoremap <C-S> <Cmd>lua require('cmp').complete({ sources = { { name = 'vsnip' } } })<CR>
 <
 *cmp.confirm* (option: cmp.ConfirmOption, callback: function)
   Accept current selected completion item.
