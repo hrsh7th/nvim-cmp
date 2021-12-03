@@ -1,0 +1,66 @@
+name: Bug Report
+description: Report a problem in nvim-cmp
+labels: [bug]
+body:
+  - type: checkboxes
+    id: faq-prerequisite
+    attributes:
+      label: FAQ
+      options:
+        - label: I have checked the [FAQ](https://github.com/hrsh7th/nvim-cmp#faq) and it didn't resolve my problem.
+          required: true
+
+  - type: checkboxes
+    id: issue-prerequisite
+    attributes:
+      label: Issues
+      options:
+        - label: I have checked [existing issues](https://github.com/hrsh7th/nvim-cmp/issues) and there are no open or closed issues with the same problem.
+          required: true
+
+  - type: input
+    attributes:
+      label: "Neovim Version"
+      description: "`nvim --version`:"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "nvim-cmp config"
+      description: "Minimal config based on [this](https://github.com/hrsh7th/nvim-cmp/blob/main/utils/vimrc.vim)"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Description"
+      description: "Describe in detail what happens"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Steps to reproduce"
+      description: "Full reproduction steps. Include a sample file if your issue relates to a specific filetype."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Expected behavior"
+      description: "A description of the behavior you expected."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Actual behavior"
+      description: "A description of the actual behavior."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Additional context"
+      description: "Any other relevant information"
