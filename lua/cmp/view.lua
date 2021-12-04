@@ -135,6 +135,10 @@ view.visible = function(self)
   return self:_get_entries_view():visible()
 end
 
+view.ghost_visible = function(self)
+  return self.ghost_text_view:visible()
+end
+
 ---Scroll documentation window if possible.
 ---@param delta number
 view.scroll_docs = function(self, delta)

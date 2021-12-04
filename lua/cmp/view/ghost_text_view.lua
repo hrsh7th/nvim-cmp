@@ -93,4 +93,11 @@ ghost_text_view.hide = function(self)
   end
 end
 
+ghost_text_view.visible = function(self)
+  if self.win and self.entry then
+    return true
+  end
+  return false
+end
+
 return ghost_text_view

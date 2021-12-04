@@ -65,6 +65,11 @@ cmp.visible = function()
   return cmp.core.view:visible() or vim.fn.pumvisible() == 1
 end
 
+---Return view ghost text is visible or not.
+cmp.ghost_visible = function()
+  return cmp.core.view:ghost_visible()
+end
+
 ---Get current selected entry or nil
 cmp.get_selected_entry = function()
   return cmp.core.view:get_selected_entry()
