@@ -245,16 +245,20 @@ core.complete = function(self, ctx, source_configs)
               return
             end
           end
-          self.filter.timeout = self.view:visible() and THROTTLE_TIME or 0
-          self:filter()
+          if not self.view:get_active_entry() then
+            self.filter.timeout = self.view:visible() and THROTTLE_TIME or 0
+            self:filter()
+          end
         end
       end
     end)(s)
     s:complete(ctx, callback)
   end
 
-  self.filter.timeout = THROTTLE_TIME
-  self:filter()
+  if not self.view:get_active_entry() then
+    self.filter.timeout = THROTTLE_TIME
+    self:filter()
+  end
 end
 
 ---Update completion menu
@@ -264,7 +268,6 @@ core.filter = async.throttle(
 
     local ignore = false
     ignore = ignore or not api.is_suitable_mode()
-    ignore = ignore or self.view:get_active_entry()
     if ignore then
       return
     end
