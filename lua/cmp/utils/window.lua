@@ -214,7 +214,7 @@ end
 
 ---Return the scrollbar will shown or not.
 window.has_scrollbar = function(self)
-  return (self.style.height or 0) < self:get_content_height()
+  return self.scrollbar and (self.style.height or 0) < self:get_content_height()
 end
 
 ---Return win info.
