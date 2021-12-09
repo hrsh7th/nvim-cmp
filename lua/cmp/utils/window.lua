@@ -152,7 +152,7 @@ window.update = function(self)
   if self:has_scrollbar() then
     local total = self:get_content_height()
     local info = self:info()
-    local bar_height = math.ceil(info.height * (info.height / total) - 0.49)
+    local bar_height = math.max(1, math.ceil(info.height * (info.height / total) - 0.49))
     local bar_offset = math.min(info.height - bar_height, math.floor(info.height * (vim.fn.getwininfo(self.win)[1].topline / total)))
     local border_offset_row, border_offset_col = window.border_offset_scrollbar(self.style)
 
