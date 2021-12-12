@@ -198,27 +198,34 @@ entry.is_deprecated = function(self)
 end
 
 ---Return view information.
+---@param suggest_offset number
+---@param entries_buf number The buffer this entry will be rendered into.
 ---@return { abbr: { text: string, bytes: number, width: number, hl_group: string }, kind: { text: string, bytes: number, width: number, hl_group: string }, menu: { text: string, bytes: number, width: number, hl_group: string } }
-entry.get_view = function(self, suggest_offset)
+entry.get_view = function(self, suggest_offset, entries_buf)
   local item = self:get_vim_item(suggest_offset)
-  return self.cache:ensure({ 'get_view', self.resolved_completion_item and 1 or 0 }, function()
+  return self.cache:ensure({ 'get_view', self.resolved_completion_item and 1 or 0, entries_buf }, function()
     local view = {}
-    view.abbr = {}
-    view.abbr.text = item.abbr or ''
-    view.abbr.bytes = #view.abbr.text
-    view.abbr.width = vim.str_utfindex(view.abbr.text)
-    view.abbr.hl_group = self:is_deprecated() and 'CmpItemAbbrDeprecated' or 'CmpItemAbbr'
-    view.kind = {}
-    view.kind.text = item.kind or ''
-    view.kind.bytes = #view.kind.text
-    view.kind.width = vim.str_utfindex(view.kind.text)
-    view.kind.hl_group = 'CmpItemKind' .. types.lsp.CompletionItemKind[self:get_kind()]
-    view.menu = {}
-    view.menu.text = item.menu or ''
-    view.menu.bytes = #view.menu.text
-    view.menu.width = vim.str_utfindex(view.menu.text)
-    view.menu.hl_group = 'CmpItemMenu'
-    view.dup = item.dup
+    -- The result of vim.fn.strdisplaywidth depends on which buffer it was
+    -- called in because it reads the values of the option 'tabstop' when
+    -- rendering <Tab> characters.
+    vim.api.nvim_buf_call(entries_buf, function()
+      view.abbr = {}
+      view.abbr.text = item.abbr or ''
+      view.abbr.bytes = #view.abbr.text
+      view.abbr.width = vim.fn.strdisplaywidth(view.abbr.text)
+      view.abbr.hl_group = self:is_deprecated() and 'CmpItemAbbrDeprecated' or 'CmpItemAbbr'
+      view.kind = {}
+      view.kind.text = item.kind or ''
+      view.kind.bytes = #view.kind.text
+      view.kind.width = vim.fn.strdisplaywidth(view.kind.text)
+      view.kind.hl_group = 'CmpItemKind' .. types.lsp.CompletionItemKind[self:get_kind()]
+      view.menu = {}
+      view.menu.text = item.menu or ''
+      view.menu.bytes = #view.menu.text
+      view.menu.width = vim.fn.strdisplaywidth(view.menu.text)
+      view.menu.hl_group = 'CmpItemMenu'
+      view.dup = item.dup
+    end)
     return view
   end)
 end
