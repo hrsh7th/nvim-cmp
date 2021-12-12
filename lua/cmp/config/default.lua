@@ -120,6 +120,7 @@ return function()
     experimental = {
       native_menu = false,
       ghost_text = false,
+      throttle_time = 120,
     },
 
     sources = {},
