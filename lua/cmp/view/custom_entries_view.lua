@@ -32,6 +32,12 @@ custom_entries_view.new = function()
   self.entries_win:option('wrap', false)
   self.entries_win:option('scrolloff', 0)
   self.entries_win:option('winhighlight', 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None')
+  -- This is done so that strdisplaywidth calculations for lines in the
+  -- custom_entries_view window exactly match with what is really displayed,
+  -- see comment in cmp.Entry.get_view. Setting tabstop to 1 makes all tabs be
+  -- always rendered one column wide, which removes the unpredictability coming
+  -- from variable width of the tab character.
+  self.entries_win:buffer_option('tabstop', 1)
   self.event = event.new()
   self.offset = -1
   self.active = false
@@ -48,7 +54,7 @@ custom_entries_view.new = function()
 
   vim.api.nvim_set_decoration_provider(custom_entries_view.ns, {
     on_win = function(_, win, buf, top, bot)
-      if win ~= self.entries_win.win then
+      if win ~= self.entries_win.win or buf ~= self.entries_win:get_buffer() then
         return
       end
 
@@ -56,7 +62,7 @@ custom_entries_view.new = function()
       for i = top, bot do
         local e = self.entries[i + 1]
         if e then
-          local v = e:get_view(self.offset)
+          local v = e:get_view(self.offset, buf)
           local o = SIDE_PADDING
           local a = 0
           for _, field in ipairs(fields) do
@@ -106,12 +112,13 @@ custom_entries_view.open = function(self, offset, entries)
   -- Apply window options (that might be changed) on the custom completion menu.
   self.entries_win:option('winblend', vim.o.pumblend)
 
+  local entries_buf = self.entries_win:get_buffer()
   local lines = {}
   local dedup = {}
   local preselect = 0
   local i = 1
   for _, e in ipairs(entries) do
-    local view = e:get_view(offset)
+    local view = e:get_view(offset, entries_buf)
     if view.dup == 1 or not dedup[e.completion_item.label] then
       dedup[e.completion_item.label] = true
       self.column_width.abbr = math.max(self.column_width.abbr, view.abbr.width)
@@ -125,7 +132,7 @@ custom_entries_view.open = function(self, offset, entries)
       i = i + 1
     end
   end
-  vim.api.nvim_buf_set_lines(self.entries_win:get_buffer(), 0, -1, false, lines)
+  vim.api.nvim_buf_set_lines(entries_buf, 0, -1, false, lines)
 
   local width = 0
   width = width + 1
@@ -193,10 +200,11 @@ custom_entries_view.draw = function(self)
   local botline = info.topline + info.height - 1
   local texts = {}
   local fields = config.get().formatting.fields
+  local entries_buf = self.entries_win:get_buffer()
   for i = topline, botline - 1 do
     local e = self.entries[i + 1]
     if e then
-      local view = e:get_view(self.offset)
+      local view = e:get_view(self.offset, entries_buf)
       local text = {}
       table.insert(text, string.rep(' ', SIDE_PADDING))
       for _, field in ipairs(fields) do
@@ -207,7 +215,7 @@ custom_entries_view.draw = function(self)
       table.insert(texts, table.concat(text, ''))
     end
   end
-  vim.api.nvim_buf_set_lines(self.entries_win:get_buffer(), topline, botline, false, texts)
+  vim.api.nvim_buf_set_lines(entries_buf, topline, botline, false, texts)
 
   if api.is_cmdline_mode() then
     vim.api.nvim_win_call(self.entries_win.win, function()
