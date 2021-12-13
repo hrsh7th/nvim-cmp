@@ -28,7 +28,7 @@ body:
   - type: textarea
     attributes:
       label: "nvim-cmp config"
-      description: "Minimal config based on [this](https://github.com/hrsh7th/nvim-cmp/blob/main/utils/vimrc.vim)"
+      description: "Minimal working config based on [this](https://github.com/hrsh7th/nvim-cmp/blob/main/utils/vimrc.vim) (Not part of the config)"
     validations:
       required: true
 
