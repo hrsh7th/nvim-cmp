@@ -367,9 +367,9 @@ entry.get_completion_item = function(self)
   return self.cache:ensure({ 'get_completion_item', (self.resolved_completion_item and 1 or 0) }, function()
     if self.resolved_completion_item then
       local completion_item = misc.copy(self.completion_item)
-      completion_item.detail = self.resolved_completion_item.detail or completion_item.detail
-      completion_item.documentation = self.resolved_completion_item.documentation or completion_item.documentation
-      completion_item.additionalTextEdits = self.resolved_completion_item.additionalTextEdits or completion_item.additionalTextEdits
+      for k, v in pairs(self.resolved_completion_item) do
+        completion_item[k] = v or completion_item[k]
+      end
       return completion_item
     end
     return self.completion_item
