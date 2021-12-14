@@ -21,6 +21,7 @@ vim.cmd [[
     autocmd CompleteDone * lua require'cmp.utils.autocmd'.emit('CompleteDone')
     autocmd ColorScheme * call v:lua.cmp.plugin.colorscheme()
     autocmd CmdlineEnter * call v:lua.cmp.plugin.cmdline.enter()
+    autocmd CmdwinEnter * call v:lua.cmp.plugin.cmdline.leave() " for entering cmdwin with `<C-f>`
   augroup END
 ]]
 
