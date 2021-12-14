@@ -176,7 +176,9 @@ keymap.evacuate = function(bufnr, mode, lhs)
   if not map.noremap and map.expr then
     -- remap & expr mapping should evacuate as <Plug> mapping with solving recursive mapping.
     rhs = function()
-      return keymap.t(keymap.recursive(bufnr, mode, lhs, vim.api.nvim_eval(map.rhs)))
+      -- Feed new key sequence to expand recursive mapping.
+      vim.api.nvim_feedkeys(keymap.t(keymap.recursive(bufnr, mode, lhs, vim.api.nvim_eval(map.rhs))), 'i', true)
+      return keymap.t('<Ignore>')
     end
   elseif map.noremap and map.expr then
     -- noremap & expr mapping should always evacuate as <Plug> mapping.
