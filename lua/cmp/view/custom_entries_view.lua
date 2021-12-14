@@ -133,6 +133,7 @@ custom_entries_view.open = function(self, offset, entries)
     end
   end
   vim.api.nvim_buf_set_lines(entries_buf, 0, -1, false, lines)
+  vim.api.nvim_buf_set_option(entries_buf, 'modified', false)
 
   local width = 0
   width = width + 1
@@ -216,6 +217,7 @@ custom_entries_view.draw = function(self)
     end
   end
   vim.api.nvim_buf_set_lines(entries_buf, topline, botline, false, texts)
+  vim.api.nvim_buf_set_option(entries_buf, 'modified', false)
 
   if api.is_cmdline_mode() then
     vim.api.nvim_win_call(self.entries_win.win, function()
