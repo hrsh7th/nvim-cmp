@@ -176,19 +176,27 @@ NOTE: You can call these functions in mapping via `<Cmd>lua require('cmp').compl
 *cmp.scroll_docs* (delta: number)
   Scroll docs if it visible.
 
-*cmp.complete* (option: { reason = cmp.ContextReason })
+*cmp.complete* (option: { reason = cmp.ContextReason, config = cmp.ConfigSchema })
   Invoke completion.
 
   The following configurations defines the key mapping to invoke only snippet completion.
 >
   cmp.setup {
     mapping = {
-      ['<C-s>'] = cmp.mapping.complete({ sources = { { name = 'vsnip' } } })
+      ['<C-s>'] = cmp.mapping.complete({
+        config = {
+          sources = {
+            { name = 'vsnip' }
+          }
+        }
+      })
     }
   }
 < >
-  inoremap <C-S> <Cmd>lua require('cmp').complete({ sources = { { name = 'vsnip' } } })<CR>
+  inoremap <C-S> <Cmd>lua require('cmp').complete({ config = { sources = { { name = 'vsnip' } } } })<CR>
 <
+  NOTE: The `config` means a temporary setting, but the `config.mapping` remains permanent.
+
 *cmp.confirm* (option: cmp.ConfirmOption, callback: function)
   Accept current selected completion item.
   If you didn't select any items and specified the `{ select = true }` for

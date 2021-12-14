@@ -55,8 +55,8 @@ end
 ---@param option cmp.CompleteParams
 cmp.complete = function(option)
   option = option or {}
-
-  cmp.core:complete(cmp.core:get_context({ reason = option.reason or cmp.ContextReason.Manual }), option.sources)
+  config.set_onetime(option.config)
+  cmp.core:complete(cmp.core:get_context({ reason = option.reason or cmp.ContextReason.Manual }))
   return true
 end
 

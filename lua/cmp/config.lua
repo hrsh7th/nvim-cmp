@@ -20,6 +20,9 @@ config.buffers = {}
 ---@type table<string, cmp.ConfigSchema>
 config.cmdline = {}
 
+---@type cmp.ConfigSchema
+config.onetime = {}
+
 ---Set configuration for global.
 ---@param c cmp.ConfigSchema
 config.set_global = function(c)
@@ -33,21 +36,36 @@ end
 ---@param bufnr number|nil
 config.set_buffer = function(c, bufnr)
   local revision = (config.buffers[bufnr] or {}).revision or 1
-  config.buffers[bufnr] = c
+  config.buffers[bufnr] = c or {}
   config.buffers[bufnr].revision = revision + 1
 end
 
 ---Set configuration for cmdline
+---@param c cmp.ConfigSchema
+---@param cmdtype string
 config.set_cmdline = function(c, cmdtype)
   local revision = (config.cmdline[cmdtype] or {}).revision or 1
-  config.cmdline[cmdtype] = c
+  config.cmdline[cmdtype] = c or {}
   config.cmdline[cmdtype].revision = revision + 1
+end
+
+---Set configuration as oneshot completion.
+---@param c cmp.ConfigSchema
+config.set_onetime = function(c)
+  local revision = (config.onetime or {}).revision or 1
+  config.onetime = c or {}
+  config.onetime.revision = revision + 1
 end
 
 ---@return cmp.ConfigSchema
 config.get = function()
   local global = config.global
-  if api.is_cmdline_mode() then
+  if config.onetime.sources then
+    local onetime = config.onetime
+    return config.cache:ensure({ 'get_onetime', global.revision or 0, onetime.revision or 0 }, function()
+      return misc.merge(config.normalize(onetime), config.normalize(global))
+    end)
+  elseif api.is_cmdline_mode() then
     local cmdtype = vim.fn.getcmdtype()
     local cmdline = config.cmdline[cmdtype] or { revision = 1, sources = {} }
     return config.cache:ensure({ 'get_cmdline', cmdtype, global.revision or 0, cmdline.revision or 0 }, function()

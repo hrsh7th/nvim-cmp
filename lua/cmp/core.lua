@@ -20,7 +20,6 @@ local THROTTLE_TIME = 120
 ---@field public suspending boolean
 ---@field public view cmp.View
 ---@field public sources cmp.Source[]
----@field public source_configs cmp.SourceConfig[]
 ---@field public context cmp.Context
 ---@field public event cmp.Event
 local core = {}
@@ -29,7 +28,6 @@ core.new = function()
   local self = setmetatable({}, { __index = core })
   self.suspending = false
   self.sources = {}
-  self.source_configs = {}
   self.context = context.new()
   self.event = event.new()
   self.view = view.new()
@@ -90,8 +88,7 @@ core.get_sources = function(self, filter)
   end
 
   local sources = {}
-  local source_configs = #self.source_configs > 0 and self.source_configs or config.get().sources
-  for _, c in pairs(source_configs) do
+  for _, c in pairs(config.get().sources) do
     for _, s in pairs(self.sources) do
       if c.name == s.name then
         if s:is_available() and f(s) then
@@ -218,14 +215,12 @@ end
 
 ---Invoke completion
 ---@param ctx cmp.Context
----@param source_configs? cmp.SourceConfig[]
-core.complete = function(self, ctx, source_configs)
+core.complete = function(self, ctx)
   if not api.is_suitable_mode() then
     return
   end
 
   self:set_context(ctx)
-  self.source_configs = source_configs or self.source_configs
 
   -- Invoke completion sources.
   local sources = self:get_sources()
@@ -288,18 +283,16 @@ core.filter = async.throttle(
     -- Display completion results.
     self.view:open(ctx, sources)
 
-    -- Check specific source config.
-    if #self.source_configs > 0 then
-      if #self:get_sources(function(s)
-        if s.status == source.SourceStatus.FETCHING then
-          return true
-        elseif s.status == source.SourceStatus.COMPLETED and #s:get_entries(ctx) > 0 then
-          return true
-        end
-        return false
-      end) == 0 then
-        self.source_configs = {}
+    -- Check onetime config.
+    if #self:get_sources(function(s)
+      if s.status == source.SourceStatus.FETCHING then
+        return true
+      elseif #s:get_entries(ctx) > 0 then
+        return true
       end
+      return false
+    end) == 0 then
+      config.set_onetime({})
     end
   end),
   THROTTLE_TIME

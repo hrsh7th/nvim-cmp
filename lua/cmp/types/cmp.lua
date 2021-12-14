@@ -48,7 +48,7 @@ cmp.ItemField.Menu = 'menu'
 
 ---@class cmp.CompleteParams
 ---@field public reason? cmp.ContextReason
----@field public sources? cmp.SourceConfig[]
+---@field public config? cmp.ConfigSchema
 
 ---@class cmp.Setup
 ---@field public __call fun(c: cmp.ConfigSchema)
