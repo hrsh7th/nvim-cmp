@@ -14,6 +14,7 @@ Command                                                            |cmp-command|
 Highlight                                                        |cmp-highlight|
 Autocmd                                                            |cmp-autocmd|
 Config                                                              |cmp-config|
+Develop                                                            |cmp-develop|
 FAQ                                                                    |cmp-faq|
 
 
@@ -25,6 +26,8 @@ This is nvim-cmp's document.
 
 1. This docs uses the type definition notation like `{lsp,cmp,vim}.*`
   - You can find it `../lua/cmp/types/init.lua`.
+2. The advanced configuration is noted in wiki.
+  - https://github.com/hrsh7th/nvim-cmp/wiki
 
 
 
@@ -34,6 +37,7 @@ Concept                                                            *cmp-concept*
 - Full support for LSP completion related capabilities
 - Powerful customizability via Lua functions
 - Smart handling of key mapping
+- No flicker
 
 
 
@@ -476,7 +480,125 @@ experimental.native_menu~
 
 
 ==============================================================================
+Develop                                                            *cmp-develop*
+
+Create custom source~
+
+NOTE:
+  1. The `complete` method is required. Others can be ommited.
+  2. The `callback` argument must always be called.
+  3. You can use only `require('cmp')` in custom source.
+  4. If the LSP spec was changed, nvim-cmp will follow it without any announcement.
+  5. You should read ./lua/cmp/types and https://microsoft.github.io/language-server-protocol/specifications/specification-current
+  6. Please add the `nvim-cmp` topic for github repo.
+
+You can create custom source like the following example.
+
+>
+  local source = {}
+
+  ---Return this source is available in current context or not. (Optional)
+  ---@return boolean
+  function source:is_available()
+    return true
+  end
+
+  ---Return the debug name of this source. (Optional)
+  ---@return string
+  function source:get_debug_name()
+    return 'debug name'
+  end
+
+  ---Return keyword pattern for triggering completion. (Optional)
+  ---If this is ommited, nvim-cmp will use default keyword pattern. See |cmp-config.completion.keyword_pattern|
+  ---@return string
+  function source:get_keyword_pattern()
+    return [[\k\+]]
+  end
+
+  ---Return trigger characters for triggering completion. (Optional)
+  function source:get_trigger_characters()
+    return { '.' }
+  end
+
+  ---Invoke completion. (Required)
+  ---@param params cmp.SourceCompletionApiParams
+  ---@param callback fun(response: lsp.CompletionResponse|nil)
+  function source:complete(params, callback)
+    callback({
+      { label = 'January' },
+      { label = 'February' },
+      { label = 'March' },
+      { label = 'April' },
+      { label = 'May' },
+      { label = 'June' },
+      { label = 'July' },
+      { label = 'August' },
+      { label = 'September' },
+      { label = 'October' },
+      { label = 'November' },
+      { label = 'December' },
+    })
+  end
+
+  ---Resolve completion item. (Optional)
+  ---@param completion_item lsp.CompletionItem
+  ---@param callback fun(completion_item: lsp.CompletionItem|nil)
+  function source:resolve(completion_item, callback)
+    callback(completion_item)
+  end
+
+  ---Execute command after item was accepted.
+  ---@param completion_item lsp.CompletionItem
+  ---@param callback fun(completion_item: lsp.CompletionItem|nil)
+  function source:execute(completion_item, callback)
+    callback(completion_item)
+  end
+
+  ---Register custom source to nvim-cmp.
+  require('cmp').register_source('month', source.new())
+<
+
+
+==============================================================================
 FAQ                                                                    *cmp-faq*
+
+How to disable auto-completion?~
+How to use nvim-cmp as like omnifunc?~
+
+You can disable auto-completion like this.
+>
+  cmp.setup {
+    ...
+    completion = {
+      autocomplete = false
+    }
+    ...
+  }
+<
+And you can invoke completion manually.
+>
+  inoremap <C-x><C-o> <Cmd>lua require('cmp').complete()<CR>
+<
+
+How to disable nvim-cmp on the specific buffer?~
+How to setup on the specific buffer?~
+
+You can setup buffer specific configuration like this.
+>
+  autocmd FileType markdown * lua require('cmp').setup.buffer {
+  \   sources = {
+  \     { name = 'path' },
+  \     { name = 'buffer' },
+  \   }
+  \ }
+<
+
+How to customize menu appearance?~
+
+You can see the nvim-cmp wiki (https://github.com/hrsh7th/nvim-cmp/wiki).
+
+
 
 ==============================================================================
  vim:tw=78:ts=4:et:ft=help:norl:
