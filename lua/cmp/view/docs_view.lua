@@ -90,7 +90,7 @@ docs_view.open = function(self, e, view)
     row = view.row,
     col = col,
     border = documentation.border,
-    zindex = documentation.zindex,
+    zindex = documentation.zindex or 50,
   })
   if left and self.window:has_scrollbar() then
     self.window.style.col = self.window.style.col - 1
