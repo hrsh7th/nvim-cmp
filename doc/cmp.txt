@@ -325,8 +325,11 @@ Highlight                                                        *cmp-highlight*
 ==============================================================================
 Autocmd                                                            *cmp-autocmd*
 
-*cmp#ready*
-  Invoke after sourcing the `plugin/cmp.lua`
+You can create custom autocommands for certain nvim-cmp events by defining
+autocommands for the User event with the following patterns.
+
+*CmpReady*
+  Invoked when nvim-cmp gets sourced from `plugin/cmp.lua`.
 
 
 
