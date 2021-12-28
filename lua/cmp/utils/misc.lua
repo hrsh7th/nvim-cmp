@@ -14,6 +14,14 @@ misc.once = function(callback)
   end
 end
 
+---Clear table entries.
+---@param tbl table
+misc.clear = function(tbl)
+  for k in pairs(tbl) do
+    tbl[k] = nil
+  end
+end
+
 ---Return concatenated list
 ---@param list1 any[]
 ---@param list2 any[]

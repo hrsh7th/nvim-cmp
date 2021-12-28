@@ -21,12 +21,10 @@ async.throttle = function(fn, timeout)
     __call = function(self, ...)
       local args = { ... }
 
-      if time == nil then
-        time = vim.loop.now()
-      end
-      timer:stop()
+      time = time or vim.loop.now()
 
       local delta = math.max(1, self.timeout - (vim.loop.now() - time))
+      timer:stop()
       timer:start(delta, 0, function()
         time = nil
         fn(unpack(args))
@@ -47,32 +45,10 @@ async.step = function(...)
   table.remove(tasks, 1)(next)
 end
 
----Timeout callback function
----@param fn function
----@param timeout number
----@return function
-async.timeout = function(fn, timeout)
-  local timer
-  local done = false
-  local callback = function(...)
-    if not done then
-      done = true
-      timer:stop()
-      timer:close()
-      fn(...)
-    end
-  end
-  timer = vim.loop.new_timer()
-  timer:start(timeout, 0, function()
-    callback()
-  end)
-  return callback
-end
-
 ---@alias cmp.AsyncDedup fun(callback: function): function
-
 ---Create deduplicated callback
----@return function
+---@generic T
+---@return fun(callback: T): T
 async.dedup = function()
   local id = 0
   return function(callback)
@@ -98,4 +74,72 @@ async.sync = function(runner, timeout)
   end, 10, false)
 end
 
+---Invoke timeout timer.
+---@param callback function
+---@param timeout number
+---@return {}
+async.set_timeout = function(callback, timeout)
+  local timer = vim.loop.new_timer()
+  timer:start(timeout, 0, function()
+    timer:stop()
+    vim.schedule(function()
+      if not timer:is_closing() then
+        callback()
+      end
+    end)
+  end)
+  return timer
+end
+
+---Clear timeout timer.
+---@param timer {}
+async.clear_timeout = function(timer)
+  if not timer then
+    return
+  end
+  if timer:is_active() then
+    timer:stop()
+  end
+  if not timer:is_closing() then
+    timer:close()
+  end
+end
+
+---Invoke interval timer.
+---@param callback function
+---@param interval number
+---@return {}
+async.set_interval = function(callback, interval)
+  local doing = false
+  local timer = vim.loop.new_timer()
+  timer:start(0, interval, function()
+    if doing then
+      return
+    end
+    doing = true
+    vim.schedule(function()
+      doing = false
+      if not timer:is_closing() then
+        callback()
+      end
+    end)
+  end)
+  return timer
+end
+
+---Clear interval timer
+---@param timer {}
+async.clear_interval = function(timer)
+  if not timer then
+    return
+  end
+  if timer:is_active() then
+    timer:stop()
+  end
+  if not timer:is_closing() then
+    timer:close()
+  end
+end
+
 return async
+

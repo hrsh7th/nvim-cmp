@@ -20,7 +20,7 @@ end
 pattern.matchstr = function(p, text)
   local s, e = pattern.offset(p, text)
   if s then
-    return string.sub(text, s, e)
+    return string.sub(text, s, e - 1)
   end
   return nil
 end

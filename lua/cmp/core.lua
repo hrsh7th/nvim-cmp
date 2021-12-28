@@ -12,6 +12,7 @@ local config = require('cmp.config')
 local types = require('cmp.types')
 local api = require('cmp.utils.api')
 local event = require('cmp.utils.event')
+local buffer= require('cmp.buffer')
 
 local SOURCE_TIMEOUT = 500
 local THROTTLE_TIME = 120
@@ -22,6 +23,7 @@ local THROTTLE_TIME = 120
 ---@field public sources cmp.Source[]
 ---@field public context cmp.Context
 ---@field public event cmp.Event
+---@field public buffers cmp.Buffer[]
 local core = {}
 
 core.new = function()
@@ -30,6 +32,7 @@ core.new = function()
   self.sources = {}
   self.context = context.new()
   self.event = event.new()
+  self.buffers = {}
   self.view = view.new()
   self.view.event:on('keymap', function(...)
     self:on_keymap(...)
@@ -139,6 +142,25 @@ core.prepare = function(self)
         self:on_keymap(...)
       end)
     end
+  end
+
+  for bufnr, buf in pairs(self.buffers) do
+    if not vim.api.nvim_buf_is_valid(bufnr) then
+      buf:close()
+      self.buffers[bufnr] = nil
+    end
+  end
+
+  local ctx = context.new()
+  if not self.buffers[ctx.bufnr] then
+    self.buffers[ctx.bufnr] = buffer.new(ctx.bufnr, {
+      keyword_length = config.get().completion.keyword_length,
+      keyword_pattern = config.get().completion.keyword_pattern,
+      indexing_batch_size = 1000,
+      indexing_interval = 100,
+    })
+    self.buffers[ctx.bufnr]:start_indexing_timer()
+    self.buffers[ctx.bufnr]:watch()
   end
 end
 

@@ -40,6 +40,7 @@ describe('utils.async', function()
     end)
     assert.is.truthy(math.abs(vim.loop.now() - now) < 10)
   end)
+
   it('step', function()
     local done = false
     local step = {}
@@ -67,3 +68,4 @@ describe('utils.async', function()
     assert.are.same(step, { 1, 2, 3 })
   end)
 end)
+

@@ -46,6 +46,20 @@ compare.recently_used = setmetatable({
   end,
 })
 
+compare.locality = function(entry1, entry2)
+  local buffer = require('cmp').core.buffers[entry1.context.bufnr]
+  if buffer then
+    local distances = buffer:get_words_distances(entry1.context.cursor.row)
+    local dist1 = distances[entry1.completion_item.label]
+    local dist2 = distances[entry2.completion_item.label]
+    if dist1 and dist2 then
+      if dist1 ~= dist2 then
+        return dist1 < dist2
+      end
+    end
+  end
+end
+
 -- kind
 compare.kind = function(entry1, entry2)
   local kind1 = entry1:get_kind()
