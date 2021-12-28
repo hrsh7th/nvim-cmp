@@ -240,13 +240,16 @@ entry.get_vim_item = function(self, suggest_offset)
     local abbr = str.oneline(completion_item.label)
 
     -- ~ indicator
+    local is_snippet = false
     if #(misc.safe(completion_item.additionalTextEdits) or {}) > 0 then
-      abbr = abbr .. '~'
+      is_snippet = true
     elseif completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-      local insert_text = self:get_insert_text()
-      if word ~= insert_text then
-        abbr = abbr .. '~'
-      end
+      is_snippet = self:get_insert_text() ~= word
+    elseif completion_item.kind == types.lsp.CompletionItemKind.Snippet then
+      is_snippet = true
+    end
+    if is_snippet then
+      abbr = abbr .. '~'
     end
 
     -- append delta text
