@@ -1,5 +1,8 @@
 local context = {}
 
+---Check if cursor is in syntax group
+---@param group string
+---@return boolean
 context.in_syntax_group = function(group)
   local lnum, col = vim.fn.line('.'), math.min(vim.fn.col('.'), #vim.fn.getline('.'))
   for _, syn_id in ipairs(vim.fn.synstack(lnum, col)) do
@@ -10,6 +13,9 @@ context.in_syntax_group = function(group)
   end
 end
 
+---Check if cursor is in treesitter capture
+---@param capture string
+---@return boolean
 context.in_treesitter_capture = function(capture)
   local highlighter = require('vim.treesitter.highlighter')
   local ts_utils = require('nvim-treesitter.ts_utils')
