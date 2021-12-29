@@ -65,11 +65,6 @@ cmp.visible = function()
   return cmp.core.view:visible() or vim.fn.pumvisible() == 1
 end
 
----Return true if cursor is in comment, else false.
-cmp.inside_comment = function()
-  return misc.is_inside_comment()
-end
-
 ---Get current selected entry or nil
 cmp.get_selected_entry = function()
   return cmp.core.view:get_selected_entry()
