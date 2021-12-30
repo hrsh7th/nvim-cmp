@@ -308,8 +308,16 @@ autocmd.subscribe('CursorMoved', function()
   end
 end)
 
+cmp.event:on('closed', function(e)
+  if e.entry then
+    cmp.config.compare.recently_used:add_entry(e.entry)
+  end
+end)
+
 cmp.event:on('confirm_done', function(e)
-  cmp.config.compare.recently_used:add_entry(e)
+  if e.entry then
+    cmp.config.compare.recently_used:add_entry(e.entry)
+  end
 end)
 
 return cmp

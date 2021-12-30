@@ -109,8 +109,11 @@ view.open = function(self, ctx, sources)
     end
   end
 
-  -- close.
+  -- closed.
   if #entries == 0 then
+    self.event:emit('closed', {
+      entry = self:_get_entries_view():get_selected_entry()
+    })
     self:close()
   end
 end
