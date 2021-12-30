@@ -383,8 +383,8 @@ core.confirm = function(self, e, option, callback)
       completion_item.textEdit.range = e:get_insert_range()
     end
 
-    local diff_before = e.context.cursor.character - completion_item.textEdit.range.start.character
-    local diff_after = completion_item.textEdit.range['end'].character - e.context.cursor.character
+    local diff_before = math.max(0, e.context.cursor.character - completion_item.textEdit.range.start.character)
+    local diff_after = math.max(0, completion_item.textEdit.range['end'].character - e.context.cursor.character)
     local new_text = completion_item.textEdit.newText
 
     if api.is_insert_mode() then
