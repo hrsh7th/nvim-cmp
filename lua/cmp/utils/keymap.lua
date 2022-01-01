@@ -17,7 +17,7 @@ keymap.normalize = function(keys)
   vim.api.nvim_set_keymap('t', '<Plug>(cmp.utils.keymap.normalize)', keys, {})
   for _, map in ipairs(vim.api.nvim_get_keymap('t')) do
     if keymap.equals(map.lhs, '<Plug>(cmp.utils.keymap.normalize)') then
-      return map.rhs
+      return map.rhs or ""
     end
   end
   return keys
@@ -122,7 +122,7 @@ keymap.get_mapping = function(mode, lhs)
     if keymap.equals(map.lhs, lhs) then
       return {
         lhs = map.lhs,
-        rhs = map.rhs,
+        rhs = map.rhs or "",
         expr = map.expr == 1,
         noremap = map.noremap == 1,
         script = map.script == 1,
@@ -137,7 +137,7 @@ keymap.get_mapping = function(mode, lhs)
     if keymap.equals(map.lhs, lhs) then
       return {
         lhs = map.lhs,
-        rhs = map.rhs,
+        rhs = map.rhs or "",
         expr = map.expr == 1,
         noremap = map.noremap == 1,
         script = map.script == 1,
