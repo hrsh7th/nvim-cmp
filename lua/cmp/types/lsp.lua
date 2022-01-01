@@ -26,7 +26,7 @@ lsp.Position.to_vim = function(buf, position)
   }
 end
 
----Convert lsp.Position to vim.Position
+---Convert vim.Position to lsp.Position
 ---@param buf number|string
 ---@param position vim.Position
 ---@return lsp.Position
