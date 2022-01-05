@@ -105,7 +105,6 @@ end
 ---@param style cmp.WindowStyle
 window.set_style = function(self, style)
   self.style = style
-  self.style.border = vim.g.border or { '' }
   self.style.zindex = self.style.zindex or 1
 end
 

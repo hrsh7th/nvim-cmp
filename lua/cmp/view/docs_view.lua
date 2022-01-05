@@ -66,6 +66,7 @@ docs_view.open = function(self, e, entries_info)
     style = 'minimal',
     width = content_width,
     height = content_height,
+    border = config.get().window.documentation.border,
     row = entries_info.row,
     col = 0, -- determine later.
   })

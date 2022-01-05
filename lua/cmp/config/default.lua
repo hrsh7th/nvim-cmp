@@ -19,6 +19,15 @@ return function()
       keyword_length = 1,
     },
 
+    window = {
+      completion = {
+        border = { '', '', '', '', '', '' , '', '' },
+      },
+      documentation = {
+        border = { '', '', '', ' ', '', '' , '', ' ' },
+      },
+    },
+
     snippet = {
       expand = function()
         error('snippet engine is not configured.')

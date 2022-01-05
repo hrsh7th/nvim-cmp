@@ -156,6 +156,7 @@ custom_entries_view.open = function(self, offset, entries)
     width = width,
     height = height,
     zindex = 1001,
+    border = config.get().window.completion.border,
   })
 
   local info = self.entries_win:info()
@@ -182,6 +183,7 @@ custom_entries_view.open = function(self, offset, entries)
     col = math.max(0, info.col),
     width = info.width - info.border_info.h,
     height = info.height - info.border_info.v,
+    border = config.get().window.completion.border,
     zindex = 1001,
   })
   if not self.entries_win:visible() then
