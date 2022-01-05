@@ -147,7 +147,7 @@ window.update = function(self)
   if info.scrollable then
     local total = self:get_content_height()
     if not info.border_info.is_visible then
-      local bar_height = math.ceil(info.height * (info.height / total))
+      local bar_height = math.floor(0.5 + info.height * (info.height / total))
       local bar_offset = math.min(info.height - bar_height, math.floor(info.height * (vim.fn.getwininfo(self.win)[1].topline / total)))
       local style1 = {}
       style1.relative = 'editor'

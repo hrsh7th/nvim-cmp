@@ -172,7 +172,7 @@ custom_entries_view.open = function(self, offset, entries)
   if not info.border_info.is_visible then
     self.entries_win:option('winhighlight', 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None')
   else
-    self.entries_win:option('winhighlight', 'FloatBorder:Normal,CursorLine:CursorLine,Search:None,NormalFloat:Normal,FloatBorder:Normal')
+    self.entries_win:option('winhighlight', 'FloatBorder:Normal,CursorLine:Visual,Search:None,NormalFloat:Normal,FloatBorder:Normal')
   end
 
   self.entries_win:open({
