@@ -21,19 +21,19 @@ end
 
 ---Open documentation window
 ---@param e cmp.Entry
----@param view cmp.WindowStyle
-docs_view.open = function(self, e, view)
+---@param entries_info cmp.WindowInfo
+docs_view.open = function(self, e, entries_info)
   local documentation = config.get().documentation
   if not documentation then
     return
   end
 
-  if not e or not view then
+  if not e or not entries_info then
     return self:close()
   end
 
-  local right_space = vim.o.columns - (view.col + view.width) - 2
-  local left_space = view.col - 2
+  local right_space = vim.o.columns - (entries_info.col + entries_info.width) - 1
+  local left_space = entries_info.col - 1
   local maxwidth = math.min(documentation.maxwidth, math.max(left_space, right_space) - 1)
 
   -- update buffer content if needed.
@@ -53,49 +53,45 @@ docs_view.open = function(self, e, view)
     })
   end
 
-  local width, height = vim.lsp.util._make_floating_popup_size(vim.api.nvim_buf_get_lines(self.window:get_buffer(), 0, -1, false), {
+  local content_width, content_height = vim.lsp.util._make_floating_popup_size(vim.api.nvim_buf_get_lines(self.window:get_buffer(), 0, -1, false), {
     max_width = maxwidth,
     max_height = documentation.maxheight,
   })
-  if width <= 0 or height <= 0 then
+  if content_width <= 0 or content_height <= 0 then
     return self:close()
   end
 
-  local right_col = view.col + view.width
-  local left_col = view.col - width - 2
-
-  local col, left
-  if right_space >= width and left_space >= width then
-    if right_space < left_space then
-      col = left_col
-      left = true
-    else
-      col = right_col
-    end
-  elseif right_space >= width then
-    col = right_col
-  elseif left_space >= width then
-    col = left_col
-    left = true
-  else
-    return self:close()
-  end
-
-  self.window:option('winhighlight', documentation.winhighlight)
   self.window:set_style({
     relative = 'editor',
     style = 'minimal',
-    width = width,
-    height = height,
-    row = view.row,
-    col = col,
-    border = documentation.border,
-    zindex = documentation.zindex or 50,
+    width = content_width,
+    height = content_height,
+    row = entries_info.row,
+    col = 0, -- determine later.
   })
-  if left and self.window:has_scrollbar() then
-    self.window.style.col = self.window.style.col - 1
+  local docs_info = self.window:info()
+  if not docs_info.border_info.is_visible then
+    self.window:option('winhighlight', 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None')
+  else
+    self.window:option('winhighlight', 'FloatBorder:Normal,CursorLine:NormalFloat,Search:None,NormalFloat:Normal,FloatBorder:Normal')
   end
-  self.window:open()
+
+  local right_col = entries_info.col + entries_info.width
+  local left_col = entries_info.col - docs_info.width
+  if right_space >= docs_info.width and left_space >= docs_info.width then
+    if right_space < left_space then
+      self.window.style.col = left_col
+    else
+      self.window.style.col = right_col
+    end
+  elseif right_space >= docs_info.width then
+    self.window.style.col = right_col
+  elseif left_space >= docs_info.width then
+    self.window.style.col = left_col
+  else
+    return self:close()
+  end
+  self.window:open(self.window.style)
 end
 
 ---Close floating window

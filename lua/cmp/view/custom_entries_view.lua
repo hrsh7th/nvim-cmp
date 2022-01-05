@@ -32,7 +32,6 @@ custom_entries_view.new = function()
   self.entries_win:option('foldenable', false)
   self.entries_win:option('wrap', false)
   self.entries_win:option('scrolloff', 0)
-  self.entries_win:option('winhighlight', 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None')
   -- This is done so that strdisplaywidth calculations for lines in the
   -- custom_entries_view window exactly match with what is really displayed,
   -- see comment in cmp.Entry.get_view. Setting tabstop to 1 makes all tabs be
@@ -147,29 +146,48 @@ custom_entries_view.open = function(self, offset, entries)
   height = math.min(height, #self.entries)
 
   local pos = api.get_screen_cursor()
-  local cursor = api.get_cursor()
-  local delta = cursor[2] + 1 - self.offset
-  local has_bottom_space = (vim.o.lines - pos[1]) >= DEFAULT_HEIGHT
-  local row, col = pos[1], pos[2] - delta - 1
+  local delta = api.get_cursor()[2] + 1 - self.offset
 
-  if not has_bottom_space and math.floor(vim.o.lines * 0.5) <= row and vim.o.lines - row <= height then
-    height = math.min(height, row - 1)
-    row = row - height - 1
+  self.entries_win:set_style({
+    relative = 'editor',
+    style = 'minimal',
+    row = math.max(0, pos[1]),
+    col = math.max(0, pos[2] - delta - 1),
+    width = width,
+    height = height,
+    zindex = 1001,
+  })
+
+  local info = self.entries_win:info()
+  local has_bottom_space = (vim.o.lines - pos[1]) >= DEFAULT_HEIGHT
+  if not has_bottom_space and math.floor(vim.o.lines * 0.5) <= info.row and vim.o.lines - info.row <= info.height then
+    info.height = math.min(info.height, info.row - 1)
+    info.row = info.row - info.height - 1
   end
-  if math.floor(vim.o.columns * 0.5) <= col and vim.o.columns - col <= width then
-    width = math.min(width, vim.o.columns - 1)
-    col = vim.o.columns - width - 1
+  if math.floor(vim.o.columns * 0.5) <= info.col and vim.o.columns - info.col <= info.width then
+    info.width = math.min(info.width, vim.o.columns - 1)
+    info.col = vim.o.columns - info.width - 1
+  end
+
+  if not info.border_info.is_visible then
+    self.entries_win:option('winhighlight', 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None')
+  else
+    self.entries_win:option('winhighlight', 'FloatBorder:Normal,CursorLine:CursorLine,Search:None,NormalFloat:Normal,FloatBorder:Normal')
   end
 
   self.entries_win:open({
     relative = 'editor',
     style = 'minimal',
-    row = math.max(0, row),
-    col = math.max(0, col),
-    width = width,
-    height = height,
+    row = math.max(0, info.row),
+    col = math.max(0, info.col),
+    width = info.width - info.border_info.h,
+    height = info.height - info.border_info.v,
     zindex = 1001,
   })
+  if not self.entries_win:visible() then
+    return
+  end
+
   if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
     self:_select(preselect, { behavior = types.cmp.SelectBehavior.Select })
   elseif not string.match(config.get().completion.completeopt, 'noselect') then

@@ -168,6 +168,22 @@ misc.to_vimindex = function(text, utfindex)
   return utfindex + 1
 end
 
+---Redraw utiilty.
+misc.redraw = setmetatable({
+  doing = false
+}, {
+  __call = function(self)
+    if self.doing then
+      return
+    end
+    self.doing = true
+    vim.schedule(function()
+      self.doing = false
+      vim.cmd([[redraw]])
+    end)
+  end
+})
+
 ---Mark the function as deprecated
 misc.deprecated = function(fn, msg)
   local printed = false
