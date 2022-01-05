@@ -120,9 +120,11 @@ keymap.get_mapping = function(mode, lhs)
 
   for _, map in ipairs(vim.api.nvim_buf_get_keymap(0, mode)) do
     if keymap.equals(map.lhs, lhs) then
+      local rhs = map.rhs or vim.fn.mapcheck(lhs, mode)
+
       return {
         lhs = map.lhs,
-        rhs = map.rhs,
+        rhs = rhs,
         expr = map.expr == 1,
         noremap = map.noremap == 1,
         script = map.script == 1,
@@ -135,9 +137,11 @@ keymap.get_mapping = function(mode, lhs)
 
   for _, map in ipairs(vim.api.nvim_get_keymap(mode)) do
     if keymap.equals(map.lhs, lhs) then
+      local rhs = map.rhs or vim.fn.mapcheck(lhs, mode)
+
       return {
         lhs = map.lhs,
-        rhs = map.rhs,
+        rhs = rhs,
         expr = map.expr == 1,
         noremap = map.noremap == 1,
         script = map.script == 1,
