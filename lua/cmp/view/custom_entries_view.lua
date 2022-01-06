@@ -25,7 +25,7 @@ custom_entries_view.ns = vim.api.nvim_create_namespace('cmp.view.custom_entries_
 
 custom_entries_view.new = function()
   local self = setmetatable({}, { __index = custom_entries_view })
-  local border_height, border_width = window.get_border_dimensions({style=config.get().completion})
+  local border_height, border_width = window.get_border_dimensions({style=config.get().window.completion})
 
   self.entries_win = window.new()
   self.entries_win:option('conceallevel', 2)
@@ -153,7 +153,7 @@ custom_entries_view.open = function(self, offset, entries)
   local delta = cursor[2] + 1 - self.offset
   local row, col = pos[1], pos[2] - delta - 1
 
-  local completion = config.get().completion
+  local completion = config.get().window.completion
   -- TODO: centralize this logic
   local border_offset_row, border_offset_col = window.get_border_dimensions({style=completion})
 
