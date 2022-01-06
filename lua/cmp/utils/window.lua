@@ -127,23 +127,23 @@ end
 
 ---Update
 window.update = function(self)
-  local info = self:info().scrollbar
-  if info and info.width > 0 then
-    info.relative = 'editor'
-    info.style = 'minimal'
-    info.zindex = (self.style.zindex and (self.style.zindex + 2) or 2)
+  local info = self:info()
+  if info.scrollbar and info.scrollbar.width > 0 then
+    info.scrollbar.relative = 'editor'
+    info.scrollbar.style = 'minimal'
+    info.scrollbar.zindex = (self.style.zindex and (self.style.zindex + 2) or 2)
     if self.swin and vim.api.nvim_win_is_valid(self.swin) then
-      vim.api.nvim_win_set_config(self.swin, info)
+      vim.api.nvim_win_set_config(self.swin, info.scrollbar)
     else
-      info.noautocmd = true
+      info.scrollbar.noautocmd = true
       local sbuf2 = buffer.ensure(self.name .. 'sbuf2')
-      self.swin = vim.api.nvim_open_win(sbuf2, false, info)
+      self.swin = vim.api.nvim_open_win(sbuf2, false, info.scrollbar)
       local highlight = self.scrollbar == '' and 'PmenuThumb' or 'Cmp'..(math.max(info.border.height, info.border.width) > 0 and 'Bordered' or '')..'WindowScrollBar'
       vim.api.nvim_win_set_option(self.swin, 'winhighlight', 'EndOfBuffer:'..highlight..',NormalFloat:'..highlight)
 
       if self.scrollbar ~= '' then
         local replace = {}
-        for i = 1, info.height do replace[i] = self.scrollbar end
+        for i = 1, info.scrollbar.height do replace[i] = self.scrollbar end
 
         vim.api.nvim_buf_set_lines(sbuf2, 0, 1, true, replace)
       end
