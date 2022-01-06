@@ -1,4 +1,5 @@
 local config = require('cmp.config')
+local misc = require('cmp.utils.misc')
 local str = require('cmp.utils.str')
 local types = require('cmp.types')
 local api = require('cmp.utils.api')
@@ -81,7 +82,7 @@ ghost_text_view.show = function(self, e)
   self.win = vim.api.nvim_get_current_win()
   self.entry = e
   if changed then
-    vim.cmd([[redraw!]]) -- force invoke decoration provider.
+    misc.redraw(true) -- force invoke decoration provider.
   end
 end
 
@@ -89,7 +90,7 @@ ghost_text_view.hide = function(self)
   if self.win and self.entry then
     self.win = nil
     self.entry = nil
-    vim.cmd([[redraw!]]) -- force invoke decoration provider.
+    misc.redraw(true) -- force invoke decoration provider.
   end
 end
 

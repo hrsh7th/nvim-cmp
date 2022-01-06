@@ -180,4 +180,27 @@ misc.deprecated = function(fn, msg)
   end
 end
 
+--Redraw
+misc.redraw = setmetatable({
+  doing = false,
+  force = false,
+}, {
+  __call = function(self, force)
+    if self.doing then
+      return
+    end
+    self.doing = true
+    self.force = not not force
+    vim.schedule(function()
+      if self.force then
+        vim.cmd([[redraw!]])
+      else
+        vim.cmd([[redraw]])
+      end
+      self.doing = false
+      self.force = false
+    end)
+  end
+})
+
 return misc

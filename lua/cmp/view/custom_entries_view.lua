@@ -5,6 +5,7 @@ local window = require('cmp.utils.window')
 local config = require('cmp.config')
 local types = require('cmp.types')
 local keymap = require('cmp.utils.keymap')
+local misc = require('cmp.utils.misc')
 local api = require('cmp.utils.api')
 
 local SIDE_PADDING = 1
@@ -221,7 +222,7 @@ custom_entries_view.draw = function(self)
 
   if api.is_cmdline_mode() then
     vim.api.nvim_win_call(self.entries_win.win, function()
-      vim.cmd([[redraw]])
+      misc.redraw()
     end)
   end
 end

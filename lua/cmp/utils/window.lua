@@ -176,7 +176,7 @@ window.update = function(self)
   -- In cmdline, vim does not redraw automatically.
   if api.is_cmdline_mode() then
     vim.api.nvim_win_call(self.win, function()
-      vim.cmd([[redraw]])
+      misc.redraw()
     end)
   end
 end
