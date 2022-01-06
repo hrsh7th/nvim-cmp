@@ -138,7 +138,7 @@ window.update = function(self)
       info.noautocmd = true
       local sbuf2 = buffer.ensure(self.name .. 'sbuf2')
       self.swin = vim.api.nvim_open_win(sbuf2, false, info)
-      local highlight = self.scrollbar ~= '' and 'CmpItemMenuThumb' or 'PmenuThumb'
+      local highlight = self.scrollbar == '' and 'PmenuThumb' or 'Cmp'..(math.max(info.border.height, info.border.width) > 0 and 'Bordered' or '')..'WindowScrollBar'
       vim.api.nvim_win_set_option(self.swin, 'winhighlight', 'EndOfBuffer:'..highlight..',NormalFloat:'..highlight)
 
       if self.scrollbar ~= '' then
@@ -204,15 +204,15 @@ window.info = function(self)
       }
       info.scrollbar.col = info.col + info.width - info.scrollbar.width
       info.scrollbar.row = info.row +
-			math.min(info.height - info.scrollbar.height, math.floor(info.height * (vim.fn.getwininfo(self.win)[1].topline / content_height))) +
-			(self.style.border ~= 'shadow' and self.style.border[4] ~= '' and 1 or 0)
+      math.min(info.height - info.scrollbar.height, math.floor(info.height * (vim.fn.getwininfo(self.win)[1].topline / content_height))) +
+      (self.style.border ~= 'shadow' and self.style.border[4] ~= '' and 1 or 0)
       info.width = info.width + info.scrollbar.width
     end
   end
     -- local info = self:info()
     -- local bar_height = math.max(1, math.ceil(info.height * (info.height / total) - 0.49))
 
-	return info
+  return info
 end
 
 --- @return number height, number width

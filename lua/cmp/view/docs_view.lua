@@ -81,7 +81,8 @@ docs_view.open = function(self, e, view)
     return self:close()
   end
 
-  self.window:option('winhighlight', documentation.winhighlight)
+  local border_height, border_width = window.get_border_dimensions({style=documentation})
+  self.window:option('winhighlight', 'Normal:Cmp'..(math.max(border_height, border_width) > 0 and 'Bordered' or '')..'Window,FloatBorder:CmpWindowBorder')
   self.window:set_style({
     relative = 'editor',
     style = 'minimal',

@@ -85,36 +85,26 @@ misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
       vim.cmd(([[highlight default link CmpItemKind%sDefault CmpItemKind]]):format(name))
     end
   end
-  highlight.inherit('CmpItemMenuDefault', 'Pmenu', {
-    guibg = 'NONE',
-    ctermbg = 'NONE',
-  })
-  highlight.inherit('CmpItemMenuThumb', 'PmenuThumb', {
+
+  highlight.inherit('CmpWindowScrollBar', 'PmenuThumb', {
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
 end)
 _G.cmp.plugin.colorscheme()
 
-if vim.fn.hlexists('CmpItemAbbr') ~= 1 then
-  vim.cmd [[highlight default link CmpItemAbbr CmpItemAbbrDefault]]
-end
+vim.cmd [[
+  highlight default link CmpBorderedWindow CmpWindow
+  highlight default link CmpBorderedWindowScrollBar CmpWindowScrollBar
+  highlight default link CmpItemAbbr CmpItemAbbrDefault
+  highlight default link CmpItemAbbrDeprecated CmpItemAbbrDeprecatedDefault
+  highlight default link CmpItemAbbrMatch CmpItemAbbrMatchDefault
+  highlight default link CmpItemAbbrMatchFuzzy CmpItemAbbrMatchFuzzyDefault
+  highlight default link CmpItemKind CmpItemKindDefault
+  highlight default link CmpWindow NormalFloat
+  highlight default link CmpWindowBorder FloatBorder
+]]
 
-if vim.fn.hlexists('CmpItemAbbrDeprecated') ~= 1 then
-  vim.cmd [[highlight default link CmpItemAbbrDeprecated CmpItemAbbrDeprecatedDefault]]
-end
-
-if vim.fn.hlexists('CmpItemAbbrMatch') ~= 1 then
-  vim.cmd [[highlight default link CmpItemAbbrMatch CmpItemAbbrMatchDefault]]
-end
-
-if vim.fn.hlexists('CmpItemAbbrMatchFuzzy') ~= 1 then
-  vim.cmd [[highlight default link CmpItemAbbrMatchFuzzy CmpItemAbbrMatchFuzzyDefault]]
-end
-
-if vim.fn.hlexists('CmpItemKind') ~= 1 then
-  vim.cmd [[highlight default link CmpItemKind CmpItemKindDefault]]
-end
 for name in pairs(types.lsp.CompletionItemKind) do
   if type(name) == 'string' then
     local hi = ('CmpItemKind%s'):format(name)
@@ -122,10 +112,6 @@ for name in pairs(types.lsp.CompletionItemKind) do
       vim.cmd(([[highlight default link %s %sDefault]]):format(hi, hi))
     end
   end
-end
-
-if vim.fn.hlexists('CmpItemMenu') ~= 1 then
-  vim.cmd [[highlight default link CmpItemMenu CmpItemMenuDefault]]
 end
 
 vim.cmd [[command! CmpStatus lua require('cmp').status()]]
