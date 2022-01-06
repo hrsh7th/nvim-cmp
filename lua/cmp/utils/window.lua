@@ -152,17 +152,16 @@ window.update = function(self)
         vim.api.nvim_win_set_config(self.scroll_win, style)
       else
         style.noautocmd = true
-        local scroll_buf = buffer.ensure(self.name .. 'scroll_buf')
-        self.scroll_win = vim.api.nvim_open_win(scroll_buf, false, style)
+        self.scroll_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'scroll_buf'), false, style)
         local highlight = self.scrollbar == '' and 'PmenuSbar' or 'CmpWindowScrollBar'
         vim.api.nvim_win_set_option(self.scroll_win, 'winhighlight', 'EndOfBuffer:'..highlight..',NormalFloat:'..highlight)
+      end
 
-        if self.scrollbar ~= '' then
-          local replace = {}
-          for i = 1, style.height do replace[i] = self.scrollbar end
+      if self.scrollbar ~= '' then
+        local replace = {}
+        for i = 1, style.height do replace[i] = self.scrollbar end
 
-          vim.api.nvim_buf_set_lines(scroll_buf, 0, 1, true, replace)
-        end
+        vim.api.nvim_buf_set_lines(vim.api.nvim_win_get_buf(self.scroll_win), 0, -1, true, replace)
       end
     end
 
@@ -173,17 +172,16 @@ window.update = function(self)
       vim.api.nvim_win_set_config(self.thumb_win, info.scrollbar)
     else
       info.scrollbar.noautocmd = true
-      local thumb_buf = buffer.ensure(self.name .. 'thumb_buf')
-      self.thumb_win = vim.api.nvim_open_win(thumb_buf, false, info.scrollbar)
+      self.thumb_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'thumb_buf'), false, info.scrollbar)
       local highlight = self.scrollbar == '' and 'PmenuThumb' or 'Cmp'..(has_border and 'Bordered' or '')..'WindowScrollThumb'
       vim.api.nvim_win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:'..highlight..',NormalFloat:'..highlight)
+    end
 
-      if self.scrollbar ~= '' then
-        local replace = {}
-        for i = 1, info.scrollbar.height do replace[i] = self.scrollbar end
+    if self.scrollbar ~= '' then
+      local replace = {}
+      for i = 1, info.scrollbar.height do replace[i] = self.scrollbar end
 
-        vim.api.nvim_buf_set_lines(thumb_buf, 0, 1, true, replace)
-      end
+      vim.api.nvim_buf_set_lines(vim.api.nvim_win_get_buf(self.thumb_win), 0, -1, true, replace)
     end
   elseif self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
     vim.api.nvim_win_hide(self.thumb_win)
