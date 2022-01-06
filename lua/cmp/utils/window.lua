@@ -209,8 +209,6 @@ window.info = function(self)
       info.width = info.width + info.scrollbar.width
     end
   end
-    -- local info = self:info()
-    -- local bar_height = math.max(1, math.ceil(info.height * (info.height / total) - 0.49))
 
   return info
 end

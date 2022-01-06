@@ -154,7 +154,6 @@ custom_entries_view.open = function(self, offset, entries)
   local row, col = pos[1], pos[2] - delta - 1
 
   local completion = config.get().window.completion
-  -- TODO: centralize this logic
   local border_offset_row, border_offset_col = window.get_border_dimensions({style=completion})
 
   if math.floor(vim.o.lines * 0.5) <= row + border_offset_row and vim.o.lines - row - border_offset_row <= math.min(DEFAULT_HEIGHT, height) then
