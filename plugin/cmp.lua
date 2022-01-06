@@ -8,7 +8,6 @@ local misc = require('cmp.utils.misc')
 local types = require('cmp.types')
 local config = require('cmp.config')
 local highlight = require('cmp.utils.highlight')
-local window = require('cmp.utils.window')
 
 -- TODO: https://github.com/neovim/neovim/pull/14661
 vim.cmd [[
@@ -91,14 +90,16 @@ misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
     end
   end
 
-  highlight.inherit('CmpWindowScrollBar', 'PmenuThumb', {
+  highlight.inherit('CmpWindowScrollBar', 'PmenuSbar', {
+    guifg = 'NONE',
+    ctermfg = 'NONE',
+  })
+  highlight.inherit('CmpWindowScrollThumb', 'PmenuThumb', {
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
 end)
 _G.cmp.plugin.colorscheme()
-
-local border_height, border_width = window.get_border_dimensions({style=config.get().window.completion})
 
 vim.cmd [[
   highlight default link CmpBorderedWindow CmpWindow
