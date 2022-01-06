@@ -122,8 +122,9 @@ keymap.get_mapping = function(mode, lhs)
     if keymap.equals(map.lhs, lhs) then
       return {
         lhs = map.lhs,
-        rhs = map.rhs,
+        rhs = map.rhs or '',
         expr = map.expr == 1,
+        callback = map.callback,
         noremap = map.noremap == 1,
         script = map.script == 1,
         silent = map.silent == 1,
@@ -137,8 +138,9 @@ keymap.get_mapping = function(mode, lhs)
     if keymap.equals(map.lhs, lhs) then
       return {
         lhs = map.lhs,
-        rhs = map.rhs,
+        rhs = map.rhs or '',
         expr = map.expr == 1,
+        callback = map.callback,
         noremap = map.noremap == 1,
         script = map.script == 1,
         silent = map.silent == 1,
@@ -152,6 +154,7 @@ keymap.get_mapping = function(mode, lhs)
     lhs = lhs,
     rhs = lhs,
     expr = false,
+    callback = nil,
     noremap = true,
     script = false,
     silent = false,
@@ -172,35 +175,49 @@ keymap.evacuate = function(bufnr, mode, lhs)
   end
 
   -- Keep existing mapping as <Plug> mapping. We escape fisrt recursive key sequence. See `:help recursive_mapping`)
-  local rhs = map.rhs
-  if not map.noremap and map.expr then
-    -- remap & expr mapping should evacuate as <Plug> mapping with solving recursive mapping.
-    rhs = function()
-      -- Feed new key sequence to expand recursive mapping.
-      vim.api.nvim_feedkeys(keymap.t(keymap.recursive(bufnr, mode, lhs, vim.api.nvim_eval(map.rhs))), 'i', true)
+  local rhs, callback = '', nil
+  if map.callback then
+    callback = function(...)
+      local keys = map.callback(...)
+      if map.noremap then
+        return keys
+      end
+
+      vim.api.nvim_feedkeys(keymap.t(keymap.recursive(bufnr, mode, lhs, keys)), 'i', true)
       return keymap.t('<Ignore>')
     end
-  elseif map.noremap and map.expr then
-    -- noremap & expr mapping should always evacuate as <Plug> mapping.
-    rhs = rhs
-  elseif map.script then
-    -- script mapping should always evacuate as <Plug> mapping.
-    rhs = rhs
-  elseif not map.noremap then
-    -- remap & non-expr mapping should be checked if recursive or not.
-    rhs = keymap.recursive(bufnr, mode, lhs, rhs)
-    if keymap.equals(rhs, map.rhs) or map.noremap then
+  else
+    rhs = map.rhs
+    if not map.noremap and map.expr then
+      -- remap & expr mapping should evacuate as <Plug> mapping with solving recursive mapping.
+      rhs = function()
+        -- Feed new key sequence to expand recursive mapping.
+        vim.api.nvim_feedkeys(keymap.t(keymap.recursive(bufnr, mode, lhs, vim.api.nvim_eval(map.rhs))), 'i', true)
+        return keymap.t('<Ignore>')
+      end
+    elseif map.noremap and map.expr then
+      -- noremap & expr mapping should always evacuate as <Plug> mapping.
+      rhs = rhs
+    elseif map.script then
+      -- script mapping should always evacuate as <Plug> mapping.
+      rhs = rhs
+    elseif not map.noremap then
+      -- remap & non-expr mapping should be checked if recursive or not.
+      rhs = keymap.recursive(bufnr, mode, lhs, rhs)
+      if keymap.equals(rhs, map.rhs) or map.noremap then
+        return { keys = rhs, mode = 'it' .. (map.noremap and 'n' or '') }
+      end
+    else
+      -- noremap & non-expr mapping doesn't need to evacuate.
       return { keys = rhs, mode = 'it' .. (map.noremap and 'n' or '') }
     end
-  else
-    -- noremap & non-expr mapping doesn't need to evacuate.
-    return { keys = rhs, mode = 'it' .. (map.noremap and 'n' or '') }
   end
 
   local fallback = ('<Plug>(cmp.utils.keymap.evacuate:%s)'):format(map.lhs)
   keymap.set_map(bufnr, mode, fallback, rhs, {
     expr = map.expr,
     noremap = map.noremap,
+    callback = callback,
     script = map.script,
     silent = mode ~= 'c', -- I can't understand but it solves the #427 (wilder.nvim's mapping does not work if silent=true in cmdline mode...)
   })
