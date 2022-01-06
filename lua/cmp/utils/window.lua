@@ -199,13 +199,13 @@ window.info = function(self)
     local content_height = self:get_content_height()
     if content_height > self.style.height then
       info.scrollbar = {
-        height = math.max(1, math.ceil(info.height * (info.height / content_height) - 0.49) - info.border.height - 1),
+        height = math.max(1, math.ceil(info.height * (info.height / content_height) - 0.49)),
         width = 1,
       }
       info.scrollbar.col = info.col + info.width - info.scrollbar.width
       info.scrollbar.row = info.row +
-      math.min(info.height - info.scrollbar.height, math.floor(info.height * (vim.fn.getwininfo(self.win)[1].topline / content_height))) +
-      (self.style.border ~= 'shadow' and self.style.border[4] ~= '' and 1 or 0)
+        math.min(self.style.height - info.scrollbar.height, math.floor(self.style.height * (vim.fn.getwininfo(self.win)[1].topline / content_height))) +
+        (self.style.border ~= 'shadow' and self.style.border[4] ~= '' and 1 or 0)
       info.width = info.width + info.scrollbar.width
     end
   end
