@@ -61,9 +61,8 @@ docs_view.open = function(self, e, view)
     return self:close()
   end
 
-  local _, border_offset_col = window.border_offset(documentation)
   local right_col = view.col + view.width
-  local left_col = view.col - width - border_offset_col
+  local left_col = view.col - width
 
   local col, left
   if right_space >= width and left_space >= width then
@@ -94,8 +93,10 @@ docs_view.open = function(self, e, view)
     zindex = documentation.zindex or 50,
   })
   self.window.scrollbar = documentation.scrollbar
-  if left and self.window:has_scrollbar() then
-    self.window.style.col = self.window.style.col - 1
+  if left then
+    self.window.style.col = self.window.style.col - self.window:info().border.width - 1
+  else
+    self.window.style.col = self.window.style.col + 1
   end
   self.window:open()
 end

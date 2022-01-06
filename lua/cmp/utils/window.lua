@@ -23,28 +23,6 @@ local api = require('cmp.utils.api')
 ---@field public cache cmp.Cache
 local window = {}
 
---- @param style cmp.WindowStyle
---- @return integer row the offset needed to account for the popup window
-window.border_offset = function(style)
-  if style.border then
-    return (style.border[2] ~= '' and 1 or 0) + (style.border[6] ~= '' and 1 or 0),
-           (style.border[4] ~= '' and 1 or 0) + (style.border[8] ~= '' and 1 or 0)
-  end
-
-  return 0, 0
-end
-
---- @param style cmp.WindowStyle
---- @return integer row, integer column the offset needed to account for the scrollbar
-window.border_offset_scrollbar = function(style)
-  if style.border then
-    -- We want to center the scrollbar vertically, and reduce the column by one if necessary
-    return style.border[2] ~= '' and 1 or 0, style.border[4] ~= '' and 1 or 0
-  end
-
-  return 0, 0
-end
-
 ---new
 ---@return cmp.Window
 window.new = function()
@@ -101,10 +79,10 @@ end
 ---Set style.
 ---@param style cmp.WindowStyle
 window.set_style = function(self, style)
-  local border_offset = window.border_offset(style)
+  local border_height = self:get_border_dimensions()
 
-  if vim.o.lines and vim.o.lines <= style.row + style.height + border_offset + 1 then
-    style.height = vim.o.lines - style.row - border_offset - 1
+  if vim.o.lines and vim.o.lines <= style.row + style.height + border_height + 1 then
+    style.height = vim.o.lines - style.row - border_height - 1
   end
 
   self.style = style
@@ -149,33 +127,23 @@ end
 
 ---Update
 window.update = function(self)
-  if self:has_scrollbar() then
-    local total = self:get_content_height()
-    local info = self:info()
-    local bar_height = math.max(1, math.ceil(info.height * (info.height / total) - 0.49))
-    local bar_offset = math.min(info.height - bar_height, math.floor(info.height * (vim.fn.getwininfo(self.win)[1].topline / total)))
-    local border_offset_row, border_offset_col = window.border_offset_scrollbar(self.style)
-
-    local style2 = {}
-    style2.relative = 'editor'
-    style2.style = 'minimal'
-    style2.width = 1
-    style2.height = bar_height
-    style2.row = info.row + bar_offset + border_offset_row
-    style2.col = info.col + info.width - (info.has_scrollbar and 1 or 0) - border_offset_col
-    style2.zindex = (self.style.zindex and (self.style.zindex + 2) or 2)
+  local info = self:info().scrollbar
+  if info and info.width > 0 then
+    info.relative = 'editor'
+    info.style = 'minimal'
+    info.zindex = (self.style.zindex and (self.style.zindex + 2) or 2)
     if self.swin and vim.api.nvim_win_is_valid(self.swin) then
-      vim.api.nvim_win_set_config(self.swin, style2)
+      vim.api.nvim_win_set_config(self.swin, info)
     else
-      style2.noautocmd = true
+      info.noautocmd = true
       local sbuf2 = buffer.ensure(self.name .. 'sbuf2')
-      self.swin = vim.api.nvim_open_win(sbuf2, false, style2)
+      self.swin = vim.api.nvim_open_win(sbuf2, false, info)
       local highlight = self.scrollbar ~= '' and 'CmpItemMenuThumb' or 'PmenuThumb'
       vim.api.nvim_win_set_option(self.swin, 'winhighlight', 'EndOfBuffer:'..highlight..',NormalFloat:'..highlight)
 
       if self.scrollbar ~= '' then
         local replace = {}
-        for i = 1, style2.height do replace[i] = self.scrollbar end
+        for i = 1, info.height do replace[i] = self.scrollbar end
 
         vim.api.nvim_buf_set_lines(sbuf2, 0, 1, true, replace)
       end
@@ -212,65 +180,59 @@ window.visible = function(self)
   return self.win and vim.api.nvim_win_is_valid(self.win)
 end
 
----Return the scrollbar will shown or not.
-window.has_scrollbar = function(self)
-  return self.scrollbar and (self.style.height or 0) < self:get_content_height()
-end
-
 ---Return win info.
 window.info = function(self)
-  local border_width = self:get_border_width()
-  local has_scrollbar = self:has_scrollbar()
-  return {
+  local border_height, border_width = self:get_border_dimensions()
+  local info = {
     row = self.style.row,
     col = self.style.col,
-    width = self.style.width + border_width + (has_scrollbar and 1 or 0),
-    height = self.style.height,
-    border_width = border_width,
-    has_scrollbar = has_scrollbar,
+    width = self.style.width + border_width,
+    height = self.style.height + border_height,
+    border = {
+      height = border_height,
+      width = border_width,
+    },
   }
+
+  -- Information about the scrollbar
+  if self.win and type(self.scrollbar) == 'string' then
+    local content_height = self:get_content_height()
+    if content_height > self.style.height then
+      info.scrollbar = {
+        height = math.max(1, math.ceil(info.height * (info.height / content_height) - 0.49) - info.border.height - 1),
+        width = 1,
+      }
+      info.scrollbar.col = info.col + info.width - info.scrollbar.width
+      info.scrollbar.row = info.row +
+			math.min(info.height - info.scrollbar.height, math.floor(info.height * (vim.fn.getwininfo(self.win)[1].topline / content_height))) +
+			(self.style.border ~= 'shadow' and self.style.border[4] ~= '' and 1 or 0)
+      info.width = info.width + info.scrollbar.width
+    end
+  end
+    -- local info = self:info()
+    -- local bar_height = math.max(1, math.ceil(info.height * (info.height / total) - 0.49))
+
+	return info
 end
 
----Get border width
----@return number
-window.get_border_width = function(self)
+--- @return number height, number width
+--- @return number[] dimensions the height and width
+window.get_border_dimensions = function(self)
   local border = self.style.border
-  if type(border) == 'table' then
-    local new_border = {}
-    while #new_border < 8 do
-      for _, b in ipairs(border) do
-        table.insert(new_border, b)
-      end
-    end
-    border = new_border
+
+  if border == 'shadow' then
+    return 1, 1
+  elseif type(border) == 'string' then
+    return 2, 2
+  elseif type(border) == 'table' then
+    -- NOTE: the border indices look like this: 1 2 3
+    --                                          8   4
+    --                                          7 6 5
+    return (self.style.border[2] ~= '' and 1 or 0) + (self.style.border[6] ~= '' and 1 or 0),
+           (self.style.border[4] ~= '' and 1 or 0) + (self.style.border[8] ~= '' and 1 or 0)
   end
 
-  local w = 0
-  if border then
-    if type(border) == 'string' then
-      if border == 'single' then
-        w = 2
-      elseif border == 'solid' then
-        w = 2
-      elseif border == 'double' then
-        w = 2
-      elseif border == 'rounded' then
-        w = 2
-      elseif border == 'shadow' then
-        w = 1
-      end
-    elseif type(border) == 'table' then
-      local b4 = type(border[4]) == 'table' and border[4][1] or border[4]
-      if #b4 > 0 then
-        w = w + 1
-      end
-      local b8 = type(border[8]) == 'table' and border[8][1] or border[8]
-      if #b8 > 0 then
-        w = w + 1
-      end
-    end
-  end
-  return w
+  return 0, 0
 end
 
 ---Get scroll height.
