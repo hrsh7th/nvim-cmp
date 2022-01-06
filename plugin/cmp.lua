@@ -81,6 +81,10 @@ misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
+  highlight.inherit('CmpItemMenuDefault', 'Pmenu', {
+    guibg = 'NONE',
+    ctermbg = 'NONE',
+  })
   for name in pairs(types.lsp.CompletionItemKind) do
     if type(name) == 'string' then
       vim.cmd(([[highlight default link CmpItemKind%sDefault CmpItemKind]]):format(name))
@@ -96,7 +100,7 @@ _G.cmp.plugin.colorscheme()
 
 local border_height, border_width = window.get_border_dimensions({style=config.get().window.completion})
 
-vim.cmd([[
+vim.cmd [[
   highlight default link CmpBorderedWindow CmpWindow
   highlight default link CmpBorderedWindowScrollBar CmpWindowScrollBar
   highlight default link CmpItemAbbr CmpItemAbbrDefault
@@ -104,10 +108,10 @@ vim.cmd([[
   highlight default link CmpItemAbbrMatch CmpItemAbbrMatchDefault
   highlight default link CmpItemAbbrMatchFuzzy CmpItemAbbrMatchFuzzyDefault
   highlight default link CmpItemKind CmpItemKindDefault
+  highlight default link CmpItemMenu CmpItemMenuDefault
   highlight default link CmpWindow NormalFloat
   highlight default link CmpWindowBorder FloatBorder
-  highlight default link CmpItemMenu ]]..(math.max(border_height, border_width) > 0 and 'CmpBorderedWindow' or 'CmpWindow')
-)
+]]
 
 for name in pairs(types.lsp.CompletionItemKind) do
   if type(name) == 'string' then
