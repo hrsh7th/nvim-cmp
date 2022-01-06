@@ -103,7 +103,7 @@ _G.cmp.plugin.colorscheme()
 
 vim.cmd [[
   highlight default link CmpBorderedWindow CmpWindow
-  highlight default link CmpBorderedWindowScrollBar CmpWindowScrollBar
+  highlight default link CmpBorderedWindowScrollThumb CmpWindowScrollThumb
   highlight default link CmpItemAbbr CmpItemAbbrDefault
   highlight default link CmpItemAbbrDeprecated CmpItemAbbrDeprecatedDefault
   highlight default link CmpItemAbbrMatch CmpItemAbbrMatchDefault
