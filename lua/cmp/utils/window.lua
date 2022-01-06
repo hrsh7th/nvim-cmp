@@ -199,7 +199,7 @@ window.info = function(self)
     local content_height = self:get_content_height()
     if content_height > self.style.height then
       info.scrollbar = {
-        height = math.max(1, math.ceil(info.height * (info.height / content_height) - 0.49)),
+        height = math.max(1, math.ceil(self.style.height * (self.style.height / content_height) - 0.49)),
         width = 1,
       }
       info.scrollbar.col = info.col + info.width - info.scrollbar.width
