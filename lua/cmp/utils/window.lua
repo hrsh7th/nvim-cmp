@@ -15,7 +15,8 @@ local api = require('cmp.utils.api')
 ---@class cmp.Window
 ---@field public name string
 ---@field public win number|nil
----@field public swin number|nil
+---@field public thumb_win number|nil the scrollbar thumb window
+---@field public scroll_win number|nil the scrollbar window
 ---@field public style cmp.WindowStyle
 ---@field public opt table<string, any>
 ---@field public buffer_opt table<string, any>
@@ -29,7 +30,8 @@ window.new = function()
   local self = setmetatable({}, { __index = window })
   self.name = misc.id('cmp.utils.window.new')
   self.win = nil
-  self.swin = nil
+  self.scroll_win = nil
+  self.thumb_win = nil
   self.style = {}
   self.cache = cache.new()
   self.opt = {}
@@ -131,26 +133,61 @@ window.update = function(self)
   if info.scrollbar and info.scrollbar.width > 0 then
     info.scrollbar.relative = 'editor'
     info.scrollbar.style = 'minimal'
+
+    local has_border = math.max(info.border.height, info.border.width) > 0
+
+    -- Draw the background of the scrollbar
+    if not has_border then
+      local style = {
+        relative = info.scrollbar.relative,
+        style = info.scrollbar.style,
+        width = info.scrollbar.width,
+        height = self.style.height,
+        row = info.scrollbar.row,
+        col = info.scrollbar.col,
+        zindex = (self.style.zindex and (self.style.zindex + 1) or 1),
+      }
+
+      if self.scroll_win and vim.api.nvim_win_is_valid(self.scroll_win) then
+        vim.api.nvim_win_set_config(self.scroll_win, style)
+      else
+        style.noautocmd = true
+        local scroll_buf = buffer.ensure(self.name .. 'scroll_buf')
+        self.scroll_win = vim.api.nvim_open_win(scroll_buf, false, style)
+        local highlight = self.scrollbar == '' and 'PmenuSbar' or 'CmpWindowScrollBar'
+        vim.api.nvim_win_set_option(self.scroll_win, 'winhighlight', 'EndOfBuffer:'..highlight..',NormalFloat:'..highlight)
+
+        if self.scrollbar ~= '' then
+          local replace = {}
+          for i = 1, style.height do replace[i] = self.scrollbar end
+
+          vim.api.nvim_buf_set_lines(scroll_buf, 0, 1, true, replace)
+        end
+      end
+    end
+
+    -- Draw the scrollbar thumb
     info.scrollbar.zindex = (self.style.zindex and (self.style.zindex + 2) or 2)
-    if self.swin and vim.api.nvim_win_is_valid(self.swin) then
-      vim.api.nvim_win_set_config(self.swin, info.scrollbar)
+
+    if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
+      vim.api.nvim_win_set_config(self.thumb_win, info.scrollbar)
     else
       info.scrollbar.noautocmd = true
-      local sbuf2 = buffer.ensure(self.name .. 'sbuf2')
-      self.swin = vim.api.nvim_open_win(sbuf2, false, info.scrollbar)
-      local highlight = self.scrollbar == '' and 'PmenuThumb' or 'Cmp'..(math.max(info.border.height, info.border.width) > 0 and 'Bordered' or '')..'WindowScrollBar'
-      vim.api.nvim_win_set_option(self.swin, 'winhighlight', 'EndOfBuffer:'..highlight..',NormalFloat:'..highlight)
+      local thumb_buf = buffer.ensure(self.name .. 'thumb_buf')
+      self.thumb_win = vim.api.nvim_open_win(thumb_buf, false, info.scrollbar)
+      local highlight = self.scrollbar == '' and 'PmenuThumb' or 'Cmp'..(has_border and 'Bordered' or '')..'WindowScrollThumb'
+      vim.api.nvim_win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:'..highlight..',NormalFloat:'..highlight)
 
       if self.scrollbar ~= '' then
         local replace = {}
         for i = 1, info.scrollbar.height do replace[i] = self.scrollbar end
 
-        vim.api.nvim_buf_set_lines(sbuf2, 0, 1, true, replace)
+        vim.api.nvim_buf_set_lines(thumb_buf, 0, 1, true, replace)
       end
     end
-  elseif self.swin and vim.api.nvim_win_is_valid(self.swin) then
-    vim.api.nvim_win_hide(self.swin)
-    self.swin = nil
+  elseif self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
+    vim.api.nvim_win_hide(self.thumb_win)
+    self.thumb_win = nil
   end
 
   -- In cmdline, vim does not redraw automatically.
@@ -168,9 +205,13 @@ window.close = function(self)
       vim.api.nvim_win_hide(self.win)
       self.win = nil
     end
-    if self.swin and vim.api.nvim_win_is_valid(self.swin) then
-      vim.api.nvim_win_hide(self.swin)
-      self.swin = nil
+    if self.scroll_win and vim.api.nvim_win_is_valid(self.scroll_win) then
+      vim.api.nvim_win_hide(self.scroll_win)
+      self.scroll_win = nil
+    end
+    if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
+      vim.api.nvim_win_hide(self.thumb_win)
+      self.thumb_win = nil
     end
   end
 end
@@ -188,6 +229,7 @@ window.info = function(self)
     col = self.style.col,
     width = self.style.width + border_width,
     height = self.style.height + border_height,
+    -- NOTE: this is the scrollbar THUMB information.
     border = {
       height = border_height,
       width = border_width,
