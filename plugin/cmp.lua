@@ -8,6 +8,7 @@ local misc = require('cmp.utils.misc')
 local types = require('cmp.types')
 local config = require('cmp.config')
 local highlight = require('cmp.utils.highlight')
+local window = require('cmp.utils.window')
 
 -- TODO: https://github.com/neovim/neovim/pull/14661
 vim.cmd [[
@@ -93,7 +94,9 @@ misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
 end)
 _G.cmp.plugin.colorscheme()
 
-vim.cmd [[
+local border_height, border_width = window.get_border_dimensions({style=config.get().window.completion})
+
+vim.cmd([[
   highlight default link CmpBorderedWindow CmpWindow
   highlight default link CmpBorderedWindowScrollBar CmpWindowScrollBar
   highlight default link CmpItemAbbr CmpItemAbbrDefault
@@ -103,7 +106,8 @@ vim.cmd [[
   highlight default link CmpItemKind CmpItemKindDefault
   highlight default link CmpWindow NormalFloat
   highlight default link CmpWindowBorder FloatBorder
-]]
+  highlight default link CmpItemMenu ]]..(math.max(border_height, border_width) > 0 and 'CmpBorderedWindow' or 'CmpWindow')
+)
 
 for name in pairs(types.lsp.CompletionItemKind) do
   if type(name) == 'string' then
