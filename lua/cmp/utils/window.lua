@@ -81,13 +81,13 @@ end
 ---Set style.
 ---@param style cmp.WindowStyle
 window.set_style = function(self, style)
-  local border_height = self:get_border_dimensions()
+  self.style = style
+  local info = self:info()
 
-  if vim.o.lines and vim.o.lines <= style.row + style.height + border_height + 1 then
-    style.height = vim.o.lines - style.row - border_height - 1
+  if vim.o.lines and vim.o.lines <= info.row + info.height + 1 then
+    self.style.height = vim.o.lines - info.row - info.border.height - 1
   end
 
-  self.style = style
   self.style.zindex = self.style.zindex or 1
 end
 
