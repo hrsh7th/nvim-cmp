@@ -26,6 +26,7 @@ custom_entries_view.ns = vim.api.nvim_create_namespace('cmp.view.custom_entries_
 custom_entries_view.new = function()
   local self = setmetatable({}, { __index = custom_entries_view })
   local border_height, border_width = window.get_border_dimensions({style=config.get().window.completion})
+  local has_border = math.max(border_height, border_width) > 0
 
   self.entries_win = window.new()
   self.entries_win:option('conceallevel', 2)
@@ -34,7 +35,7 @@ custom_entries_view.new = function()
   self.entries_win:option('foldenable', false)
   self.entries_win:option('wrap', false)
   self.entries_win:option('scrolloff', 0)
-  self.entries_win:option('winhighlight', 'Normal:Cmp'..(math.max(border_height, border_width) > 0 and 'Bordered' or '')..'Window,FloatBorder:CmpWindowBorder,CursorLine:PmenuSel,Search:None')
+  self.entries_win:option('winhighlight', 'Normal:Cmp'..(has_border and 'Bordered' or '')..'Window,FloatBorder:CmpWindowBorder,CursorLine:PmenuSel,Search:None')
   -- This is done so that strdisplaywidth calculations for lines in the
   -- custom_entries_view window exactly match with what is really displayed,
   -- see comment in cmp.Entry.get_view. Setting tabstop to 1 makes all tabs be
@@ -65,7 +66,7 @@ custom_entries_view.new = function()
       for i = top, bot do
         local e = self.entries[i + 1]
         if e then
-          local v = e:get_view(self.offset, buf)
+          local v = e:get_view(self.offset, buf, has_border)
           local o = SIDE_PADDING
           local a = 0
           for _, field in ipairs(fields) do
