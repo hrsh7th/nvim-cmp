@@ -383,6 +383,8 @@ completion.autocomplete~
 formatting.format~
   `fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem`
   The function to customize the completion menu appearance. See |complete-items|.
+  NOTE: The `vim.CompletedItem` can have special properties `abbr_hl_group`,
+  `kind_hl_group` and `menu_hl_group`.
 
                                                   *cmp-config.formatting.fields*
 formatting.fields~

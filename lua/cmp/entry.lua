@@ -213,17 +213,17 @@ entry.get_view = function(self, suggest_offset, entries_buf)
       view.abbr.text = item.abbr or ''
       view.abbr.bytes = #view.abbr.text
       view.abbr.width = vim.fn.strdisplaywidth(view.abbr.text)
-      view.abbr.hl_group = self:is_deprecated() and 'CmpItemAbbrDeprecated' or 'CmpItemAbbr'
+      view.abbr.hl_group = item.abbr_hl_group or (self:is_deprecated() and 'CmpItemAbbrDeprecated' or 'CmpItemAbbr')
       view.kind = {}
       view.kind.text = item.kind or ''
       view.kind.bytes = #view.kind.text
       view.kind.width = vim.fn.strdisplaywidth(view.kind.text)
-      view.kind.hl_group = 'CmpItemKind' .. (types.lsp.CompletionItemKind[self:get_kind()] or '')
+      view.kind.hl_group = item.kind_hl_group or ('CmpItemKind' .. (types.lsp.CompletionItemKind[self:get_kind()] or ''))
       view.menu = {}
       view.menu.text = item.menu or ''
       view.menu.bytes = #view.menu.text
       view.menu.width = vim.fn.strdisplaywidth(view.menu.text)
-      view.menu.hl_group = 'CmpItemMenu'
+      view.menu.hl_group = item.menu_hl_group or 'CmpItemMenu'
       view.dup = item.dup
     end)
     return view
