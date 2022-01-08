@@ -95,9 +95,9 @@ docs_view.open = function(self, e, view)
   })
   self.window.scrollbar = documentation.scrollbar
   if left then
-    self.window.style.col = self.window.style.col - border_width - 1
+    self.window.style.col = self.window.style.col - border_width
   else
-    self.window.style.col = self.window.style.col + 1
+    self.window.style.col = self.window.style.col
   end
   self.window:open()
 end
