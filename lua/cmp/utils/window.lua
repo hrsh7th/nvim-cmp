@@ -183,9 +183,15 @@ window.update = function(self)
 
       vim.api.nvim_buf_set_lines(vim.api.nvim_win_get_buf(self.thumb_win), 0, -1, true, replace)
     end
-  elseif self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
-    vim.api.nvim_win_hide(self.thumb_win)
-    self.thumb_win = nil
+  else
+    if self.scroll_win and vim.api.nvim_win_is_valid(self.scroll_win) then
+      vim.api.nvim_win_hide(self.scroll_win)
+      self.scroll_win = nil
+    end
+    if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
+      vim.api.nvim_win_hide(self.thumb_win)
+      self.thumb_win = nil
+    end
   end
 
   -- In cmdline, vim does not redraw automatically.
