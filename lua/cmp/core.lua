@@ -34,6 +34,9 @@ core.new = function()
   self.view.event:on('keymap', function(...)
     self:on_keymap(...)
   end)
+  self.view.event:on('complete_done', function(evt)
+    self.event:emit('complete_done', evt)
+  end)
   return self
 end
 
@@ -425,7 +428,9 @@ core.confirm = function(self, e, option, callback)
   feedkeys.call('', 'n', function()
     e:execute(vim.schedule_wrap(function()
       release()
-      self.event:emit('confirm_done', e)
+      self.event:emit('confirm_done', {
+        entry = e
+      })
       if callback then
         callback()
       end

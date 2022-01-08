@@ -209,6 +209,7 @@ NOTE: You can call these functions in mapping via `<Cmd>lua require('cmp').compl
 *cmp.event:on* ('%EVENT_NAME%, callback)
   Subscribe nvim-cmp's events below.
 
+  - `complete_done`: emit after current completion is done.
   - `confirm_done`: emit after confirmation is done.
 
 
