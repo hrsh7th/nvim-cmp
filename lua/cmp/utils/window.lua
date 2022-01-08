@@ -251,7 +251,7 @@ window.info = function(self)
       info.scrollbar.col = info.col + info.width - info.scrollbar.width
       info.scrollbar.row = info.row +
         math.min(self.style.height - info.scrollbar.height, math.floor(self.style.height * (vim.fn.getwininfo(self.win)[1].topline / content_height))) +
-        (self.style.border ~= 'shadow' and self.style.border[4] ~= '' and 1 or 0)
+        (self.style.border ~= 'shadow' and self.style.border[2] ~= '' and 1 or 0)
       if border_width < 1 then
         info.width = info.width + info.scrollbar.width
       end
