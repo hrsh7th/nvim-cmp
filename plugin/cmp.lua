@@ -82,7 +82,7 @@ misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
   })
   for name in pairs(types.lsp.CompletionItemKind) do
     if type(name) == 'string' then
-      vim.cmd(([[highlight default link CmpItemKind%sDefault CmpItemKindDefault]]):format(name))
+      vim.cmd(([[highlight default link CmpItemKind%sDefault CmpItemKind]]):format(name))
     end
   end
   highlight.inherit('CmpItemMenuDefault', 'Pmenu', {
