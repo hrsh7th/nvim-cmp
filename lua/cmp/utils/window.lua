@@ -143,7 +143,7 @@ window.update = function(self)
         style = info.scrollbar.style,
         width = info.scrollbar.width,
         height = self.style.height,
-        row = info.scrollbar.row,
+        row = info.row + (self.style.border ~= 'shadow' and self.style.border[2] ~= '' and 1 or 0),
         col = info.scrollbar.col,
         zindex = (self.style.zindex and (self.style.zindex + 1) or 1),
       }
