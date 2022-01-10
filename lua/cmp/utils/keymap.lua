@@ -92,15 +92,16 @@ keymap.listen = function(mode, lhs, callback)
   end
 
   local bufnr = existing.buffer and vim.api.nvim_get_current_buf() or -1
-  local fallback = keymap.evacuate(bufnr, mode, lhs)
   keymap.set_map(bufnr, mode, lhs, function()
     if mode == 'c' and vim.fn.getcmdtype() == '=' then
-      return fallback()
+      return keymap.feedmap(existing)
     end
 
     callback(
       lhs,
-      misc.once(fallback)
+      misc.once(function()
+        keymap.feedmap(existing)
+      end)
     )
   end, {
     expr = false,
@@ -173,46 +174,17 @@ keymap.feedmap = function(map)
   else
     rhs = keymap.t(map.rhs)
   end
-  if not map.noremap and string.find(rhs, lhs, 1, true) == 1 then
-    rhs = string.gsub(rhs, '^' .. vim.psec(lhs), '')
-    vim.api.nvim_feedkeys(rhs, 'itm', true)
-    vim.api.nvim_feedkeys(lhs, 'itn', true)
+
+  if map.noremap then
+    vim.api.nvim_feedkeys(rhs, 'itn', true)
   else
-    vim.api.nvim_feedkeys(rhs, 'it' .. (map.noremap and 'n' or 'm'), true)
-  end
-end
-
----Evacuate existing key mapping
----@param bufnr number
----@param mode string
----@param lhs string
----@return { keys: string, mode: string }
-keymap.evacuate = function(bufnr, mode, lhs)
-  local map = keymap.get_mapping(mode, lhs)
-  if not map.script then
-    return function()
-      keymap.feedmap(map)
+    if string.find(rhs, lhs, 1, true) == 1 then
+      rhs = string.gsub(rhs, '^' .. vim.pesc(lhs), '')
+      vim.api.nvim_feedkeys(rhs, 'itm', true)
+      vim.api.nvim_feedkeys(lhs, 'itn', true)
+    else
+      vim.api.nvim_feedkeys(rhs, 'itm', true)
     end
-  end
-
-  local fallback = ('<Plug>(cmp.u.k.e:%s)'):format(misc.id('cmp.utils.keymap.evacuate'))
-  keymap.set_map(bufnr, mode, fallback, function()
-    local lhst = keymap.t(map.lhs)
-    local rhst = keymap.t(map.rhs)
-    if string.find(rhst, lhst, 1, true) == 1 then
-      vim.api.nvim_feedkeys(lhst, 'itn', true)
-      return string.gsub(rhst, '^' .. vim.pesc(lhst), '')
-    end
-    return rhst
-  end, {
-    expr = true,
-    noremap = false,
-    script = true,
-    nowait = true,
-    silent = mode ~= 'c', -- I can't understand but it solves the #427 (wilder.nvim's mapping does not work if silent=true in cmdline mode...)
-  })
-  return function()
-    vim.api.nvim_feedkeys(keymap.t(fallback), 'itm', true)
   end
 end
 
