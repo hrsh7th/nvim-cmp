@@ -24,7 +24,7 @@ end
 ---@param e cmp.Entry
 ---@param entries_analyzed cmp.WindowAnalyzed
 docs_view.open = function(self, e, entries_analyzed)
-  local documentation = config.get().documentation
+  local documentation = config.get().window.documentation
   if not documentation then
     return
   end
@@ -42,8 +42,8 @@ docs_view.open = function(self, e, entries_analyzed)
   local right_space = vim.o.columns - (entries_analyzed.col + entries_analyzed.width)
   local left_space = entries_analyzed.col
   local bottom_space = vim.o.lines - entries_analyzed.row
-  local max_content_width = math.min(documentation.maxwidth, math.max(left_space, right_space)) - border_info.horizontal - 1
-  local max_content_height = math.min(documentation.maxheight, bottom_space) - border_info.vertical
+  local max_content_width = math.min(documentation.max_width, math.max(left_space, right_space)) - border_info.horizontal - 1
+  local max_content_height = math.min(documentation.max_height, bottom_space) - border_info.vertical
 
   -- update buffer content if needed.
   if not self.entry or e.id ~= self.entry.id then
@@ -69,7 +69,7 @@ docs_view.open = function(self, e, entries_analyzed)
     col = 0,
     width = content_width,
     height = content_height,
-    border = config.get().window.documentation.border,
+    border = documentation.border,
   }, self.window:get_buffer())
 
   local col
@@ -88,19 +88,18 @@ docs_view.open = function(self, e, entries_analyzed)
   else
     return self:close()
   end
-  if not docs_analyzed.border_info.is_visible then
-    self.window:option('winhighlight', 'Normal:NormalFloat,FloatBorder:NormalFloat,CursorLine:PmenuSel,Search:None')
-  else
-    self.window:option('winhighlight', 'FloatBorder:Normal,CursorLine:NormalFloat,Search:None,NormalFloat:Normal,FloatBorder:Normal')
-  end
+  local win_mode_option = docs_analyzed.border_info.is_visible and documentation.win_mode.bordered or documentation.win_mode.default
+  self.window:set_scrollbar(win_mode_option.scrollbar)
+  self.window:option('winhighlight', win_mode_option.winhighlight)
   self.window:open({
     relative = 'editor',
     style = 'minimal',
-    width = docs_analyzed.inner_width,
-    height = docs_analyzed.inner_height,
-    border = config.get().window.documentation.border,
     row = entries_analyzed.row,
     col = col,
+    width = docs_analyzed.inner_width,
+    height = docs_analyzed.inner_height,
+    border = documentation.border,
+    zindex = documentation.zindex or 1001,
   })
 end
 

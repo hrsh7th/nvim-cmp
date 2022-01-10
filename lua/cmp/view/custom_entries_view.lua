@@ -106,6 +106,8 @@ custom_entries_view.on_change = function(self)
 end
 
 custom_entries_view.open = function(self, offset, entries)
+  local completion = config.get().window.completion
+
   self.offset = offset
   self.entries = {}
   self.column_width = { abbr = 0, kind = 0, menu = 0 }
@@ -183,11 +185,9 @@ custom_entries_view.open = function(self, offset, entries)
     col = vim.o.columns - analyzed.width - 1
   end
 
-  if not analyzed.border_info.is_visible then
-    self.entries_win:option('winhighlight', 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None')
-  else
-    self.entries_win:option('winhighlight', 'FloatBorder:Normal,CursorLine:Visual,Search:None,NormalFloat:Normal,FloatBorder:Normal')
-  end
+  local win_mode_option = analyzed.border_info.is_visible and completion.win_mode.bordered or completion.win_mode.default
+  self.entries_win:set_scrollbar(win_mode_option.scrollbar)
+  self.entries_win:option('winhighlight', win_mode_option.winhighlight)
   self.entries_win:open({
     relative = 'editor',
     style = 'minimal',
@@ -195,8 +195,8 @@ custom_entries_view.open = function(self, offset, entries)
     col = math.max(0, col),
     width = analyzed.inner_width,
     height = analyzed.inner_height,
-    border = config.get().window.completion.border,
-    zindex = 1001,
+    border = completion.border,
+    zindex = completion.zindex or 1001,
   })
 
   if not self.entries_win:visible() then

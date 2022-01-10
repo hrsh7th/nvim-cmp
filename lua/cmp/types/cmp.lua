@@ -74,7 +74,7 @@ cmp.ItemField.Menu = 'menu'
 ---@field public enabled fun():boolean|boolean
 ---@field public preselect cmp.PreselectMode
 ---@field public completion cmp.CompletionConfig
----@field public documentation cmp.DocumentationConfig|"false"
+---@field public window cmp.WindowConfig
 ---@field public confirmation cmp.ConfirmationConfig
 ---@field public sorting cmp.SortingConfig
 ---@field public formatting cmp.FormattingConfig
@@ -90,12 +90,9 @@ cmp.ItemField.Menu = 'menu'
 ---@field public keyword_length number
 ---@field public get_trigger_characters fun(trigger_characters: string[]): string[]
 
----@class cmp.DocumentationConfig
----@field public border string[]
----@field public winhighlight string
----@field public maxwidth number|nil
----@field public maxheight number|nil
----@field public zindex number|nil
+---@class cmp.WindowConfig
+---@field public completion cmp.WindowOption
+---@field public documentation cmp.WindowOption
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior
@@ -128,5 +125,17 @@ cmp.ItemField.Menu = 'menu'
 ---@field public keyword_length number|nil
 ---@field public max_item_count number|nil
 ---@field public group_index number|nil
+
+---@class cmp.WindowOption
+---@field public winhighlight { bordered: string, padded: string }
+---@field public border string|string[]
+---@field public win_mode { default: cmp.WindowModeOption, bordered: cmp.WindowModeOption }
+---@field public max_width number
+---@field public max_height number
+---@field public zindex number
+
+---@class cmp.WindowModeOption
+---@field public winhighlight string
+---@field public scrollbar string
 
 return cmp

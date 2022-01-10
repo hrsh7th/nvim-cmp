@@ -21,10 +21,34 @@ return function()
 
     window = {
       completion = {
-        border = { '', '', '', '', '', '' , '', '' },
+        border = { '', '', '', '', '', '', '', '' },
+        max_width = -1,
+        max_height = -1,
+        win_mode = {
+          default = {
+            winhighlight = 'NormalFloat:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None',
+            scrollbar = '',
+          },
+          bordered = {
+            winhighlight = 'NormalFloat:Normal,FloatBorder:Normal,FloatBorder:Normal,CursorLine:Visual,Search:None',
+            scrollbar = '║',
+          },
+        }
       },
       documentation = {
-        border = { '', '', '', ' ', '', '' , '', ' ' },
+        border = { '', '', '', ' ', '', '', '', ' ' },
+        max_width = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
+        max_height = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
+        win_mode = {
+          default = {
+            winhighlight = 'FloatBorder:NormalFloat,CursorLine:Visual,Search:None',
+            scrollbar = '',
+          },
+          bordered = {
+            winhighlight = 'NormalFloat:Normal,FloatBorder:Normal,FloatBorder:Normal,CursorLine:Visual,Search:None',
+            scrollbar = '║',
+          }
+        }
       },
     },
 
@@ -35,13 +59,6 @@ return function()
     },
 
     preselect = types.cmp.PreselectMode.Item,
-
-    documentation = {
-      border = { '', '', '', ' ', '', '', '', ' ' },
-      winhighlight = 'NormalFloat:NormalFloat,FloatBorder:NormalFloat',
-      maxwidth = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
-      maxheight = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
-    },
 
     confirmation = {
       default_behavior = types.cmp.ConfirmBehavior.Insert,

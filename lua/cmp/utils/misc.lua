@@ -168,22 +168,6 @@ misc.to_vimindex = function(text, utfindex)
   return utfindex + 1
 end
 
----Redraw utiilty.
-misc.redraw = setmetatable({
-  doing = false
-}, {
-  __call = function(self)
-    if self.doing then
-      return
-    end
-    self.doing = true
-    vim.schedule(function()
-      self.doing = false
-      vim.cmd([[redraw]])
-    end)
-  end
-})
-
 ---Mark the function as deprecated
 misc.deprecated = function(fn, msg)
   local printed = false
@@ -202,21 +186,36 @@ misc.redraw = setmetatable({
   force = false,
 }, {
   __call = function(self, force)
-    if self.doing then
-      return
-    end
-    self.doing = true
     self.force = not not force
-    vim.schedule(function()
-      if self.force then
-        vim.cmd([[redraw!]])
-      else
-        vim.cmd([[redraw]])
-      end
-      self.doing = false
-      self.force = false
-    end)
-  end
+    if not self.doing then
+      self.doing = true
+      vim.schedule(function()
+        if self.force then
+          vim.cmd([[redraw!]])
+        else
+          vim.cmd([[redraw]])
+        end
+        self.doing = false
+        self.force = false
+      end)
+    end
+  end,
 })
+
+misc.rep = function(string_or_array, count)
+  if type(string_or_array) == 'string' then
+    return string.rep(string_or_array, count)
+  end
+  if count == 0 then
+    return {}
+  end
+  local new_array = {}
+  for _ = 1, count do
+    for _, v in ipairs(string_or_array) do
+      table.insert(new_array, v)
+    end
+  end
+  return new_array
+end
 
 return misc

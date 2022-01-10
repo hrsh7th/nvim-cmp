@@ -20,6 +20,7 @@ local api = require('cmp.utils.api')
 ---@field public style cmp.WindowStyle
 ---@field public window_opt table<string, any>
 ---@field public buffer_opt table<string, any>
+---@field public scrollbar string
 local window = {}
 
 ---new
@@ -33,7 +34,14 @@ window.new = function()
   self.style = {}
   self.window_opt = {}
   self.buffer_opt = {}
+  self.scrollbar = ''
   return self
+end
+
+---Set scrollbar character.
+---@param char string
+window.set_scrollbar = function(self, char)
+  self.scrollbar = char
 end
 
 ---Set window option.
@@ -152,6 +160,7 @@ window.update = function(self)
         vim.api.nvim_win_set_option(self.sbar_win, 'winhighlight', 'EndOfBuffer:PmenuSbar,Normal:PmenuSbar,NormalNC:PmenuSbar,NormalFloat:PmenuSbar')
       end
     end
+
     local style2 = {}
     style2.relative = 'editor'
     style2.style = 'minimal'
@@ -160,12 +169,17 @@ window.update = function(self)
     style2.row = analyzed.row + area_offset + bar_offset
     style2.col = analyzed.col + analyzed.width - 1
     style2.zindex = (self.style.zindex and (self.style.zindex + 2) or 2)
+    vim.api.nvim_buf_set_lines(buffer.ensure(self.name .. 'thumb_buf'), 0, -1, false, misc.rep({ self.scrollbar }, style2.height))
     if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
       vim.api.nvim_win_set_config(self.thumb_win, style2)
     else
       style2.noautocmd = true
-      self.thumb_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'thumb_win'), false, style2)
-      vim.api.nvim_win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:PmenuThumb,Normal:PmenuThumb,NormalNC:PmenuThumb,NormalFloat:PmenuThumb')
+      self.thumb_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'thumb_buf'), false, style2)
+      if self.scrollbar == '' then
+        vim.api.nvim_win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:PmenuThumb,Normal:PmenuThumb,NormalNC:PmenuThumb,NormalFloat:PmenuThumb')
+      else
+        vim.api.nvim_win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:Normal,Normal:Normal,NormalNC:Normal,NormalFloat:Normal')
+      end
     end
   else
     if self.sbar_win and vim.api.nvim_win_is_valid(self.sbar_win) then

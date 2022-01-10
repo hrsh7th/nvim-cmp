@@ -35,18 +35,16 @@ window_analysis.cache = cache.new()
 window_analysis.analyze = function(style, bufnr)
   local scroll_height = window_analysis.get_content_height(style.width, bufnr)
   local border_info = window_analysis.get_border_info(style.border)
-  local scroll_info = style.height >= scroll_height and ({
+  local scroll_info = style.height >= scroll_height and {
     scrollable = false,
     extra_width = 0,
-  }) or (
-    border_info.is_visible and ({
-      scrollable = true,
-      extra_width = 0,
-    }) or ({
-      scrollable = true,
-      extra_width = 1,
-    })
-  )
+  } or (border_info.is_visible and {
+    scrollable = true,
+    extra_width = 0,
+  } or {
+    scrollable = true,
+    extra_width = 1,
+  })
   return {
     row = style.row,
     col = style.col,
@@ -73,7 +71,7 @@ window_analysis.get_border_info = function(border)
       bottom = 0,
       horizontal = 0,
       vertical = 0,
-      is_visible = false
+      is_visible = false,
     }
     if border then
       if vim.tbl_contains({ 'single', 'solid', 'double', 'rounded' }, border) then
@@ -113,8 +111,9 @@ end
 ---@return number
 window_analysis.get_content_width = function(bufnr)
   return window_analysis.cache:ensure({
+    'get_content_width',
     bufnr,
-    vim.api.nvim_buf_get_changedtick(bufnr)
+    vim.api.nvim_buf_get_changedtick(bufnr),
   }, function()
     local content_width = 0
     vim.api.nvim_buf_call(bufnr, function()
@@ -132,9 +131,10 @@ end
 ---@return number
 window_analysis.get_content_height = function(width, bufnr)
   return window_analysis.cache:ensure({
+    'get_content_height',
     width,
     bufnr,
-    vim.api.nvim_buf_get_changedtick(bufnr)
+    vim.api.nvim_buf_get_changedtick(bufnr),
   }, function()
     local content_height = 0
     vim.api.nvim_buf_call(bufnr, function()
@@ -147,4 +147,3 @@ window_analysis.get_content_height = function(width, bufnr)
 end
 
 return window_analysis
-
