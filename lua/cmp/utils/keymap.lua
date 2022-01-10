@@ -167,7 +167,9 @@ end
 keymap.feedmap = function(map)
   local lhs = keymap.t(map.lhs)
   local rhs
-  if map.callback and map.expr then
+  if map.callback and not map.expr then
+    return map.callback()
+  elseif map.callback and map.expr then
     rhs = map.callback()
   elseif map.expr then
     rhs = keymap.t(vim.api.nvim_eval(map.rhs))
