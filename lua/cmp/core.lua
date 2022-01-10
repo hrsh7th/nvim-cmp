@@ -443,6 +443,7 @@ core.reset = function(self)
   for _, s in pairs(self.sources) do
     s:reset()
   end
+  self.context = context.empty()
 end
 
 return core
