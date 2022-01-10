@@ -90,12 +90,13 @@ end
 ---Open window
 ---@param style cmp.WindowStyle
 window.open = function(self, style)
-  local analyzed = window_analysis.analyze(style, self:get_buffer())
-  if style.col + analyzed.width >= vim.o.columns then
-    style.width = vim.o.columns - style.col - analyzed.border_info.horizontal - 1
+  local border_info = window_analysis.get_border_info(style.border)
+  if style.row + style.height + border_info.vertical >= vim.o.lines - 1 then
+    style.height = vim.o.lines - style.row - border_info.vertical - 1
   end
-  if style.row + analyzed.height >= vim.o.lines then
-    style.height = vim.o.lines - style.row - analyzed.border_info.vertical - 1
+  local analyzed = window_analysis.analyze(style, self:get_buffer())
+  if style.col + analyzed.width >= vim.o.columns - 1 then
+    style.width = vim.o.columns - style.col - analyzed.border_info.horizontal - analyzed.scroll_info.extra_width
   end
   if style.row < 0 or style.col < 0 or style.width <= 0 or style.height <= 0 then
     return
@@ -141,7 +142,7 @@ window.update = function(self)
       style1.width = 1
       style1.height = area_height
       style1.row = analyzed.row + area_offset
-      style1.col = analyzed.col + analyzed.width - analyzed.scroll_info.extra_width
+      style1.col = analyzed.col + analyzed.width - 1
       style1.zindex = (self.style.zindex and (self.style.zindex + 1) or 1)
       if self.sbar_win and vim.api.nvim_win_is_valid(self.sbar_win) then
         vim.api.nvim_win_set_config(self.sbar_win, style1)
@@ -157,7 +158,7 @@ window.update = function(self)
     style2.width = 1
     style2.height = bar_height
     style2.row = analyzed.row + area_offset + bar_offset
-    style2.col = analyzed.col + analyzed.width - analyzed.scroll_info.extra_width
+    style2.col = analyzed.col + analyzed.width - 1
     style2.zindex = (self.style.zindex and (self.style.zindex + 2) or 2)
     if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
       vim.api.nvim_win_set_config(self.thumb_win, style2)

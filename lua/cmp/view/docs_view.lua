@@ -33,9 +33,17 @@ docs_view.open = function(self, e, entries_analyzed)
     return self:close()
   end
 
-  local right_space = vim.o.columns - (entries_analyzed.col + entries_analyzed.width) - 1
-  local left_space = entries_analyzed.col - 1
-  local maxwidth = math.min(documentation.maxwidth, math.max(left_space, right_space) - 1)
+  -- Reserve +1 width for the scrollbar area but we try to compute border dimenstions.
+  -- The presence or absence of scrollbars depends on the height of the content.
+  -- However, stylize_markdown still requests max_width / max_height, even though it writes to the buffer internally.
+  -- With this, it is not possible to check the presence of the scroll bar in advance and adjust the width.
+
+  local border_info = window_analysis.get_border_info(config.get().window.documentation.border)
+  local right_space = vim.o.columns - (entries_analyzed.col + entries_analyzed.width)
+  local left_space = entries_analyzed.col
+  local bottom_space = vim.o.lines - entries_analyzed.row
+  local max_content_width = math.min(documentation.maxwidth, math.max(left_space, right_space)) - border_info.horizontal - 1
+  local max_content_height = math.min(documentation.maxheight, bottom_space) - border_info.vertical
 
   -- update buffer content if needed.
   if not self.entry or e.id ~= self.entry.id then
@@ -49,19 +57,13 @@ docs_view.open = function(self, e, entries_analyzed)
       vim.cmd([[syntax clear]])
     end)
     vim.lsp.util.stylize_markdown(self.window:get_buffer(), documents, {
-      max_width = maxwidth,
-      max_height = documentation.maxheight,
+      max_width = max_content_width,
+      max_height = max_content_height,
     })
   end
 
-  local content_width, content_height = vim.lsp.util._make_floating_popup_size(vim.api.nvim_buf_get_lines(self.window:get_buffer(), 0, -1, false), {
-    max_width = maxwidth,
-    max_height = documentation.maxheight,
-  })
-  if content_width <= 0 or content_height <= 0 then
-    return self:close()
-  end
-
+  local content_width = math.min(max_content_width, window_analysis.get_content_width(self.window:get_buffer()))
+  local content_height = math.min(max_content_height, window_analysis.get_content_height(content_width, self.window:get_buffer()))
   local docs_analyzed = window_analysis.analyze({
     row = 0,
     col = 0,
@@ -69,11 +71,6 @@ docs_view.open = function(self, e, entries_analyzed)
     height = content_height,
     border = config.get().window.documentation.border,
   }, self.window:get_buffer())
-  if not docs_analyzed.border_info.is_visible then
-    self.window:option('winhighlight', 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None')
-  else
-    self.window:option('winhighlight', 'FloatBorder:Normal,CursorLine:NormalFloat,Search:None,NormalFloat:Normal,FloatBorder:Normal')
-  end
 
   local col
   local right_col = entries_analyzed.col + entries_analyzed.width
@@ -91,12 +88,16 @@ docs_view.open = function(self, e, entries_analyzed)
   else
     return self:close()
   end
-
+  if not docs_analyzed.border_info.is_visible then
+    self.window:option('winhighlight', 'Normal:NormalFloat,FloatBorder:NormalFloat,CursorLine:PmenuSel,Search:None')
+  else
+    self.window:option('winhighlight', 'FloatBorder:Normal,CursorLine:NormalFloat,Search:None,NormalFloat:Normal,FloatBorder:Normal')
+  end
   self.window:open({
     relative = 'editor',
     style = 'minimal',
-    width = content_width,
-    height = content_height,
+    width = docs_analyzed.inner_width,
+    height = docs_analyzed.inner_height,
     border = config.get().window.documentation.border,
     row = entries_analyzed.row,
     col = col,

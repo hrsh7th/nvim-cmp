@@ -106,8 +106,6 @@ custom_entries_view.on_change = function(self)
 end
 
 custom_entries_view.open = function(self, offset, entries)
-  local fields = config.get().formatting.fields
-
   self.offset = offset
   self.entries = {}
   self.column_width = { abbr = 0, kind = 0, menu = 0 }
@@ -133,15 +131,21 @@ custom_entries_view.open = function(self, offset, entries)
     end
   end
 
+  local fields = misc.copy(config.get().formatting.fields)
+  for i = #fields, 1, -1 do
+    if self.column_width[fields[i]] == 0 then
+      table.remove(fields, i)
+    end
+  end
+
   local texts = {}
   for _, e in ipairs(self.entries) do
     local view = e:get_view(self.offset, self.entries_win:get_buffer())
-    local text = {}
-    table.insert(text, string.rep(' ', SIDE_PADDING))
+    local text = { string.rep(' ', SIDE_PADDING) }
     for i, field in ipairs(fields) do
       table.insert(text, view[field].text) -- field content.
       table.insert(text, string.rep(' ', self.column_width[field] - view[field].width)) -- padding for field's max width
-      table.insert(text, fields ~= i and ' ' or '') -- extra 1-padding for next field
+      table.insert(text, #fields ~= i and ' ' or '') -- extra 1-padding for next field
     end
     table.insert(text, string.rep(' ', SIDE_PADDING))
     table.insert(texts, table.concat(text, ''))
@@ -184,24 +188,17 @@ custom_entries_view.open = function(self, offset, entries)
   else
     self.entries_win:option('winhighlight', 'FloatBorder:Normal,CursorLine:Visual,Search:None,NormalFloat:Normal,FloatBorder:Normal')
   end
-
   self.entries_win:open({
     relative = 'editor',
     style = 'minimal',
     row = math.max(0, row),
     col = math.max(0, col),
-    width = analyzed.width - analyzed.border_info.horizontal,
-    height = analyzed.height - analyzed.border_info.vertical,
+    width = analyzed.inner_width,
+    height = analyzed.inner_height,
     border = config.get().window.completion.border,
     zindex = 1001,
   })
 
-  if api.is_insert_mode() then
-    print(vim.inspect({
-      entries = #self.entries,
-      analyzed = self.entries_win:analyzed()
-    }))
-  end
   if not self.entries_win:visible() then
     return
   end

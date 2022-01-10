@@ -100,10 +100,11 @@ end
 native_entries_view.analyzed = function(self)
   if self:visible() then
     local view = vim.fn.pum_getpos()
+    local offset = view.col == 0 and 0 or 1
     return {
       row = view.row,
-      col = view.col,
-      width = view.width + (view.scrollbar and 1 or 0),
+      col = view.col - offset,
+      width = offset + view.width + (view.scrollbar and 1 or 0),
       height = view.height,
       inner_width = view.width,
       inner_height = view.height,
