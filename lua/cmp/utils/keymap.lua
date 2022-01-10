@@ -85,7 +85,7 @@ end
 keymap.listen = function(mode, lhs, callback)
   lhs = keymap.normalize(keymap.to_keymap(lhs))
 
-  local existing = keymap.get_mapping(mode, lhs)
+  local existing = keymap.get_map(mode, lhs)
   local id = string.match(existing.rhs, 'v:lua%.cmp%.utils%.keymap%.set_map%((%d+)%)')
   if id and keymap.set_map.callbacks[tonumber(id, 10)] then
     return
@@ -94,13 +94,13 @@ keymap.listen = function(mode, lhs, callback)
   local bufnr = existing.buffer and vim.api.nvim_get_current_buf() or -1
   keymap.set_map(bufnr, mode, lhs, function()
     if mode == 'c' and vim.fn.getcmdtype() == '=' then
-      return keymap.feedmap(existing)
+      return keymap.feed_map(existing)
     end
 
     callback(
       lhs,
       misc.once(function()
-        keymap.feedmap(existing)
+        keymap.feed_map(existing)
       end)
     )
   end, {
@@ -110,11 +110,11 @@ keymap.listen = function(mode, lhs, callback)
   })
 end
 
----Get mapping
+---Get map
 ---@param mode string
 ---@param lhs string
 ---@return table
-keymap.get_mapping = function(mode, lhs)
+keymap.get_map = function(mode, lhs)
   lhs = keymap.normalize(lhs)
 
   for _, map in ipairs(vim.api.nvim_buf_get_keymap(0, mode)) do
@@ -164,7 +164,7 @@ end
 
 ---Feed mapping object.
 ---@param map table
-keymap.feedmap = function(map)
+keymap.feed_map = function(map)
   local lhs = keymap.t(map.lhs)
   local rhs
   if map.callback and not map.expr then
