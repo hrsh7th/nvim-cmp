@@ -134,16 +134,14 @@ window.update = function(self)
     info.scrollbar.relative = 'editor'
     info.scrollbar.style = 'minimal'
 
-    local has_border = math.max(info.border.height, info.border.width) > 0
-
     -- Draw the background of the scrollbar
-    if not has_border then
+    if self.style.border[2] == '' or self.style.border[2] == ' ' or math.max(info.border.height, info.border.width) < 1 then
       local style = {
         relative = info.scrollbar.relative,
         style = info.scrollbar.style,
         width = info.scrollbar.width,
         height = self.style.height,
-        row = info.row + (self.style.border ~= 'shadow' and self.style.border[2] ~= '' and 1 or 0),
+        row = info.row + ((self.style.border[2] == '' or self.style.border[2] == ' ' or self.style.border == 'shadow') and 0 or 1),
         col = info.scrollbar.col,
         zindex = (self.style.zindex and (self.style.zindex + 1) or 1),
       }
@@ -173,7 +171,7 @@ window.update = function(self)
     else
       info.scrollbar.noautocmd = true
       self.thumb_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'thumb_buf'), false, info.scrollbar)
-      local highlight = self.scrollbar == '' and 'PmenuThumb' or 'CmpWindow'..(has_border and 'Bordered' or '')..'ScrollThumb'
+      local highlight = self.scrollbar == '' and 'PmenuThumb' or 'CmpWindowScrollThumb'
       vim.api.nvim_win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:'..highlight..',NormalFloat:'..highlight)
     end
 
@@ -248,10 +246,10 @@ window.info = function(self)
         height = math.ceil(self.style.height * (self.style.height / content_height)),
         width = 1,
       }
-      info.scrollbar.col = info.col + info.width - (self.style.border[4] ~= '' and 1 or 0)
+      info.scrollbar.col = info.col + info.width - ((self.style.border[4] == '' or self.style.border[4] == ' ') and 0 or 1)
       info.scrollbar.row = info.row +
         math.min(self.style.height - info.scrollbar.height, math.floor(self.style.height * (vim.fn.getwininfo(self.win)[1].topline / content_height))) +
-        (self.style.border ~= 'shadow' and self.style.border[2] ~= '' and 1 or 0)
+        ((self.style.border[2] == '' or self.style.border[2] == ' ' or self.style.border == 'shadow') and 0 or 1)
       if border_width < 1 then
         info.width = info.width + info.scrollbar.width
       end
