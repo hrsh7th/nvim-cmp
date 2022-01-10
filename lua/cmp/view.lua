@@ -2,6 +2,7 @@ local config = require('cmp.config')
 local async = require('cmp.utils.async')
 local event = require('cmp.utils.event')
 local keymap = require('cmp.utils.keymap')
+local window = require('cmp.utils.window')
 local docs_view = require('cmp.view.docs_view')
 local custom_entries_view = require('cmp.view.custom_entries_view')
 local native_entries_view = require('cmp.view.native_entries_view')
@@ -208,7 +209,7 @@ view.on_entry_change = async.throttle(
         if not self:visible() then
           return
         end
-        self.docs_view:open(e, self:_get_entries_view():info())
+        self.docs_view:open(e, self:_get_entries_view():analyzed())
       end)))
     else
       self.docs_view:close()

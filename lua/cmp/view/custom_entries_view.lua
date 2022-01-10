@@ -2,6 +2,7 @@ local event = require('cmp.utils.event')
 local autocmd = require('cmp.utils.autocmd')
 local feedkeys = require('cmp.utils.feedkeys')
 local window = require('cmp.utils.window')
+local window_analysis = require('cmp.utils.window_analysis')
 local config = require('cmp.config')
 local types = require('cmp.types')
 local keymap = require('cmp.utils.keymap')
@@ -105,6 +106,8 @@ custom_entries_view.on_change = function(self)
 end
 
 custom_entries_view.open = function(self, offset, entries)
+  local fields = config.get().formatting.fields
+
   self.offset = offset
   self.entries = {}
   self.column_width = { abbr = 0, kind = 0, menu = 0 }
@@ -112,34 +115,45 @@ custom_entries_view.open = function(self, offset, entries)
   -- Apply window options (that might be changed) on the custom completion menu.
   self.entries_win:option('winblend', vim.o.pumblend)
 
-  local entries_buf = self.entries_win:get_buffer()
-  local lines = {}
   local dedup = {}
   local preselect = 0
-  local i = 1
+  local deduped_i = 1
   for _, e in ipairs(entries) do
-    local view = e:get_view(offset, entries_buf)
+    local view = e:get_view(offset, self.entries_win:get_buffer())
     if view.dup == 1 or not dedup[e.completion_item.label] then
       dedup[e.completion_item.label] = true
       self.column_width.abbr = math.max(self.column_width.abbr, view.abbr.width)
       self.column_width.kind = math.max(self.column_width.kind, view.kind.width)
       self.column_width.menu = math.max(self.column_width.menu, view.menu.width)
       table.insert(self.entries, e)
-      table.insert(lines, ' ')
       if preselect == 0 and e.completion_item.preselect then
-        preselect = i
+        preselect = deduped_i
       end
-      i = i + 1
+      deduped_i = deduped_i + 1
     end
   end
-  vim.api.nvim_buf_set_lines(entries_buf, 0, -1, false, lines)
-  vim.api.nvim_buf_set_option(entries_buf, 'modified', false)
 
-  local width = 0
+  local texts = {}
+  for _, e in ipairs(self.entries) do
+    local view = e:get_view(self.offset, self.entries_win:get_buffer())
+    local text = {}
+    table.insert(text, string.rep(' ', SIDE_PADDING))
+    for i, field in ipairs(fields) do
+      table.insert(text, view[field].text) -- field content.
+      table.insert(text, string.rep(' ', self.column_width[field] - view[field].width)) -- padding for field's max width
+      table.insert(text, fields ~= i and ' ' or '') -- extra 1-padding for next field
+    end
+    table.insert(text, string.rep(' ', SIDE_PADDING))
+    table.insert(texts, table.concat(text, ''))
+  end
+  vim.api.nvim_buf_set_lines(self.entries_win:get_buffer(), 0, -1, false, texts)
+  vim.api.nvim_buf_set_option(self.entries_win:get_buffer(), 'modified', false)
+
+  local width = 1
+  for i, field in ipairs(fields) do
+    width = width + self.column_width[field] + (#fields ~= i and 1 or 0)
+  end
   width = width + 1
-  width = width + self.column_width.abbr + (self.column_width.kind > 0 and 1 or 0)
-  width = width + self.column_width.kind + (self.column_width.menu > 0 and 1 or 0)
-  width = width + self.column_width.menu + 1
 
   local height = vim.api.nvim_get_option('pumheight')
   height = height ~= 0 and height or #self.entries
@@ -147,30 +161,25 @@ custom_entries_view.open = function(self, offset, entries)
 
   local pos = api.get_screen_cursor()
   local delta = api.get_cursor()[2] + 1 - self.offset
+  local row, col = pos[1], pos[2] - delta - 1
 
-  self.entries_win:set_style({
-    relative = 'editor',
-    style = 'minimal',
-    row = math.max(0, pos[1]),
-    col = math.max(0, pos[2] - delta - 1),
+  local analyzed = window_analysis.analyze({
     width = width,
     height = height,
-    zindex = 1001,
     border = config.get().window.completion.border,
-  })
+  }, self.entries_win:get_buffer())
 
-  local info = self.entries_win:info()
   local has_bottom_space = (vim.o.lines - pos[1]) >= DEFAULT_HEIGHT
-  if not has_bottom_space and math.floor(vim.o.lines * 0.5) <= info.row and vim.o.lines - info.row <= info.height then
-    info.height = math.min(info.height, info.row - 1)
-    info.row = info.row - info.height - 1
+  if not has_bottom_space and math.floor(vim.o.lines * 0.5) <= row and vim.o.lines - row <= analyzed.height then
+    analyzed.height = math.min(analyzed.height, row - 1)
+    row = row - analyzed.height - 1
   end
-  if math.floor(vim.o.columns * 0.5) <= info.col and vim.o.columns - info.col <= info.width then
-    info.width = math.min(info.width, vim.o.columns - 1)
-    info.col = vim.o.columns - info.width - 1
+  if math.floor(vim.o.columns * 0.5) <= col and vim.o.columns - col <= analyzed.width then
+    analyzed.width = math.min(analyzed.width, vim.o.columns - 1)
+    col = vim.o.columns - analyzed.width - 1
   end
 
-  if not info.border_info.is_visible then
+  if not analyzed.border_info.is_visible then
     self.entries_win:option('winhighlight', 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None')
   else
     self.entries_win:option('winhighlight', 'FloatBorder:Normal,CursorLine:Visual,Search:None,NormalFloat:Normal,FloatBorder:Normal')
@@ -179,13 +188,20 @@ custom_entries_view.open = function(self, offset, entries)
   self.entries_win:open({
     relative = 'editor',
     style = 'minimal',
-    row = math.max(0, info.row),
-    col = math.max(0, info.col),
-    width = info.width - info.border_info.h,
-    height = info.height - info.border_info.v,
+    row = math.max(0, row),
+    col = math.max(0, col),
+    width = analyzed.width - analyzed.border_info.horizontal,
+    height = analyzed.height - analyzed.border_info.vertical,
     border = config.get().window.completion.border,
     zindex = 1001,
   })
+
+  if api.is_insert_mode() then
+    print(vim.inspect({
+      entries = #self.entries,
+      analyzed = self.entries_win:analyzed()
+    }))
+  end
   if not self.entries_win:visible() then
     return
   end
@@ -216,43 +232,12 @@ custom_entries_view.abort = function(self)
   end)
 end
 
-custom_entries_view.draw = function(self)
-  local info = vim.fn.getwininfo(self.entries_win.win)[1]
-  local topline = info.topline - 1
-  local botline = info.topline + info.height - 1
-  local texts = {}
-  local fields = config.get().formatting.fields
-  local entries_buf = self.entries_win:get_buffer()
-  for i = topline, botline - 1 do
-    local e = self.entries[i + 1]
-    if e then
-      local view = e:get_view(self.offset, entries_buf)
-      local text = {}
-      table.insert(text, string.rep(' ', SIDE_PADDING))
-      for _, field in ipairs(fields) do
-        table.insert(text, view[field].text)
-        table.insert(text, string.rep(' ', 1 + self.column_width[field] - view[field].width))
-      end
-      table.insert(text, string.rep(' ', SIDE_PADDING))
-      table.insert(texts, table.concat(text, ''))
-    end
-  end
-  vim.api.nvim_buf_set_lines(entries_buf, topline, botline, false, texts)
-  vim.api.nvim_buf_set_option(entries_buf, 'modified', false)
-
-  if api.is_cmdline_mode() then
-    vim.api.nvim_win_call(self.entries_win.win, function()
-      misc.redraw()
-    end)
-  end
-end
-
 custom_entries_view.visible = function(self)
   return self.entries_win:visible()
 end
 
-custom_entries_view.info = function(self)
-  return self.entries_win:info()
+custom_entries_view.analyzed = function(self)
+  return self.entries_win:analyzed()
 end
 
 custom_entries_view.select_next_item = function(self, option)
@@ -310,7 +295,6 @@ custom_entries_view._select = function(self, cursor, option)
   end
 
   self.entries_win:update()
-  self:draw()
   self.event:emit('change')
 end
 

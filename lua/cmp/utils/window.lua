@@ -1,4 +1,4 @@
-local cache = require('cmp.utils.cache')
+local window_analysis = require('cmp.utils.window_analysis')
 local misc = require('cmp.utils.misc')
 local buffer = require('cmp.utils.buffer')
 local api = require('cmp.utils.api')
@@ -12,26 +12,14 @@ local api = require('cmp.utils.api')
 ---@field public zindex number|nil
 ---@field public border string|string[]
 
----@class cmp.WindowInfo
----@field public row number
----@field public col number
----@field public width number
----@field public height number
----@field public content_width number
----@field public content_height number
----@field public scrollable boolean
----@field public border_info { top: number, left: number, right: number, bottom: number, v: number, h: number, is_visible: boolean }
-
 ---@class cmp.Window
 ---@field public name string
 ---@field public win number|nil
----@field public swin1 number|nil
----@field public swin2 number|nil
----@field public swin3 number|nil
+---@field public sbar_win number|nil
+---@field public thumb_win number|nil
 ---@field public style cmp.WindowStyle
----@field public opt table<string, any>
+---@field public window_opt table<string, any>
 ---@field public buffer_opt table<string, any>
----@field public cache cmp.Cache
 local window = {}
 
 ---new
@@ -40,12 +28,10 @@ window.new = function()
   local self = setmetatable({}, { __index = window })
   self.name = misc.id('cmp.utils.window.new')
   self.win = nil
-  self.swin1 = nil
-  self.swin2 = nil
-  self.swin3 = nil
+  self.sbar_win = nil
+  self.thumb_win = nil
   self.style = {}
-  self.cache = cache.new()
-  self.opt = {}
+  self.window_opt = {}
   self.buffer_opt = {}
   return self
 end
@@ -60,10 +46,10 @@ window.option = function(self, key, value)
   end
 
   if value == nil then
-    return self.opt[key]
+    return self.window_opt[key]
   end
 
-  self.opt[key] = value
+  self.window_opt[key] = value
   if self:visible() then
     vim.api.nvim_win_set_option(self.win, key, value)
   end
@@ -101,114 +87,93 @@ window.get_buffer = function(self)
   return buf
 end
 
----Set style.
----@param style cmp.WindowStyle
-window.set_style = function(self, style)
-  self.style = style
-  self.style.zindex = self.style.zindex or 1
-end
-
 ---Open window
 ---@param style cmp.WindowStyle
 window.open = function(self, style)
-  if style then
-    self:set_style(style)
+  local analyzed = window_analysis.analyze(style, self:get_buffer())
+  if style.col + analyzed.width >= vim.o.columns then
+    style.width = vim.o.columns - style.col - analyzed.border_info.horizontal - 1
   end
-
-  local info = self:info()
-  if info.row + info.height >= vim.o.lines then
-    self.style.height = vim.o.lines - info.row - info.border_info.v - 1
+  if style.row + analyzed.height >= vim.o.lines then
+    style.height = vim.o.lines - style.row - analyzed.border_info.vertical - 1
   end
-  if info.col + info.width >= vim.o.columns then
-    self.style.width = vim.o.columns - info.col - info.border_info.h - 1
-  end
-
-  if self.style.width <= 0 or self.style.height <= 0 then
+  if style.row < 0 or style.col < 0 or style.width <= 0 or style.height <= 0 then
     return
   end
+  style.zindex = style.zindex or 1
 
   if self.win and vim.api.nvim_win_is_valid(self.win) then
-    vim.api.nvim_win_set_config(self.win, self.style)
+    vim.api.nvim_win_set_config(self.win, style)
   else
-    local s = misc.copy(self.style)
+    local s = misc.copy(style)
     s.noautocmd = true
     self.win = vim.api.nvim_open_win(self:get_buffer(), false, s)
-    for k, v in pairs(self.opt) do
+    for k, v in pairs(self.window_opt) do
       vim.api.nvim_win_set_option(self.win, k, v)
     end
   end
+  self.style = style
   self:update()
 end
 
 ---Update
 window.update = function(self)
-  local info = self:info()
-  if info.scrollable then
-    local total = self:get_content_height()
-    if not info.border_info.is_visible then
-      local bar_height = math.floor(0.5 + info.height * (info.height / total))
-      local bar_offset = math.min(info.height - bar_height, math.floor(info.height * (vim.fn.getwininfo(self.win)[1].topline / total)))
+  local analyzed = self:analyzed()
+  if analyzed.scroll_info.scrollable then
+    local bar_ratio = analyzed.inner_height / analyzed.scroll_height
+    local scroll_ratio = vim.fn.getwininfo(self.win)[1].topline / analyzed.scroll_height
+
+    local area_height, area_offset, bar_height, bar_offset
+    if analyzed.border_info.is_visible then
+      area_height = analyzed.inner_height
+      area_offset = analyzed.border_info.top
+    else
+      area_height = analyzed.height
+      area_offset = 0
+    end
+    bar_height = math.floor(0.5 + area_height * bar_ratio)
+    bar_offset = math.floor(area_height * scroll_ratio)
+
+    if not analyzed.border_info.is_visible then
       local style1 = {}
       style1.relative = 'editor'
       style1.style = 'minimal'
       style1.width = 1
-      style1.height = info.height
-      style1.row = info.row
-      style1.col = info.col + info.content_width + info.border_info.h
+      style1.height = area_height
+      style1.row = analyzed.row + area_offset
+      style1.col = analyzed.col + analyzed.width - analyzed.scroll_info.extra_width
       style1.zindex = (self.style.zindex and (self.style.zindex + 1) or 1)
-      if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
-        vim.api.nvim_win_set_config(self.swin1, style1)
+      if self.sbar_win and vim.api.nvim_win_is_valid(self.sbar_win) then
+        vim.api.nvim_win_set_config(self.sbar_win, style1)
       else
         style1.noautocmd = true
-        self.swin1 = vim.api.nvim_open_win(buffer.ensure(self.name .. 'sbuf1'), false, style1)
-        vim.api.nvim_win_set_option(self.swin1, 'winhighlight', 'EndOfBuffer:PmenuSbar,Normal:PmenuSbar,NormalNC:PmenuSbar,NormalFloat:PmenuSbar')
+        self.sbar_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'sbar_buf'), false, style1)
+        vim.api.nvim_win_set_option(self.sbar_win, 'winhighlight', 'EndOfBuffer:PmenuSbar,Normal:PmenuSbar,NormalNC:PmenuSbar,NormalFloat:PmenuSbar')
       end
-      local style2 = {}
-      style2.relative = 'editor'
-      style2.style = 'minimal'
-      style2.width = 1
-      style2.height = bar_height
-      style2.row = info.row + bar_offset
-      style2.col = info.col + info.content_width + info.border_info.h
-      style2.zindex = (self.style.zindex and (self.style.zindex + 2) or 2)
-      if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
-        vim.api.nvim_win_set_config(self.swin2, style2)
-      else
-        style2.noautocmd = true
-        self.swin2 = vim.api.nvim_open_win(buffer.ensure(self.name .. 'sbuf2'), false, style2)
-        vim.api.nvim_win_set_option(self.swin2, 'winhighlight', 'EndOfBuffer:PmenuThumb,Normal:PmenuThumb,NormalNC:PmenuThumb,NormalFloat:PmenuThumb')
-      end
+    end
+    local style2 = {}
+    style2.relative = 'editor'
+    style2.style = 'minimal'
+    style2.width = 1
+    style2.height = bar_height
+    style2.row = analyzed.row + area_offset + bar_offset
+    style2.col = analyzed.col + analyzed.width - analyzed.scroll_info.extra_width
+    style2.zindex = (self.style.zindex and (self.style.zindex + 2) or 2)
+    if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
+      vim.api.nvim_win_set_config(self.thumb_win, style2)
     else
-      local bar_height = math.ceil(info.content_height * (info.content_height / total))
-      local bar_offset = math.min(info.content_height - bar_height, math.floor(info.content_height * (vim.fn.getwininfo(self.win)[1].topline / total)))
-      local style3 = {}
-      style3.relative = 'editor'
-      style3.style = 'minimal'
-      style3.width = 1
-      style3.height = bar_height
-      style3.row = info.row + bar_offset + info.border_info.top
-      style3.col = info.col + info.content_width + info.border_info.h - 1
-      style3.zindex = (self.style.zindex and (self.style.zindex + 2) or 2)
-      if self.swin3 and vim.api.nvim_win_is_valid(self.swin3) then
-        vim.api.nvim_win_set_config(self.swin3, style3)
-      else
-        style3.noautocmd = true
-        self.swin3 = vim.api.nvim_open_win(buffer.ensure(self.name .. 'sbuf3'), false, style3)
-        vim.api.nvim_win_set_option(self.swin3, 'winhighlight', 'EndOfBuffer:PmenuThumb,NormalNC:PmenuThumb,NormalFloat:PmenuThumb,Normal:PmenuThumb')
-      end
+      style2.noautocmd = true
+      self.thumb_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'thumb_win'), false, style2)
+      vim.api.nvim_win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:PmenuThumb,Normal:PmenuThumb,NormalNC:PmenuThumb,NormalFloat:PmenuThumb')
     end
   else
-    if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
-      vim.api.nvim_win_hide(self.swin1)
-      self.swin1 = nil
+    if self.sbar_win and vim.api.nvim_win_is_valid(self.sbar_win) then
+      vim.api.nvim_win_hide(self.sbar_win)
+      self.sbar_win = nil
     end
-    if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
-      vim.api.nvim_win_hide(self.swin2)
-      self.swin2 = nil
-    end
-    if self.swin3 and vim.api.nvim_win_is_valid(self.swin3) then
-      vim.api.nvim_win_hide(self.swin3)
-      self.swin3 = nil
+    if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
+      vim.api.nvim_win_hide(self.thumb_win)
+      self.thumb_win = nil
     end
   end
 
@@ -227,17 +192,13 @@ window.close = function(self)
       vim.api.nvim_win_hide(self.win)
       self.win = nil
     end
-    if self.swin1 and vim.api.nvim_win_is_valid(self.swin1) then
-      vim.api.nvim_win_hide(self.swin1)
-      self.swin1 = nil
+    if self.sbar_win and vim.api.nvim_win_is_valid(self.sbar_win) then
+      vim.api.nvim_win_hide(self.sbar_win)
+      self.sbar_win = nil
     end
-    if self.swin2 and vim.api.nvim_win_is_valid(self.swin2) then
-      vim.api.nvim_win_hide(self.swin2)
-      self.swin2 = nil
-    end
-    if self.swin3 and vim.api.nvim_win_is_valid(self.swin3) then
-      vim.api.nvim_win_hide(self.swin3)
-      self.swin3 = nil
+    if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
+      vim.api.nvim_win_hide(self.thumb_win)
+      self.thumb_win = nil
     end
   end
 end
@@ -247,106 +208,8 @@ window.visible = function(self)
   return self.win and vim.api.nvim_win_is_valid(self.win)
 end
 
----Return win info.
----@return cmp.WindowInfo
-window.info = function(self)
-  local scrollable = (self.style.height or 0) < self:get_content_height()
-  local border_info = self:get_border_info()
-  return {
-    row = self.style.row,
-    col = self.style.col,
-    width = self.style.width + border_info.h + ((scrollable and not border_info.is_visible) and 1 or 0),
-    height = self.style.height + border_info.v,
-    content_width = self.style.width,
-    content_height = self.style.height,
-    scrollable = scrollable,
-    border_info = border_info,
-  }
-end
-
----Get border info
----@return { top: number, left: number, right: number, bottom: number, v: number, h: number }
-window.get_border_info = function(self)
-  local border = self.style.border or { '', '', '', '', '', '', '', '' }
-  local info = { top = 0, left = 0, right = 0, bottom = 0, v = 0, h = 0, is_visible = false }
-  if border then
-    if type(border) == 'string' then
-      if border == 'single' then
-        info.top = 1
-        info.left = 1
-        info.right = 1
-        info.bottom = 1
-        info.is_visible = true
-      elseif border == 'solid' then
-        info.top = 1
-        info.left = 1
-        info.right = 1
-        info.bottom = 1
-        info.is_visible = false
-      elseif border == 'double' then
-        info.top = 1
-        info.left = 1
-        info.right = 1
-        info.bottom = 1
-        info.is_visible = true
-      elseif border == 'rounded' then
-        info.top = 1
-        info.left = 1
-        info.right = 1
-        info.bottom = 1
-        info.is_visible = true
-      elseif border == 'shadow' then
-        info.top = 0
-        info.left = 0
-        info.right = 1
-        info.bottom = 1
-        info.is_visible = false
-      end
-    elseif type(border) == 'table' then
-      local new_border = {}
-      while #new_border < 8 do
-        for _, b in ipairs(border) do
-          table.insert(new_border, b)
-        end
-      end
-      border = new_border
-
-      info.top = border[2] == '' and 0 or 1
-      info.left = border[4] == '' and 0 or 1
-      info.right = border[8] == '' and 0 or 1
-      info.bottom = border[6] == '' and 0 or 1
-      info.is_visible = not ((border[4] == '' or border[4] == ' ') and (border[8] == '' or border[8] == ' '))
-    end
-  end
-  info.v = info.top + info.bottom
-  info.h = info.left + info.right
-  return info
-end
-
----Get scroll height.
----@return number
-window.get_content_height = function(self)
-  if not self:option('wrap') then
-    return vim.api.nvim_buf_line_count(self:get_buffer())
-  end
-
-  return self.cache:ensure({
-    'get_content_height',
-    self.style.width,
-    self:get_buffer(),
-    vim.api.nvim_buf_get_changedtick(self:get_buffer()),
-  }, function()
-    local height = 0
-    local buf = self:get_buffer()
-    -- The result of vim.fn.strdisplaywidth depends on the buffer it was called
-    -- in (see comment in cmp.Entry.get_view).
-    vim.api.nvim_buf_call(buf, function()
-      for _, text in ipairs(vim.api.nvim_buf_get_lines(buf, 0, -1, false)) do
-        height = height + math.ceil(math.max(1, vim.fn.strdisplaywidth(text)) / self.style.width)
-      end
-    end)
-    return height
-  end)
+window.analyzed = function(self)
+  return window_analysis.analyze(self.style, self:get_buffer())
 end
 
 return window

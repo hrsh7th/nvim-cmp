@@ -97,14 +97,30 @@ native_entries_view.visible = function(_)
   return vim.fn.pumvisible() == 1
 end
 
-native_entries_view.info = function(self)
+native_entries_view.analyzed = function(self)
   if self:visible() then
-    local info = vim.fn.pum_getpos()
+    local view = vim.fn.pum_getpos()
     return {
-      width = info.width + (info.scrollbar and 1 or 0),
-      height = info.height,
-      row = info.row,
-      col = info.col,
+      row = view.row,
+      col = view.col,
+      width = view.width + (view.scrollbar and 1 or 0),
+      height = view.height,
+      inner_width = view.width,
+      inner_height = view.height,
+      scroll_height = view.size,
+      border_info = {
+        top = 0,
+        left = 0,
+        right = 0,
+        bottom = 0,
+        horizontal = 0,
+        vertical = 0,
+        is_visible = false,
+      },
+      scroll_info = {
+        scrollable = view.scrollbar,
+        extra_width = view.scrollbar and 1 or 0,
+      },
     }
   end
 end
