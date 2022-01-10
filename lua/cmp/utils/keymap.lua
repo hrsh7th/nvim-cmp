@@ -7,7 +7,9 @@ local keymap = {}
 ---@param keys string
 ---@return string
 keymap.t = function(keys)
-  return vim.api.nvim_replace_termcodes(keys, true, true, true)
+  return (string.gsub(keys, '(<[A-Za-z0-9_%-%[%]%^@]->)', function(match)
+    return vim.api.nvim_eval(string.format([["\%s"]], match))
+  end))
 end
 
 ---Normalize key sequence.

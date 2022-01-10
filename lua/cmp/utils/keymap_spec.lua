@@ -6,6 +6,12 @@ local keymap = require('cmp.utils.keymap')
 describe('keymap', function()
   before_each(spec.before)
 
+  it('t', function()
+    assert.are.equal(keymap.t('<Tab>'), vim.api.nvim_replace_termcodes('<Tab>', true, true, true))
+    assert.are.equal(keymap.t('<C-g>u'), vim.api.nvim_replace_termcodes('<C-g>u', true, true, true))
+    assert.are.equal(keymap.t('<Cmd>aiueo<CR>'), vim.api.nvim_replace_termcodes('<Cmd>aiueo<CR>', true, true, true))
+  end)
+
   it('to_keymap', function()
     assert.are.equal(keymap.to_keymap('\n'), '<CR>')
     assert.are.equal(keymap.to_keymap('<CR>'), '<CR>')
