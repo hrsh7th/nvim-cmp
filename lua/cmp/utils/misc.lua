@@ -186,6 +186,10 @@ misc.redraw = setmetatable({
   force = false,
 }, {
   __call = function(self, force)
+    if vim.tbl_contains({ '/', '?' }, vim.fn.getcmdtype()) then
+      return vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-r>=""<CR>', true, true, true), 'n', true)
+    end
+
     if self.doing then
       return
     end
@@ -196,9 +200,6 @@ misc.redraw = setmetatable({
         vim.cmd([[redraw!]])
       else
         vim.cmd([[redraw]])
-      end
-      if vim.tbl_contains({ '/', '?' }, vim.fn.getcmdtype()) then
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-r>=""<CR>', true, true, true), 'n', true)
       end
       self.doing = false
       self.force = false
