@@ -173,7 +173,7 @@ window.update = function(self)
     else
       info.scrollbar.noautocmd = true
       self.thumb_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'thumb_buf'), false, info.scrollbar)
-      local highlight = self.scrollbar == '' and 'PmenuThumb' or 'Cmp'..(has_border and 'Bordered' or '')..'WindowScrollThumb'
+      local highlight = self.scrollbar == '' and 'PmenuThumb' or 'CmpWindow'..(has_border and 'Bordered' or '')..'ScrollThumb'
       vim.api.nvim_win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:'..highlight..',NormalFloat:'..highlight)
     end
 

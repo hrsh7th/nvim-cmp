@@ -102,16 +102,23 @@ end)
 _G.cmp.plugin.colorscheme()
 
 vim.cmd [[
-  highlight default link CmpBorderedWindow NormalFloat
-  highlight default link CmpBorderedWindowScrollThumb CmpWindowScrollThumb
   highlight default link CmpItemAbbr CmpItemAbbrDefault
   highlight default link CmpItemAbbrDeprecated CmpItemAbbrDeprecatedDefault
   highlight default link CmpItemAbbrMatch CmpItemAbbrMatchDefault
   highlight default link CmpItemAbbrMatchFuzzy CmpItemAbbrMatchFuzzyDefault
   highlight default link CmpItemKind CmpItemKindDefault
   highlight default link CmpItemMenu CmpItemMenuDefault
-  highlight default link CmpWindow Pmenu
-  highlight default link CmpWindowBorder CmpWindow
+
+  highlight default link CmpCompletionWindow Pmenu
+  highlight default link CmpCompletionWindowBorder CmpWindowBorder
+  highlight default link CmpCompletionWindowBordered CmpCompletionWindow
+
+  highlight default link CmpDocumentationWindow NormalFloat
+  highlight default link CmpDocumentationWindowBorder CmpWindowBorder
+  highlight default link CmpDocumentationWindowBordered CmpDocumentationWindow
+
+  highlight default link CmpWindowBorder NormalFloat
+  highlight default link CmpWindowBorderedScrollThumb CmpWindowScrollThumb
 ]]
 
 for name in pairs(types.lsp.CompletionItemKind) do
