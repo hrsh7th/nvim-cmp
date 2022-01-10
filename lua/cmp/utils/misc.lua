@@ -187,7 +187,9 @@ misc.redraw = setmetatable({
 }, {
   __call = function(self, force)
     if vim.tbl_contains({ '/', '?' }, vim.fn.getcmdtype()) then
-      return vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-r>=""<CR>', true, true, true), 'n', true)
+      if vim.o.incsearch then
+        return vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-r>=""<CR>', true, true, true), 'n', true)
+      end
     end
 
     if self.doing then
