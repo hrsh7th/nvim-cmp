@@ -26,7 +26,7 @@ describe('keymap', function()
         expr = true,
         noremap = false,
       })
-      feedkeys.call('i', 'nx', function( )
+      feedkeys.call('i', 'nx', function()
         keymap.feed_map(keymap.get_map('i', '('))
       end)
       assert.are.same({ '(' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
@@ -41,7 +41,7 @@ describe('keymap', function()
         expr = false,
         noremap = false,
       })
-      feedkeys.call('i', 'nx', function( )
+      feedkeys.call('i', 'nx', function()
         keymap.feed_map(keymap.get_map('i', '('))
       end)
       assert.are.same({ '()' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
