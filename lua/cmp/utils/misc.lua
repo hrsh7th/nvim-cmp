@@ -204,7 +204,7 @@ misc.redraw = setmetatable({
       self.doing = false
       self.force = false
     end)
-  end
+  end,
 })
 
 return misc

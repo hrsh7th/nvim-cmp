@@ -112,7 +112,7 @@ view.open = function(self, ctx, sources)
   -- complete_done.
   if #entries == 0 then
     self.event:emit('complete_done', {
-      entry = self:_get_entries_view():get_selected_entry()
+      entry = self:_get_entries_view():get_selected_entry(),
     })
     self:close()
   end

@@ -429,7 +429,7 @@ core.confirm = function(self, e, option, callback)
     e:execute(vim.schedule_wrap(function()
       release()
       self.event:emit('confirm_done', {
-        entry = e
+        entry = e,
       })
       if callback then
         callback()
