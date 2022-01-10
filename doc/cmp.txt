@@ -366,7 +366,7 @@ snippet.expand~
                                           *cmp-config.completion.keyword_length*
 completion.keyword_length~
   `number`
-  The default number value to trigger auto-completion.
+  The number of characters needed to trigger auto-completion.
 
                                          *cmp-config.completion.keyword_pattern*
 completion.keyword_pattern~
