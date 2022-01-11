@@ -2,6 +2,7 @@ local cache = require('cmp.utils.cache')
 local misc = require('cmp.utils.misc')
 local buffer = require('cmp.utils.buffer')
 local api = require('cmp.utils.api')
+local str = require('cmp.utils.str')
 
 ---@class cmp.WindowStyle
 ---@field public relative string
@@ -135,13 +136,13 @@ window.update = function(self)
     info.scrollbar.style = 'minimal'
 
     -- Draw the background of the scrollbar
-    if self.style.border[2] == '' or self.style.border[2] == ' ' or math.max(info.border.height, info.border.width) < 1 then
+    if str.is_whitespace_char(self.style.border[2]) or math.max(info.border.height, info.border.width) < 1 then
       local style = {
         relative = info.scrollbar.relative,
         style = info.scrollbar.style,
         width = info.scrollbar.width,
         height = self.style.height,
-        row = info.row + ((self.style.border[2] == '' or self.style.border[2] == ' ' or self.style.border == 'shadow') and 0 or 1),
+        row = info.row + ((str.is_whitespace_char(self.style.border[2]) or self.style.border == 'shadow') and 0 or 1),
         col = info.scrollbar.col,
         zindex = (self.style.zindex and (self.style.zindex + 1) or 1),
       }
@@ -246,10 +247,10 @@ window.info = function(self)
         height = math.ceil(self.style.height * (self.style.height / content_height)),
         width = 1,
       }
-      info.scrollbar.col = info.col + info.width - ((self.style.border[4] == '' or self.style.border[4] == ' ') and 0 or 1)
+      info.scrollbar.col = info.col + info.width - ((str.is_whitespace_char(self.style.border[4])) and 0 or 1)
       info.scrollbar.row = info.row +
         math.min(self.style.height - info.scrollbar.height, math.floor(self.style.height * (vim.fn.getwininfo(self.win)[1].topline / content_height))) +
-        ((self.style.border[2] == '' or self.style.border[2] == ' ' or self.style.border == 'shadow') and 0 or 1)
+        ((str.is_whitespace_char(self.style.border[2]) or self.style.border == 'shadow') and 0 or 1)
       if border_width < 1 then
         info.width = info.width + info.scrollbar.width
       end
