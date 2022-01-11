@@ -34,7 +34,7 @@ docs_view.open = function(self, e, view)
 
   local right_space = vim.o.columns - (view.col + view.width) - 2
   local left_space = view.col - 2
-  local maxwidth = math.min(documentation.maxwidth, math.max(left_space, right_space) - 1)
+  local max_width = math.min(documentation.max_width, math.max(left_space, right_space) - 1)
 
   -- update buffer content if needed.
   if not self.entry or e.id ~= self.entry.id then
@@ -48,14 +48,14 @@ docs_view.open = function(self, e, view)
       vim.cmd([[syntax clear]])
     end)
     vim.lsp.util.stylize_markdown(self.window:get_buffer(), documents, {
-      max_width = maxwidth,
-      max_height = documentation.maxheight,
+      max_width = max_width,
+      max_height = documentation.max_height,
     })
   end
 
   local width, height = vim.lsp.util._make_floating_popup_size(vim.api.nvim_buf_get_lines(self.window:get_buffer(), 0, -1, false), {
-    max_width = maxwidth,
-    max_height = documentation.maxheight,
+    max_width = max_width,
+    max_height = documentation.max_height,
   })
   if width <= 0 or height <= 0 then
     return self:close()
