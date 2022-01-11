@@ -175,7 +175,7 @@ custom_entries_view.open = function(self, offset, entries)
     width = width,
     height = height,
     border = completion.border,
-    zindex = 1001,
+    zindex = completion.zindex or 1001,
   })
   if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
     self:_select(preselect, { behavior = types.cmp.SelectBehavior.Select })
