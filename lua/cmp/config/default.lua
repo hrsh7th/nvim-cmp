@@ -138,12 +138,14 @@ return function()
       completion = {
         border = {'', '', '', '', '', '', '', ''},
         scrollbar = '',
+        winhighlight = 'Normal:CmpCompletionWindow,FloatBorder:CmpCompletionWindowBorder,CursorLine:PmenuSel,Search:None',
       },
       documentation = {
         border = {'', '', '', ' ', '', '', '', ' '},
         max_height = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
         max_width = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
         scrollbar = '',
+        winhighlight = 'Normal:CmpDocumentationWindow,FloatBorder:CmpDocumentationWindowBorder',
       },
     },
   }

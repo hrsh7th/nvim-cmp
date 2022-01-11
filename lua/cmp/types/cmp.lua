@@ -101,6 +101,7 @@ cmp.ItemField.Menu = 'menu'
 ---@class cmp.CompletionWindowConfig
 ---@field public border string|string[]
 ---@field public scrollbar string
+---@field public winhighlight string
 ---@field public zindex number|nil
 
 ---@class cmp.DocumentationConfig
@@ -108,6 +109,7 @@ cmp.ItemField.Menu = 'menu'
 ---@field public max_height number|nil
 ---@field public max_width number|nil
 ---@field public scrollbar string
+---@field public winhighlight string
 ---@field public zindex number|nil
 
 ---@class cmp.ConfirmationConfig
