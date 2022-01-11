@@ -7,6 +7,8 @@ describe('utils.str', function()
     assert.are.equal(str.get_word('print()'), 'print')
     assert.are.equal(str.get_word('["cmp#confirm"]'), '["cmp#confirm"]')
     assert.are.equal(str.get_word('"devDependencies":', string.byte('"')), '"devDependencies')
+    assert.are.equal(str.get_word('"devDependencies": ${1},', string.byte('"')), '"devDependencies')
+    assert.are.equal(str.get_word('#[cfg(test)]'), '#[cfg(test)]')
   end)
 
   it('strikethrough', function()

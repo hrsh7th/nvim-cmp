@@ -3,24 +3,29 @@ local pattern = require('cmp.utils.pattern')
 
 local str = {}
 
-local INVALID_CHARS = {}
-INVALID_CHARS[string.byte("'")] = true
-INVALID_CHARS[string.byte('"')] = true
-INVALID_CHARS[string.byte('=')] = true
-INVALID_CHARS[string.byte('$')] = true
-INVALID_CHARS[string.byte('(')] = true
-INVALID_CHARS[string.byte('[')] = true
-INVALID_CHARS[string.byte(' ')] = true
-INVALID_CHARS[string.byte('\t')] = true
-INVALID_CHARS[string.byte('\n')] = true
-INVALID_CHARS[string.byte('\r')] = true
+local INVALIDS = {}
+INVALIDS[string.byte("'")] = true
+INVALIDS[string.byte('"')] = true
+INVALIDS[string.byte('=')] = true
+INVALIDS[string.byte('$')] = true
+INVALIDS[string.byte('(')] = true
+INVALIDS[string.byte('[')] = true
+INVALIDS[string.byte('<')] = true
+INVALIDS[string.byte('{')] = true
+INVALIDS[string.byte(' ')] = true
+INVALIDS[string.byte('\t')] = true
+INVALIDS[string.byte('\n')] = true
+INVALIDS[string.byte('\r')] = true
 
 local NR_BYTE = string.byte('\n')
 
-local PAIR_CHARS = {}
-PAIR_CHARS[string.byte('[')] = string.byte(']')
-PAIR_CHARS[string.byte('(')] = string.byte(')')
-PAIR_CHARS[string.byte('<')] = string.byte('>')
+local PAIRS = {}
+PAIRS[string.byte('<')] = string.byte('>')
+PAIRS[string.byte('[')] = string.byte(']')
+PAIRS[string.byte('(')] = string.byte(')')
+PAIRS[string.byte('{')] = string.byte('}')
+PAIRS[string.byte('"')] = string.byte('"')
+PAIRS[string.byte("'")] = string.byte("'")
 
 ---Return if specified text has prefix or not
 ---@param text string
@@ -103,21 +108,42 @@ end
 ---@param text string
 ---@return string
 str.get_word = function(text, stop_char)
-  local valids = {}
-  local has_valid = false
-  for idx = 1, #text do
-    local c = string.byte(text, idx)
-    local invalid = INVALID_CHARS[c] and not (valids[c] and stop_char ~= c)
-    if has_valid and invalid then
-      return string.sub(text, 1, idx - 1)
+  local has_alnum = false
+  local stack = {}
+  local word = {}
+  for i = 1, #text do
+    local c = string.byte(text, i, i)
+    if not INVALIDS[c] then
+      if PAIRS[c] then
+        table.insert(stack, c)
+      end
+      table.insert(word, string.char(c))
+      has_alnum = has_alnum or char.is_alnum(c)
+    elseif not has_alnum then
+      if PAIRS[c] then
+        table.insert(stack, c)
+      end
+      table.insert(word, string.char(c))
+    elseif #stack ~= 0 then
+      table.insert(word, string.char(c))
+      if stack[#stack] == c then
+        table.remove(stack, #stack)
+      else
+        if PAIRS[c] then
+          table.insert(stack, c)
+        end
+      end
+      if has_alnum and #stack == 0 then
+        break
+      end
+    else
+      break
     end
-    valids[c] = true
-    if PAIR_CHARS[c] then
-      valids[PAIR_CHARS[c]] = true
-    end
-    has_valid = has_valid or not invalid
   end
-  return text
+  if stop_char and word[#word] == string.char(stop_char) then
+    table.remove(word, #word)
+  end
+  return table.concat(word, '')
 end
 
 ---Oneline
