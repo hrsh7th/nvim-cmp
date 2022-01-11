@@ -7,9 +7,22 @@ describe('keymap', function()
   before_each(spec.before)
 
   it('t', function()
-    assert.are.equal(keymap.t('<Tab>'), vim.api.nvim_replace_termcodes('<Tab>', true, true, true))
-    assert.are.equal(keymap.t('<C-g>u'), vim.api.nvim_replace_termcodes('<C-g>u', true, true, true))
-    assert.are.equal(keymap.t('<Cmd>aiueo<CR>'), vim.api.nvim_replace_termcodes('<Cmd>aiueo<CR>', true, true, true))
+    for _, key in ipairs({
+      '<F1>',
+      '<C-a>',
+      '<C-]>',
+      '<C-[>',
+      '<C-^>',
+      '<C-@>',
+      '<Tab>',
+      '<Plug>(example)',
+      '<C-r>="abc"<CR>',
+      '<Cmd>normal! ==<CR>',
+    }) do
+      assert.are.equal(keymap.t(key), vim.api.nvim_replace_termcodes(key, true, true, true))
+      assert.are.equal(keymap.t(key .. key), vim.api.nvim_replace_termcodes(key .. key, true, true, true))
+      assert.are.equal(keymap.t(key .. key .. key), vim.api.nvim_replace_termcodes(key .. key .. key, true, true, true))
+    end
   end)
 
   it('to_keymap', function()
