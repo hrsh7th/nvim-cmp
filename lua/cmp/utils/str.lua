@@ -193,9 +193,9 @@ str.escape = function(text, chars)
   return table.concat(escaped, '')
 end
 
---- @param c string|nil the string to check
---- @return boolean is_whitespace `true` if `s` matches `%s*`
-str.is_whitespace_char = function(c)
+--- @param c string|nil the char to check
+--- @return boolean visible `true` if `s` matches `%s*`
+str.is_visible = function(c)
   return c == '' or c == ' '
 end
 
