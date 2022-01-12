@@ -110,9 +110,13 @@ vim.cmd [[
   highlight default link CmpItemMenu CmpItemMenuDefault
 
   highlight default link CmpCompletionWindow Pmenu
-  highlight default link CmpCompletionWindowBorder NormalFloat
+  highlight default link CmpCompletionWindowBorder FloatBorder
+  highlight default link CmpCompletionWindowBordered CmpCompletionWindow
+  highlight default link CmpCompletionWindowPadding CmpCompletionWindow
   highlight default link CmpDocumentationWindow NormalFloat
   highlight default link CmpDocumentationWindowBorder CmpCompletionWindowBorder
+  highlight default link CmpDocumentationWindowBordered CmpDocumentationWindow
+  highlight default link CmpDocumentationWindowPadding CmpDocumentationWindow
 ]]
 
 for name in pairs(types.lsp.CompletionItemKind) do
