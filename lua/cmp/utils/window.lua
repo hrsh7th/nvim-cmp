@@ -152,7 +152,7 @@ window.update = function(self)
       else
         style.noautocmd = true
         self.scroll_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'scroll_buf'), false, style)
-        local highlight = self.scrollbar == '' and 'PmenuSbar' or 'CmpWindowScrollBar'
+        local highlight = self.scrollbar == '' and 'PmenuSbar' or 'CmpScrollBar'
         vim.api.nvim_win_set_option(self.scroll_win, 'winhighlight', 'EndOfBuffer:'..highlight..',NormalFloat:'..highlight)
       end
 
@@ -172,7 +172,7 @@ window.update = function(self)
     else
       info.scrollbar.noautocmd = true
       self.thumb_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'thumb_buf'), false, info.scrollbar)
-      local highlight = self.scrollbar == '' and 'PmenuThumb' or 'CmpWindowScrollThumb'
+      local highlight = self.scrollbar == '' and 'PmenuThumb' or 'CmpScrollThumb'
       vim.api.nvim_win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:'..highlight..',NormalFloat:'..highlight)
     end
 

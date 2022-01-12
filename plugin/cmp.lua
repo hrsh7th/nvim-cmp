@@ -90,11 +90,11 @@ misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
     end
   end
 
-  highlight.inherit('CmpCompletionScrollBar', 'PmenuSbar', {
+  highlight.inherit('CmpScrollBar', 'PmenuSbar', {
     guifg = 'NONE',
     ctermfg = 'NONE',
   })
-  highlight.inherit('CmpCompletionScrollThumb', 'PmenuThumb', {
+  highlight.inherit('CmpScrollThumb', 'PmenuThumb', {
     guibg = 'NONE',
     ctermbg = 'NONE',
   })
@@ -113,8 +113,6 @@ vim.cmd [[
   highlight default link CmpCompletionWindowBorder NormalFloat
   highlight default link CmpDocumentationWindow NormalFloat
   highlight default link CmpDocumentationWindowBorder CmpCompletionWindowBorder
-  highlight default link CmpDocumentationScrollThumb CmpCompletionScrollThumb
-  highlight default link CmpDocumentationScrollBar CmpCompletionScrollBar
 ]]
 
 for name in pairs(types.lsp.CompletionItemKind) do
