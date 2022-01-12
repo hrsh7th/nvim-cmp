@@ -139,8 +139,8 @@ return function()
         border = {'', '', '', '', '', '', '', ''},
         scrollbar = '',
         winhighlight = {
-          bordered = 'Normal:CmpCompletionWindow,FloatBorder:CmpCompletionWindowPadding,CursorLine:PmenuSel,Search:None',
-          default = 'Normal:CmpCompletionWindowBordered,FloatBorder:CmpCompletionWindowBorder,CursorLine:PmenuSel,Search:None',
+          bordered = 'Normal:CmpCompletionWindowBordered,FloatBorder:CmpCompletionWindowBorder,CursorLine:PmenuSel,Search:None',
+          default = 'Normal:CmpCompletionWindow,FloatBorder:CmpCompletionWindowPadding,CursorLine:PmenuSel,Search:None',
         },
       },
       documentation = {
