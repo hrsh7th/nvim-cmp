@@ -33,7 +33,6 @@ custom_entries_view.new = function()
   self.entries_win:option('foldenable', false)
   self.entries_win:option('wrap', false)
   self.entries_win:option('scrolloff', 0)
-  self.entries_win:option('winhighlight', config.get().window.completion.winhighlight)
   -- This is done so that strdisplaywidth calculations for lines in the
   -- custom_entries_view window exactly match with what is really displayed,
   -- see comment in cmp.Entry.get_view. Setting tabstop to 1 makes all tabs be
@@ -107,12 +106,14 @@ custom_entries_view.on_change = function(self)
 end
 
 custom_entries_view.open = function(self, offset, entries)
+  local completion = config.get().window.completion
   self.offset = offset
   self.entries = {}
   self.column_width = { abbr = 0, kind = 0, menu = 0 }
 
   -- Apply window options (that might be changed) on the custom completion menu.
   self.entries_win:option('winblend', vim.o.pumblend)
+  self.entries_win:option('winhighlight', completion.winhighlight)
 
   local entries_buf = self.entries_win:get_buffer()
   local lines = {}
@@ -152,9 +153,7 @@ custom_entries_view.open = function(self, offset, entries)
   local delta = cursor[2] + 1 - self.offset
   local row, col = pos[1], pos[2] - delta - 1
 
-  local completion = config.get().window.completion
   local border_offset_row, border_offset_col = window.get_border_dimensions({style=completion})
-
   if math.floor(vim.o.lines * 0.5) <= row + border_offset_row and vim.o.lines - row - border_offset_row <= math.min(DEFAULT_HEIGHT, height) then
     height = math.min(height, row - 1)
     row = row - height - border_offset_row - 1
