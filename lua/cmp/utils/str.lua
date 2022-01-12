@@ -195,7 +195,7 @@ end
 
 --- @param c string|nil the char to check
 --- @return boolean visible `true` if `s` matches `%s*`
-str.is_visible = function(c)
+str.is_invisible = function(c)
   return c == '' or c == ' '
 end
 
