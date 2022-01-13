@@ -4,6 +4,7 @@ local event = require('cmp.utils.event')
 local keymap = require('cmp.utils.keymap')
 local docs_view = require('cmp.view.docs_view')
 local custom_entries_view = require('cmp.view.custom_entries_view')
+local statusline_entries_view = require('cmp.view.statusline_entries_view')
 local native_entries_view = require('cmp.view.native_entries_view')
 local ghost_text_view = require('cmp.view.ghost_text_view')
 
@@ -23,6 +24,7 @@ view.new = function()
   self.resolve_dedup = async.dedup()
   self.custom_entries_view = custom_entries_view.new()
   self.native_entries_view = native_entries_view.new()
+  self.statusline_entries_view = statusline_entries_view.new()
   self.docs_view = docs_view.new()
   self.ghost_text_view = ghost_text_view.new()
   self.event = event.new()
@@ -180,6 +182,7 @@ view._get_entries_view = function(self)
   local c = config.get()
   self.native_entries_view.event:clear()
   self.custom_entries_view.event:clear()
+  self.statusline_entries_view.event:clear()
 
   if c.experimental.native_menu then
     self.native_entries_view.event:on('change', function()
@@ -187,10 +190,14 @@ view._get_entries_view = function(self)
     end)
     return self.native_entries_view
   else
-    self.custom_entries_view.event:on('change', function()
+    local v = self.custom_entries_view
+    if vim.tbl_contains({ '/', '?' }, vim.fn.getcmdtype()) and c.experimental.horizontal_search then
+      v = self.statusline_entries_view
+    end
+    v.event:on('change', function()
       self:on_entry_change()
     end)
-    return self.custom_entries_view
+    return v
   end
 end
 
