@@ -106,12 +106,12 @@ statusline_entries_view.highlight_entry = function(self, entry)
   local hl_group = '%#' .. view['abbr'].hl_group .. '#'
   local fuzzy_group = '%#' .. 'CmpItemAbbrMatchFuzzy' .. '#'
   local match_group = '%#' .. 'CmpItemAbbrMatch' .. '#'
-  local text = {hl_group}
+  local text = { hl_group }
   local last_offset = 1
   for _, m in ipairs(entry.matches or {}) do
     if m.word_match_start > last_offset then
       -- add everything b4 m.word_match_start
-        table.insert(text, word:sub(last_offset, m.word_match_start - 1))
+      table.insert(text, word:sub(last_offset, m.word_match_start - 1))
     end
     table.insert(text, m.fuzzy and fuzzy_group or match_group)
     table.insert(text, word:sub(m.word_match_start, m.word_match_end))
@@ -123,7 +123,6 @@ statusline_entries_view.highlight_entry = function(self, entry)
 
   return table.concat(text, ''), word, view_length
 end
-
 
 statusline_entries_view.draw = function(self)
   local texts = {}
@@ -145,7 +144,7 @@ statusline_entries_view.draw = function(self)
     start_index = start_index
   elseif vim.tbl_contains(lst_dspl_ind, selected_index) then
     start_index = lst_dspl_ind[1]
-  -- elseif start_index > lst_dspl_ind[#lst_dspl_ind] then
+    -- elseif start_index > lst_dspl_ind[#lst_dspl_ind] then
   elseif self.moving_forwards then
     local needed_length = lengths[selected_index]
     start_index = lst_dspl_ind[1]
