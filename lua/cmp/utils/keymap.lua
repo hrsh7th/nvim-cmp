@@ -174,7 +174,7 @@ keymap.feed_map = function(map)
   elseif map.callback and map.expr then
     rhs = map.callback()
   elseif map.expr then
-    rhs = keymap.t(vim.api.nvim_eval(map.rhs))
+    rhs = vim.api.nvim_eval(keymap.t(map.rhs))
   else
     rhs = keymap.t(map.rhs)
   end
