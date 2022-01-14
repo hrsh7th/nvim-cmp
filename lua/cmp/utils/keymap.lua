@@ -1,3 +1,4 @@
+local cache = require('cmp.utils.cache')
 local misc = require('cmp.utils.misc')
 local api = require('cmp.utils.api')
 
@@ -101,15 +102,16 @@ keymap.listen = function(mode, lhs, callback)
   end
 
   local bufnr = existing.buffer and vim.api.nvim_get_current_buf() or -1
+  local fallback = keymap.evacuate(bufnr, mode, existing)
   keymap.set_map(bufnr, mode, lhs, function()
     if mode == 'c' and vim.fn.getcmdtype() == '=' then
-      return keymap.feed_map(existing)
+      return vim.api.nvim_feedkeys(keymap.t(fallback), 'it', true)
     end
 
     callback(
       lhs,
       misc.once(function()
-        keymap.feed_map(existing)
+        return vim.api.nvim_feedkeys(keymap.t(fallback), 'it', true)
       end)
     )
   end, {
@@ -170,6 +172,56 @@ keymap.get_map = function(mode, lhs)
     buffer = false,
   }
 end
+
+---Evacuate existing keymapping.
+---@param bufnr number
+---@param mode string
+---@param existing table
+---@return string
+keymap.evacuate = setmetatable({
+  cache = cache.new(),
+}, {
+  __call = function(self, bufnr, mode, existing)
+    local fallback = self.cache:ensure({ bufnr, mode, existing.lhs }, function()
+      return string.format('<Plug>(cmp.u.k.evacuate:%s)', misc.id('cmp.utils.keymap.evacuate'))
+    end)
+    for _, map in ipairs(bufnr == -1 and vim.api.nvim_get_keymap(mode) or vim.api.nvim_buf_get_keymap(bufnr, mode)) do
+      if map.lhs == fallback then
+        return fallback
+      end
+    end
+
+    local callback = not existing.expr and existing.callback
+    keymap.set_map(bufnr, mode, fallback, function()
+      local lhs = keymap.t(existing.lhs)
+      local rhs
+      if existing.callback then
+        rhs = existing.callback()
+      elseif existing.expr then
+        rhs = vim.api.nvim_eval(keymap.t(existing.rhs))
+      else
+        rhs = keymap.t(existing.rhs)
+      end
+
+      if not existing.noremap then
+        if string.find(rhs, lhs, 1, true) == 1 then
+          vim.api.nvim_feedkeys(lhs, 'itn', true)
+          rhs = string.gsub(rhs, '^' .. vim.pesc(lhs), '')
+        end
+      end
+      return rhs
+    end, {
+      expr = not not not callback,
+      callback = callback,
+      noremap = existing.noremap,
+      script = existing.script,
+      silent = existing.silent,
+      nowait = existing.nowait,
+    })
+
+    return fallback
+  end
+})
 
 ---Feed mapping object.
 ---@param map table
