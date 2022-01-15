@@ -167,7 +167,7 @@ keymap.evacuate = setmetatable({
     })
 
     return fallback
-  end
+  end,
 })
 
 ---Get map
