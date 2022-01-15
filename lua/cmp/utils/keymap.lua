@@ -133,11 +133,6 @@ keymap.evacuate = setmetatable({
     local fallback = self.cache:ensure({ bufnr, mode, existing.lhs }, function()
       return string.format('<Plug>(cmp.u.k.evacuate:%s)', misc.id('cmp.utils.keymap.evacuate'))
     end)
-    for _, map in ipairs(bufnr == -1 and vim.api.nvim_get_keymap(mode) or vim.api.nvim_buf_get_keymap(bufnr, mode)) do
-      if map.lhs == fallback then
-        return fallback
-      end
-    end
 
     local callback = not existing.expr and existing.callback
     keymap.set_map(bufnr, mode, fallback, function()
