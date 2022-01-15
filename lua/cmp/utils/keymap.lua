@@ -1,3 +1,4 @@
+local cache = require('cmp.utils.cache')
 local misc = require('cmp.utils.misc')
 local api = require('cmp.utils.api')
 
@@ -101,15 +102,16 @@ keymap.listen = function(mode, lhs, callback)
   end
 
   local bufnr = existing.buffer and vim.api.nvim_get_current_buf() or -1
+  local fallback = keymap.evacuate(bufnr, mode, existing)
   keymap.set_map(bufnr, mode, lhs, function()
     if mode == 'c' and vim.fn.getcmdtype() == '=' then
-      return keymap.feed_map(existing)
+      return vim.api.nvim_feedkeys(keymap.t(fallback), 'it', true)
     end
 
     callback(
       lhs,
       misc.once(function()
-        keymap.feed_map(existing)
+        return vim.api.nvim_feedkeys(keymap.t(fallback), 'it', true)
       end)
     )
   end, {
@@ -118,6 +120,56 @@ keymap.listen = function(mode, lhs, callback)
     silent = true,
   })
 end
+
+---Evacuate existing keymapping.
+---@param bufnr number
+---@param mode string
+---@param existing table
+---@return string
+keymap.evacuate = setmetatable({
+  cache = cache.new(),
+}, {
+  __call = function(self, bufnr, mode, existing)
+    local fallback = self.cache:ensure({ bufnr, mode, existing.lhs }, function()
+      return string.format('<Plug>(cmp.u.k.evacuate:%s)', misc.id('cmp.utils.keymap.evacuate'))
+    end)
+
+    local callback = not existing.expr and existing.callback
+    keymap.set_map(bufnr, mode, fallback, function()
+      local lhs = keymap.t(existing.lhs)
+      local rhs
+      if existing.callback then
+        rhs = existing.callback()
+      elseif existing.expr then
+        rhs = vim.api.nvim_eval(keymap.t(existing.rhs))
+      else
+        rhs = keymap.t(existing.rhs)
+      end
+
+      if not existing.noremap then
+        if string.find(rhs, lhs, 1, true) == 1 then
+          rhs = string.gsub(rhs, '^' .. vim.pesc(lhs), string.format(keymap.t([[<C-r>=v:lua.vim.json.decode(%s)<CR>]]), vim.fn.string(vim.json.encode(lhs))))
+        end
+      end
+      return rhs
+    end, callback and {
+      expr = false,
+      callback = callback,
+      noremap = existing.noremap,
+      script = existing.script,
+      silent = true,
+      nowait = existing.nowait,
+    } or {
+      expr = true,
+      noremap = existing.noremap,
+      script = existing.script,
+      silent = true,
+      nowait = existing.nowait,
+    })
+
+    return fallback
+  end,
+})
 
 ---Get map
 ---@param mode string
@@ -165,38 +217,10 @@ keymap.get_map = function(mode, lhs)
     callback = nil,
     noremap = true,
     script = false,
-    silent = false,
+    silent = true,
     nowait = false,
     buffer = false,
   }
-end
-
----Feed mapping object.
----@param map table
-keymap.feed_map = function(map)
-  local lhs = keymap.t(map.lhs)
-  local rhs
-  if map.callback and not map.expr then
-    return map.callback()
-  elseif map.callback and map.expr then
-    rhs = map.callback()
-  elseif map.expr then
-    rhs = vim.api.nvim_eval(keymap.t(map.rhs))
-  else
-    rhs = keymap.t(map.rhs)
-  end
-
-  if map.noremap then
-    vim.api.nvim_feedkeys(rhs, 'itn', true)
-  else
-    if string.find(rhs, lhs, 1, true) == 1 then
-      rhs = string.gsub(rhs, '^' .. vim.pesc(lhs), '')
-      vim.api.nvim_feedkeys(rhs, 'itm', true)
-      vim.api.nvim_feedkeys(lhs, 'itn', true)
-    else
-      vim.api.nvim_feedkeys(rhs, 'itm', true)
-    end
-  end
 end
 
 ---Set keymapping
