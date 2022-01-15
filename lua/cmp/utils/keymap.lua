@@ -186,18 +186,12 @@ keymap.feed_map = function(map)
     rhs = keymap.t(map.rhs)
   end
 
-  rhs = keymap.expression(rhs)
-
-  if map.noremap then
-    vim.api.nvim_feedkeys(rhs, 'itn', true)
+  if not map.noremap and string.find(rhs, lhs, 1, true) == 1 then
+    rhs = string.gsub(rhs, '^' .. vim.pesc(lhs), '')
+    vim.api.nvim_feedkeys(keymap.expression(rhs), 'itm', true)
+    vim.api.nvim_feedkeys(lhs, 'itn', true)
   else
-    if string.find(rhs, lhs, 1, true) == 1 then
-      rhs = string.gsub(rhs, '^' .. vim.pesc(lhs), '')
-      vim.api.nvim_feedkeys(rhs, 'itm', true)
-      vim.api.nvim_feedkeys(lhs, 'itn', true)
-    else
-      vim.api.nvim_feedkeys(rhs, 'itm', true)
-    end
+    vim.api.nvim_feedkeys(keymap.expression(rhs), 'it' .. (map.noremap and 'n' or 'm'), true)
   end
 end
 
