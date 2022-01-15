@@ -181,7 +181,7 @@ keymap.evacuate = setmetatable({
 ---@return string
 keymap.recursive = function(lhs, rhs)
   if string.find(rhs, lhs, 1, true) == 1 then
-    local expr = string.format(keymap.t('<C-r>=v:lua.vim.json.decode(%s)<CR>'), vim.fn.string(vim.json.encode(lhs)))
+    local expr = string.format(keymap.t('<C-r>=v:lua.vim.json.decode(%s)<CR>'), vim.fn.string(vim.json.encode(keymap.t(lhs))))
     return string.gsub(rhs, '^' .. vim.pesc(lhs), expr)
   end
   return rhs
