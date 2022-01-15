@@ -152,9 +152,15 @@ keymap.evacuate = setmetatable({
         end
       end
       return rhs
-    end, {
-      expr = not not not callback,
+    end, callback and {
+      expr = false,
       callback = callback,
+      noremap = existing.noremap,
+      script = existing.script,
+      silent = true,
+      nowait = existing.nowait,
+    } or {
+      expr = true,
       noremap = existing.noremap,
       script = existing.script,
       silent = true,
