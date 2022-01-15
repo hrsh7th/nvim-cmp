@@ -318,7 +318,7 @@ core.confirm = function(self, e, option, callback)
   -- Close menus.
   self.view:close()
 
-  feedkeys.call(keymap.t('<Cmd>set indentkeys=<CR>'), 'n')
+  feedkeys.call(keymap.indentkeys(), 'n')
   feedkeys.call('', 'n', function()
     local ctx = context.new()
     local keys = {}
@@ -424,7 +424,7 @@ core.confirm = function(self, e, option, callback)
       feedkeys.call(table.concat(keys, ''), 'int')
     end
   end)
-  feedkeys.call(keymap.t('<Cmd>set indentkeys=%s<CR>'):format(vim.fn.escape(vim.bo.indentkeys, ' "|\\')), 'n')
+  feedkeys.call(keymap.indentkeys(vim.bo.indentkeys), 'n')
   feedkeys.call('', 'n', function()
     e:execute(vim.schedule_wrap(function()
       release()

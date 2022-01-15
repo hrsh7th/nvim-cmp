@@ -75,6 +75,13 @@ keymap.backspace = function(count)
   return table.concat(keys, '')
 end
 
+---Update indentkeys.
+---@param expr string
+---@return string
+keymap.indentkeys = function(expr)
+  return string.format(keymap.t('<Cmd>set indentkeys=%s<CR>'), expr and vim.fn.escape(expr, '| \t\\') or '')
+end
+
 ---Return two key sequence are equal or not.
 ---@param a string
 ---@param b string
@@ -179,16 +186,12 @@ keymap.feed_map = function(map)
     rhs = keymap.t(map.rhs)
   end
 
-  if map.noremap then
-    vim.api.nvim_feedkeys(rhs, 'itn', true)
+  if not map.noremap and string.find(rhs, lhs, 1, true) == 1 then
+    rhs = string.gsub(rhs, '^' .. vim.pesc(lhs), '')
+    vim.api.nvim_feedkeys(keymap.expression(rhs), 'itm', true)
+    vim.api.nvim_feedkeys(lhs, 'itn', true)
   else
-    if string.find(rhs, lhs, 1, true) == 1 then
-      rhs = string.gsub(rhs, '^' .. vim.pesc(lhs), '')
-      vim.api.nvim_feedkeys(rhs, 'itm', true)
-      vim.api.nvim_feedkeys(lhs, 'itn', true)
-    else
-      vim.api.nvim_feedkeys(rhs, 'itm', true)
-    end
+    vim.api.nvim_feedkeys(keymap.expression(rhs), 'it' .. (map.noremap and 'n' or 'm'), true)
   end
 end
 
@@ -217,5 +220,28 @@ keymap.set_map = setmetatable({
 misc.set(_G, { 'cmp', 'utils', 'keymap', 'set_map' }, function(id)
   return keymap.set_map.callbacks[id]() or ''
 end)
+
+---Resolve expression.
+---@param expr string
+---@return string
+keymap.expression = function(expr)
+  local spans = {}
+  local f = 0
+  for i = 1, #expr do
+    local c = string.sub(expr, i, i)
+    if f == 0 and c == keymap.t('<C-r>') then
+      f = i
+    end
+    if f ~= 0 and c == keymap.t('<CR>') then
+      table.insert(spans, { s = f, e = i })
+      f = 0
+    end
+  end
+  for i = #spans, 1, -1 do
+    local s, e = spans[i].s, spans[i].e
+    expr = string.sub(expr, 1, s - 1) .. keymap.expression(vim.api.nvim_eval(string.sub(expr, s + 2, e - 1))) .. string.sub(expr, e + 1)
+  end
+  return expr
+end
 
 return keymap
