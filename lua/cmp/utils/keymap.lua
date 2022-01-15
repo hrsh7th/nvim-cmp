@@ -122,6 +122,11 @@ keymap.listen = function(mode, lhs, callback)
 end
 
 ---Evacuate existing mapping.
+--- NOTE:
+---   In insert-mode, we should all mapping evacuate to the `<Plug>` because `<C-r>=` will display gabage message.
+---   In cmdline-mode, we shouldn't re-map as `<Plug>` because `cmap <Tab> <Plug>(map-to-tab)` will broke native behavior.
+---   We should resolve recursive mapping because existing mapping will feed by `feedkeys` that doesn't solve recursive mapping.
+---     We use `<C-r>=` to solve recursive mapping.
 ---@param map table
 keymap.evacuate = setmetatable({
   cache = cache.new(),
