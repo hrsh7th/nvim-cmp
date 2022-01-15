@@ -136,6 +136,7 @@ keymap.evacuate = setmetatable({
 
     local callback = not existing.expr and existing.callback
     keymap.set_map(bufnr, mode, fallback, function()
+      -- Make resolved key sequence.
       local lhs = keymap.t(existing.lhs)
       local rhs
       if existing.callback then
@@ -146,11 +147,13 @@ keymap.evacuate = setmetatable({
         rhs = keymap.t(existing.rhs)
       end
 
+      -- Resolve recursive mapping. See `:help recursive_mapping`.
       if not existing.noremap then
         if string.find(rhs, lhs, 1, true) == 1 then
           rhs = string.gsub(rhs, '^' .. vim.pesc(lhs), string.format(keymap.t([[<C-r>=v:lua.vim.json.decode(%s)<CR>]]), vim.fn.string(vim.json.encode(lhs))))
         end
       end
+
       return rhs
     end, callback and {
       expr = false,
