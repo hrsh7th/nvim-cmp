@@ -205,8 +205,7 @@ keymap.evacuate = setmetatable({
 
       if not existing.noremap then
         if string.find(rhs, lhs, 1, true) == 1 then
-          vim.api.nvim_feedkeys(lhs, 'itn', true)
-          rhs = string.gsub(rhs, '^' .. vim.pesc(lhs), '')
+          rhs = string.gsub(rhs, '^' .. vim.pesc(lhs), string.format(keymap.t([[<C-r>=v:lua.vim.json.decode(%s)<CR>]]), vim.fn.string(vim.json.encode(lhs))))
         end
       end
       return rhs
