@@ -75,6 +75,13 @@ keymap.backspace = function(count)
   return table.concat(keys, '')
 end
 
+---Update indentkeys.
+---@param expr string
+---@return string
+keymap.indentkeys = function(expr)
+  return string.format(keymap.t('<Cmd>set indentkeys=%s<CR>'), expr and vim.fn.escape(expr, '| \t\\') or '')
+end
+
 ---Return two key sequence are equal or not.
 ---@param a string
 ---@param b string
