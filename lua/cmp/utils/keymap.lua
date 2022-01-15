@@ -160,13 +160,13 @@ keymap.evacuate = setmetatable({
       callback = callback,
       noremap = existing.noremap,
       script = existing.script,
-      silent = true,
+      silent = mode ~= 'c',
       nowait = existing.nowait,
     } or {
       expr = true,
       noremap = existing.noremap,
       script = existing.script,
-      silent = true,
+      silent = mode ~= 'c',
       nowait = existing.nowait,
     })
 
