@@ -1,3 +1,4 @@
+local cache = require('cmp.utils.cache')
 local misc = require('cmp.utils.misc')
 local api = require('cmp.utils.api')
 
@@ -101,22 +102,94 @@ keymap.listen = function(mode, lhs, callback)
   end
 
   local bufnr = existing.buffer and vim.api.nvim_get_current_buf() or -1
+  local fallback = keymap.evacuate(bufnr, mode, existing)
   keymap.set_map(bufnr, mode, lhs, function()
     if mode == 'c' and vim.fn.getcmdtype() == '=' then
-      return keymap.feed_map(existing)
+      vim.api.nvim_feedkeys(fallback.keys, 'it' .. (fallback.noremap and 'n' or 'm'), true)
+    else
+      callback(
+        lhs,
+        misc.once(function()
+          vim.api.nvim_feedkeys(fallback.keys, 'it' .. (fallback.noremap and 'n' or 'm'), true)
+        end)
+      )
     end
-
-    callback(
-      lhs,
-      misc.once(function()
-        keymap.feed_map(existing)
-      end)
-    )
   end, {
     expr = false,
     noremap = true,
     silent = true,
   })
+end
+
+---Evacuate existing mapping.
+--- NOTE:
+---   In insert-mode, we should all mapping evacuate to the `<Plug>` because `<C-r>=` will display gabage message.
+---   In cmdline-mode, we shouldn't re-map as `<Plug>` because `cmap <Tab> <Plug>(map-to-tab)` will broke native behavior.
+---   We should resolve recursive mapping because existing mapping will feed by `feedkeys` that doesn't solve recursive mapping.
+---     We use `<C-r>=` to solve recursive mapping.
+---@param map table
+keymap.evacuate = setmetatable({
+  cache = cache.new(),
+}, {
+  __call = function(self, bufnr, mode, map)
+    local fallback = self.cache:ensure({ bufnr, mode, map.lhs }, function()
+      return string.format('<Plug>(cmp.u.k.evacuate:%s)', misc.id('cmp.utils.keymap.evacuate'))
+    end)
+
+    if map.expr then
+      keymap.set_map(bufnr, mode, fallback, function()
+        local lhs = keymap.t(map.lhs)
+        local rhs = (function()
+          if map.callback then
+            return map.callback()
+          end
+          return vim.api.nvim_eval(keymap.t(map.rhs))
+        end)()
+        if not map.noremap then
+          rhs = keymap.recursive(lhs, rhs)
+        end
+        return rhs
+      end, {
+        expr = true,
+        noremap = map.noremap,
+        script = map.script,
+        silent = mode ~= 'c',
+        nowait = map.nowait,
+      })
+    elseif mode ~= 'c' then
+      local rhs = map.rhs
+      if not map.noremap then
+        rhs = keymap.recursive(map.lhs, rhs)
+      end
+      keymap.set_map(bufnr, mode, fallback, rhs, {
+        expr = false,
+        noremap = map.noremap,
+        script = map.script,
+        silent = mode ~= 'c',
+        nowait = map.nowait,
+      })
+    else
+      local lhs = keymap.t(map.lhs)
+      local rhs = keymap.t(map.rhs)
+      if not map.noremap then
+        rhs = keymap.recursive(lhs, rhs)
+      end
+      return { keys = rhs, noremap = map.noremap }
+    end
+    return { keys = keymap.t(fallback), noremap = false }
+  end,
+})
+
+---Solve recursive mapping.
+---@param lhs string
+---@param rhs string
+---@return string
+keymap.recursive = function(lhs, rhs)
+  if string.find(rhs, lhs, 1, true) == 1 then
+    local expr = string.format(keymap.t('<C-r>=v:lua.vim.json.decode(%s)<CR>'), vim.fn.string(vim.json.encode(keymap.t(lhs))))
+    return string.gsub(rhs, '^' .. vim.pesc(lhs), expr)
+  end
+  return rhs
 end
 
 ---Get map
@@ -171,30 +244,6 @@ keymap.get_map = function(mode, lhs)
   }
 end
 
----Feed mapping object.
----@param map table
-keymap.feed_map = function(map)
-  local lhs = keymap.t(map.lhs)
-  local rhs
-  if map.callback and not map.expr then
-    return map.callback()
-  elseif map.callback and map.expr then
-    rhs = map.callback()
-  elseif map.expr then
-    rhs = vim.api.nvim_eval(keymap.t(map.rhs))
-  else
-    rhs = keymap.t(map.rhs)
-  end
-
-  if not map.noremap and string.find(rhs, lhs, 1, true) == 1 then
-    rhs = string.gsub(rhs, '^' .. vim.pesc(lhs), '')
-    vim.api.nvim_feedkeys(keymap.expression(rhs), 'itm', true)
-    vim.api.nvim_feedkeys(lhs, 'itn', true)
-  else
-    vim.api.nvim_feedkeys(keymap.expression(rhs), 'it' .. (map.noremap and 'n' or 'm'), true)
-  end
-end
-
 ---Set keymapping
 keymap.set_map = setmetatable({
   callbacks = {},
@@ -220,28 +269,5 @@ keymap.set_map = setmetatable({
 misc.set(_G, { 'cmp', 'utils', 'keymap', 'set_map' }, function(id)
   return keymap.set_map.callbacks[id]() or ''
 end)
-
----Resolve expression.
----@param expr string
----@return string
-keymap.expression = function(expr)
-  local spans = {}
-  local f = 0
-  for i = 1, #expr do
-    local c = string.sub(expr, i, i)
-    if f == 0 and c == keymap.t('<C-r>') then
-      f = i
-    end
-    if f ~= 0 and c == keymap.t('<CR>') then
-      table.insert(spans, { s = f, e = i })
-      f = 0
-    end
-  end
-  for i = #spans, 1, -1 do
-    local s, e = spans[i].s, spans[i].e
-    expr = string.sub(expr, 1, s - 1) .. keymap.expression(vim.api.nvim_eval(string.sub(expr, s + 2, e - 1))) .. string.sub(expr, e + 1)
-  end
-  return expr
-end
 
 return keymap

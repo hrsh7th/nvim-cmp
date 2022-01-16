@@ -1,4 +1,3 @@
-local feedkeys = require('cmp.utils.feedkeys')
 local spec = require('cmp.utils.spec')
 
 local keymap = require('cmp.utils.keymap')
@@ -32,7 +31,7 @@ describe('keymap', function()
     assert.are.equal(keymap.to_keymap('|'), '<Bar>')
   end)
 
-  describe('feedmap', function()
+  describe('evacuate', function()
     before_each(spec.before)
 
     it('expr & register', function()
@@ -40,9 +39,8 @@ describe('keymap', function()
         expr = true,
         noremap = false,
       })
-      feedkeys.call('i', 'nx', function()
-        keymap.feed_map(keymap.get_map('i', '('))
-      end)
+      local fallback = keymap.evacuate(0, 'i', keymap.get_map('i', '('))
+      vim.api.nvim_feedkeys('i' .. fallback.keys, 'x' .. (fallback.noremap and 'n' or 'm'), true)
       assert.are.same({ '(' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
     end)
 
@@ -55,9 +53,8 @@ describe('keymap', function()
         expr = false,
         noremap = false,
       })
-      feedkeys.call('i', 'nx', function()
-        keymap.feed_map(keymap.get_map('i', '('))
-      end)
+      local fallback = keymap.evacuate(0, 'i', keymap.get_map('i', '('))
+      vim.api.nvim_feedkeys('i' .. fallback.keys, 'x' .. (fallback.noremap and 'n' or 'm'), true)
       assert.are.same({ '()' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
     end)
 
@@ -69,10 +66,8 @@ describe('keymap', function()
           expr = true,
           noremap = false,
         })
-        feedkeys.call('i', 'n', function()
-          keymap.feed_map(keymap.get_map('i', '<Tab>'))
-        end)
-        feedkeys.call('', 'x')
+        local fallback = keymap.evacuate(0, 'i', keymap.get_map('i', '<Tab>'))
+        vim.api.nvim_feedkeys('i' .. fallback.keys, 'x' .. (fallback.noremap and 'n' or 'm'), true)
         assert.are.same({ 'foobar' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
       end)
       it('false', function()
@@ -80,9 +75,8 @@ describe('keymap', function()
           expr = true,
           noremap = false,
         })
-        feedkeys.call('i', 'nx', function()
-          keymap.feed_map(keymap.get_map('i', '<Tab>'))
-        end)
+        local fallback = keymap.evacuate(0, 'i', keymap.get_map('i', '<Tab>'))
+        vim.api.nvim_feedkeys('i' .. fallback.keys, 'x' .. (fallback.noremap and 'n' or 'm'), true)
         assert.are.same({ '\taiueo' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
       end)
     end)
