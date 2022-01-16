@@ -318,7 +318,7 @@ core.confirm = function(self, e, option, callback)
   -- Close menus.
   self.view:close()
 
-  feedkeys.call(keymap.t('<Cmd>set indentkeys=<CR>'), 'n')
+  feedkeys.call(keymap.indentkeys(), 'n')
   feedkeys.call('', 'n', function()
     local ctx = context.new()
     local keys = {}
@@ -366,10 +366,10 @@ core.confirm = function(self, e, option, callback)
         if has_cursor_line_text_edit then
           return
         end
-        vim.lsp.util.apply_text_edits(text_edits, ctx.bufnr)
+        vim.lsp.util.apply_text_edits(text_edits, ctx.bufnr, 'utf-16')
       end)
     else
-      vim.lsp.util.apply_text_edits(e:get_completion_item().additionalTextEdits, ctx.bufnr)
+      vim.lsp.util.apply_text_edits(e:get_completion_item().additionalTextEdits, ctx.bufnr, 'utf-16')
     end
   end)
   feedkeys.call('', 'n', function()
@@ -399,7 +399,7 @@ core.confirm = function(self, e, option, callback)
       if is_snippet then
         completion_item.textEdit.newText = ''
       end
-      vim.lsp.util.apply_text_edits({ completion_item.textEdit }, ctx.bufnr)
+      vim.lsp.util.apply_text_edits({ completion_item.textEdit }, ctx.bufnr, 'utf-16')
       local texts = vim.split(completion_item.textEdit.newText, '\n')
       local position = completion_item.textEdit.range.start
       position.line = position.line + (#texts - 1)
@@ -424,7 +424,7 @@ core.confirm = function(self, e, option, callback)
       feedkeys.call(table.concat(keys, ''), 'int')
     end
   end)
-  feedkeys.call(keymap.t('<Cmd>set indentkeys=%s<CR>'):format(vim.fn.escape(vim.bo.indentkeys, ' "|\\')), 'n')
+  feedkeys.call(keymap.indentkeys(vim.bo.indentkeys), 'n')
   feedkeys.call('', 'n', function()
     e:execute(vim.schedule_wrap(function()
       release()
