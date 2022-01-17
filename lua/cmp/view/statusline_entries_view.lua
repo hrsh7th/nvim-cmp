@@ -48,7 +48,6 @@ statusline_entries_view.new = function()
         return
       end
 
-      dump('========================================')
       local location = 0
       for _, i in ipairs(self.last_displayed_indices) do
         local e = self.entries[i]
@@ -164,7 +163,7 @@ statusline_entries_view.draw = function(self)
   local entries_buf = self.entries_win:get_buffer()
   local texts = {}
   local lengths = {}
-  for i, e in ipairs(self.entries) do
+  for _, e in ipairs(self.entries) do
     if e then
       local view = e:get_view(self.offset, entries_buf)
       -- add 1 to lengths, to account for the added separator
@@ -278,7 +277,7 @@ statusline_entries_view.get_active_entry = function(self)
   end
 end
 
-statusline_entries_view._select = function(self, selected_index, option)
+statusline_entries_view._select = function(self, selected_index, _)
   self.selected_index = selected_index
   self.active = (selected_index ~= nil)
 
