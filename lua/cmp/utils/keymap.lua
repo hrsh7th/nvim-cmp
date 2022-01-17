@@ -239,7 +239,7 @@ keymap.get_map = function(mode, lhs)
     callback = nil,
     noremap = true,
     script = false,
-    silent = false,
+    silent = true,
     nowait = false,
     buffer = false,
   }
