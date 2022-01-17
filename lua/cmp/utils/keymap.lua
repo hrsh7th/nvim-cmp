@@ -156,16 +156,17 @@ keymap.evacuate = setmetatable({
         silent = mode ~= 'c',
         nowait = map.nowait,
       })
-    elseif mode ~= 'c' then
+    elseif mode ~= 'c' or not map.callback then
       local rhs = map.rhs
       if not map.noremap then
         rhs = keymap.recursive(map.lhs, rhs)
       end
       keymap.set_map(bufnr, mode, fallback, rhs, {
         expr = false,
+        callback = map.callback,
         noremap = map.noremap,
         script = map.script,
-        silent = mode ~= 'c',
+        silent = mode ~= 'c' and map.silent,
         nowait = map.nowait,
       })
     else
