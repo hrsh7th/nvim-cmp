@@ -102,7 +102,7 @@ keymap.listen = function(mode, lhs, callback)
   end
 
   local bufnr = existing.buffer and vim.api.nvim_get_current_buf() or -1
-  local fallback = keymap.evacuate(bufnr, mode, existing)
+  local fallback = keymap.fallback(bufnr, mode, existing)
   keymap.set_map(bufnr, mode, lhs, function()
     if mode == 'c' and vim.fn.getcmdtype() == '=' then
       vim.api.nvim_feedkeys(fallback.keys, 'it' .. (fallback.noremap and 'n' or 'm'), true)
@@ -121,19 +121,19 @@ keymap.listen = function(mode, lhs, callback)
   })
 end
 
----Evacuate existing mapping.
+---Fallback existing mapping.
 --- NOTE:
----   In insert-mode, we should all mapping evacuate to the `<Plug>` because `<C-r>=` will display gabage message.
+---   In insert-mode, we should all mapping fallback to the `<Plug>` because `<C-r>=` will display gabage message.
 ---   In cmdline-mode, we shouldn't re-map as `<Plug>` because `cmap <Tab> <Plug>(map-to-tab)` will broke native behavior.
 ---   We should resolve recursive mapping because existing mapping will feed by `feedkeys` that doesn't solve recursive mapping.
 ---     We use `<C-r>=` to solve recursive mapping.
 ---@param map table
-keymap.evacuate = setmetatable({
+keymap.fallback = setmetatable({
   cache = cache.new(),
 }, {
   __call = function(self, bufnr, mode, map)
     local fallback = self.cache:ensure({ bufnr, mode, map.lhs }, function()
-      return string.format('<Plug>(cmp.u.k.evacuate:%s)', misc.id('cmp.utils.keymap.evacuate'))
+      return string.format('<Plug>(cmp.u.k.fallback:%s)', misc.id('cmp.utils.keymap.fallback'))
     end)
 
     if map.expr then

@@ -1,4 +1,6 @@
 local spec = require('cmp.utils.spec')
+local api = require('cmp.utils.api')
+local feedkeys = require('cmp.utils.feedkeys')
 
 local keymap = require('cmp.utils.keymap')
 
@@ -32,56 +34,65 @@ describe('keymap', function()
     assert.are.equal(keymap.to_keymap('|'), '<Bar>')
   end)
 
-  describe('evacuate', function()
+  describe('fallback', function()
     before_each(spec.before)
 
-    it('expr & register', function()
-      vim.api.nvim_buf_set_keymap(0, 'i', '(', [['<C-r>="("<CR>']], {
+    local keys = function(keys, mode)
+      local state = {}
+      feedkeys.call(keys, mode, function()
+        if api.is_cmdline_mode() then
+          state.buffer = { api.get_current_line() }
+        else
+          state.buffer = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+        end
+        state.cursor = api.get_cursor()
+        state.wildmenumode = vim.fn.wildmenumode() == 1
+      end)
+      feedkeys.call('', 'x')
+      return state
+    end
+
+    it('recursive', function()
+      vim.api.nvim_buf_set_keymap(0, 'i', '(', '()<Left>', {
+        expr = false,
+        noremap = false,
+        silent = true,
+      })
+      local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
+      local state = keys('i' .. fallback.keys, fallback.noremap and 'n' or 'm')
+      assert.are.same({ '()' }, state.buffer)
+      assert.are.same({ 1, 1 }, state.cursor)
+    end)
+
+    it('recursive expr', function()
+      vim.api.nvim_buf_set_keymap(0, 'i', '(', '"()<Left>"', {
         expr = true,
         noremap = false,
+        silent = true,
       })
-      local fallback = keymap.evacuate(0, 'i', keymap.get_map('i', '('))
-      vim.api.nvim_feedkeys('i' .. fallback.keys, 'x' .. (fallback.noremap and 'n' or 'm'), true)
-      assert.are.same({ '(' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
+      local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
+      local state = keys('i' .. fallback.keys, fallback.noremap and 'n' or 'm')
+      assert.are.same({ '()' }, state.buffer)
+      assert.are.same({ 1, 1 }, state.cursor)
     end)
 
-    it('recursive & <Plug> (tpope/vim-endwise)', function()
-      vim.api.nvim_buf_set_keymap(0, 'i', '<Plug>(paren-close)', [[)<Left>]], {
-        expr = false,
-        noremap = true,
-      })
-      vim.api.nvim_buf_set_keymap(0, 'i', '(', [[(<Plug>(paren-close)]], {
-        expr = false,
+    it('recursive callback', function()
+      vim.api.nvim_buf_set_keymap(0, 'i', '(', '', {
+        expr = true,
         noremap = false,
+        silent = true,
+        callback = function()
+          return keymap.t('()<Left>')
+        end
       })
-      local fallback = keymap.evacuate(0, 'i', keymap.get_map('i', '('))
-      vim.api.nvim_feedkeys('i' .. fallback.keys, 'x' .. (fallback.noremap and 'n' or 'm'), true)
-      assert.are.same({ '()' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
+      local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
+      local state = keys('i' .. fallback.keys, fallback.noremap and 'n' or 'm')
+      assert.are.same({ '()' }, state.buffer)
+      assert.are.same({ 1, 1 }, state.cursor)
     end)
 
-    describe('expr & recursive', function()
-      before_each(spec.before)
-
-      it('true', function()
-        vim.api.nvim_buf_set_keymap(0, 'i', '<Tab>', [[v:true ? '<C-r>="foobar"<CR>' : '<Tab>aiueo']], {
-          expr = true,
-          noremap = false,
-        })
-        local fallback = keymap.evacuate(0, 'i', keymap.get_map('i', '<Tab>'))
-        vim.api.nvim_feedkeys('i' .. fallback.keys, 'x' .. (fallback.noremap and 'n' or 'm'), true)
-        assert.are.same({ 'foobar' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
-      end)
-      it('false', function()
-        vim.api.nvim_buf_set_keymap(0, 'i', '<Tab>', [[v:false ? '<C-r>="foobar"<CR>' : '<Tab>aiueo']], {
-          expr = true,
-          noremap = false,
-        })
-        local fallback = keymap.evacuate(0, 'i', keymap.get_map('i', '<Tab>'))
-        vim.api.nvim_feedkeys('i' .. fallback.keys, 'x' .. (fallback.noremap and 'n' or 'm'), true)
-        assert.are.same({ '\taiueo' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
-      end)
-    end)
   end)
+
   describe('realworld', function()
     before_each(spec.before)
     it('#226', function()
