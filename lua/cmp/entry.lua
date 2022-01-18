@@ -109,14 +109,17 @@ entry.get_word = function(self)
     local word
     if misc.safe(self:get_completion_item().textEdit) then
       word = str.trim(self:get_completion_item().textEdit.newText)
+      if self:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
+        word = vim.lsp.util.parse_snippet(word)
+      end
       local overwrite = self:get_overwrite()
       if 0 < overwrite[2] or self:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-        word = str.get_word(word, string.byte(self.context.cursor_after_line, 1))
+        word = str.get_word(word, string.byte(self.context.cursor_after_line, 1), overwrite[1] or 0)
       end
     elseif misc.safe(self:get_completion_item().insertText) then
       word = str.trim(self:get_completion_item().insertText)
       if self:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-        word = str.get_word(word)
+        word = str.get_word(vim.lsp.util.parse_snippet(word))
       end
     else
       word = str.trim(self:get_completion_item().label)
@@ -151,20 +154,6 @@ entry.get_filter_text = function(self)
     else
       word = str.trim(self:get_completion_item().label)
     end
-
-    -- @see https://github.com/clangd/clangd/issues/815
-    if misc.safe(self:get_completion_item().textEdit) then
-      local diff = self.source_offset - self:get_offset()
-      if diff > 0 then
-        if char.is_symbol(string.byte(self.context.cursor_line, self:get_offset())) then
-          local prefix = string.sub(self.context.cursor_line, self:get_offset(), self:get_offset() + diff)
-          if string.find(word, prefix, 1, true) ~= 1 then
-            word = prefix .. word
-          end
-        end
-      end
-    end
-
     return word
   end)
 end
@@ -351,11 +340,31 @@ end
 ---@return { score: number, matches: table[] }
 entry.match = function(self, input)
   return self.match_cache:ensure({ input, self.resolved_completion_item and 1 or 0 }, function()
-    local score, matches, _
-    score, matches = matcher.match(input, self:get_filter_text(), { self:get_word(), self:get_completion_item().label })
-    if self:get_filter_text() ~= self:get_completion_item().label then
+    local filter_text = self:get_filter_text()
+
+    local score, matches
+    score, matches = matcher.match(input, filter_text, { self:get_word(), self:get_completion_item().label })
+
+    -- Support the language server that doesn't respect VSCode's behaviors.
+    if score == 0 then
+      if misc.safe(self:get_completion_item().textEdit) then
+        local diff = self.source_offset - self:get_offset()
+        if diff > 0 then
+          local prefix = string.sub(self.context.cursor_line, self:get_offset(), self:get_offset() + diff)
+          local accept = false
+          accept = accept or string.match(prefix, '^[^%a]+$')
+          accept = accept or string.find(self:get_completion_item().textEdit.newText, prefix, 1, true)
+          if accept then
+            score, matches = matcher.match(input, prefix .. filter_text, { self:get_word(), self:get_completion_item().label })
+          end
+        end
+      end
+    end
+
+    if filter_text ~= self:get_completion_item().label then
       _, matches = matcher.match(input, self:get_completion_item().label, { self:get_word() })
     end
+
     return { score = score, matches = matches }
   end)
 end

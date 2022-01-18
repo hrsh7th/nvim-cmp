@@ -101,7 +101,7 @@ describe('entry', function()
       },
     })
     assert.are.equal(e:get_vim_item(4).word, '->foo')
-    assert.are.equal(e:get_filter_text(), '.foo')
+    assert.are.equal(e:get_filter_text(), 'foo')
   end)
 
   it('[typescript-language-server] 1', function()
