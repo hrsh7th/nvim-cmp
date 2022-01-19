@@ -106,33 +106,36 @@ end
 
 ---get_word
 ---@param text string
+---@param stop_char number
+---@param min_length number
 ---@return string
-str.get_word = function(text, stop_char)
+str.get_word = function(text, stop_char, min_length)
+  min_length = min_length or 0
+
   local has_alnum = false
   local stack = {}
   local word = {}
+  local add = function(c)
+    table.insert(word, string.char(c))
+    if stack[#stack] == c then
+      table.remove(stack, #stack)
+    else
+      if PAIRS[c] then
+        table.insert(stack, c)
+      end
+    end
+  end
   for i = 1, #text do
     local c = string.byte(text, i, i)
-    if not INVALIDS[c] then
-      if PAIRS[c] then
-        table.insert(stack, c)
-      end
+    if #word < min_length then
       table.insert(word, string.char(c))
+    elseif not INVALIDS[c] then
+      add(c)
       has_alnum = has_alnum or char.is_alnum(c)
     elseif not has_alnum then
-      if PAIRS[c] then
-        table.insert(stack, c)
-      end
-      table.insert(word, string.char(c))
+      add(c)
     elseif #stack ~= 0 then
-      table.insert(word, string.char(c))
-      if stack[#stack] == c then
-        table.remove(stack, #stack)
-      else
-        if PAIRS[c] then
-          table.insert(stack, c)
-        end
-      end
+      add(c)
       if has_alnum and #stack == 0 then
         break
       end

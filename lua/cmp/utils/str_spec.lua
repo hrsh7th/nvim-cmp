@@ -9,6 +9,7 @@ describe('utils.str', function()
     assert.are.equal(str.get_word('"devDependencies":', string.byte('"')), '"devDependencies')
     assert.are.equal(str.get_word('"devDependencies": ${1},', string.byte('"')), '"devDependencies')
     assert.are.equal(str.get_word('#[cfg(test)]'), '#[cfg(test)]')
+    assert.are.equal(str.get_word('import { GetStaticProps$1 } from "next";', nil, 9), 'import { GetStaticProps')
   end)
 
   it('strikethrough', function()
