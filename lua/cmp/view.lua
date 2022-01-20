@@ -113,15 +113,17 @@ view.open = function(self, ctx, sources)
 
   -- complete_done.
   if #entries == 0 then
-    self.event:emit('complete_done', {
-      entry = self:_get_entries_view():get_selected_entry(),
-    })
     self:close()
   end
 end
 
 ---Close menu
 view.close = function(self)
+  if self:visible() then
+    self.event:emit('complete_done', {
+      entry = self:_get_entries_view():get_selected_entry(),
+    })
+  end
   self:_get_entries_view():close()
   self.docs_view:close()
   self.ghost_text_view:hide()
@@ -179,11 +181,11 @@ end
 ---Return current configured entries_view
 ---@return cmp.CustomEntriesView|cmp.NativeEntriesView
 view._get_entries_view = function(self)
-  local c = config.get()
   self.native_entries_view.event:clear()
   self.custom_entries_view.event:clear()
   self.statusline_entries_view.event:clear()
 
+  local c = config.get()
   if c.experimental.native_menu then
     self.native_entries_view.event:on('change', function()
       self:on_entry_change()

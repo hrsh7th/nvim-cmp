@@ -83,14 +83,13 @@ describe('keymap', function()
         silent = true,
         callback = function()
           return keymap.t('()<Left>')
-        end
+        end,
       })
       local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
       local state = keys('i' .. fallback.keys, fallback.noremap and 'n' or 'm')
       assert.are.same({ '()' }, state.buffer)
       assert.are.same({ 1, 1 }, state.cursor)
     end)
-
   end)
 
   describe('realworld', function()
