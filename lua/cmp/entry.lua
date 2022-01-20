@@ -342,7 +342,7 @@ entry.match = function(self, input)
   return self.match_cache:ensure({ input, self.resolved_completion_item and 1 or 0 }, function()
     local filter_text = self:get_filter_text()
 
-    local score, matches
+    local score, matches, _
     score, matches = matcher.match(input, filter_text, { self:get_word(), self:get_completion_item().label })
 
     -- Support the language server that doesn't respect VSCode's behaviors.
