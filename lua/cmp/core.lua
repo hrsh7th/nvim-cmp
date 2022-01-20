@@ -165,7 +165,7 @@ core.on_change = function(self, trigger_event)
       if vim.tbl_contains(config.get().completion.autocomplete or {}, trigger_event) then
         self:complete(ctx)
       else
-        self.filter.timeout = THROTTLE_TIME
+        self.filter.timeout = self.view:visible() and THROTTLE_TIME or 0
         self:filter()
       end
     else
@@ -254,7 +254,7 @@ core.complete = function(self, ctx)
   end
 
   if not self.view:get_active_entry() then
-    self.filter.timeout = THROTTLE_TIME
+    self.filter.timeout = self.view:visible() and THROTTLE_TIME or 0
     self:filter()
   end
 end
@@ -262,7 +262,7 @@ end
 ---Update completion menu
 core.filter = async.throttle(
   vim.schedule_wrap(function(self)
-    self.filter.timeout = THROTTLE_TIME
+    self.filter.timeout = self.view:visible() and THROTTLE_TIME or 0
 
     local ignore = false
     ignore = ignore or not api.is_suitable_mode()
