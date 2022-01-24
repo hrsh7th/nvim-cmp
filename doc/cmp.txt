@@ -592,7 +592,7 @@ How to setup on the specific buffer?~
 
 You can setup buffer specific configuration like this.
 >
-  autocmd FileType markdown * lua require('cmp').setup.buffer {
+  autocmd FileType markdown lua require('cmp').setup.buffer {
   \   sources = {
   \     { name = 'path' },
   \     { name = 'buffer' },
