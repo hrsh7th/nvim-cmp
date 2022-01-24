@@ -3,6 +3,7 @@ local async = {}
 ---@class cmp.AsyncThrottle
 ---@field public timeout number
 ---@field public stop function
+---@field public raw function
 ---@field public __call function
 
 ---@param fn function
@@ -12,10 +13,14 @@ async.throttle = function(fn, timeout)
   local time = nil
   local timer = vim.loop.new_timer()
   return setmetatable({
+    running = false,
     timeout = timeout,
     stop = function()
       time = nil
       timer:stop()
+    end,
+    raw = function(...)
+      fn(...)
     end,
   }, {
     __call = function(self, ...)
@@ -28,8 +33,14 @@ async.throttle = function(fn, timeout)
 
       local delta = math.max(1, self.timeout - (vim.loop.now() - time))
       timer:start(delta, 0, function()
-        time = nil
-        fn(unpack(args))
+        if not self.running then
+          time = nil
+          self.running = true
+          vim.schedule(function()
+            self.running = false
+            fn(unpack(args))
+          end)
+        end
       end)
     end,
   })

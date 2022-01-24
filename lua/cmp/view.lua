@@ -198,7 +198,7 @@ end
 
 ---On entry change
 view.on_entry_change = async.throttle(
-  vim.schedule_wrap(function(self)
+  function(self)
     if not self:visible() then
       return
     end
@@ -225,7 +225,7 @@ view.on_entry_change = async.throttle(
     else
       self.ghost_text_view:hide()
     end
-  end),
+  end,
   20
 )
 

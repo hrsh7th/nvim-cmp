@@ -261,43 +261,54 @@ end
 
 ---Update completion menu
 core.filter = async.throttle(
-  vim.schedule_wrap(function(self)
-    self.filter.timeout = self.view:visible() and THROTTLE_TIME or 0
+  setmetatable({
+    ctx = nil,
+  }, {
+    __call = function(this, self)
+      self.filter.timeout = self.view:visible() and THROTTLE_TIME or 0
 
-    local ignore = false
-    ignore = ignore or not api.is_suitable_mode()
-    if ignore then
-      return
-    end
-
-    local sources = {}
-    for _, s in ipairs(self:get_sources({ source.SourceStatus.FETCHING, source.SourceStatus.COMPLETED })) do
-      if not s.incomplete and SOURCE_TIMEOUT > s:get_fetching_time() then
-        -- Reserve filter call for timeout.
-        self.filter.timeout = SOURCE_TIMEOUT - s:get_fetching_time()
-        self:filter()
-        break
+      -- Check context changed.
+      local ctx = self:get_context()
+      if this.ctx and not this.ctx:changed(ctx) then
+        return
       end
-      table.insert(sources, s)
-    end
+      this.ctx = ctx
 
-    local ctx = self:get_context()
-
-    -- Display completion results.
-    self.view:open(ctx, sources)
-
-    -- Check onetime config.
-    if #self:get_sources(function(s)
-      if s.status == source.SourceStatus.FETCHING then
-        return true
-      elseif #s:get_entries(ctx) > 0 then
-        return true
+      -- Check invalid condition.
+      local ignore = false
+      ignore = ignore or not api.is_suitable_mode()
+      if ignore then
+        return
       end
-      return false
-    end) == 0 then
+
+      -- Check fetching sources.
+      local sources = {}
+      for _, s in ipairs(self:get_sources({ source.SourceStatus.FETCHING, source.SourceStatus.COMPLETED })) do
+        if not s.incomplete and SOURCE_TIMEOUT > s:get_fetching_time() then
+          -- Reserve filter call for timeout.
+          self.filter.timeout = SOURCE_TIMEOUT - s:get_fetching_time()
+          self:filter()
+          break
+        end
+        table.insert(sources, s)
+      end
+
+      -- Display completion results.
+      self.view:open(ctx, sources)
+
+      -- Check onetime config.
+      if #self:get_sources(function(s)
+        if s.status == source.SourceStatus.FETCHING then
+          return true
+        elseif #s:get_entries(ctx) > 0 then
+          return true
+        end
+        return false
+      end) == 0 then
       config.set_onetime({})
     end
-  end),
+  end
+  }),
   THROTTLE_TIME
 )
 

@@ -67,11 +67,13 @@ end
 
 ---Get current selected entry or nil
 cmp.get_selected_entry = function()
+  cmp.core.filter.raw(cmp.core)
   return cmp.core.view:get_selected_entry()
 end
 
 ---Get current active entry or nil
 cmp.get_active_entry = function()
+  cmp.core.filter.raw(cmp.core)
   return cmp.core.view:get_active_entry()
 end
 
