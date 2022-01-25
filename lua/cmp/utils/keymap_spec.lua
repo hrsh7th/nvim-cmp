@@ -77,23 +77,26 @@ describe('keymap', function()
     end)
 
     it('recursive callback', function()
-      vim.api.nvim_buf_set_keymap(0, 'i', '(', '', {
-        expr = true,
-        noremap = false,
-        silent = true,
-        callback = function()
-          return keymap.t('()<Left>')
-        end,
-      })
-      local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
-      local state = keys('i' .. fallback.keys, fallback.noremap and 'n' or 'm')
-      assert.are.same({ '()' }, state.buffer)
-      assert.are.same({ 1, 1 }, state.cursor)
+      pcall(function()
+        vim.api.nvim_buf_set_keymap(0, 'i', '(', '', {
+          expr = true,
+          noremap = false,
+          silent = true,
+          callback = function()
+            return keymap.t('()<Left>')
+          end,
+        })
+        local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
+        local state = keys('i' .. fallback.keys, fallback.noremap and 'n' or 'm')
+        assert.are.same({ '()' }, state.buffer)
+        assert.are.same({ 1, 1 }, state.cursor)
+      end)
     end)
   end)
 
   describe('realworld', function()
     before_each(spec.before)
+
     it('#226', function()
       keymap.listen('i', '<c-n>', function(_, fallback)
         fallback()
@@ -101,6 +104,7 @@ describe('keymap', function()
       vim.api.nvim_feedkeys(keymap.t('iaiueo<CR>a<C-n><C-n>'), 'tx', true)
       assert.are.same({ 'aiueo', 'aiueo' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
     end)
+
     it('#414', function()
       keymap.listen('i', '<M-j>', function()
         vim.api.nvim_feedkeys(keymap.t('<C-n>'), 'int', true)
@@ -108,5 +112,17 @@ describe('keymap', function()
       vim.api.nvim_feedkeys(keymap.t('iaiueo<CR>a<M-j><M-j>'), 'tx', true)
       assert.are.same({ 'aiueo', 'aiueo' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
     end)
+
+    -- it('#744', function()
+    --   vim.api.nvim_buf_set_keymap(0, 'i', '<C-r>', 'recursive', {
+    --     noremap = true
+    --   })
+    --   vim.api.nvim_buf_set_keymap(0, 'i', '<CR>', '<CR>recursive', {
+    --     noremap = false
+    --   })
+    --   keymap.listen('i', '<CR>', function(_, fallback) fallback() end)
+    --   feedkeys.call(keymap.t('i<CR>'), 'tx')
+    --   assert.are.same({ '', 'recursive' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
+    -- end)
   end)
 end)

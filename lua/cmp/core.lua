@@ -260,46 +260,45 @@ core.complete = function(self, ctx)
 end
 
 ---Update completion menu
-core.filter = async.throttle(
-  vim.schedule_wrap(function(self)
-    self.filter.timeout = self.view:visible() and THROTTLE_TIME or 0
+core.filter = async.throttle(function(self)
+  self.filter.timeout = self.view:visible() and THROTTLE_TIME or 0
 
-    local ignore = false
-    ignore = ignore or not api.is_suitable_mode()
-    if ignore then
-      return
+  -- Check invalid condition.
+  local ignore = false
+  ignore = ignore or not api.is_suitable_mode()
+  if ignore then
+    return
+  end
+
+  -- Check fetching sources.
+  local sources = {}
+  for _, s in ipairs(self:get_sources({ source.SourceStatus.FETCHING, source.SourceStatus.COMPLETED })) do
+    if not s.incomplete and SOURCE_TIMEOUT > s:get_fetching_time() then
+      -- Reserve filter call for timeout.
+      self.filter.timeout = SOURCE_TIMEOUT - s:get_fetching_time()
+      self:filter()
+      break
     end
+    table.insert(sources, s)
+  end
 
-    local sources = {}
-    for _, s in ipairs(self:get_sources({ source.SourceStatus.FETCHING, source.SourceStatus.COMPLETED })) do
-      if not s.incomplete and SOURCE_TIMEOUT > s:get_fetching_time() then
-        -- Reserve filter call for timeout.
-        self.filter.timeout = SOURCE_TIMEOUT - s:get_fetching_time()
-        self:filter()
-        break
-      end
-      table.insert(sources, s)
+  local ctx = self:get_context()
+
+  -- Display completion results.
+  self.view:open(ctx, sources)
+
+  -- Check onetime config.
+  if #self:get_sources(function(s)
+    if s.status == source.SourceStatus.FETCHING then
+      return true
+    elseif #s:get_entries(ctx) > 0 then
+      return true
     end
-
-    local ctx = self:get_context()
-
-    -- Display completion results.
-    self.view:open(ctx, sources)
-
-    -- Check onetime config.
-    if #self:get_sources(function(s)
-      if s.status == source.SourceStatus.FETCHING then
-        return true
-      elseif #s:get_entries(ctx) > 0 then
-        return true
-      end
-      return false
-    end) == 0 then
-      config.set_onetime({})
-    end
-  end),
-  THROTTLE_TIME
-)
+    return false
+  end) == 0 then
+    config.set_onetime({})
+  end
+end, THROTTLE_TIME)
 
 ---Confirm completion.
 ---@param e cmp.Entry

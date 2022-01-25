@@ -175,6 +175,9 @@ cmp.confirm = function(option, callback)
     return true
   end
 
+  vim.wait(1000, function()
+    return not cmp.core.filter.running
+  end)
   local e = cmp.core.view:get_selected_entry() or (option.select and cmp.core.view:get_first_entry() or nil)
   if e then
     cmp.core:confirm(e, {
