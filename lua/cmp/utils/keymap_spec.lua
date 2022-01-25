@@ -94,6 +94,7 @@ describe('keymap', function()
 
   describe('realworld', function()
     before_each(spec.before)
+
     it('#226', function()
       keymap.listen('i', '<c-n>', function(_, fallback)
         fallback()
@@ -101,6 +102,7 @@ describe('keymap', function()
       vim.api.nvim_feedkeys(keymap.t('iaiueo<CR>a<C-n><C-n>'), 'tx', true)
       assert.are.same({ 'aiueo', 'aiueo' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
     end)
+
     it('#414', function()
       keymap.listen('i', '<M-j>', function()
         vim.api.nvim_feedkeys(keymap.t('<C-n>'), 'int', true)
@@ -108,5 +110,17 @@ describe('keymap', function()
       vim.api.nvim_feedkeys(keymap.t('iaiueo<CR>a<M-j><M-j>'), 'tx', true)
       assert.are.same({ 'aiueo', 'aiueo' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
     end)
+
+    -- it('#744', function()
+    --   vim.api.nvim_buf_set_keymap(0, 'i', '<C-r>', 'recursive', {
+    --     noremap = true
+    --   })
+    --   vim.api.nvim_buf_set_keymap(0, 'i', '<CR>', '<CR>recursive', {
+    --     noremap = false
+    --   })
+    --   keymap.listen('i', '<CR>', function(_, fallback) fallback() end)
+    --   feedkeys.call(keymap.t('i<CR>'), 'tx')
+    --   assert.are.same({ '', 'recursive' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
+    -- end)
   end)
 end)
