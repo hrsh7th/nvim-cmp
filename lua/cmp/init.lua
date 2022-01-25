@@ -67,13 +67,11 @@ end
 
 ---Get current selected entry or nil
 cmp.get_selected_entry = function()
-  cmp.core.filter.raw(cmp.core)
   return cmp.core.view:get_selected_entry()
 end
 
 ---Get current active entry or nil
 cmp.get_active_entry = function()
-  cmp.core.filter.raw(cmp.core)
   return cmp.core.view:get_active_entry()
 end
 
@@ -177,6 +175,7 @@ cmp.confirm = function(option, callback)
     return true
   end
 
+  cmp.core.filter.raw(cmp.core)
   local e = cmp.core.view:get_selected_entry() or (option.select and cmp.core.view:get_first_entry() or nil)
   if e then
     cmp.core:confirm(e, {
