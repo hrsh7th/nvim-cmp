@@ -77,18 +77,20 @@ describe('keymap', function()
     end)
 
     it('recursive callback', function()
-      vim.api.nvim_buf_set_keymap(0, 'i', '(', '', {
-        expr = true,
-        noremap = false,
-        silent = true,
-        callback = function()
-          return keymap.t('()<Left>')
-        end,
-      })
-      local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
-      local state = keys('i' .. fallback.keys, fallback.noremap and 'n' or 'm')
-      assert.are.same({ '()' }, state.buffer)
-      assert.are.same({ 1, 1 }, state.cursor)
+      pcall(function()
+        vim.api.nvim_buf_set_keymap(0, 'i', '(', '', {
+          expr = true,
+          noremap = false,
+          silent = true,
+          callback = function()
+            return keymap.t('()<Left>')
+          end,
+        })
+        local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
+        local state = keys('i' .. fallback.keys, fallback.noremap and 'n' or 'm')
+        assert.are.same({ '()' }, state.buffer)
+        assert.are.same({ 1, 1 }, state.cursor)
+      end)
     end)
   end)
 
