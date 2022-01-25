@@ -1,9 +1,9 @@
 local async = {}
 
 ---@class cmp.AsyncThrottle
+---@field public running boolean
 ---@field public timeout number
 ---@field public stop function
----@field public raw function
 ---@field public __call function
 
 ---@param fn function
@@ -18,10 +18,7 @@ async.throttle = function(fn, timeout)
     stop = function()
       time = nil
       timer:stop()
-    end,
-    raw = function(...)
-      fn(...)
-    end,
+    end
   }, {
     __call = function(self, ...)
       local args = { ... }
@@ -29,18 +26,15 @@ async.throttle = function(fn, timeout)
       if time == nil then
         time = vim.loop.now()
       end
-      timer:stop()
 
-      local delta = math.max(1, self.timeout - (vim.loop.now() - time))
-      timer:start(delta, 0, function()
-        if not self.running then
+      self.running = true
+      timer:stop()
+      timer:start(math.max(1, self.timeout - (vim.loop.now() - time)), 0, function()
+        vim.schedule(function()
           time = nil
-          self.running = true
-          vim.schedule(function()
-            self.running = false
-            fn(unpack(args))
-          end)
-        end
+          self.running = false
+          fn(unpack(args))
+        end)
       end)
     end,
   })
