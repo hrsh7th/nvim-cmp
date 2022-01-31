@@ -120,8 +120,8 @@ end
 keymap.fallback = function(bufnr, mode, map)
   return function()
     if map.expr then
-      local pseudo = string.format('<Plug>(cmp.u.k.pseudo_expr:%s)', map.lhs)
-      keymap.set_map(bufnr, mode, pseudo, function()
+      local fallback_expr = string.format('<Plug>(cmp.u.k.fallback_expr:%s)', map.lhs)
+      keymap.set_map(bufnr, mode, fallback_expr, function()
         return keymap.solve(bufnr, mode, map).keys
       end, {
         expr = true,
@@ -130,7 +130,7 @@ keymap.fallback = function(bufnr, mode, map)
         nowait = map.nowait,
         silent = map.silent and mode ~= 'c',
       })
-      vim.api.nvim_feedkeys(keymap.t(pseudo), 'itm', true)
+      vim.api.nvim_feedkeys(keymap.t(fallback_expr), 'itm', true)
     else
       if map.callback then
         map.callback()
