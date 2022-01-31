@@ -29,6 +29,21 @@ cmp.event = cmp.core.event
 ---Export mapping
 cmp.mapping = require('cmp.config.mapping')
 
+---Sync asynchronous process.
+cmp.sync = function(callback)
+  return function(...)
+    cmp.core.filter:sync(1000)
+    if callback then
+      return callback(...)
+    end
+  end
+end
+
+---Suspend completion.
+cmp.suspend = function()
+  return cmp.core:suspend()
+end
+
 ---Register completion sources
 ---@param name string
 ---@param s cmp.Source
@@ -53,30 +68,30 @@ end
 
 ---Invoke completion manually
 ---@param option cmp.CompleteParams
-cmp.complete = function(option)
+cmp.complete = cmp.sync(function(option)
   option = option or {}
   config.set_onetime(option.config)
   cmp.core:complete(cmp.core:get_context({ reason = option.reason or cmp.ContextReason.Manual }))
   return true
-end
+end)
 
 ---Return view is visible or not.
-cmp.visible = function()
+cmp.visible = cmp.sync(function()
   return cmp.core.view:visible() or vim.fn.pumvisible() == 1
-end
+end)
 
 ---Get current selected entry or nil
-cmp.get_selected_entry = function()
+cmp.get_selected_entry = cmp.sync(function()
   return cmp.core.view:get_selected_entry()
-end
+end)
 
 ---Get current active entry or nil
-cmp.get_active_entry = function()
+cmp.get_active_entry = cmp.sync(function()
   return cmp.core.view:get_active_entry()
-end
+end)
 
 ---Close current completion
-cmp.close = function()
+cmp.close = cmp.sync(function()
   if cmp.core.view:visible() then
     local release = cmp.core:suspend()
     cmp.core.view:close()
@@ -86,10 +101,10 @@ cmp.close = function()
   else
     return false
   end
-end
+end)
 
 ---Abort current completion
-cmp.abort = function()
+cmp.abort = cmp.sync(function()
   if cmp.core.view:visible() then
     local release = cmp.core:suspend()
     cmp.core.view:abort()
@@ -98,15 +113,10 @@ cmp.abort = function()
   else
     return false
   end
-end
-
----Suspend completion.
-cmp.suspend = function()
-  return cmp.core:suspend()
-end
+end)
 
 ---Select next item if possible
-cmp.select_next_item = function(option)
+cmp.select_next_item = cmp.sync(function(option)
   option = option or {}
 
   -- Hack: Ignore when executing macro.
@@ -128,10 +138,10 @@ cmp.select_next_item = function(option)
     return true
   end
   return false
-end
+end)
 
 ---Select prev item if possible
-cmp.select_prev_item = function(option)
+cmp.select_prev_item = cmp.sync(function(option)
   option = option or {}
 
   -- Hack: Ignore when executing macro.
@@ -153,20 +163,20 @@ cmp.select_prev_item = function(option)
     return true
   end
   return false
-end
+end)
 
 ---Scrolling documentation window if possible
-cmp.scroll_docs = function(delta)
+cmp.scroll_docs = cmp.sync(function(delta)
   if cmp.core.view:visible() then
     cmp.core.view:scroll_docs(delta)
     return true
   else
     return false
   end
-end
+end)
 
 ---Confirm completion
-cmp.confirm = function(option, callback)
+cmp.confirm = cmp.sync(function(option, callback)
   option = option or {}
   callback = callback or function() end
 
@@ -175,9 +185,6 @@ cmp.confirm = function(option, callback)
     return true
   end
 
-  vim.wait(1000, function()
-    return not cmp.core.filter.running
-  end)
   local e = cmp.core.view:get_selected_entry() or (option.select and cmp.core.view:get_first_entry() or nil)
   if e then
     cmp.core:confirm(e, {
@@ -194,7 +201,7 @@ cmp.confirm = function(option, callback)
     end
     return false
   end
-end
+end)
 
 ---Show status
 cmp.status = function()
