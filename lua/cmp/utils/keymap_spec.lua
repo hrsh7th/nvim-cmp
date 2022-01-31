@@ -37,9 +37,12 @@ describe('keymap', function()
   describe('fallback', function()
     before_each(spec.before)
 
-    local keys = function(keys, mode)
+    local run_fallback = function(keys, fallback)
       local state = {}
-      feedkeys.call(keys, mode, function()
+      feedkeys.call(keys, '', function()
+        fallback()
+      end)
+      feedkeys.call('', '', function()
         if api.is_cmdline_mode() then
           state.buffer = { api.get_current_line() }
         else
@@ -59,7 +62,7 @@ describe('keymap', function()
         silent = true,
       })
       local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
-      local state = keys('i' .. fallback.keys, fallback.noremap and 'n' or 'm')
+      local state = run_fallback('i', fallback)
       assert.are.same({ '()' }, state.buffer)
       assert.are.same({ 1, 1 }, state.cursor)
     end)
@@ -71,7 +74,7 @@ describe('keymap', function()
         silent = true,
       })
       local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
-      local state = keys('i' .. fallback.keys, fallback.noremap and 'n' or 'm')
+      local state = run_fallback('i', fallback)
       assert.are.same({ '()' }, state.buffer)
       assert.are.same({ 1, 1 }, state.cursor)
     end)
@@ -87,7 +90,7 @@ describe('keymap', function()
           end,
         })
         local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
-        local state = keys('i' .. fallback.keys, fallback.noremap and 'n' or 'm')
+        local state = run_fallback('i', fallback)
         assert.are.same({ '()' }, state.buffer)
         assert.are.same({ 1, 1 }, state.cursor)
       end)
