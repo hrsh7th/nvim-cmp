@@ -55,44 +55,92 @@ describe('keymap', function()
       return state
     end
 
-    it('recursive', function()
-      vim.api.nvim_buf_set_keymap(0, 'i', '(', '()<Left>', {
-        expr = false,
-        noremap = false,
-        silent = true,
-      })
-      local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
-      local state = run_fallback('i', fallback)
-      assert.are.same({ '()' }, state.buffer)
-      assert.are.same({ 1, 1 }, state.cursor)
-    end)
+    describe('basic', function()
+      it('<Plug>', function()
+        vim.api.nvim_buf_set_keymap(0, 'i', '<Plug>(pairs)', '()<Left>', { noremap = true })
+        vim.api.nvim_buf_set_keymap(0, 'i', '(', '<Plug>(pairs)', { noremap = false })
+        local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
+        local state = run_fallback('i', fallback)
+        assert.are.same({ '()' }, state.buffer)
+        assert.are.same({ 1, 1 }, state.cursor)
+      end)
 
-    it('recursive expr', function()
-      vim.api.nvim_buf_set_keymap(0, 'i', '(', '"()<Left>"', {
-        expr = true,
-        noremap = false,
-        silent = true,
-      })
-      local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
-      local state = run_fallback('i', fallback)
-      assert.are.same({ '()' }, state.buffer)
-      assert.are.same({ 1, 1 }, state.cursor)
-    end)
+      it('<C-r>=', function()
+        vim.api.nvim_buf_set_keymap(0, 'i', '(', '<C-r>="()"<CR><Left>', {})
+        local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
+        local state = run_fallback('i', fallback)
+        assert.are.same({ '()' }, state.buffer)
+        assert.are.same({ 1, 1 }, state.cursor)
+      end)
 
-    it('recursive callback', function()
-      pcall(function()
+      it('callback', function()
         vim.api.nvim_buf_set_keymap(0, 'i', '(', '', {
-          expr = true,
-          noremap = false,
-          silent = true,
           callback = function()
-            return keymap.t('()<Left>')
+            vim.api.nvim_feedkeys('()' .. keymap.t('<Left>'), 'int', true)
           end,
         })
         local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
         local state = run_fallback('i', fallback)
         assert.are.same({ '()' }, state.buffer)
         assert.are.same({ 1, 1 }, state.cursor)
+      end)
+
+      it('expr-callback', function()
+        vim.api.nvim_buf_set_keymap(0, 'i', '(', '', {
+          expr = true,
+          noremap = false,
+          silent = true,
+          callback = function()
+            return '()' .. keymap.t('<Left>')
+          end,
+        })
+        local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
+        local state = run_fallback('i', fallback)
+        assert.are.same({ '()' }, state.buffer)
+        assert.are.same({ 1, 1 }, state.cursor)
+      end)
+    end)
+
+    describe('recursive', function()
+      it('non-expr', function()
+        vim.api.nvim_buf_set_keymap(0, 'i', '(', '()<Left>', {
+          expr = false,
+          noremap = false,
+          silent = true,
+        })
+        local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
+        local state = run_fallback('i', fallback)
+        assert.are.same({ '()' }, state.buffer)
+        assert.are.same({ 1, 1 }, state.cursor)
+      end)
+
+      it('expr', function()
+        vim.api.nvim_buf_set_keymap(0, 'i', '(', '"()<Left>"', {
+          expr = true,
+          noremap = false,
+          silent = true,
+        })
+        local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
+        local state = run_fallback('i', fallback)
+        assert.are.same({ '()' }, state.buffer)
+        assert.are.same({ 1, 1 }, state.cursor)
+      end)
+
+      it('expr-callback', function()
+        pcall(function()
+          vim.api.nvim_buf_set_keymap(0, 'i', '(', '', {
+            expr = true,
+            noremap = false,
+            silent = true,
+            callback = function()
+              return keymap.t('()<Left>')
+            end,
+          })
+          local fallback = keymap.fallback(0, 'i', keymap.get_map('i', '('))
+          local state = run_fallback('i', fallback)
+          assert.are.same({ '()' }, state.buffer)
+          assert.are.same({ 1, 1 }, state.cursor)
+        end)
       end)
     end)
   end)

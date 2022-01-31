@@ -1,4 +1,3 @@
-local cache = require('cmp.utils.cache')
 local misc = require('cmp.utils.misc')
 local api = require('cmp.utils.api')
 
@@ -144,7 +143,8 @@ end
 
 ---Solve
 keymap.solve = function(bufnr, mode, map)
-  local lhs, rhs = keymap.t(map.lhs)
+  local lhs = keymap.t(map.lhs)
+  local rhs
   if map.expr then
     rhs = map.callback and map.callback() or vim.api.nvim_eval(keymap.t(map.rhs))
   else
@@ -157,12 +157,16 @@ keymap.solve = function(bufnr, mode, map)
 
   if string.find(rhs, lhs, 1, true) == 1 then
     local recursive = string.format('<Plug>(cmp.u.k.recursive:%s)', lhs)
-    keymap.set_map(bufnr, mode, recursive, lhs, { noremap = true })
+    keymap.set_map(bufnr, mode, recursive, lhs, {
+      noremap = true,
+      script = map.script,
+      nowait = map.nowait,
+      silent = map.silent and mode ~= 'c',
+    })
     return { keys = keymap.t(recursive) .. string.gsub(rhs, '^' .. vim.pesc(lhs), ''), mode = 'itm' }
   end
   return { keys = rhs, mode = 'itm' }
 end
-
 
 ---Get map
 ---@param mode string

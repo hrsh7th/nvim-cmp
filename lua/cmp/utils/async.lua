@@ -18,7 +18,7 @@ async.throttle = function(fn, timeout)
     stop = function()
       time = nil
       timer:stop()
-    end
+    end,
   }, {
     __call = function(self, ...)
       local args = { ... }
