@@ -3,6 +3,7 @@ local async = {}
 ---@class cmp.AsyncThrottle
 ---@field public running boolean
 ---@field public timeout number
+---@field public sync function(self: cmp.AsyncThrottle, timeout: number|nil)
 ---@field public stop function
 ---@field public __call function
 
@@ -15,6 +16,11 @@ async.throttle = function(fn, timeout)
   return setmetatable({
     running = false,
     timeout = timeout,
+    sync = function(self, timeout_)
+      vim.wait(timeout_ or 1000, function()
+        return not self.running
+      end)
+    end,
     stop = function()
       time = nil
       timer:stop()
