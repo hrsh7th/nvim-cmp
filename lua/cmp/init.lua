@@ -33,7 +33,9 @@ cmp.mapping = require('cmp.config.mapping')
 cmp.sync = function(callback)
   return function(...)
     cmp.core.filter:sync(1000)
-    return callback(...)
+    if callback then
+      return callback(...)
+    end
   end
 end
 
