@@ -164,16 +164,16 @@ describe('keymap', function()
       assert.are.same({ 'aiueo', 'aiueo' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
     end)
 
-    -- it('#744', function()
-    --   vim.api.nvim_buf_set_keymap(0, 'i', '<C-r>', 'recursive', {
-    --     noremap = true
-    --   })
-    --   vim.api.nvim_buf_set_keymap(0, 'i', '<CR>', '<CR>recursive', {
-    --     noremap = false
-    --   })
-    --   keymap.listen('i', '<CR>', function(_, fallback) fallback() end)
-    --   feedkeys.call(keymap.t('i<CR>'), 'tx')
-    --   assert.are.same({ '', 'recursive' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
-    -- end)
+    it('#744', function()
+      vim.api.nvim_buf_set_keymap(0, 'i', '<C-r>', 'recursive', {
+        noremap = true
+      })
+      vim.api.nvim_buf_set_keymap(0, 'i', '<CR>', '<CR>recursive', {
+        noremap = false
+      })
+      keymap.listen('i', '<CR>', function(_, fallback) fallback() end)
+      feedkeys.call(keymap.t('i<CR>'), 'tx')
+      assert.are.same({ '', 'recursive' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
+    end)
   end)
 end)
