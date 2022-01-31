@@ -16,6 +16,11 @@ local api = require('cmp.utils.api')
 ---@field public event cmp.Event
 local statusline_entries_view = {}
 
+local function get_separator()
+  local c = config.get()
+  return (c and c.view and c.view.separator) or '  '
+end
+
 statusline_entries_view.ns = vim.api.nvim_create_namespace('cmp.view.statusline_entries_view')
 
 statusline_entries_view.init = function(self)
@@ -81,7 +86,7 @@ statusline_entries_view.new = function()
             })
           end
 
-          location = location + view['abbr'].bytes + 1
+          location = location + view['abbr'].bytes + get_separator():len()
         end
       end
     end,
@@ -167,7 +172,7 @@ statusline_entries_view.draw = function(self)
     if e then
       local view = e:get_view(self.offset, entries_buf)
       -- add 1 to lengths, to account for the added separator
-      table.insert(lengths, view['abbr'].bytes + 1)
+      table.insert(lengths, view['abbr'].bytes + get_separator():len())
       table.insert(texts, view['abbr'].text)
     end
   end
@@ -218,7 +223,7 @@ statusline_entries_view.draw = function(self)
     end
   end
 
-  statusline = table.concat(statusline, '|')
+  statusline = table.concat(statusline, get_separator())
   self.last_displayed_indices = displayed_indices
 
   vim.api.nvim_buf_set_lines(entries_buf, 0, 1, false, { statusline })

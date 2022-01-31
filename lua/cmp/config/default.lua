@@ -123,5 +123,9 @@ return function()
     },
 
     sources = {},
+
+    view = {
+      entries = 'custom'
+    }
   }
 end
