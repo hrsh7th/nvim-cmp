@@ -2,8 +2,6 @@ local cache = require('cmp.utils.cache')
 local misc = require('cmp.utils.misc')
 local api = require('cmp.utils.api')
 
-local c = cache.new()
-
 local keymap = {}
 
 ---Shortcut for nvim_replace_termcodes
@@ -124,13 +122,7 @@ keymap.fallback = function(bufnr, mode, map)
     if map.expr then
       local pseudo = string.format('<Plug>(cmp.u.k.pseudo_expr:%s)', map.lhs)
       keymap.set_map(bufnr, mode, pseudo, function()
-        local lhs = keymap.t(map.lhs)
-        local rhs = map.callback and map.callback() or vim.api.nvim_eval(keymap.t(map.rhs))
-        if map.noremap then
-          return rhs
-        else
-          return table.concat(keymap.recursive(bufnr, mode, lhs, rhs), '')
-        end
+        return keymap.solve(bufnr, mode, map).keys
       end, {
         expr = true,
         noremap = map.noremap,
@@ -143,26 +135,32 @@ keymap.fallback = function(bufnr, mode, map)
       if map.callback then
         map.callback()
       else
-        if map.noremap then
-          vim.api.nvim_feedkeys(keymap.t(map.rhs), 'itn', true)
-        else
-          vim.api.nvim_feedkeys(table.concat(keymap.recursive(bufnr, mode, keymap.t(map.lhs), keymap.t(map.rhs))), 'itm', true)
-        end
+        local solved = keymap.solve(bufnr, mode, map)
+        vim.api.nvim_feedkeys(solved.keys, solved.mode, true)
       end
     end
   end
 end
 
----Recursive
-keymap.recursive = function(bufnr, mode, lhs, rhs)
+---Solve
+keymap.solve = function(bufnr, mode, map)
+  local lhs, rhs = keymap.t(map.lhs)
+  if map.expr then
+    rhs = map.callback and map.callback() or vim.api.nvim_eval(keymap.t(map.rhs))
+  else
+    rhs = keymap.t(map.rhs)
+  end
+
+  if map.noremap then
+    return { keys = rhs, mode = 'itn' }
+  end
+
   if string.find(rhs, lhs, 1, true) == 1 then
     local recursive = string.format('<Plug>(cmp.u.k.recursive:%s)', lhs)
-    keymap.set_map(bufnr, mode, recursive, lhs, {
-      noremap = true
-    })
-    return { keymap.t(recursive) .. keymap.t(string.gsub(rhs, '^' .. vim.pesc(lhs), '')) }
+    keymap.set_map(bufnr, mode, recursive, lhs, { noremap = true })
+    return { keys = keymap.t(recursive) .. string.gsub(rhs, '^' .. vim.pesc(lhs), ''), mode = 'itm' }
   end
-  return { keymap.t(rhs) }
+  return { keys = rhs, mode = 'itm' }
 end
 
 
