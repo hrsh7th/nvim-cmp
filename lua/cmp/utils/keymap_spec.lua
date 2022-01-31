@@ -49,7 +49,6 @@ describe('keymap', function()
           state.buffer = vim.api.nvim_buf_get_lines(0, 0, -1, false)
         end
         state.cursor = api.get_cursor()
-        state.wildmenumode = vim.fn.wildmenumode() == 1
       end)
       feedkeys.call('', 'x')
       return state
@@ -99,6 +98,13 @@ describe('keymap', function()
         assert.are.same({ '()' }, state.buffer)
         assert.are.same({ 1, 1 }, state.cursor)
       end)
+
+      -- it('cmdline default <Tab>', function()
+      --   local fallback = keymap.fallback(0, 'c', keymap.get_map('c', '<Tab>'))
+      --   local state = run_fallback(':', fallback)
+      --   assert.are.same({ '' }, state.buffer)
+      --   assert.are.same({ 1, 0 }, state.cursor)
+      -- end)
     end)
 
     describe('recursive', function()
@@ -166,12 +172,14 @@ describe('keymap', function()
 
     it('#744', function()
       vim.api.nvim_buf_set_keymap(0, 'i', '<C-r>', 'recursive', {
-        noremap = true
+        noremap = true,
       })
       vim.api.nvim_buf_set_keymap(0, 'i', '<CR>', '<CR>recursive', {
-        noremap = false
+        noremap = false,
       })
-      keymap.listen('i', '<CR>', function(_, fallback) fallback() end)
+      keymap.listen('i', '<CR>', function(_, fallback)
+        fallback()
+      end)
       feedkeys.call(keymap.t('i<CR>'), 'tx')
       assert.are.same({ '', 'recursive' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
     end)
