@@ -130,13 +130,11 @@ keymap.fallback = function(bufnr, mode, map)
         silent = map.silent and mode ~= 'c',
       })
       vim.api.nvim_feedkeys(keymap.t(fallback_expr), 'itm', true)
+    elseif not map.callback then
+      local solved = keymap.solve(bufnr, mode, map)
+      vim.api.nvim_feedkeys(solved.keys, solved.mode, true)
     else
-      if map.callback then
-        map.callback()
-      else
-        local solved = keymap.solve(bufnr, mode, map)
-        vim.api.nvim_feedkeys(solved.keys, solved.mode, true)
-      end
+      map.callback()
     end
   end
 end
@@ -144,12 +142,7 @@ end
 ---Solve
 keymap.solve = function(bufnr, mode, map)
   local lhs = keymap.t(map.lhs)
-  local rhs
-  if map.expr then
-    rhs = map.callback and map.callback() or vim.api.nvim_eval(keymap.t(map.rhs))
-  else
-    rhs = keymap.t(map.rhs)
-  end
+  local rhs = map.expr and (map.callback and map.callback() or vim.api.nvim_eval(keymap.t(map.rhs))) or keymap.t(map.rhs)
 
   if map.noremap then
     return { keys = rhs, mode = 'itn' }
