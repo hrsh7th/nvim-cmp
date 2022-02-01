@@ -4,6 +4,7 @@ local event = require('cmp.utils.event')
 local keymap = require('cmp.utils.keymap')
 local docs_view = require('cmp.view.docs_view')
 local custom_entries_view = require('cmp.view.custom_entries_view')
+local wildmenu_entries_view = require('cmp.view.wildmenu_entries_view')
 local native_entries_view = require('cmp.view.native_entries_view')
 local ghost_text_view = require('cmp.view.ghost_text_view')
 
@@ -12,6 +13,7 @@ local ghost_text_view = require('cmp.view.ghost_text_view')
 ---@field private resolve_dedup cmp.AsyncDedup
 ---@field private native_entries_view cmp.NativeEntriesView
 ---@field private custom_entries_view cmp.CustomEntriesView
+---@field private wildmenu_entries_view cmp.CustomEntriesView
 ---@field private change_dedup cmp.AsyncDedup
 ---@field private docs_view cmp.DocsView
 ---@field private ghost_text_view cmp.GhostTextView
@@ -23,6 +25,7 @@ view.new = function()
   self.resolve_dedup = async.dedup()
   self.custom_entries_view = custom_entries_view.new()
   self.native_entries_view = native_entries_view.new()
+  self.wildmenu_entries_view = wildmenu_entries_view.new()
   self.docs_view = docs_view.new()
   self.ghost_text_view = ghost_text_view.new()
   self.event = event.new()
@@ -181,19 +184,19 @@ end
 view._get_entries_view = function(self)
   self.native_entries_view.event:clear()
   self.custom_entries_view.event:clear()
+  self.wildmenu_entries_view.event:clear()
 
   local c = config.get()
-  if c.experimental.native_menu then
-    self.native_entries_view.event:on('change', function()
-      self:on_entry_change()
-    end)
-    return self.native_entries_view
-  else
-    self.custom_entries_view.event:on('change', function()
-      self:on_entry_change()
-    end)
-    return self.custom_entries_view
+  local v = self.custom_entries_view
+  if (c.view and c.view.entries and (c.view.entries.name or c.view.entries)) == 'wildmenu' then
+    v = self.wildmenu_entries_view
+  elseif (c.view and c.view.entries and (c.view.entries.name or c.view.entries)) == 'native' then
+    v = self.native_entries_view
   end
+  v.event:on('change', function()
+    self:on_entry_change()
+  end)
+  return v
 end
 
 ---On entry change

@@ -81,6 +81,7 @@ cmp.ItemField.Menu = 'menu'
 ---@field public snippet cmp.SnippetConfig
 ---@field public mapping table<string, cmp.Mapping>
 ---@field public sources cmp.SourceConfig[]
+---@field public view cmp.ViewConfig
 ---@field public experimental cmp.ExperimentalConfig
 
 ---@class cmp.CompletionConfig
@@ -128,5 +129,13 @@ cmp.ItemField.Menu = 'menu'
 ---@field public keyword_length number|nil
 ---@field public max_item_count number|nil
 ---@field public group_index number|nil
+
+---@class cmp.EntriesConfig
+---@field name string
+---@field separator string|nil
+
+---@class cmp.ViewConfig
+---@field public entries string|cmp.EntriesConfig
+---@field public separator string
 
 return cmp
