@@ -18,7 +18,7 @@ local statusline_entries_view = {}
 
 local function get_separator()
   local c = config.get()
-  return (c and c.view and c.view.separator) or '  '
+  return (c and c.view and c.view.entries and c.view.entries.separator) or '  '
 end
 
 statusline_entries_view.ns = vim.api.nvim_create_namespace('cmp.view.statusline_entries_view')

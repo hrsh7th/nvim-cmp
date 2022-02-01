@@ -125,7 +125,7 @@ return function()
     sources = {},
 
     view = {
-      entries = 'custom'
-    }
+      entries = { name = 'custom' },
+    },
   }
 end
