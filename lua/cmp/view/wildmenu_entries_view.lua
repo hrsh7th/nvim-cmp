@@ -140,10 +140,11 @@ statusline_entries_view.open = function(self, offset, entries)
     end
   end
 
+  local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1] or { winrow = 1 }
   self.entries_win:open({
     relative = 'editor',
     style = 'minimal',
-    row = vim.api.nvim_win_get_height(0),
+    row = vim.api.nvim_win_get_height(0) + wininfo.winrow - 1,
     col = 0,
     width = vim.api.nvim_win_get_width(0),
     height = 1,
