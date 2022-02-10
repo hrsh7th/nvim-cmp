@@ -119,7 +119,7 @@ core.on_keymap = function(self, keys, fallback)
     local is_printable = char.is_printable(string.byte(chars, 1))
     self:confirm(e, {
       behavior = is_printable and 'insert' or 'replace',
-      commit_chars = chars,
+      commit_character = chars,
     }, function()
       local ctx = self:get_context()
       local word = e:get_word()
@@ -430,7 +430,7 @@ core.confirm = function(self, e, option, callback)
       release()
       self.event:emit('confirm_done', {
         entry = e,
-        commit_chars = option.commit_chars,
+        commit_character = option.commit_character,
       })
       if callback then
         callback()
