@@ -236,7 +236,7 @@ cmp.status = function()
     for _, name in ipairs(kinds.available) do
       vim.api.nvim_echo({ { ('- %s\n'):format(name), 'Normal' } }, false, {})
     end
-  end
+ end
 
   if #kinds.unavailable > 0 then
     vim.api.nvim_echo({ { '\n', 'Normal' } }, false, {})
@@ -267,6 +267,9 @@ end
 cmp.setup = setmetatable({
   global = function(c)
     config.set_global(c)
+  end,
+  filetype = function(filetype, c)
+    config.set_filetype(c, filetype)
   end,
   buffer = function(c)
     config.set_buffer(c, vim.api.nvim_get_current_buf())

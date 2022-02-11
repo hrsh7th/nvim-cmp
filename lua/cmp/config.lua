@@ -18,6 +18,9 @@ config.global = require('cmp.config.default')()
 config.buffers = {}
 
 ---@type table<string, cmp.ConfigSchema>
+config.filetypes = {}
+
+---@type table<string, cmp.ConfigSchema>
 config.cmdline = {}
 
 ---@type cmp.ConfigSchema
@@ -40,6 +43,15 @@ config.set_buffer = function(c, bufnr)
   config.buffers[bufnr].revision = revision + 1
 end
 
+---Set configuration for filetype
+---@param c cmp.ConfigSchema
+---@param filetype string
+config.set_filetype = function(c, filetype)
+  local revision = (config.filetypes[filetype] or {}).revision or 1
+  config.filetypes[filetype] = c or {}
+  config.filetypes[filetype].revision = revision + 1
+end
+
 ---Set configuration for cmdline
 ---@param c cmp.ConfigSchema
 ---@param cmdtype string
@@ -59,23 +71,48 @@ end
 
 ---@return cmp.ConfigSchema
 config.get = function()
-  local global = config.global
+  local global_config = config.global
   if config.onetime.sources then
-    local onetime = config.onetime
-    return config.cache:ensure({ 'get_onetime', global.revision or 0, onetime.revision or 0 }, function()
-      return misc.merge(config.normalize(onetime), config.normalize(global))
+    local onetime_config = config.onetime
+    return config.cache:ensure({
+      'get',
+      'onetime',
+      global_config.revision or 0,
+      onetime_config.revision or 0
+    }, function()
+      return misc.merge(config.normalize(onetime_config), config.normalize(global_config))
     end)
   elseif api.is_cmdline_mode() then
     local cmdtype = vim.fn.getcmdtype()
-    local cmdline = config.cmdline[cmdtype] or { revision = 1, sources = {} }
-    return config.cache:ensure({ 'get_cmdline', cmdtype, global.revision or 0, cmdline.revision or 0 }, function()
-      return misc.merge(config.normalize(cmdline), config.normalize(global))
+    local cmdline_config = config.cmdline[cmdtype] or { revision = 1, sources = {} }
+    return config.cache:ensure({
+      'get',
+      'cmdline',
+      global_config.revision or 0,
+      cmdtype,
+      cmdline_config.revision or 0
+    }, function()
+      return misc.merge(config.normalize(cmdline_config), config.normalize(global_config))
     end)
   else
     local bufnr = vim.api.nvim_get_current_buf()
-    local buffer = config.buffers[bufnr] or { revision = 1 }
-    return config.cache:ensure({ 'get_buffer', bufnr, global.revision or 0, buffer.revision or 0 }, function()
-      return misc.merge(config.normalize(buffer), config.normalize(global))
+    local filetype = vim.api.nvim_buf_get_option(bufnr, 'filetype')
+    local buffer_config = config.buffers[bufnr] or { revision = 1 }
+    local filetype_config = config.filetypes[filetype] or { revision = 1 }
+    return config.cache:ensure({
+      'get',
+      'default',
+      global_config.revision or 0,
+      filetype,
+      filetype_config.revision or 0,
+      bufnr,
+      buffer_config.revision or 0,
+    }, function()
+      local c = {}
+      c = misc.merge(c, config.normalize(buffer_config))
+      c = misc.merge(c, config.normalize(filetype_config))
+      c = misc.merge(c, config.normalize(global_config))
+      return c
     end)
   end
 end
@@ -102,6 +139,18 @@ config.get_source_config = function(name)
   return nil
 end
 
+---Return the current menu is native or not.
+config.is_native_menu = function()
+  local c = config.get()
+  if c.experimental and c.experimental.native_menu then
+    return true
+  end
+  if c.view and c.view.entries then
+    return c.view.entries == 'native' or c.view.entries.name == 'native' 
+  end
+  return false
+end
+
 ---Normalize mapping key
 ---@param c cmp.ConfigSchema
 ---@return cmp.ConfigSchema
@@ -112,6 +161,20 @@ config.normalize = function(c)
       normalized[keymap.normalize(k)] = mapping(v, { 'i' })
     end
     c.mapping = normalized
+  end
+
+  if c.experimental and c.experimental.native_menu then
+      vim.api.nvim_echo({
+        { '[nvim-cmp] ', 'Normal' },
+        { 'experimental.native_menu', 'WarningMsg' },
+        { ' is deprecated.\n', 'Normal' },
+        { '[nvim-cmp] Please use ', 'Normal' },
+        { 'view.entries = "native"', 'WarningMsg' },
+        { ' instead.', 'Normal' },
+      }, true, {})
+
+    c.view = c.view or {}
+    c.view.entries = c.view.entries or 'native'
   end
 
   if c.sources then

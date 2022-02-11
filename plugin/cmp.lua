@@ -26,7 +26,7 @@ vim.cmd [[
 ]]
 
 misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'enter' }, function()
-  if config.get().experimental.native_menu then
+  if config.is_native_menu() then
     return
   end
   if vim.fn.expand('<afile>')~= '=' then

@@ -10,52 +10,8 @@ return function()
     enabled = function()
       return vim.api.nvim_buf_get_option(0, 'buftype') ~= 'prompt'
     end,
-    completion = {
-      autocomplete = {
-        types.cmp.TriggerEvent.TextChanged,
-      },
-      completeopt = 'menu,menuone,noselect',
-      keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
-      keyword_length = 1,
-    },
-
-    snippet = {
-      expand = function()
-        error('snippet engine is not configured.')
-      end,
-    },
 
     preselect = types.cmp.PreselectMode.Item,
-
-    documentation = {
-      border = { '', '', '', ' ', '', '', '', ' ' },
-      winhighlight = 'NormalFloat:NormalFloat,FloatBorder:NormalFloat',
-      maxwidth = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
-      maxheight = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
-    },
-
-    confirmation = {
-      default_behavior = types.cmp.ConfirmBehavior.Insert,
-      get_commit_characters = function(commit_characters)
-        return commit_characters
-      end,
-    },
-
-    sorting = {
-      priority_weight = 2,
-      comparators = {
-        compare.offset,
-        compare.exact,
-        compare.score,
-        compare.recently_used,
-        compare.kind,
-        compare.sort_text,
-        compare.length,
-        compare.order,
-      },
-    },
-
-    event = {},
 
     mapping = {
       ['<Down>'] = mapping({
@@ -79,7 +35,7 @@ return function()
       ['<Tab>'] = mapping({
         c = function(fallback)
           local cmp = require('cmp')
-          if #cmp.core:get_sources() > 0 and not cmp.get_config().experimental.native_menu then
+          if #cmp.core:get_sources() > 0 and not require('cmp.config').is_native_menu() then
             if cmp.visible() then
               cmp.select_next_item()
             else
@@ -93,7 +49,7 @@ return function()
       ['<S-Tab>'] = mapping({
         c = function(fallback)
           local cmp = require('cmp')
-          if #cmp.core:get_sources() > 0 and not cmp.get_config().experimental.native_menu then
+          if #cmp.core:get_sources() > 0 and not require('cmp.config').is_native_menu() then
             if cmp.visible() then
               cmp.select_prev_item()
             else
@@ -110,6 +66,21 @@ return function()
       ['<C-e>'] = mapping.abort(),
     },
 
+    snippet = {
+      expand = function()
+        error('snippet engine is not configured.')
+      end,
+    },
+
+    completion = {
+      keyword_length = 1,
+      keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
+      autocomplete = {
+        types.cmp.TriggerEvent.TextChanged,
+      },
+      completeopt = 'menu,menuone,noselect',
+    },
+
     formatting = {
       fields = { 'abbr', 'kind', 'menu' },
       format = function(_, vim_item)
@@ -117,15 +88,44 @@ return function()
       end,
     },
 
-    experimental = {
-      native_menu = false,
-      ghost_text = false,
+    sorting = {
+      priority_weight = 2,
+      comparators = {
+        compare.offset,
+        compare.exact,
+        compare.score,
+        compare.recently_used,
+        compare.kind,
+        compare.sort_text,
+        compare.length,
+        compare.order,
+      },
     },
 
     sources = {},
 
+    documentation = {
+      border = { '', '', '', ' ', '', '', '', ' ' },
+      winhighlight = 'NormalFloat:NormalFloat,FloatBorder:NormalFloat',
+      maxwidth = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
+      maxheight = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
+    },
+
+    confirmation = {
+      default_behavior = types.cmp.ConfirmBehavior.Insert,
+      get_commit_characters = function(commit_characters)
+        return commit_characters
+      end,
+    },
+
+    event = {},
+
+    experimental = {
+      ghost_text = false,
+    },
+
     view = {
-      entries = { name = 'custom' },
+      entries = 'custom',
     },
   }
 end

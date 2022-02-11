@@ -131,12 +131,19 @@ cmp.ItemField.Menu = 'menu'
 ---@field public max_item_count number|nil
 ---@field public group_index number|nil
 
----@class cmp.EntriesConfig
----@field name string
----@field separator string|nil
-
 ---@class cmp.ViewConfig
----@field public entries string|cmp.EntriesConfig
----@field public separator string
+---@field public entries cmp.EntriesConfig
+
+---@alias cmp.EntriesConfig cmp.CustomEntriesConfig|cmp.NativeEntriesConfig|cmp.WildmenuEntriesConfig|string
+
+---@class cmp.CustomEntriesConfig
+---@field name "'custom'"
+
+---@class cmp.NativeEntriesConfig
+---@field name "'native'"
+
+---@class cmp.WildmenuEntriesConfig
+---@field name "'wildmenu'"
+---@field separator string|nil
 
 return cmp

@@ -48,7 +48,7 @@ The recommendation configurations are the below.
 
 NOTE:
   1. You must setup `snippet.expand` function.
-  2. The `cmp.setup.cmdline` won't work if you specified the `experimental.native_menu` option.
+  2. The `cmp.setup.cmdline` won't work if you are using `native` completion menu. 
   3. You can disable the `default` options via specifying `cmp.config.disable` value.
 >
   call plug#begin(s:plug_dir)
@@ -147,6 +147,9 @@ NOTE: You can call these functions in mapping via `<Cmd>lua require('cmp').compl
 
 *cmp.setup* (config: cmp.ConfigSchema)
   Setup global configuration. See configuration option.
+
+*cmp.setup.filetype* (filetype: string, config: cmp.ConfigSchema)
+  Setup filetype configuration to the specific filetype.
 
 *cmp.setup.buffer* (config: cmp.ConfigSchema)
   Setup buffer configuration to the current buffer.
@@ -380,17 +383,24 @@ completion.autocomplete~
   nvim-cmp does not completion automatically but you can still use the manual
   completion though.
 
-                                                  *cmp-config.formatting.format*
-formatting.format~
-  `fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem`
-  The function to customize the completion menu appearance. See |complete-items|.
-  NOTE: The `vim.CompletedItem` can have special properties `abbr_hl_group`,
-  `kind_hl_group` and `menu_hl_group`.
+                                             *cmp-config.completion.completeopt*
+completion.completeopt~
+  `string`
+  The vim's completeopt like setting. See 'completeopt'.
+  Besically, You don't need to modify this.
 
                                                   *cmp-config.formatting.fields*
 formatting.fields~
   `cmp.ItemField[]`
   The array of completion menu field to specify the order of them.
+
+                                                  *cmp-config.formatting.format*
+formatting.format~
+  `fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem`
+  The function to customize the completion menu appearance. See |complete-items|.
+  This value also can be used to modify `dup` property. 
+  NOTE: The `vim.CompletedItem` can have special properties `abbr_hl_group`,
+  `kind_hl_group` and `menu_hl_group`.
 
                                             *cmp-config.sorting.priority_weight*
 sorting.priority_weight~
@@ -473,15 +483,16 @@ sources[n].group_index~
       })
     }
 <
+                                                               *cmp-config.view*
+view~
+  `{ entries: cmp.EntriesConfig|string }`
+  Specify the view class to customize appearance.
+  Currently, the possible configurations are:
+
                                             *cmp-config.experimental.ghost_text*
 experimental.ghost_text~
   `boolean | { hl_group = string }`
   The boolean value to enable or disable the ghost_text feature.
-
-                                           *cmp-config.experimental.native_menu*
-experimental.native_menu~
-  `boolean`
-  The boolean value to enable or disable the native completion menu.
 
 
 
@@ -592,12 +603,12 @@ How to setup on the specific buffer?~
 
 You can setup buffer specific configuration like this.
 >
-  autocmd FileType markdown lua require('cmp').setup.buffer {
-  \   sources = {
-  \     { name = 'path' },
-  \     { name = 'buffer' },
-  \   }
-  \ }
+  cmp.setup.filetype('markdown', {
+    sources = {
+      { name = 'path' },
+      { name = 'buffer' },
+    }
+  })
 <
 
 How to customize menu appearance?~
