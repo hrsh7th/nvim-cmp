@@ -38,6 +38,7 @@ cmp.ItemField.Menu = 'menu'
 
 ---@class cmp.ConfirmOption
 ---@field public behavior cmp.ConfirmBehavior
+---@field public commit_character? string
 
 ---@class cmp.SelectOption
 ---@field public behavior cmp.SelectBehavior
