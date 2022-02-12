@@ -45,11 +45,13 @@ end
 
 ---Set configuration for filetype
 ---@param c cmp.ConfigSchema
----@param filetype string
-config.set_filetype = function(c, filetype)
-  local revision = (config.filetypes[filetype] or {}).revision or 1
-  config.filetypes[filetype] = c or {}
-  config.filetypes[filetype].revision = revision + 1
+---@param filetypes string[]|string
+config.set_filetype = function(c, filetypes)
+  for _, filetype in ipairs(type(filetypes) == 'table' and filetypes or { filetypes }) do
+    local revision = (config.filetypes[filetype] or {}).revision or 1
+    config.filetypes[filetype] = c or {}
+    config.filetypes[filetype].revision = revision + 1
+  end
 end
 
 ---Set configuration for cmdline

@@ -603,7 +603,7 @@ How to setup on the specific buffer?~
 
 You can setup buffer specific configuration like this.
 >
-  cmp.setup.filetype('markdown', {
+  cmp.setup.filetype({ 'markdown', 'help' }, {
     sources = {
       { name = 'path' },
       { name = 'buffer' },
