@@ -617,7 +617,7 @@ FAQ                                                                    *cmp-faq*
 How to disable auto-completion?~
 How to use nvim-cmp as like omnifunc?~
 
-You can disable auto-completion like this.
+  You can disable auto-completion like this.
 >
   cmp.setup {
     ...
@@ -627,7 +627,7 @@ You can disable auto-completion like this.
     ...
   }
 <
-And you can invoke completion manually.
+  And you can invoke completion manually.
 >
   inoremap <C-x><C-o> <Cmd>lua require('cmp').complete()<CR>
 <
@@ -635,7 +635,7 @@ And you can invoke completion manually.
 How to disable nvim-cmp on the specific buffer?~
 How to setup on the specific buffer?~
 
-You can setup buffer specific configuration like this.
+  You can setup buffer specific configuration like this.
 >
   cmp.setup.filetype({ 'markdown', 'help' }, {
     sources = {
@@ -645,9 +645,34 @@ You can setup buffer specific configuration like this.
   })
 <
 
+How to integrate with copilot.vim?~
+
+  The copilot.vim and nvim-cmp both have a `key-mapping fallback` mechanism.
+  Therefore, You should manage those plugins by yourself.
+
+  Fortunately, the copilot.vim has the feature that disables the fallback mechanism.
+>
+  let g:copilot_no_tab_map = v:true
+  imap <expr> <Plug>(vimrc:copilot-dummy-map) copilot#Accept("\<Tab>")
+<
+  You can manage copilot.vim's accept feature with nvim-cmp' key-mapping configuration. 
+>
+  cmp.setup {
+    mapping = {
+      ['<C-g>'] = cmp.mapping(function(fallback)
+        vim.api.nvim_feedkeys(vim.fn['copilot#Accept'](vim.api.nvim_replace_termcodes('<Tab>', true, true, true)), 'n', true)
+      end)
+    },
+    experimental = {
+      ghost_text = false -- this feature conflict to the copilot.vim's preview.
+    }
+  }
+<
+
+
 How to customize menu appearance?~
 
-You can see the nvim-cmp wiki (https://github.com/hrsh7th/nvim-cmp/wiki).
+  You can see the nvim-cmp wiki (https://github.com/hrsh7th/nvim-cmp/wiki).
 
 
 
