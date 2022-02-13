@@ -229,8 +229,8 @@ core.complete_common_string = function(self)
     matching = {
       disallow_prefix_unmatching = true,
       disallow_partial_matching = true,
-      disallow_fuzzy_matching  = true,
-    }
+      disallow_fuzzy_matching = true,
+    },
   })
 
   self:filter()

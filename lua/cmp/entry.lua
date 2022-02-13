@@ -353,8 +353,8 @@ entry.match = function(self, input, matching_config)
       disallow_prefix_unmatching = matching_config.disallow_prefix_unmatching,
       synonyms = {
         self:get_word(),
-        self:get_completion_item().label
-      }
+        self:get_completion_item().label,
+      },
     }
 
     local score, matches, _

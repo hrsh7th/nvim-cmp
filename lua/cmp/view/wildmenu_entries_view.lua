@@ -259,4 +259,3 @@ wildmenu_entries_view._get_separator = function()
 end
 
 return wildmenu_entries_view
-
