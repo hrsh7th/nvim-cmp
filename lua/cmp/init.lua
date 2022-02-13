@@ -17,17 +17,18 @@ end
 cmp.lsp = require('cmp.types.lsp')
 cmp.vim = require('cmp.types.vim')
 
----Export default config presets.
+---Expose event
+cmp.event = cmp.core.event
+
+---Export mapping for special case
+cmp.mapping = require('cmp.config.mapping')
+
+---Export default config presets
 cmp.config = {}
 cmp.config.disable = misc.none
 cmp.config.compare = require('cmp.config.compare')
 cmp.config.sources = require('cmp.config.sources')
-
----Expose event
-cmp.event = cmp.core.event
-
----Export mapping
-cmp.mapping = require('cmp.config.mapping')
+cmp.config.mapping = require('cmp.config.mapping')
 
 ---Sync asynchronous process.
 cmp.sync = function(callback)
@@ -75,6 +76,7 @@ cmp.complete = cmp.sync(function(option)
   return true
 end)
 
+---Complete common string in current entries.
 cmp.complete_common_string = cmp.sync(function()
   return cmp.core:complete_common_string()
 end)
@@ -134,6 +136,7 @@ cmp.select_next_item = cmp.sync(function(option)
     vim.schedule(release)
     return true
   elseif vim.fn.pumvisible() == 1 then
+    -- Special handling for native puma. Required to facilitate key mapping processing.
     if (option.behavior or cmp.SelectBehavior.Insert) == cmp.SelectBehavior.Insert then
       feedkeys.call(keymap.t('<C-n>'), 'n')
     else
@@ -159,6 +162,7 @@ cmp.select_prev_item = cmp.sync(function(option)
     vim.schedule(release)
     return true
   elseif vim.fn.pumvisible() == 1 then
+    -- Special handling for native puma. Required to facilitate key mapping processing.
     if (option.behavior or cmp.SelectBehavior.Insert) == cmp.SelectBehavior.Insert then
       feedkeys.call(keymap.t('<C-p>'), 'n')
     else
@@ -199,6 +203,7 @@ cmp.confirm = cmp.sync(function(option, callback)
     end)
     return true
   else
+    -- Special handling for native puma. Required to facilitate key mapping processing.
     if vim.fn.complete_info({ 'selected' }).selected ~= -1 then
       feedkeys.call(keymap.t('<C-y>'), 'n')
       return true

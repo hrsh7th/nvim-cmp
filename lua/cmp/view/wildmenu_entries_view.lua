@@ -16,81 +16,27 @@ local api = require('cmp.utils.api')
 ---@field public event cmp.Event
 local wildmenu_entries_view = {}
 
-local function get_separator()
-  local c = config.get()
-  return (c and c.view and c.view.entries and c.view.entries.separator) or '  '
-end
-
 wildmenu_entries_view.ns = vim.api.nvim_create_namespace('cmp.view.statusline_entries_view')
 
-wildmenu_entries_view.init = function(self)
+wildmenu_entries_view.new = function()
+  local self = setmetatable({}, { __index = wildmenu_entries_view })
   self.event = event.new()
   self.offset = -1
   self.active = false
   self.entries = {}
-  self.selected_index = nil
-  self.last_displayed_indices = {}
-  self.moving_forwards = nil
-end
-
-wildmenu_entries_view.new = function()
-  local self = setmetatable({}, { __index = wildmenu_entries_view })
-  self:init()
-
+  self.offsets = {}
+  self.selected_index = 0
   self.entries_win = window.new()
+
   self.entries_win:option('conceallevel', 2)
   self.entries_win:option('concealcursor', 'n')
   self.entries_win:option('cursorlineopt', 'line')
   self.entries_win:option('foldenable', false)
   self.entries_win:option('wrap', false)
   self.entries_win:option('scrolloff', 0)
+  self.entries_win:option('sidescrolloff', 0)
   self.entries_win:option('winhighlight', 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None')
   self.entries_win:buffer_option('tabstop', 1)
-
-  vim.api.nvim_set_decoration_provider(wildmenu_entries_view.ns, {
-    on_win = function(_, win, buf, _, _)
-      if win ~= self.entries_win.win or buf ~= self.entries_win:get_buffer() then
-        return
-      end
-
-      local location = 0
-      for _, i in ipairs(self.last_displayed_indices) do
-        local e = self.entries[i]
-        if e then
-          local view = e:get_view(self.offset, buf)
-          vim.api.nvim_buf_set_extmark(buf, wildmenu_entries_view.ns, 0, location, {
-            end_line = 0,
-            end_col = location + view['abbr'].bytes,
-            hl_group = view['abbr'].hl_group,
-            hl_mode = 'combine',
-            ephemeral = true,
-          })
-
-          if i == self.selected_index then
-            vim.api.nvim_buf_set_extmark(buf, wildmenu_entries_view.ns, 0, location, {
-              end_line = 0,
-              end_col = location + view['abbr'].bytes,
-              hl_group = 'PmenuSel',
-              hl_mode = 'combine',
-              ephemeral = true,
-            })
-          end
-
-          for _, m in ipairs(e.matches or {}) do
-            vim.api.nvim_buf_set_extmark(buf, wildmenu_entries_view.ns, 0, location + m.word_match_start - 1, {
-              end_line = 0,
-              end_col = location + m.word_match_end,
-              hl_group = m.fuzzy and 'CmpItemAbbrMatchFuzzy' or 'CmpItemAbbrMatch',
-              hl_mode = 'combine',
-              ephemeral = true,
-            })
-          end
-
-          location = location + view['abbr'].bytes + get_separator():len()
-        end
-      end
-    end,
-  })
 
   autocmd.subscribe(
     'CompleteChanged',
@@ -100,12 +46,52 @@ wildmenu_entries_view.new = function()
       end
     end)
   )
+
+  vim.api.nvim_set_decoration_provider(wildmenu_entries_view.ns, {
+    on_win = function(_, win, buf, _, _)
+      if win ~= self.entries_win.win or buf ~= self.entries_win:get_buffer() then
+        return
+      end
+
+      for i, e in ipairs(self.entries) do
+        if e then
+          local view = e:get_view(self.offset, buf)
+          vim.api.nvim_buf_set_extmark(buf, wildmenu_entries_view.ns, 0, self.offsets[i], {
+            end_line = 0,
+            end_col = self.offsets[i] + view.abbr.bytes,
+            hl_group = view.abbr.hl_group,
+            hl_mode = 'combine',
+            ephemeral = true,
+          })
+
+          if i == self.selected_index then
+            vim.api.nvim_buf_set_extmark(buf, wildmenu_entries_view.ns, 0, self.offsets[i], {
+              end_line = 0,
+              end_col = self.offsets[i] + view.abbr.bytes,
+              hl_group = 'PmenuSel',
+              hl_mode = 'combine',
+              ephemeral = true,
+            })
+          end
+
+          for _, m in ipairs(e.matches or {}) do
+            vim.api.nvim_buf_set_extmark(buf, wildmenu_entries_view.ns, 0, self.offsets[i] + m.word_match_start - 1, {
+              end_line = 0,
+              end_col = self.offsets[i] + m.word_match_end,
+              hl_group = m.fuzzy and 'CmpItemAbbrMatchFuzzy' or 'CmpItemAbbrMatch',
+              hl_mode = 'combine',
+              ephemeral = true,
+            })
+          end
+        end
+      end
+    end,
+  })
   return self
 end
 
 wildmenu_entries_view.close = function(self)
   self.entries_win:close()
-  self:init()
 end
 
 wildmenu_entries_view.ready = function()
@@ -119,12 +105,10 @@ end
 wildmenu_entries_view.open = function(self, offset, entries)
   self.offset = offset
   self.entries = {}
-  self.last_displayed_indices = {}
 
   -- Apply window options (that might be changed) on the custom completion menu.
   self.entries_win:option('winblend', vim.o.pumblend)
 
-  -- local entries_buf = self.entries_win:get_buffer()
   local dedup = {}
   local preselect = 0
   local i = 1
@@ -140,22 +124,23 @@ wildmenu_entries_view.open = function(self, offset, entries)
     end
   end
 
-  local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1] or { winrow = 1 }
   self.entries_win:open({
     relative = 'editor',
     style = 'minimal',
-    row = vim.api.nvim_win_get_height(0) + wininfo.winrow - 1,
+    row = vim.o.lines - 2,
     col = 0,
-    width = vim.api.nvim_win_get_width(0),
+    width = vim.o.columns,
     height = 1,
     zindex = 1001,
   })
+  self:draw()
+
   if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
     self:_select(preselect, { behavior = types.cmp.SelectBehavior.Select })
   elseif not string.match(config.get().completion.completeopt, 'noselect') then
     self:_select(1, { behavior = types.cmp.SelectBehavior.Select })
   else
-    self:_select(nil, { behavior = types.cmp.SelectBehavior.Select })
+    self:_select(0, { behavior = types.cmp.SelectBehavior.Select })
   end
 end
 
@@ -166,68 +151,19 @@ wildmenu_entries_view.abort = function(self)
 end
 
 wildmenu_entries_view.draw = function(self)
+  self.offsets = {}
+
   local entries_buf = self.entries_win:get_buffer()
   local texts = {}
-  local lengths = {}
+  local offset = 0
   for _, e in ipairs(self.entries) do
-    if e then
-      local view = e:get_view(self.offset, entries_buf)
-      -- add 1 to lengths, to account for the added separator
-      table.insert(lengths, view['abbr'].bytes + get_separator():len())
-      table.insert(texts, view['abbr'].text)
-    end
+    local view = e:get_view(self.offset, entries_buf)
+    table.insert(self.offsets, offset)
+    table.insert(texts, view.abbr.text)
+    offset = offset + view.abbr.bytes + #self:_get_separator()
   end
 
-  local selected_index = (self.selected_index or 1)
-  local start_index = (self.selected_index or 1)
-  local lst_dspl_ind = self.last_displayed_indices
-  if #lst_dspl_ind == 0 then
-    start_index = start_index
-  elseif vim.tbl_contains(lst_dspl_ind, selected_index) then
-    start_index = lst_dspl_ind[1]
-  elseif self.moving_forwards then
-    local needed_length = lengths[selected_index]
-    start_index = lst_dspl_ind[1]
-    while needed_length > 0 and vim.tbl_contains(lst_dspl_ind, start_index) do
-      needed_length = needed_length - lengths[start_index]
-      start_index = start_index + 1
-    end
-  else -- we need to scroll back
-    local needed_length = lengths[selected_index]
-    start_index = lst_dspl_ind[1]
-    while needed_length > 0 and vim.tbl_contains(lst_dspl_ind, start_index) do
-      needed_length = needed_length - lengths[start_index]
-      start_index = start_index - 1
-      if start_index <= 0 then
-        start_index = #self.entries
-      end
-    end
-  end
-  local statusline = {}
-  local total_length = 0
-  local displayed_indices = {}
-  for index = start_index, #self.entries * 2 do
-    if index > #self.entries then
-      index = index - #self.entries
-    end
-    if total_length + lengths[index] < vim.api.nvim_win_get_width(self.entries_win.win) then
-      if total_length ~= 0 and index == start_index then
-        break
-      end
-      table.insert(statusline, texts[index])
-      table.insert(displayed_indices, index)
-      total_length = total_length + lengths[index]
-    else
-      -- always add the last entry
-      table.insert(statusline, texts[index])
-      break
-    end
-  end
-
-  statusline = table.concat(statusline, get_separator())
-  self.last_displayed_indices = displayed_indices
-
-  vim.api.nvim_buf_set_lines(entries_buf, 0, 1, false, { statusline })
+  vim.api.nvim_buf_set_lines(entries_buf, 0, 1, false, { table.concat(texts, self:_get_separator()) })
   vim.api.nvim_buf_set_option(entries_buf, 'modified', false)
 
   vim.api.nvim_win_call(0, function()
@@ -245,8 +181,7 @@ end
 
 wildmenu_entries_view.select_next_item = function(self, option)
   if self:visible() then
-    self.moving_forwards = true
-    if self.selected_index == nil or self.selected_index == #self.entries then
+    if self.selected_index == 0 or self.selected_index == #self.entries then
       self:_select(1, option)
     else
       self:_select(self.selected_index + 1, option)
@@ -256,8 +191,7 @@ end
 
 wildmenu_entries_view.select_prev_item = function(self, option)
   if self:visible() then
-    self.moving_forwards = false
-    if self.selected_index == nil or self.selected_index <= 1 then
+    if self.selected_index == 0 or self.selected_index <= 1 then
       self:_select(#self.entries, option)
     else
       self:_select(self.selected_index - 1, option)
@@ -297,19 +231,32 @@ wildmenu_entries_view.get_active_entry = function(self)
   end
 end
 
-wildmenu_entries_view._select = function(self, selected_index, _)
+wildmenu_entries_view._select = function(self, selected_index, option)
+  local is_next = self.selected_index < selected_index
   self.selected_index = selected_index
-  self.active = (selected_index ~= nil)
+  self.active = (selected_index ~= 0)
 
   if self.active then
-    local cursor = api.get_cursor()
-    local word = self:get_active_entry():get_vim_item(self.offset).word
-    vim.api.nvim_feedkeys(keymap.backspace(string.sub(api.get_current_line(), self.offset, cursor[2])) .. word, 'int', true)
+    local e = self:get_active_entry()
+    if option.behavior == types.cmp.SelectBehavior.Insert then
+      local cursor = api.get_cursor()
+      local word = e:get_vim_item(self.offset).word
+      vim.api.nvim_feedkeys(keymap.backspace(string.sub(api.get_current_line(), self.offset, cursor[2])) .. word, 'int', true)
+    end
+    vim.api.nvim_win_call(self.entries_win.win, function()
+      local view = e:get_view(self.offset, self.entries_win:get_buffer())
+      vim.api.nvim_win_set_cursor(0, { 1, self.offsets[selected_index] + (is_next and view.abbr.bytes or 0) })
+      vim.cmd([[redraw!]]) -- Force refresh for vim.api.nvim_set_decoration_provider
+    end)
   end
 
-  self.entries_win:update()
-  self:draw()
   self.event:emit('change')
 end
 
+wildmenu_entries_view._get_separator = function()
+  local c = config.get()
+  return (c and c.view and c.view.entries and c.view.entries.separator) or '  '
+end
+
 return wildmenu_entries_view
+
