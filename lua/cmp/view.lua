@@ -50,7 +50,7 @@ end
 view.open = function(self, ctx, sources)
   local source_group_map = {}
   for _, s in ipairs(sources) do
-    local group_index = s:get_config().group_index or 0
+    local group_index = s:get_source_config().group_index or 0
     if not source_group_map[group_index] then
       source_group_map[group_index] = {}
     end
@@ -83,7 +83,7 @@ view.open = function(self, ctx, sources)
       if s.offset <= offset then
         if not has_triggered_by_symbol_source or s.is_triggered_by_symbol then
           -- source order priority bonus.
-          local priority = s:get_config().priority or ((#source_group - (i - 1)) * config.get().sorting.priority_weight)
+          local priority = s:get_source_config().priority or ((#source_group - (i - 1)) * config.get().sorting.priority_weight)
 
           for _, e in ipairs(s:get_entries(ctx)) do
             e.score = e.score + priority

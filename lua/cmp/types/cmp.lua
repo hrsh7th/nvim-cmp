@@ -77,6 +77,7 @@ cmp.ItemField.Menu = 'menu'
 ---@field public completion cmp.CompletionConfig
 ---@field public documentation cmp.DocumentationConfig|"false"
 ---@field public confirmation cmp.ConfirmationConfig
+---@field public matching cmp.MatchingConfig
 ---@field public sorting cmp.SortingConfig
 ---@field public formatting cmp.FormattingConfig
 ---@field public snippet cmp.SnippetConfig
@@ -102,6 +103,11 @@ cmp.ItemField.Menu = 'menu'
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior
 ---@field public get_commit_characters fun(commit_characters: string[]): string[]
+
+---@class cmp.MatchingConfig
+---@field public disallow_fuzzy_matching boolean
+---@field public disallow_partial_matching boolean
+---@field public disallow_prefix_unmatching boolean
 
 ---@class cmp.SortingConfig
 ---@field public priority_weight number

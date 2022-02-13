@@ -220,11 +220,23 @@ end
 
 ---Complete common string for current completed entries.
 core.complete_common_string = function(self)
-  if not self.view:visible() then
+  if not self.view:visible() or self.view:get_active_entry() then
     return false
   end
 
+  config.set_onetime({
+    sources = config.get().sources,
+    matching = {
+      disallow_prefix_unmatching = true,
+      disallow_partial_matching = true,
+      disallow_fuzzy_matching  = true,
+    }
+  })
+
+  self:filter()
   self.filter:sync(1000)
+
+  config.set_onetime({})
 
   local cursor = api.get_cursor()
   local offset = self.view:get_offset()

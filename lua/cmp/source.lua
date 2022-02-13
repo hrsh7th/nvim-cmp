@@ -61,10 +61,16 @@ source.reset = function(self)
   self.complete_dedup(function() end)
 end
 
----Return source option
+---Return source config
 ---@return cmp.SourceConfig
-source.get_config = function(self)
+source.get_source_config = function(self)
   return config.get_source_config(self.name) or {}
+end
+
+---Return matching config
+---@return cmp.MatchingConfig
+source.get_matching_config = function()
+  return config.get().matching
 end
 
 ---Get fetching time
@@ -103,7 +109,7 @@ source.get_entries = function(self, ctx)
       inputs[o] = string.sub(ctx.cursor_before_line, o)
     end
 
-    local match = e:match(inputs[o])
+    local match = e:match(inputs[o], self:get_matching_config())
     e.score = match.score
     e.exact = false
     if e.score >= 1 then
@@ -114,7 +120,7 @@ source.get_entries = function(self, ctx)
   end
   self.cache:set({ 'get_entries', self.revision, ctx.cursor_before_line }, entries)
 
-  local max_item_count = self:get_config().max_item_count or 200
+  local max_item_count = self:get_source_config().max_item_count or 200
   local limited_entries = {}
   for _, e in ipairs(entries) do
     table.insert(limited_entries, e)
@@ -188,7 +194,7 @@ end
 ---Get trigger_characters
 ---@return string[]
 source.get_trigger_characters = function(self)
-  local c = self:get_config()
+  local c = self:get_source_config()
   if c.trigger_characters then
     return c.trigger_characters
   end
@@ -206,7 +212,7 @@ end
 ---Get keyword_pattern
 ---@return string
 source.get_keyword_pattern = function(self)
-  local c = self:get_config()
+  local c = self:get_source_config()
   if c.keyword_pattern then
     return c.keyword_pattern
   end
@@ -219,7 +225,7 @@ end
 ---Get keyword_length
 ---@return number
 source.get_keyword_length = function(self)
-  local c = self:get_config()
+  local c = self:get_source_config()
   if c.keyword_length then
     return c.keyword_length
   end
@@ -288,7 +294,7 @@ source.complete = function(self, ctx, callback)
   self.context = ctx
   self.completion_context = completion_context
   self.source:complete(
-    vim.tbl_extend('keep', misc.copy(self:get_config()), {
+    vim.tbl_extend('keep', misc.copy(self:get_source_config()), {
       offset = self.offset,
       context = ctx,
       completion_context = completion_context,

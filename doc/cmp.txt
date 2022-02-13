@@ -209,12 +209,11 @@ NOTE: You can call these functions in mapping via `<Cmd>lua require('cmp').compl
 >
   cmp.setup {
     mapping = {
-      ['<C-n>'] = cmp.mapping(function(fallback)
+      ['<C-l>'] = cmp.mapping(function(fallback)
         if cmp.visible() then
           if cmp.complete_common_string() then
             return
           end
-          return cmp.select_next_item()
         end
         fallback()
       end, { 'i', 'c' }),
@@ -421,6 +420,21 @@ formatting.format~
   This value also can be used to modify `dup` property. 
   NOTE: The `vim.CompletedItem` can have special properties `abbr_hl_group`,
   `kind_hl_group` and `menu_hl_group`.
+
+                                   *cmp-config.matching.disallow_fuzzy_matching*
+matching.disallow_fuzzy_matching~
+  `boolean`
+  Specify disallow or allow fuzzy matching.
+
+                                 *cmp-config.matching.disallow_partial_matching*
+matching.disallow_partial_matching~
+  `boolean`
+  Specify disallow or allow partial matching.
+
+                                *cmp-config.matching.disallow_prefix_unmatching*
+matching.disallow_prefix_unmatching~
+  `boolean`
+  Specify disallow or allow prefix unmatching.
 
                                             *cmp-config.sorting.priority_weight*
 sorting.priority_weight~

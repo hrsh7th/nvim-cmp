@@ -38,8 +38,8 @@ async.throttle = function(fn, timeout)
       timer:start(math.max(1, self.timeout - (vim.loop.now() - time)), 0, function()
         vim.schedule(function()
           time = nil
-          self.running = false
           fn(unpack(args))
+          self.running = false
         end)
       end)
     end,

@@ -337,13 +337,28 @@ end
 
 ---Match line.
 ---@param input string
+---@param matching_config cmp.MatchingConfig
 ---@return { score: number, matches: table[] }
-entry.match = function(self, input)
-  return self.match_cache:ensure({ input, self.resolved_completion_item and 1 or 0 }, function()
-    local filter_text = self:get_filter_text()
+entry.match = function(self, input, matching_config)
+  return self.match_cache:ensure({
+    input,
+    self.resolved_completion_item and 1 or 0,
+    matching_config.disallow_fuzzy_matching and 1 or 0,
+    matching_config.disallow_partial_matching and 1 or 0,
+    matching_config.disallow_prefix_unmatching and 1 or 0,
+  }, function()
+    local option = {
+      disallow_fuzzy_matching = matching_config.disallow_fuzzy_matching,
+      disallow_partial_matching = matching_config.disallow_partial_matching,
+      disallow_prefix_unmatching = matching_config.disallow_prefix_unmatching,
+      synonyms = {
+        self:get_word(),
+        self:get_completion_item().label
+      }
+    }
 
     local score, matches, _
-    score, matches = matcher.match(input, filter_text, { self:get_word(), self:get_completion_item().label })
+    score, matches = matcher.match(input, self:get_filter_text(), option)
 
     -- Support the language server that doesn't respect VSCode's behaviors.
     if score == 0 then
@@ -355,13 +370,13 @@ entry.match = function(self, input)
           accept = accept or string.match(prefix, '^[^%a]+$')
           accept = accept or string.find(self:get_completion_item().textEdit.newText, prefix, 1, true)
           if accept then
-            score, matches = matcher.match(input, prefix .. filter_text, { self:get_word(), self:get_completion_item().label })
+            score, matches = matcher.match(input, prefix .. self:get_filter_text(), option)
           end
         end
       end
     end
 
-    if filter_text ~= self:get_completion_item().label then
+    if self:get_filter_text() ~= self:get_completion_item().label then
       _, matches = matcher.match(input, self:get_completion_item().label, { self:get_word() })
     end
 
