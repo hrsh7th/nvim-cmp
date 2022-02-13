@@ -249,7 +249,7 @@ core.complete_common_string = function(self)
       common_string = str.get_common_string(common_string, vim_item.word)
     end
   end
-  if common_string and #common_string > (1 + cursor[2] - offset) then
+  if common_string and #common_string >= (1 + cursor[2] - offset) then
     feedkeys.call(keymap.backspace(string.sub(api.get_current_line(), offset, cursor[2])) .. common_string, 'n')
     return true
   end
