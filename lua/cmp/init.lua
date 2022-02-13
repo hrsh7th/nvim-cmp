@@ -240,7 +240,7 @@ cmp.status = function()
     for _, name in ipairs(kinds.available) do
       vim.api.nvim_echo({ { ('- %s\n'):format(name), 'Normal' } }, false, {})
     end
- end
+  end
 
   if #kinds.unavailable > 0 then
     vim.api.nvim_echo({ { '\n', 'Normal' } }, false, {})

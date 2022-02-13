@@ -80,7 +80,7 @@ config.get = function()
       'get',
       'onetime',
       global_config.revision or 0,
-      onetime_config.revision or 0
+      onetime_config.revision or 0,
     }, function()
       return misc.merge(config.normalize(onetime_config), config.normalize(global_config))
     end)
@@ -92,7 +92,7 @@ config.get = function()
       'cmdline',
       global_config.revision or 0,
       cmdtype,
-      cmdline_config.revision or 0
+      cmdline_config.revision or 0,
     }, function()
       return misc.merge(config.normalize(cmdline_config), config.normalize(global_config))
     end)
@@ -148,7 +148,7 @@ config.is_native_menu = function()
     return true
   end
   if c.view and c.view.entries then
-    return c.view.entries == 'native' or c.view.entries.name == 'native' 
+    return c.view.entries == 'native' or c.view.entries.name == 'native'
   end
   return false
 end
@@ -166,14 +166,14 @@ config.normalize = function(c)
   end
 
   if c.experimental and c.experimental.native_menu then
-      vim.api.nvim_echo({
-        { '[nvim-cmp] ', 'Normal' },
-        { 'experimental.native_menu', 'WarningMsg' },
-        { ' is deprecated.\n', 'Normal' },
-        { '[nvim-cmp] Please use ', 'Normal' },
-        { 'view.entries = "native"', 'WarningMsg' },
-        { ' instead.', 'Normal' },
-      }, true, {})
+    vim.api.nvim_echo({
+      { '[nvim-cmp] ', 'Normal' },
+      { 'experimental.native_menu', 'WarningMsg' },
+      { ' is deprecated.\n', 'Normal' },
+      { '[nvim-cmp] Please use ', 'Normal' },
+      { 'view.entries = "native"', 'WarningMsg' },
+      { ' instead.', 'Normal' },
+    }, true, {})
 
     c.view = c.view or {}
     c.view.entries = c.view.entries or 'native'
