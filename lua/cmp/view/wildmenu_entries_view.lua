@@ -14,16 +14,16 @@ local api = require('cmp.utils.api')
 ---@field private active boolean
 ---@field private entries cmp.Entry[]
 ---@field public event cmp.Event
-local statusline_entries_view = {}
+local wildmenu_entries_view = {}
 
 local function get_separator()
   local c = config.get()
   return (c and c.view and c.view.entries and c.view.entries.separator) or '  '
 end
 
-statusline_entries_view.ns = vim.api.nvim_create_namespace('cmp.view.statusline_entries_view')
+wildmenu_entries_view.ns = vim.api.nvim_create_namespace('cmp.view.statusline_entries_view')
 
-statusline_entries_view.init = function(self)
+wildmenu_entries_view.init = function(self)
   self.event = event.new()
   self.offset = -1
   self.active = false
@@ -33,8 +33,8 @@ statusline_entries_view.init = function(self)
   self.moving_forwards = nil
 end
 
-statusline_entries_view.new = function()
-  local self = setmetatable({}, { __index = statusline_entries_view })
+wildmenu_entries_view.new = function()
+  local self = setmetatable({}, { __index = wildmenu_entries_view })
   self:init()
 
   self.entries_win = window.new()
@@ -47,7 +47,7 @@ statusline_entries_view.new = function()
   self.entries_win:option('winhighlight', 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None')
   self.entries_win:buffer_option('tabstop', 1)
 
-  vim.api.nvim_set_decoration_provider(statusline_entries_view.ns, {
+  vim.api.nvim_set_decoration_provider(wildmenu_entries_view.ns, {
     on_win = function(_, win, buf, _, _)
       if win ~= self.entries_win.win or buf ~= self.entries_win:get_buffer() then
         return
@@ -58,7 +58,7 @@ statusline_entries_view.new = function()
         local e = self.entries[i]
         if e then
           local view = e:get_view(self.offset, buf)
-          vim.api.nvim_buf_set_extmark(buf, statusline_entries_view.ns, 0, location, {
+          vim.api.nvim_buf_set_extmark(buf, wildmenu_entries_view.ns, 0, location, {
             end_line = 0,
             end_col = location + view['abbr'].bytes,
             hl_group = view['abbr'].hl_group,
@@ -67,7 +67,7 @@ statusline_entries_view.new = function()
           })
 
           if i == self.selected_index then
-            vim.api.nvim_buf_set_extmark(buf, statusline_entries_view.ns, 0, location, {
+            vim.api.nvim_buf_set_extmark(buf, wildmenu_entries_view.ns, 0, location, {
               end_line = 0,
               end_col = location + view['abbr'].bytes,
               hl_group = 'PmenuSel',
@@ -77,7 +77,7 @@ statusline_entries_view.new = function()
           end
 
           for _, m in ipairs(e.matches or {}) do
-            vim.api.nvim_buf_set_extmark(buf, statusline_entries_view.ns, 0, location + m.word_match_start - 1, {
+            vim.api.nvim_buf_set_extmark(buf, wildmenu_entries_view.ns, 0, location + m.word_match_start - 1, {
               end_line = 0,
               end_col = location + m.word_match_end,
               hl_group = m.fuzzy and 'CmpItemAbbrMatchFuzzy' or 'CmpItemAbbrMatch',
@@ -103,20 +103,20 @@ statusline_entries_view.new = function()
   return self
 end
 
-statusline_entries_view.close = function(self)
+wildmenu_entries_view.close = function(self)
   self.entries_win:close()
   self:init()
 end
 
-statusline_entries_view.ready = function()
+wildmenu_entries_view.ready = function()
   return vim.fn.pumvisible() == 0
 end
 
-statusline_entries_view.on_change = function(self)
+wildmenu_entries_view.on_change = function(self)
   self.active = false
 end
 
-statusline_entries_view.open = function(self, offset, entries)
+wildmenu_entries_view.open = function(self, offset, entries)
   self.offset = offset
   self.entries = {}
   self.last_displayed_indices = {}
@@ -159,13 +159,13 @@ statusline_entries_view.open = function(self, offset, entries)
   end
 end
 
-statusline_entries_view.abort = function(self)
+wildmenu_entries_view.abort = function(self)
   feedkeys.call('', 'n', function()
     self:close()
   end)
 end
 
-statusline_entries_view.draw = function(self)
+wildmenu_entries_view.draw = function(self)
   local entries_buf = self.entries_win:get_buffer()
   local texts = {}
   local lengths = {}
@@ -235,15 +235,15 @@ statusline_entries_view.draw = function(self)
   end)
 end
 
-statusline_entries_view.visible = function(self)
+wildmenu_entries_view.visible = function(self)
   return self.entries_win:visible()
 end
 
-statusline_entries_view.info = function(self)
+wildmenu_entries_view.info = function(self)
   return self.entries_win:info()
 end
 
-statusline_entries_view.select_next_item = function(self, option)
+wildmenu_entries_view.select_next_item = function(self, option)
   if self:visible() then
     self.moving_forwards = true
     if self.selected_index == nil or self.selected_index == #self.entries then
@@ -254,7 +254,7 @@ statusline_entries_view.select_next_item = function(self, option)
   end
 end
 
-statusline_entries_view.select_prev_item = function(self, option)
+wildmenu_entries_view.select_prev_item = function(self, option)
   if self:visible() then
     self.moving_forwards = false
     if self.selected_index == nil or self.selected_index <= 1 then
@@ -265,33 +265,46 @@ statusline_entries_view.select_prev_item = function(self, option)
   end
 end
 
-statusline_entries_view.get_first_entry = function(self)
+wildmenu_entries_view.get_offset = function(self)
+  if self:visible() then
+    return self.offset
+  end
+  return nil
+end
+
+wildmenu_entries_view.get_entries = function(self)
+  if self:visible() then
+    return self.entries
+  end
+  return {}
+end
+
+wildmenu_entries_view.get_first_entry = function(self)
   if self:visible() then
     return self.entries[1]
   end
 end
 
-statusline_entries_view.get_selected_entry = function(self)
+wildmenu_entries_view.get_selected_entry = function(self)
   if self:visible() and self.active then
     return self.entries[self.selected_index]
   end
 end
 
-statusline_entries_view.get_active_entry = function(self)
+wildmenu_entries_view.get_active_entry = function(self)
   if self:visible() and self.active then
     return self:get_selected_entry()
   end
 end
 
-statusline_entries_view._select = function(self, selected_index, _)
+wildmenu_entries_view._select = function(self, selected_index, _)
   self.selected_index = selected_index
   self.active = (selected_index ~= nil)
 
   if self.active then
     local cursor = api.get_cursor()
     local word = self:get_active_entry():get_vim_item(self.offset).word
-    local length = vim.fn.strchars(string.sub(api.get_current_line(), self.offset, cursor[2]), true)
-    vim.api.nvim_feedkeys(keymap.backspace(length) .. word, 'int', true)
+    vim.api.nvim_feedkeys(keymap.backspace(string.sub(api.get_current_line(), self.offset, cursor[2])) .. word, 'int', true)
   end
 
   self.entries_win:update()
@@ -299,4 +312,4 @@ statusline_entries_view._select = function(self, selected_index, _)
   self.event:emit('change')
 end
 
-return statusline_entries_view
+return wildmenu_entries_view

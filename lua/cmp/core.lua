@@ -1,4 +1,5 @@
 local debug = require('cmp.utils.debug')
+local str = require('cmp.utils.str')
 local char = require('cmp.utils.char')
 local pattern = require('cmp.utils.pattern')
 local feedkeys = require('cmp.utils.feedkeys')
@@ -215,6 +216,32 @@ core.autoindent = function(self, trigger_event, callback)
   end
 
   callback()
+end
+
+---Complete common string for current completed entries.
+core.complete_common_string = function(self)
+  if not self.view:visible() then
+    return false
+  end
+
+  self.filter:sync(1000)
+
+  local cursor = api.get_cursor()
+  local offset = self.view:get_offset()
+  local common_string
+  for _, e in ipairs(self.view:get_entries()) do
+    local vim_item = e:get_vim_item(offset)
+    if not common_string then
+      common_string = vim_item.word
+    else
+      common_string = str.get_common_string(common_string, vim_item.word)
+    end
+  end
+  if common_string and #common_string > (1 + cursor[2] - offset) then
+    feedkeys.call(keymap.backspace(string.sub(api.get_current_line(), offset, cursor[2])) .. common_string, 'n')
+    return true
+  end
+  return false
 end
 
 ---Invoke completion

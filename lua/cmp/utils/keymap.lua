@@ -67,6 +67,9 @@ end
 ---@param count number
 ---@return string
 keymap.backspace = function(count)
+  if type(count) == 'string'  then
+    count = vim.fn.strchars(count, true)
+  end
   if count <= 0 then
     return ''
   end

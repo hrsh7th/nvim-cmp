@@ -75,6 +75,10 @@ cmp.complete = cmp.sync(function(option)
   return true
 end)
 
+cmp.complete_common_string = cmp.sync(function()
+  return cmp.core:complete_common_string()
+end)
+
 ---Return view is visible or not.
 cmp.visible = cmp.sync(function()
   return cmp.core.view:visible() or vim.fn.pumvisible() == 1

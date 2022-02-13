@@ -43,6 +43,17 @@ str.has_prefix = function(text, prefix)
   return true
 end
 
+---get_common_string
+str.get_common_string = function(text1, text2)
+  local min = math.min(#text1, #text2)
+  for i = 1, min do
+    if not char.match(string.byte(text1, i), string.byte(text2, i)) then
+      return string.sub(text1, 1, i - 1)
+    end
+  end
+  return string.sub(text1, 1, min)
+end
+
 ---Remove suffix
 ---@param text string
 ---@param suffix string

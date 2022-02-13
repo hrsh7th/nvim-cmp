@@ -22,6 +22,15 @@ mapping.complete = function(option)
   end
 end
 
+---Complete common string.
+mapping.complete_common_string = function()
+  return function(fallback)
+    if not require('cmp').complete_common_string() then
+      fallback()
+    end
+  end
+end
+
 ---Close current completion menu if it displayed.
 mapping.close = function()
   return function(fallback)

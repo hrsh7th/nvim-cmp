@@ -204,6 +204,23 @@ NOTE: You can call these functions in mapping via `<Cmd>lua require('cmp').compl
 <
   NOTE: The `config` means a temporary setting, but the `config.mapping` remains permanent.
 
+*cmp.complete_common_string* ()
+  Complete common string as like as shell completion behavior.
+>
+  cmp.setup {
+    mapping = {
+      ['<C-n>'] = cmp.mapping(function(fallback)
+        if cmp.visible() then
+          if cmp.complete_common_string() then
+            return
+          end
+          return cmp.select_next_item()
+        end
+        fallback()
+      end, { 'i', 'c' }),
+    }
+  }
+<
 *cmp.confirm* (option: cmp.ConfirmOption, callback: function)
   Accept current selected completion item.
   If you didn't select any items and specified the `{ select = true }` for
@@ -278,6 +295,9 @@ You can also use built-in mapping helpers.
 
   *cmp.mapping.complete* (option: cmp.CompleteParams)
     Same as |cmp.complete|
+
+  *cmp.mapping.complete_common_string* ()
+    Same as |cmp.complete_common_string|
 
   *cmp.mapping.confirm* (option: cmp.ConfirmOption)
     Same as |cmp.confirm|

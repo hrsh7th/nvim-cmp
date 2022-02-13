@@ -161,6 +161,17 @@ view.select_prev_item = function(self, option)
   self:_get_entries_view():select_prev_item(option)
 end
 
+---Get offset.
+view.get_offset = function(self)
+  return self:_get_entries_view():get_offset()
+end
+
+---Get entries.
+---@return cmp.Entry[]
+view.get_entries = function(self)
+  return self:_get_entries_view():get_entries()
+end
+
 ---Get first entry
 ---@param self cmp.Entry|nil
 view.get_first_entry = function(self)

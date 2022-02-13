@@ -257,6 +257,20 @@ custom_entries_view.select_prev_item = function(self, option)
   end
 end
 
+custom_entries_view.get_offset = function(self)
+  if self:visible() then
+    return self.offset
+  end
+  return nil
+end
+
+custom_entries_view.get_entries = function(self)
+  if self:visible() then
+    return self.entries
+  end
+  return {}
+end
+
 custom_entries_view.get_first_entry = function(self)
   if self:visible() then
     return self.entries[1]
@@ -301,8 +315,7 @@ custom_entries_view._insert = setmetatable({
     word = word or ''
     if api.is_cmdline_mode() then
       local cursor = api.get_cursor()
-      local length = vim.fn.strchars(string.sub(api.get_current_line(), self.offset, cursor[2]), true)
-      vim.api.nvim_feedkeys(keymap.backspace(length) .. word, 'int', true)
+      vim.api.nvim_feedkeys(keymap.backspace(string.sub(api.get_current_line(), self.offset, cursor[2])) .. word, 'int', true)
     else
       if this.pending then
         return
@@ -312,10 +325,9 @@ custom_entries_view._insert = setmetatable({
       local release = require('cmp').suspend()
       feedkeys.call('', '', function()
         local cursor = api.get_cursor()
-        local length = vim.fn.strchars(string.sub(api.get_current_line(), self.offset, cursor[2]), true)
         local keys = {}
         table.insert(keys, keymap.indentkeys())
-        table.insert(keys, keymap.backspace(length))
+        table.insert(keys, keymap.backspace(string.sub(api.get_current_line(), self.offset, cursor[2])))
         table.insert(keys, word)
         table.insert(keys, keymap.indentkeys(vim.bo.indentkeys))
         feedkeys.call(

@@ -143,6 +143,20 @@ native_entries_view.select_prev_item = function(self, option)
   end
 end
 
+native_entries_view.get_offset = function(self)
+  if self:visible() then
+    return self.offset
+  end
+  return nil
+end
+
+native_entries_view.get_entries = function(self)
+  if self:visible() then
+    return self.entries
+  end
+  return {}
+end
+
 native_entries_view.get_first_entry = function(self)
   if self:visible() then
     return self.entries[1]
