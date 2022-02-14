@@ -211,9 +211,7 @@ NOTE: You can call these functions in mapping via `<Cmd>lua require('cmp').compl
     mapping = {
       ['<C-l>'] = cmp.mapping(function(fallback)
         if cmp.visible() then
-          if cmp.complete_common_string() then
-            return
-          end
+          return cmp.complete_common_string()
         end
         fallback()
       end, { 'i', 'c' }),
