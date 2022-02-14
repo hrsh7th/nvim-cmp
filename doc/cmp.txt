@@ -17,8 +17,6 @@ Config                                                              |cmp-config|
 Develop                                                            |cmp-develop|
 FAQ                                                                    |cmp-faq|
 
-
-
 ==============================================================================
 Abstract                                                          *cmp-abstract*
 
@@ -29,8 +27,6 @@ This is nvim-cmp's document.
 2. The advanced configuration is noted in wiki.
   - https://github.com/hrsh7th/nvim-cmp/wiki
 
-
-
 ==============================================================================
 Concept                                                            *cmp-concept*
 
@@ -39,8 +35,6 @@ Concept                                                            *cmp-concept*
 - Smart handling of key mapping
 - No flicker
 
-
-
 ==============================================================================
 Usage                                                                *cmp-usage*
 
@@ -48,7 +42,7 @@ The recommendation configurations are the below.
 
 NOTE:
   1. You must setup `snippet.expand` function.
-  2. The `cmp.setup.cmdline` won't work if you are using `native` completion menu. 
+  2. The `cmp.setup.cmdline` won't work if you are using `native` completion menu.
   3. You can disable the `default` options via specifying `cmp.config.disable` value.
 >
   call plug#begin(s:plug_dir)
@@ -138,7 +132,6 @@ NOTE:
     }
   EOF
 <
-
 
 ==============================================================================
 Function                                                          *cmp-function*
@@ -231,8 +224,6 @@ NOTE: You can call these functions in mapping via `<Cmd>lua require('cmp').compl
   - `complete_done`: emit after current completion is done.
   - `confirm_done`: emit after confirmation is done.
 
-
-
 ==============================================================================
 Mapping                                                            *cmp-mapping*
 
@@ -304,8 +295,6 @@ You can also use built-in mapping helpers.
 The built-in mapping helper is only available as a configuration option.
 If you want to call the nvim-cmp features directly, please use |cmp-function| instead.
 
-
-
 ==============================================================================
 Command                                                            *cmp-command*
 
@@ -313,8 +302,6 @@ Command                                                            *cmp-command*
   Prints source statuses for the current buffer and states.
   Sometimes `unknown` source will be printed but it isn't problem. (e.g. `cmp-nvim-lsp`)
   That the reason is the `cmp-nvim-lsp` will registered on the InsertEnter autocmd.
-
-
 
 ==============================================================================
 Highlight                                                        *cmp-highlight*
@@ -343,7 +330,77 @@ Highlight                                                        *cmp-highlight*
 *CmpItemMenu*
   The menu field's highlight group.
 
+  Default: |hl-Pmenu|
 
+*CmpCompletionWindow*
+  The highlight group for the completion window.
+
+  Default: |hl-Pmenu|
+
+*CmpCompletionWindowBorder*
+  The highlight group for borders to completion window.
+
+  Default: |hl-NormalFloat|
+  Recommended: |hl-FloatBorder|
+
+*CmpCompletionWindowBordered*
+  The highlight group for a bordered documentation window.
+
+  Default: |CmpCompletionWindow|
+
+*CmpCompletionWindowPadding*
+  The highlight group for borders to the completion window which are made up of
+  entirely invisible / whitespace characters. For example: >
+  cmp.setup {
+    window = {
+      completion = {
+        border = {'', '', '', ' ', '', '', '', ' '},
+      },
+    },
+  }
+<
+
+  Default: |CmpCompletionWindow|
+
+*CmpDocumentationWindow*
+  The highlight group for the documentation window.
+
+  Default: |hl-Pmenu|
+
+*CmpDocumentationWindowBorder*
+  The highlight group for borders to documentation window.
+
+  Default: |CmpCompletionWindowBorder|
+
+*CmpDocumentationWindowBordered*
+  The highlight group for a bordered documentation window.
+
+  Default: |CmpDocumentationWindow|
+
+*CmpDocumentationWindowPadding*
+  The highlight group for borders to the documentation window which are made
+  up of entirely invisible / whitespace characters. For example: >
+  cmp.setup {
+    window = {
+      documentation = {
+        border = {'', '', '', ' ', '', '', '', ' '},
+      },
+    },
+  }
+<
+
+  Default: |CmpDocumentationWindow|
+
+*CmpScrollBar*
+  The highlight group for the background of a scrollbar; present when there
+  is no border on a window.
+
+  Default: |hl-PmenuSbar|
+
+*CmpScrollThumb*
+  The highlight group for the thumb of a scrollbar.
+
+  Default: |hl-PmenuThumb|
 
 ==============================================================================
 Autocmd                                                            *cmp-autocmd*
@@ -353,8 +410,6 @@ autocommands for the User event with the following patterns.
 
 *CmpReady*
   Invoked when nvim-cmp gets sourced from `plugin/cmp.lua`.
-
-
 
 ==============================================================================
 Config                                                              *cmp-config*
@@ -417,7 +472,7 @@ formatting.fields~
 formatting.format~
   `fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem`
   The function to customize the completion menu appearance. See |complete-items|.
-  This value also can be used to modify `dup` property. 
+  This value also can be used to modify `dup` property.
   NOTE: The `vim.CompletedItem` can have special properties `abbr_hl_group`,
   `kind_hl_group` and `menu_hl_group`.
 
@@ -523,12 +578,87 @@ view~
   Specify the view class to customize appearance.
   Currently, the possible configurations are:
 
+                                           *cmp-config.window.completion.border*
+window.completion.border~
+  `string | string[] | nil`
+  Border characters used for the completion popup menu when
+  |experimental.native_menu| is disabled.
+
+                                        *cmp-config.window.completion.scrollbar*
+window.completion.scrollbar~
+  `string | false`
+  A setting defining which character to use for the scrollbar.
+
+  * If an empty string (`""`), |hl-PmenuThumb| will be used.
+  * If `false`, no scrollbar will be rendered.
+  * If |experimental.native_menu| is `true`, this setting will be ignored.
+
+  Default: `""`
+  Recommended: `"║"`
+
+                                     *cmp-config.window.completion.winhighlight*
+window.completion.winhighlight~
+  `string | cmp.WinhighlightConfig`
+  Is either a `string` matching the 'winhighlight' syntax, or a `table` of
+  `bordered` and `default` options which both specify 'winhighlight' settings
+  for when the completion window has and does not have a border, respectively.
+
+                                           *cmp-config.window.completion.zindex*
+window.completion.zindex~
+  `number`
+  The completion window's zindex.
+
+                                               *cmp-config.window.documentation*
+window.documentation~
+  `false | cmp.DocumentationConfig`
+  If set to `false`, the documentation of each item will not be shown.
+  Else, a table representing documentation configuration should be provided.
+  The following are possible options.
+
+                                        *cmp-config.window.documentation.border*
+window.documentation.border~
+  `string | string[] | nil`
+
+  Border characters used for documentation window.
+
+                                     *cmp-config.window.documentation.max_width*
+window.documentation.max_width~
+  `number`
+  The documentation window's max width.
+
+                                    *cmp-config.window.documentation.max_height*
+window.documentation.max_height~
+  `number`
+  The documentation window's max height.
+
+                                     *cmp-config.window.documentation.scrollbar*
+window.documentation.scrollbar~
+  `string`
+  A setting defining which character to use for the scrollbar.
+
+  * If an empty string (`""`), |hl-PmenuThumb| will be used.
+  * If `false`, no scrollbar will be rendered.
+
+  Default: `""`
+  Recommended: `"║"`
+
+                                  *cmp-config.window.documentation.winhighlight*
+window.documentation.winhighlight~
+  `string | cmp.WinhighlightConfig`
+  Is either a `string` matching the 'winhighlight' syntax, or a `table` of
+  `bordered` and `default` options which both specify 'winhighlight' settings
+  for when the documentation window has and does not have a border,
+  respectively.
+
+                                        *cmp-config.window.documentation.zindex*
+window.documentation.zindex~
+  `number`
+  The documentation window's zindex.
+
                                             *cmp-config.experimental.ghost_text*
 experimental.ghost_text~
   `boolean | { hl_group = string }`
   The boolean value to enable or disable the ghost_text feature.
-
-
 
 ==============================================================================
 Develop                                                            *cmp-develop*
@@ -610,7 +740,6 @@ You can create custom source like the following example.
   require('cmp').register_source('month', source.new())
 <
 
-
 ==============================================================================
 FAQ                                                                    *cmp-faq*
 
@@ -649,8 +778,5 @@ How to customize menu appearance?~
 
 You can see the nvim-cmp wiki (https://github.com/hrsh7th/nvim-cmp/wiki).
 
-
-
 ==============================================================================
- vim:tw=78:ts=4:et:ft=help:norl:
-
+ vim:tw=78:ts=2:et:ft=help:norl:

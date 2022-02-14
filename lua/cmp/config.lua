@@ -3,6 +3,7 @@ local cache = require('cmp.utils.cache')
 local keymap = require('cmp.utils.keymap')
 local misc = require('cmp.utils.misc')
 local api = require('cmp.utils.api')
+local str = require('cmp.utils.str')
 
 ---@class cmp.Config
 ---@field public g cmp.ConfigSchema
@@ -29,7 +30,7 @@ config.onetime = {}
 ---Set configuration for global.
 ---@param c cmp.ConfigSchema
 config.set_global = function(c)
-  config.global = misc.merge(config.normalize(c), config.normalize(config.global))
+  config.global = config.normalize(misc.merge(c, config.global))
   config.global.revision = config.global.revision or 1
   config.global.revision = config.global.revision + 1
 end
@@ -82,7 +83,7 @@ config.get = function()
       global_config.revision or 0,
       onetime_config.revision or 0,
     }, function()
-      return misc.merge(config.normalize(onetime_config), config.normalize(global_config))
+      return config.normalize(misc.merge(onetime_config, global_config))
     end)
   elseif api.is_cmdline_mode() then
     local cmdtype = vim.fn.getcmdtype()
@@ -94,7 +95,7 @@ config.get = function()
       cmdtype,
       cmdline_config.revision or 0,
     }, function()
-      return misc.merge(config.normalize(cmdline_config), config.normalize(global_config))
+      return config.normalize(misc.merge(cmdline_config, global_config))
     end)
   else
     local bufnr = vim.api.nvim_get_current_buf()
@@ -111,9 +112,9 @@ config.get = function()
       buffer_config.revision or 0,
     }, function()
       local c = {}
-      c = misc.merge(c, config.normalize(buffer_config))
-      c = misc.merge(c, config.normalize(filetype_config))
-      c = misc.merge(c, config.normalize(global_config))
+      c = config.normalize(misc.merge(c, buffer_config))
+      c = config.normalize(misc.merge(c, filetype_config))
+      c = config.normalize(misc.merge(c, global_config))
       return c
     end)
   end
@@ -163,6 +164,35 @@ config.normalize = function(c)
       normalized[keymap.normalize(k)] = mapping(v, { 'i' })
     end
     c.mapping = normalized
+  end
+
+  if type(c.window) == 'table' then
+    for k, v in pairs(c.window) do
+      if type(v) == 'table' then
+        if type(v.winhighlight) == 'table' then
+          local any_visible = false
+          if type(v.border) == 'table' then
+            -- PERF: we want to do this before normalizing the `v.border`, because after it may be longer
+            for _, b in ipairs(v.border) do
+              any_visible = any_visible or not str.is_invisible(b)
+            end
+          elseif type(v.border) == 'string' then
+            any_visible = true
+          else
+            any_visible = false
+          end
+          c.window[k].winhighlight = any_visible and v.winhighlight.bordered or v.winhighlight.default
+        end
+
+        if type(v.border) == 'table' and #v.border < 8 then
+          local corner1 = v.border[1]
+          local middle1 = v.border[2]
+          local corner2 = v.border[3]
+          local middle2 = v.border[4]
+          c.window[k].border = {corner1, middle1, corner2 or corner1, middle2 or middle1, corner1, middle1, corner2 or corner1, middle2 or middle1}
+        end
+      end
+    end
   end
 
   if c.experimental and c.experimental.native_menu then
