@@ -264,6 +264,58 @@ describe('entry', function()
     assert.are.equal(e:get_filter_text(), '$this')
   end)
 
+  it('[odin-language-server] 1', function()
+    local state = spec.state('\t\t', 1, 4)
+
+    -- press g
+    state.input('s')
+    local e = entry.new(state.manual(), state.source(), {
+      additionalTextEdits = {},
+      command = {
+        arguments = {},
+        command = '',
+        title = '',
+      },
+      deprecated = false,
+      detail = 'string',
+      documentation = '',
+      insertText = '',
+      insertTextFormat = 1,
+      kind = 14,
+      label = 'string',
+      tags = {},
+    })
+    assert.are.equal(e:get_vim_item(e:get_offset()).word, 'string')
+  end)
+
+  it('[ansiblels] 1', function()
+    local state = spec.state('\t\t', 1, 4)
+
+    -- press g
+    state.input('s')
+    local e = entry.new(state.manual(), state.source(), {
+      detail = 'ansible.builtin',
+      filterText = 'blockinfile ansible.builtin.blockinfile',
+      kind = 7,
+      label = 'blockinfile',
+      sortText = '2_blockinfile',
+      textEdit = {
+        newText = '',
+        range = {
+          ['end'] = {
+            character = 7,
+            line = 15,
+          },
+          start = {
+            character = 6,
+            line = 15,
+          },
+        },
+      },
+    })
+    assert.are.equal(e:get_vim_item(e:get_offset()).word, 'blockinfile')
+  end)
+
   it('[#47] word should not contain \\n character', function()
     local state = spec.state('', 1, 1)
 

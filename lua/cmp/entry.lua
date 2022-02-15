@@ -107,7 +107,7 @@ entry.get_word = function(self)
     end
 
     local word
-    if misc.safe(self:get_completion_item().textEdit) then
+    if misc.safe(self:get_completion_item().textEdit) and not misc.empty(self:get_completion_item().textEdit.newText) then
       word = str.trim(self:get_completion_item().textEdit.newText)
       if self:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
         word = vim.lsp.util.parse_snippet(word)
@@ -116,7 +116,7 @@ entry.get_word = function(self)
       if 0 < overwrite[2] or self:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
         word = str.get_word(word, string.byte(self.context.cursor_after_line, 1), overwrite[1] or 0)
       end
-    elseif misc.safe(self:get_completion_item().insertText) then
+    elseif not misc.empty(self:get_completion_item().insertText) then
       word = str.trim(self:get_completion_item().insertText)
       if self:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
         word = str.get_word(vim.lsp.util.parse_snippet(word))
@@ -362,7 +362,7 @@ entry.match = function(self, input, matching_config)
 
     -- Support the language server that doesn't respect VSCode's behaviors.
     if score == 0 then
-      if misc.safe(self:get_completion_item().textEdit) then
+      if misc.safe(self:get_completion_item().textEdit) and not misc.empty(self:get_completion_item().textEdit.newText) then
         local diff = self.source_offset - self:get_offset()
         if diff > 0 then
           local prefix = string.sub(self.context.cursor_line, self:get_offset(), self:get_offset() + diff)

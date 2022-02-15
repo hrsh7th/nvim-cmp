@@ -29,6 +29,28 @@ misc.concat = function(list1, list2)
   return new_list
 end
 
+---Return the valu is empty or not.
+---@param v any
+---@return boolean
+misc.empty = function(v)
+  if not v then
+    return true
+  end
+  if v == vim.NIL then
+    return true
+  end
+  if type(v) == 'string' and v == '' then
+    return true
+  end
+  if type(v) == 'table' and vim.tbl_isempty(v) then
+    return true
+  end
+  if type(v) == 'number' and v == 0 then
+    return true
+  end
+  return false
+end
+
 ---The symbol to remove key in misc.merge.
 misc.none = vim.NIL
 
