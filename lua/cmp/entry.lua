@@ -98,9 +98,10 @@ entry.get_offset = function(self)
 end
 
 ---Create word for vim.CompletedItem
+---NOTE: This method doesn't clear the cache after completionItem/resolve.
 ---@return string
 entry.get_word = function(self)
-  return self.cache:ensure({ 'get_word', self.resolved_completion_item and 1 or 0 }, function()
+  return self.cache:ensure({ 'get_word' }, function()
     --NOTE: This is nvim-cmp specific implementation.
     if misc.safe(self:get_completion_item().word) then
       return self:get_completion_item().word

@@ -1,4 +1,6 @@
 local spec = require('cmp.utils.spec')
+local source = require('cmp.source')
+local async = require('cmp.utils.async')
 
 local entry = require('cmp.entry')
 
@@ -289,11 +291,7 @@ describe('entry', function()
   end)
 
   it('[ansiblels] 1', function()
-    local state = spec.state('\t\t', 1, 4)
-
-    -- press g
-    state.input('s')
-    local e = entry.new(state.manual(), state.source(), {
+    local item = {
       detail = 'ansible.builtin',
       filterText = 'blockinfile ansible.builtin.blockinfile',
       kind = 7,
@@ -312,7 +310,18 @@ describe('entry', function()
           },
         },
       },
+    }
+    local s = source.new('dummy', {
+      resolve = function(_, _, callback)
+        item.textEdit.newText = 'modified'
+        callback(item)
+      end,
     })
+    local e = entry.new(spec.state('', 1, 1).manual(), s, item)
+    assert.are.equal(e:get_vim_item(e:get_offset()).word, 'blockinfile')
+    async.sync(function(done)
+      e:resolve(done)
+    end, 100)
     assert.are.equal(e:get_vim_item(e:get_offset()).word, 'blockinfile')
   end)
 
