@@ -411,9 +411,14 @@ entry.get_documentation = function(self)
 
   -- detail
   if misc.safe(item.detail) and item.detail ~= '' then
+    local ft = self.context.filetype
+    local dot_index = string.find(ft, "%.")
+    if dot_index ~= nil then
+        ft = string.sub(ft, 0, dot_index-1)
+    end
     table.insert(documents, {
       kind = types.lsp.MarkupKind.Markdown,
-      value = ('```%s\n%s\n```'):format(self.context.filetype, str.trim(item.detail)),
+      value = ('```%s\n%s\n```'):format(ft, str.trim(item.detail)),
     })
   end
 
