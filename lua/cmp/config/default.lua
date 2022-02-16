@@ -73,12 +73,12 @@ return function()
     },
 
     completion = {
-      keyword_length = 1,
-      keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
       autocomplete = {
         types.cmp.TriggerEvent.TextChanged,
       },
       completeopt = 'menu,menuone,noselect',
+      keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
+      keyword_length = 1,
     },
 
     formatting = {
@@ -110,13 +110,6 @@ return function()
 
     sources = {},
 
-    documentation = {
-      border = { '', '', '', ' ', '', '', '', ' ' },
-      winhighlight = 'NormalFloat:NormalFloat,FloatBorder:NormalFloat',
-      maxwidth = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
-      maxheight = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
-    },
-
     confirmation = {
       default_behavior = types.cmp.ConfirmBehavior.Insert,
       get_commit_characters = function(commit_characters)
@@ -132,6 +125,27 @@ return function()
 
     view = {
       entries = 'custom',
+    },
+
+    window = {
+      completion = {
+        border = {'', '', '', '', '', '', '', ''},
+        scrollbar = '',
+        winhighlight = {
+          bordered = 'Normal:CmpCompletionWindowBordered,FloatBorder:CmpCompletionWindowBorder,CursorLine:PmenuSel,Search:None',
+          default = 'Normal:CmpCompletionWindow,FloatBorder:CmpCompletionWindowPadding,CursorLine:PmenuSel,Search:None',
+        },
+      },
+      documentation = {
+        border = {'', '', '', ' ', '', '', '', ' '},
+        max_height = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
+        max_width = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
+        scrollbar = '',
+        winhighlight = {
+          bordered = 'Normal:CmpDocumentationWindowBordered,FloatBorder:CmpDocumentationWindowBorder',
+          default = 'Normal:CmpDocumentationWindow,FloatBorder:CmpDocumentationWindowPadding',
+        },
+      },
     },
   }
 end

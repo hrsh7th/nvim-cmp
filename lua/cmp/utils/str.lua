@@ -193,4 +193,10 @@ str.escape = function(text, chars)
   return table.concat(escaped, '')
 end
 
+--- @param c string|nil the char to check
+--- @return boolean visible `true` if `s` matches `%s*`
+str.is_invisible = function(c)
+  return c == '' or c == ' '
+end
+
 return str

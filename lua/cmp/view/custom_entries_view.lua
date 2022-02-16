@@ -25,6 +25,7 @@ custom_entries_view.ns = vim.api.nvim_create_namespace('cmp.view.custom_entries_
 
 custom_entries_view.new = function()
   local self = setmetatable({}, { __index = custom_entries_view })
+
   self.entries_win = window.new()
   self.entries_win:option('conceallevel', 2)
   self.entries_win:option('concealcursor', 'n')
@@ -32,7 +33,6 @@ custom_entries_view.new = function()
   self.entries_win:option('foldenable', false)
   self.entries_win:option('wrap', false)
   self.entries_win:option('scrolloff', 0)
-  self.entries_win:option('winhighlight', 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None')
   -- This is done so that strdisplaywidth calculations for lines in the
   -- custom_entries_view window exactly match with what is really displayed,
   -- see comment in cmp.Entry.get_view. Setting tabstop to 1 makes all tabs be
@@ -106,12 +106,14 @@ custom_entries_view.on_change = function(self)
 end
 
 custom_entries_view.open = function(self, offset, entries)
+  local completion = config.get().window.completion
   self.offset = offset
   self.entries = {}
   self.column_width = { abbr = 0, kind = 0, menu = 0 }
 
   -- Apply window options (that might be changed) on the custom completion menu.
   self.entries_win:option('winblend', vim.o.pumblend)
+  self.entries_win:option('winhighlight', completion.winhighlight)
 
   local entries_buf = self.entries_win:get_buffer()
   local lines = {}
@@ -149,18 +151,21 @@ custom_entries_view.open = function(self, offset, entries)
   local pos = api.get_screen_cursor()
   local cursor = api.get_cursor()
   local delta = cursor[2] + 1 - self.offset
-  local has_bottom_space = (vim.o.lines - pos[1]) >= DEFAULT_HEIGHT
   local row, col = pos[1], pos[2] - delta - 1
 
-  if not has_bottom_space and math.floor(vim.o.lines * 0.5) <= row and vim.o.lines - row <= height then
+  local border_offset_row, border_offset_col = window.get_border_dimensions({style=completion})
+  if math.floor(vim.o.lines * 0.5) <= row + border_offset_row and vim.o.lines - row - border_offset_row <= math.min(DEFAULT_HEIGHT, height) then
     height = math.min(height, row - 1)
-    row = row - height - 1
+    row = row - height - border_offset_row - 1
+    if row < 0 then height = height + row end
   end
-  if math.floor(vim.o.columns * 0.5) <= col and vim.o.columns - col <= width then
+  if math.floor(vim.o.columns * 0.5) <= col + border_offset_col and vim.o.columns - col - border_offset_col <= width then
     width = math.min(width, vim.o.columns - 1)
-    col = vim.o.columns - width - 1
+    col = vim.o.columns - width - border_offset_col - 1
+    if col < 0 then width = width + col end
   end
 
+  self.entries_win.scrollbar = completion.scrollbar
   self.entries_win:open({
     relative = 'editor',
     style = 'minimal',
@@ -168,7 +173,8 @@ custom_entries_view.open = function(self, offset, entries)
     col = math.max(0, col),
     width = width,
     height = height,
-    zindex = 1001,
+    border = completion.border,
+    zindex = completion.zindex or 1001,
   })
   if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
     self:_select(preselect, { behavior = types.cmp.SelectBehavior.Select })
