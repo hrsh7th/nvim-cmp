@@ -23,7 +23,7 @@ end
 ---@param e cmp.Entry
 ---@param view cmp.WindowStyle
 docs_view.open = function(self, e, view)
-  local documentation = config.get().documentation
+  local documentation = config.get().window.documentation
   if not documentation then
     return
   end
@@ -34,7 +34,7 @@ docs_view.open = function(self, e, view)
 
   local right_space = vim.o.columns - (view.col + view.width) - 2
   local left_space = view.col - 2
-  local maxwidth = math.min(documentation.maxwidth, math.max(left_space, right_space) - 1)
+  local max_width = math.min(documentation.max_width, math.max(left_space, right_space) - 1)
 
   -- update buffer content if needed.
   if not self.entry or e.id ~= self.entry.id then
@@ -48,21 +48,21 @@ docs_view.open = function(self, e, view)
       vim.cmd([[syntax clear]])
     end)
     vim.lsp.util.stylize_markdown(self.window:get_buffer(), documents, {
-      max_width = maxwidth,
-      max_height = documentation.maxheight,
+      max_width = max_width,
+      max_height = documentation.max_height,
     })
   end
 
   local width, height = vim.lsp.util._make_floating_popup_size(vim.api.nvim_buf_get_lines(self.window:get_buffer(), 0, -1, false), {
-    max_width = maxwidth,
-    max_height = documentation.maxheight,
+    max_width = max_width,
+    max_height = documentation.max_height,
   })
   if width <= 0 or height <= 0 then
     return self:close()
   end
 
   local right_col = view.col + view.width
-  local left_col = view.col - width - 2
+  local left_col = view.col - width
 
   local col, left
   if right_space >= width and left_space >= width then
@@ -81,6 +81,7 @@ docs_view.open = function(self, e, view)
     return self:close()
   end
 
+  local _, border_width = window.get_border_dimensions({style=documentation})
   self.window:option('winhighlight', documentation.winhighlight)
   self.window:set_style({
     relative = 'editor',
@@ -92,8 +93,11 @@ docs_view.open = function(self, e, view)
     border = documentation.border,
     zindex = documentation.zindex or 50,
   })
-  if left and self.window:has_scrollbar() then
-    self.window.style.col = self.window.style.col - 1
+  self.window.scrollbar = documentation.scrollbar
+  if left then
+    self.window.style.col = self.window.style.col - border_width
+  else
+    self.window.style.col = self.window.style.col
   end
   self.window:open()
 end
