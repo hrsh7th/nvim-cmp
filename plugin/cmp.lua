@@ -109,14 +109,8 @@ vim.cmd [[
   highlight default link CmpItemKind CmpItemKindDefault
   highlight default link CmpItemMenu CmpItemMenuDefault
 
-  highlight default link CmpCompletionWindow Pmenu
-  highlight default link CmpCompletionWindowBorder FloatBorder
-  highlight default link CmpCompletionWindowBordered CmpCompletionWindow
-  highlight default link CmpCompletionWindowPadding CmpCompletionWindow
-  highlight default link CmpDocumentationWindow NormalFloat
-  highlight default link CmpDocumentationWindowBorder CmpCompletionWindowBorder
-  highlight default link CmpDocumentationWindowBordered CmpDocumentationWindow
-  highlight default link CmpDocumentationWindowPadding CmpDocumentationWindow
+  highlight default link CmpBorderedWindow_Normal Normal
+  highlight default link CmpBorderedWindow_FloatBorder FloatBorder
 ]]
 
 for name in pairs(types.lsp.CompletionItemKind) do
@@ -127,10 +121,6 @@ for name in pairs(types.lsp.CompletionItemKind) do
     end
   end
 end
-
-vim.cmd [[command! CmpStatus lua require('cmp').status()]]
-
-vim.cmd [[doautocmd <nomodeline> User CmpReady]]
 
 if vim.on_key then
   vim.on_key(function(keys)
@@ -143,4 +133,8 @@ if vim.on_key then
     end
   end, vim.api.nvim_create_namespace('cmp.plugin'))
 end
+
+vim.cmd [[command! CmpStatus lua require('cmp').status()]]
+
+vim.cmd [[doautocmd <nomodeline> User CmpReady]]
 
