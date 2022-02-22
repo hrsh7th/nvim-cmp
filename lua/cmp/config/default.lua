@@ -132,8 +132,8 @@ return function()
         border = {'', '', '', '', '', '', '', ''},
         scrollbar = '',
         winhighlight = {
-          bordered = 'Normal:CmpCompletionWindowBordered,FloatBorder:CmpCompletionWindowBorder,CursorLine:PmenuSel,Search:None',
-          default = 'Normal:CmpCompletionWindow,FloatBorder:CmpCompletionWindowPadding,CursorLine:PmenuSel,Search:None',
+          bordered = 'Normal:CmpBorderedWindow_Normal,FloatBorder:CmpBorderedWindow_FloatBorder,CursorLine:Visual,Search:None',
+          default = 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None',
         },
       },
       documentation = {
@@ -142,8 +142,8 @@ return function()
         max_width = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
         scrollbar = '',
         winhighlight = {
-          bordered = 'Normal:CmpDocumentationWindowBordered,FloatBorder:CmpDocumentationWindowBorder',
-          default = 'Normal:CmpDocumentationWindow,FloatBorder:CmpDocumentationWindowPadding',
+          bordered = 'Normal:CmpBorderedWindow_Normal,FloatBorder:CmpBorderedWindow_FloatBorder',
+          default = 'FloatBorder:NormalFloat',
         },
       },
     },
