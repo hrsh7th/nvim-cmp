@@ -97,7 +97,6 @@ lsp.InsertTextMode = vim.tbl_add_reverse_lookup(lsp.InsertTextMode)
 lsp.MarkupKind = {}
 lsp.MarkupKind.PlainText = 'plaintext'
 lsp.MarkupKind.Markdown = 'markdown'
-lsp.MarkupKind.Markdown = 'markdown'
 lsp.MarkupKind = vim.tbl_add_reverse_lookup(lsp.MarkupKind)
 
 ---@alias lsp.CompletionItemTag "1"
