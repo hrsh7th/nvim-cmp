@@ -612,6 +612,20 @@ You can create custom source like the following example.
 ==============================================================================
 FAQ                                                                    *cmp-faq*
 
+Why does cmp automatically select a particular item? ~
+How to disable the preselect feature? ~
+
+  The nvim-cmp respects LSP(Language Server Protocol) specification.
+  The LSP spec defines the `preselect` feature for completion. 
+
+  You can disable the `preselect` feature like the following. 
+>
+  cmp.setup {
+    preselect = cmp.PreselectMode.None
+  }
+<
+
+
 How to disable auto-completion?~
 How to use nvim-cmp as like omnifunc?~
 
