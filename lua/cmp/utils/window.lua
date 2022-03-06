@@ -17,7 +17,7 @@ local str = require('cmp.utils.str')
 ---@field public name string
 ---@field public win number|nil
 ---@field public thumb_win number|nil the scrollbar thumb window
----@field public scroll_win number|nil the scrollbar window
+---@field public sbar_win number|nil the scrollbar window
 ---@field public style cmp.WindowStyle
 ---@field public opt table<string, any>
 ---@field public buffer_opt table<string, any>
@@ -31,7 +31,7 @@ window.new = function()
   local self = setmetatable({}, { __index = window })
   self.name = misc.id('cmp.utils.window.new')
   self.win = nil
-  self.scroll_win = nil
+  self.sbar_win = nil
   self.thumb_win = nil
   self.style = {}
   self.cache = cache.new()
@@ -86,7 +86,7 @@ window.set_style = function(self, style)
   local info = self:info()
 
   if vim.o.lines and vim.o.lines <= info.row + info.height + 1 then
-    self.style.height = vim.o.lines - info.row - info.border.height - 1
+    self.style.height = vim.o.lines - info.row - info.border_info.vert - 1
   end
 
   self.style.zindex = self.style.zindex or 1
@@ -131,61 +131,59 @@ end
 ---Update
 window.update = function(self)
   local info = self:info()
-  if info.scrollbar and info.scrollbar.width > 0 then
-    info.scrollbar.relative = 'editor'
-    info.scrollbar.style = 'minimal'
-
+  if info.scrollbar then
     -- Draw the background of the scrollbar
-    if str.is_invisible(self.style.border[2]) or math.max(info.border.height, info.border.width) < 1 then
+    if not info.border_info.visible then
       local style = {
-        relative = info.scrollbar.relative,
-        style = info.scrollbar.style,
-        width = info.scrollbar.width,
+        relative = 'editor',
+        style = 'minimal',
+        width = 1,
         height = self.style.height,
-        row = info.row + ((str.is_invisible(self.style.border[2]) or self.style.border == 'shadow') and 0 or 1),
-        col = info.scrollbar.col,
+        row = info.row,
+        col = info.col + info.width - info.scrollbar_offset, -- info.col was already contained the scrollbar offset.
         zindex = (self.style.zindex and (self.style.zindex + 1) or 1),
       }
-
-      if self.scroll_win and vim.api.nvim_win_is_valid(self.scroll_win) then
-        vim.api.nvim_win_set_config(self.scroll_win, style)
+      if self.sbar_win and vim.api.nvim_win_is_valid(self.sbar_win) then
+        vim.api.nvim_win_set_config(self.sbar_win, style)
       else
         style.noautocmd = true
-        self.scroll_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'scroll_buf'), false, style)
+        self.sbar_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'sbar_buf'), false, style)
         local highlight = self.scrollbar == '' and 'PmenuSbar' or 'CmpScrollBar'
-        vim.api.nvim_win_set_option(self.scroll_win, 'winhighlight', 'EndOfBuffer:'..highlight..',NormalFloat:'..highlight)
+        vim.api.nvim_win_set_option(self.sbar_win, 'winhighlight', 'EndOfBuffer:' .. highlight .. ',NormalFloat:' .. highlight)
       end
-
       if self.scrollbar ~= '' then
-        local replace = {}
-        for i = 1, style.height do replace[i] = self.scrollbar end
-
-        vim.api.nvim_buf_set_lines(vim.api.nvim_win_get_buf(self.scroll_win), 0, -1, true, replace)
+        vim.api.nvim_buf_set_lines(vim.api.nvim_win_get_buf(self.sbar_win), 0, -1, true, misc.rep({ self.scrollbar }, style.height))
       end
     end
 
     -- Draw the scrollbar thumb
-    info.scrollbar.zindex = (self.style.zindex and (self.style.zindex + 2) or 2)
+    local thumb_offset = math.floor(info.inner_height * (vim.fn.getwininfo(self.win)[1].topline / self:get_content_height()))
+    local thumb_height = math.ceil(info.inner_height * (info.inner_height / self:get_content_height()))
 
+    local style = {
+      relative = 'editor',
+      style = 'minimal',
+      width = 1,
+      height = thumb_height,
+      row = info.row + thumb_offset + (info.border_info.visible and 1 or 0),
+      col = info.col + info.width - 1, -- info.col was already added scrollbar offset.
+      zindex = (self.style.zindex and (self.style.zindex + 2) or 2),
+    }
     if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
-      vim.api.nvim_win_set_config(self.thumb_win, info.scrollbar)
+      vim.api.nvim_win_set_config(self.thumb_win, style)
     else
-      info.scrollbar.noautocmd = true
-      self.thumb_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'thumb_buf'), false, info.scrollbar)
+      style.noautocmd = true
+      self.thumb_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'thumb_buf'), false, style)
       local highlight = self.scrollbar == '' and 'PmenuThumb' or 'CmpScrollThumb'
-      vim.api.nvim_win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:'..highlight..',NormalFloat:'..highlight)
+      vim.api.nvim_win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:'  .. highlight .. ',NormalFloat:'  .. highlight)
     end
-
     if self.scrollbar ~= '' then
-      local replace = {}
-      for i = 1, info.scrollbar.height do replace[i] = self.scrollbar end
-
-      vim.api.nvim_buf_set_lines(vim.api.nvim_win_get_buf(self.thumb_win), 0, -1, true, replace)
+      vim.api.nvim_buf_set_lines(vim.api.nvim_win_get_buf(self.sbar_win), 0, -1, true, misc.rep({ self.scrollbar }, style.height))
     end
   else
-    if self.scroll_win and vim.api.nvim_win_is_valid(self.scroll_win) then
-      vim.api.nvim_win_hide(self.scroll_win)
-      self.scroll_win = nil
+    if self.sbar_win and vim.api.nvim_win_is_valid(self.sbar_win) then
+      vim.api.nvim_win_hide(self.sbar_win)
+      self.sbar_win = nil
     end
     if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
       vim.api.nvim_win_hide(self.thumb_win)
@@ -208,9 +206,9 @@ window.close = function(self)
       vim.api.nvim_win_hide(self.win)
       self.win = nil
     end
-    if self.scroll_win and vim.api.nvim_win_is_valid(self.scroll_win) then
-      vim.api.nvim_win_hide(self.scroll_win)
-      self.scroll_win = nil
+    if self.sbar_win and vim.api.nvim_win_is_valid(self.sbar_win) then
+      vim.api.nvim_win_hide(self.sbar_win)
+      self.sbar_win = nil
     end
     if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
       vim.api.nvim_win_hide(self.thumb_win)
@@ -226,33 +224,25 @@ end
 
 ---Return win info.
 window.info = function(self)
-  local border_height, border_width = self:get_border_dimensions()
+  local border_info = self:get_border_info()
   local info = {
     row = self.style.row,
     col = self.style.col,
-    width = self.style.width + border_width,
-    height = self.style.height + border_height,
-    -- NOTE: this is the scrollbar THUMB information.
-    border = {
-      height = border_height,
-      width = border_width,
-    },
+    width = self.style.width + border_info.left + border_info.right,
+    height = self.style.height + border_info.top + border_info.bottom,
+    inner_width = self.style.width,
+    inner_height = self.style.height,
+    border_info = border_info,
+    scrollbar = false,
+    scrollbar_offset = 0
   }
 
-  -- Information about the scrollbar
-  if self.win and type(self.scrollbar) == 'string' then
-    local content_height = self:get_content_height()
-    if content_height > self.style.height then
-      info.scrollbar = {
-        height = math.ceil(self.style.height * (self.style.height / content_height)),
-        width = 1,
-      }
-      info.scrollbar.col = info.col + info.width - ((str.is_invisible(self.style.border[4])) and 0 or 1)
-      info.scrollbar.row = info.row +
-        math.min(self.style.height - info.scrollbar.height, math.floor(self.style.height * (vim.fn.getwininfo(self.win)[1].topline / content_height))) +
-        ((str.is_invisible(self.style.border[2]) or self.style.border == 'shadow') and 0 or 1)
-      if border_width < 1 then
-        info.width = info.width + info.scrollbar.width
+  if type(self.scrollbar) == 'string' then
+    if self:get_content_height() > info.inner_height then
+      info.scrollbar = true
+      if not border_info.visible then
+        info.scrollbar_offset = 1
+        info.width = info.width + 1
       end
     end
   end
@@ -260,50 +250,80 @@ window.info = function(self)
   return info
 end
 
---- @return number height, number width
---- @return number[] dimensions the height and width
-window.get_border_dimensions = function(self)
+---Return border information.
+---@return { top: number, left: number, right: number, bottom: number, vert: number, horiz: number, visible: boolean }
+window.get_border_info = function(self)
   local border = self.style.border
-
-  if border == 'shadow' then
-    return 1, 1
-  elseif type(border) == 'string' then
-    return 2, 2
-  elseif type(border) == 'table' then
-    -- NOTE: the border indices look like this: 1 2 3
-    --                                          8   4
-    --                                          7 6 5
-    return (self.style.border[2] ~= '' and 1 or 0) + (self.style.border[6] ~= '' and 1 or 0),
-           (self.style.border[4] ~= '' and 1 or 0) + (self.style.border[8] ~= '' and 1 or 0)
+  if not border or border == 'none' then
+    return {
+      top = 0,
+      left = 0,
+      right = 0,
+      bottom = 0,
+      vert = 0,
+      horiz = 0,
+      visible = false,
+    }
+  end
+  if type(border) == 'string' then
+    if border == 'shadow' then
+      return {
+        top = 0,
+        left = 0,
+        right = 1,
+        bottom = 1,
+        vert = 1,
+        horiz = 1,
+        visible = false,
+      }
+    end
+    return {
+      top = 1,
+      left = 1,
+      right = 1,
+      bottom = 1,
+      vert = 2,
+      horiz = 2,
+      visible = true,
+    }
   end
 
-  return 0, 0
+  local new_border = {}
+  while #new_border <= 8 do
+    for _, b in ipairs(border) do
+      table.insert(new_border, type(b) == 'string' and b or b[1])
+    end
+  end
+  local info = {}
+  info.top = new_border[2] == '' and 0 or 1
+  info.right = new_border[4] == '' and 0 or 1
+  info.bottom = new_border[6] == '' and 0 or 1
+  info.left = new_border[8] == '' and 0 or 1
+  info.vert = info.top + info.bottom
+  info.horiz = info.left + info.right
+  info.visible = not (
+    vim.tbl_contains({ '', ' ' }, new_border[2])
+    and vim.tbl_contains({ '', ' ' }, new_border[4])
+    and vim.tbl_contains({ '', ' ' }, new_border[6])
+    and vim.tbl_contains({ '', ' ' }, new_border[8])
+  )
+  return info
 end
 
 ---Get scroll height.
+---NOTE: The result of vim.fn.strdisplaywidth depends on the buffer it was called in (see comment in cmp.Entry.get_view).
 ---@return number
 window.get_content_height = function(self)
   if not self:option('wrap') then
     return vim.api.nvim_buf_line_count(self:get_buffer())
   end
-
-  return self.cache:ensure({
-    'get_content_height',
-    self.style.width,
-    self:get_buffer(),
-    vim.api.nvim_buf_get_changedtick(self:get_buffer()),
-  }, function()
-    local height = 0
-    local buf = self:get_buffer()
-    -- The result of vim.fn.strdisplaywidth depends on the buffer it was called
-    -- in (see comment in cmp.Entry.get_view).
-    vim.api.nvim_buf_call(buf, function()
-      for _, text in ipairs(vim.api.nvim_buf_get_lines(buf, 0, -1, false)) do
-        height = height + math.ceil(math.max(1, vim.fn.strdisplaywidth(text)) / self.style.width)
-      end
-    end)
-    return height
+  local height = 0
+  vim.api.nvim_buf_call(self:get_buffer(), function()
+    for _, text in ipairs(vim.api.nvim_buf_get_lines(self:get_buffer(), 0, -1, false)) do
+      height = height + math.max(1, math.ceil(vim.fn.strdisplaywidth(text) / self.style.width))
+    end
   end)
+  return height
 end
 
 return window

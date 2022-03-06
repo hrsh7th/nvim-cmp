@@ -32,11 +32,12 @@ docs_view.open = function(self, e, view)
     return self:close()
   end
 
-  local right_space = vim.o.columns - (view.col + view.width) - 2
-  local left_space = view.col - 2
-  local max_width = math.min(documentation.max_width, math.max(left_space, right_space) - 1)
+  local border_info = window.get_border_info({ style = documentation })
+  local right_space = vim.o.columns - (view.col + view.width) - 1
+  local left_space = view.col - 1
+  local max_width = math.min(documentation.max_width, math.max(left_space, right_space))
 
-  -- update buffer content if needed.
+  -- Update buffer content if needed.
   if not self.entry or e.id ~= self.entry.id then
     local documents = e:get_documentation()
     if #documents == 0 then
@@ -46,6 +47,7 @@ docs_view.open = function(self, e, view)
     self.entry = e
     vim.api.nvim_buf_call(self.window:get_buffer(), function()
       vim.cmd([[syntax clear]])
+      vim.api.nvim_buf_set_lines(self.window:get_buffer(), 0, -1, false, {})
     end)
     vim.lsp.util.stylize_markdown(self.window:get_buffer(), documents, {
       max_width = max_width,
@@ -53,17 +55,18 @@ docs_view.open = function(self, e, view)
     })
   end
 
+  -- Calculate window size.
   local width, height = vim.lsp.util._make_floating_popup_size(vim.api.nvim_buf_get_lines(self.window:get_buffer(), 0, -1, false), {
-    max_width = max_width,
-    max_height = documentation.max_height,
+    max_width = max_width - border_info.horiz,
+    max_height = documentation.max_height - border_info.vert,
   })
   if width <= 0 or height <= 0 then
     return self:close()
   end
 
+  -- Calculate window position.
   local right_col = view.col + view.width
-  local left_col = view.col - width
-
+  local left_col = view.col - width - border_info.horiz
   local col, left
   if right_space >= width and left_space >= width then
     if right_space < left_space then
@@ -81,9 +84,10 @@ docs_view.open = function(self, e, view)
     return self:close()
   end
 
-  local _, border_width = window.get_border_dimensions({style=documentation})
+  -- Render window.
+  self.window.scrollbar = documentation.scrollbar
   self.window:option('winhighlight', documentation.winhighlight)
-  self.window:set_style({
+  local style = {
     relative = 'editor',
     style = 'minimal',
     width = width,
@@ -92,14 +96,14 @@ docs_view.open = function(self, e, view)
     col = col,
     border = documentation.border,
     zindex = documentation.zindex or 50,
-  })
-  self.window.scrollbar = documentation.scrollbar
+  }
+  self.window:open(style)
+
+  -- Correct left-col for scrollbar existence.
   if left then
-    self.window.style.col = self.window.style.col - border_width
-  else
-    self.window.style.col = self.window.style.col
+    style.col = style.col - self.window:info().scrollbar_offset
+    self.window:open(style)
   end
-  self.window:open()
 end
 
 ---Close floating window

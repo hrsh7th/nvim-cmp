@@ -153,7 +153,9 @@ custom_entries_view.open = function(self, offset, entries)
   local delta = cursor[2] + 1 - self.offset
   local row, col = pos[1], pos[2] - delta - 1
 
-  local border_offset_row, border_offset_col = window.get_border_dimensions({style=completion})
+  local border_info = window.get_border_info({ style = completion })
+  local border_offset_row = border_info.top + border_info.bottom
+  local border_offset_col = border_info.left + border_info.right
   if math.floor(vim.o.lines * 0.5) <= row + border_offset_row and vim.o.lines - row - border_offset_row <= math.min(DEFAULT_HEIGHT, height) then
     height = math.min(height, row - 1)
     row = row - height - border_offset_row - 1
