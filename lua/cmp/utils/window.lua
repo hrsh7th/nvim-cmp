@@ -157,8 +157,8 @@ window.update = function(self)
     end
 
     -- Draw the scrollbar thumb
-    local thumb_offset = math.floor(info.inner_height * (vim.fn.getwininfo(self.win)[1].topline / self:get_content_height()))
     local thumb_height = math.ceil(info.inner_height * (info.inner_height / self:get_content_height()))
+    local thumb_offset = math.min(math.floor(info.inner_height * (vim.fn.getwininfo(self.win)[1].topline / self:get_content_height())), info.inner_height - thumb_height)
 
     local style = {
       relative = 'editor',
