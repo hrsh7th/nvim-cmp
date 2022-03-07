@@ -178,12 +178,12 @@ window.update = function(self)
       vim.api.nvim_win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:'  .. highlight .. ',NormalFloat:'  .. highlight)
     end
     if self.scrollbar ~= '' then
-      vim.api.nvim_buf_set_lines(vim.api.nvim_win_get_buf(self.sbar_win), 0, -1, true, misc.rep({ self.scrollbar }, style.height))
+      vim.api.nvim_buf_set_lines(vim.api.nvim_win_get_buf(self.thumb_win), 0, -1, true, misc.rep({ self.scrollbar }, style.height))
     end
   else
-    if self.sbar_win and vim.api.nvim_win_is_valid(self.sbar_win) then
-      vim.api.nvim_win_hide(self.sbar_win)
-      self.sbar_win = nil
+    if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
+      vim.api.nvim_win_hide(self.thumb_win)
+      self.thumb_win = nil
     end
     if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
       vim.api.nvim_win_hide(self.thumb_win)
