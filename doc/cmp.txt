@@ -331,77 +331,15 @@ Highlight                                                        *cmp-highlight*
 *CmpItemMenu*
   The menu field's highlight group.
 
-  Default: |hl-Pmenu|
+*CmpBorderedWindow_Normal*
+  The highlight group for the bordered window's |hi-Normal|.
 
-*CmpCompletionWindow*
-  The highlight group for the completion window.
+*CmpBorderedWindow_FloatBorder*
+  The highlight group for the bordered window's |hi-FloatBorder|.
 
-  Default: |hl-Pmenu|
+*CmpBorderedWindow_CursorLine*
+  The highlight group for the bordered window's |hi-Visual|.
 
-*CmpCompletionWindowBorder*
-  The highlight group for borders to completion window.
-
-  Default: |hl-NormalFloat|
-  Recommended: |hl-FloatBorder|
-
-*CmpCompletionWindowBordered*
-  The highlight group for a bordered documentation window.
-
-  Default: |CmpCompletionWindow|
-
-*CmpCompletionWindowPadding*
-  The highlight group for borders to the completion window which are made up of
-  entirely invisible / whitespace characters. For example: >
-  cmp.setup {
-    window = {
-      completion = {
-        border = {'', '', '', ' ', '', '', '', ' '},
-      },
-    },
-  }
-<
-
-  Default: |CmpCompletionWindow|
-
-*CmpDocumentationWindow*
-  The highlight group for the documentation window.
-
-  Default: |hl-Pmenu|
-
-*CmpDocumentationWindowBorder*
-  The highlight group for borders to documentation window.
-
-  Default: |CmpCompletionWindowBorder|
-
-*CmpDocumentationWindowBordered*
-  The highlight group for a bordered documentation window.
-
-  Default: |CmpDocumentationWindow|
-
-*CmpDocumentationWindowPadding*
-  The highlight group for borders to the documentation window which are made
-  up of entirely invisible / whitespace characters. For example: >
-  cmp.setup {
-    window = {
-      documentation = {
-        border = {'', '', '', ' ', '', '', '', ' '},
-      },
-    },
-  }
-<
-
-  Default: |CmpDocumentationWindow|
-
-*CmpScrollBar*
-  The highlight group for the background of a scrollbar; present when there
-  is no border on a window.
-
-  Default: |hl-PmenuSbar|
-
-*CmpScrollThumb*
-  The highlight group for the thumb of a scrollbar.
-
-  Default: |hl-PmenuThumb|
 
 ==============================================================================
 Autocmd                                                            *cmp-autocmd*
