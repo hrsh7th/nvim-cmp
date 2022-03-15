@@ -523,18 +523,6 @@ window.completion.border~
   Border characters used for the completion popup menu when
   |experimental.native_menu| is disabled.
 
-                                        *cmp-config.window.completion.scrollbar*
-window.completion.scrollbar~
-  `string | false`
-  A setting defining which character to use for the scrollbar.
-
-  * If an empty string (`""`), |hl-PmenuThumb| will be used.
-  * If `false`, no scrollbar will be rendered.
-  * If |experimental.native_menu| is `true`, this setting will be ignored.
-
-  Default: `""`
-  Recommended: `"║"`
-
                                      *cmp-config.window.completion.winhighlight*
 window.completion.winhighlight~
   `string | cmp.WinhighlightConfig`
@@ -569,17 +557,6 @@ window.documentation.max_width~
 window.documentation.max_height~
   `number`
   The documentation window's max height.
-
-                                     *cmp-config.window.documentation.scrollbar*
-window.documentation.scrollbar~
-  `string`
-  A setting defining which character to use for the scrollbar.
-
-  * If an empty string (`""`), |hl-PmenuThumb| will be used.
-  * If `false`, no scrollbar will be rendered.
-
-  Default: `""`
-  Recommended: `"║"`
 
                                   *cmp-config.window.documentation.winhighlight*
 window.documentation.winhighlight~

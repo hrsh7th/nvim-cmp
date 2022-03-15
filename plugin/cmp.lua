@@ -89,15 +89,6 @@ misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
       vim.cmd(([[highlight default link CmpItemKind%sDefault CmpItemKind]]):format(name))
     end
   end
-
-  highlight.inherit('CmpScrollBar', 'PmenuSbar', {
-    guifg = 'NONE',
-    ctermfg = 'NONE',
-  })
-  highlight.inherit('CmpScrollThumb', 'PmenuThumb', {
-    guibg = 'NONE',
-    ctermbg = 'NONE',
-  })
 end)
 _G.cmp.plugin.colorscheme()
 
