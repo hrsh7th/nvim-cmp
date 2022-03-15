@@ -73,23 +73,6 @@ str.remove_suffix = function(text, suffix)
   return string.sub(text, 1, -#suffix - 1)
 end
 
----strikethrough
----@param text string
----@return string
-str.strikethrough = function(text)
-  local r = pattern.regex('.')
-  local buffer = ''
-  while text ~= '' do
-    local s, e = r:match_str(text)
-    if not s then
-      break
-    end
-    buffer = buffer .. string.sub(text, s, e) .. '̶'
-    text = string.sub(text, e + 1)
-  end
-  return buffer
-end
-
 ---trim
 ---@param text string
 ---@return string
@@ -191,12 +174,6 @@ str.escape = function(text, chars)
     i = i + 1
   end
   return table.concat(escaped, '')
-end
-
---- @param c string|nil the char to check
---- @return boolean visible `true` if `s` matches `%s*`
-str.is_invisible = function(c)
-  return c == '' or c == ' '
 end
 
 return str

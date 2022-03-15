@@ -145,7 +145,6 @@ return function()
     window = {
       completion = {
         border = {'', '', '', '', '', '', '', ''},
-        scrollbar = '',
         winhighlight = {
           bordered = 'Normal:CmpBorderedWindow_Normal,FloatBorder:CmpBorderedWindow_FloatBorder,CursorLine:CmpBorderedWindow_CursorLine,Search:None',
           default = 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None',
@@ -155,7 +154,6 @@ return function()
         border = {'', '', '', ' ', '', '', '', ' '},
         max_height = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
         max_width = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
-        scrollbar = '',
         winhighlight = {
           bordered = 'Normal:CmpBorderedWindow_Normal,FloatBorder:CmpBorderedWindow_FloatBorder,CursorLine:CmpBorderedWindow_CursorLine,Search:None',
           default = 'FloatBorder:NormalFloat',

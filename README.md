@@ -137,7 +137,7 @@ A list of available sources can be found in the [Wiki](https://github.com/hrsh7t
 
 ### Where can I find advanced configuration examples?
 
-Please see the corresponding [FAQ](#how-to-show-name-of-item-kind-and-source-like-compe) section, as well as the [`completion.border`](#completion.border) and [`completion.scrollbar`](#completion.scrollbar) options.
+See the [wiki](https://github.com/hrsh7th/nvim-cmp/wiki)
 
 
 Advanced configuration example

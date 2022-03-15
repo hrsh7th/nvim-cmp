@@ -169,35 +169,6 @@ config.normalize = function(c)
     c.mapping = normalized
   end
 
-  if type(c.window) == 'table' then
-    for k, v in pairs(c.window) do
-      if type(v) == 'table' then
-        if type(v.winhighlight) == 'table' then
-          local any_visible = false
-          if type(v.border) == 'table' then
-            -- PERF: we want to do this before normalizing the `v.border`, because after it may be longer
-            for _, b in ipairs(v.border) do
-              any_visible = any_visible or not str.is_invisible(b)
-            end
-          elseif type(v.border) == 'string' then
-            any_visible = true
-          else
-            any_visible = false
-          end
-          c.window[k].winhighlight = any_visible and v.winhighlight.bordered or v.winhighlight.default
-        end
-
-        if type(v.border) == 'table' and #v.border < 8 then
-          local corner1 = v.border[1]
-          local middle1 = v.border[2]
-          local corner2 = v.border[3]
-          local middle2 = v.border[4]
-          c.window[k].border = {corner1, middle1, corner2 or corner1, middle2 or middle1, corner1, middle1, corner2 or corner1, middle2 or middle1}
-        end
-      end
-    end
-  end
-
   if c.experimental and c.experimental.native_menu then
     vim.api.nvim_echo({
       { '[nvim-cmp] ', 'Normal' },

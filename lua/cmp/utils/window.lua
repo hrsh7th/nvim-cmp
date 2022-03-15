@@ -2,7 +2,6 @@ local cache = require('cmp.utils.cache')
 local misc = require('cmp.utils.misc')
 local buffer = require('cmp.utils.buffer')
 local api = require('cmp.utils.api')
-local str = require('cmp.utils.str')
 
 ---@class cmp.WindowStyle
 ---@field public relative string
@@ -16,12 +15,11 @@ local str = require('cmp.utils.str')
 ---@class cmp.Window
 ---@field public name string
 ---@field public win number|nil
----@field public thumb_win number|nil the scrollbar thumb window
----@field public sbar_win number|nil the scrollbar window
+---@field public thumb_win number|nil
+---@field public sbar_win number|nil
 ---@field public style cmp.WindowStyle
 ---@field public opt table<string, any>
 ---@field public buffer_opt table<string, any>
----@field public scrollbar string
 ---@field public cache cmp.Cache
 local window = {}
 
@@ -131,8 +129,9 @@ end
 ---Update
 window.update = function(self)
   local info = self:info()
-  if info.scrollbar then
+  if info.scrollable then
     -- Draw the background of the scrollbar
+
     if not info.border_info.visible then
       local style = {
         relative = 'editor',
@@ -148,24 +147,20 @@ window.update = function(self)
       else
         style.noautocmd = true
         self.sbar_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'sbar_buf'), false, style)
-        local highlight = self.scrollbar == '' and 'PmenuSbar' or 'CmpScrollBar'
-        vim.api.nvim_win_set_option(self.sbar_win, 'winhighlight', 'EndOfBuffer:' .. highlight .. ',NormalFloat:' .. highlight)
-      end
-      if self.scrollbar ~= '' then
-        vim.api.nvim_buf_set_lines(vim.api.nvim_win_get_buf(self.sbar_win), 0, -1, true, misc.rep({ self.scrollbar }, style.height))
+        vim.api.nvim_win_set_option(self.sbar_win, 'winhighlight', 'EndOfBuffer:PmenuSbar,NormalFloat:PmenuSbar')
       end
     end
 
     -- Draw the scrollbar thumb
-    local thumb_height = math.ceil(info.inner_height * (info.inner_height / self:get_content_height()))
-    local thumb_offset = math.min(math.floor(info.inner_height * (vim.fn.getwininfo(self.win)[1].topline / self:get_content_height())), info.inner_height - thumb_height)
+    local thumb_height = math.floor(info.inner_height * (info.inner_height / self:get_content_height()) + 0.5)
+    local thumb_offset = math.floor(info.inner_height * (vim.fn.getwininfo(self.win)[1].topline / self:get_content_height()))
 
     local style = {
       relative = 'editor',
       style = 'minimal',
       width = 1,
-      height = thumb_height,
-      row = info.row + thumb_offset + (info.border_info.visible and 1 or 0),
+      height = math.max(1, thumb_height),
+      row = info.row + thumb_offset + (info.border_info.visible and info.border_info.top or 0),
       col = info.col + info.width - 1, -- info.col was already added scrollbar offset.
       zindex = (self.style.zindex and (self.style.zindex + 2) or 2),
     }
@@ -174,16 +169,12 @@ window.update = function(self)
     else
       style.noautocmd = true
       self.thumb_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'thumb_buf'), false, style)
-      local highlight = self.scrollbar == '' and 'PmenuThumb' or 'CmpScrollThumb'
-      vim.api.nvim_win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:'  .. highlight .. ',NormalFloat:'  .. highlight)
-    end
-    if self.scrollbar ~= '' then
-      vim.api.nvim_buf_set_lines(vim.api.nvim_win_get_buf(self.thumb_win), 0, -1, true, misc.rep({ self.scrollbar }, style.height))
+      vim.api.nvim_win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:PmenuThumb,NormalFloat:PmenuThumb')
     end
   else
-    if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
-      vim.api.nvim_win_hide(self.thumb_win)
-      self.thumb_win = nil
+    if self.sbar_win and vim.api.nvim_win_is_valid(self.sbar_win) then
+      vim.api.nvim_win_hide(self.sbar_win)
+      self.sbar_win = nil
     end
     if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
       vim.api.nvim_win_hide(self.thumb_win)
@@ -233,17 +224,15 @@ window.info = function(self)
     inner_width = self.style.width,
     inner_height = self.style.height,
     border_info = border_info,
-    scrollbar = false,
+    scrollable = false,
     scrollbar_offset = 0
   }
 
-  if type(self.scrollbar) == 'string' then
-    if self:get_content_height() > info.inner_height then
-      info.scrollbar = true
-      if not border_info.visible then
-        info.scrollbar_offset = 1
-        info.width = info.width + 1
-      end
+  if self:get_content_height() > info.inner_height then
+    info.scrollable = true
+    if not border_info.visible then
+      info.scrollbar_offset = 1
+      info.width = info.width + 1
     end
   end
 
