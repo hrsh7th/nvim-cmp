@@ -96,6 +96,11 @@ cmp.get_active_entry = cmp.sync(function()
   return cmp.core.view:get_active_entry()
 end)
 
+---Get current all entries
+cmp.get_entries = cmp.sync(function()
+  return cmp.core.view:get_entries()
+end)
+
 ---Close current completion
 cmp.close = cmp.sync(function()
   if cmp.core.view:visible() then

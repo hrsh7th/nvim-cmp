@@ -162,6 +162,9 @@ NOTE: You can call these functions in mapping via `<Cmd>lua require('cmp').compl
 *cmp.visible* ()
   Return the completion menu is visible or not.
 
+*cmp.get_entries* ()
+  Return current all entries.
+
 *cmp.get_selected_entry* ()
   Return current selected entry. (contains preselected)
 
