@@ -2,11 +2,10 @@ local M = {}
 
 local v = vim.version()
 local has_native_autocmd = v.major >= 0 and v.minor >= 7
-
 local emit = require('cmp.utils.autocmd').emit
-local ___cmp___ = vim.api.nvim_create_augroup('___cmp___', { clear = true })
 
 local function nvim_auto()
+  local ___cmp___ = vim.api.nvim_create_augroup('___cmp___', { clear = true })
   vim.api.nvim_create_autocmd('InsertEnter', {
     group = ___cmp___,
     callback = function()
@@ -105,12 +104,12 @@ end
 
 local function legacy_cmdline_mode()
   vim.cmd([[
-	 	augroup cmp-cmdline
-   	  autocmd!
-   	  autocmd CmdlineChanged * lua require'cmp.utils.autocmd'.emit('TextChanged')
-   	  autocmd CmdlineLeave * call v:lua.cmp.plugin.cmdline.leave()
-   	augroup END
-	 ]])
+	augroup cmp-cmdline
+		autocmd!
+		autocmd CmdlineChanged * lua require'cmp.utils.autocmd'.emit('TextChanged')
+		autocmd CmdlineLeave * call v:lua.cmp.plugin.cmdline.leave()
+	augroup END
+]])
 end
 
 function M.autocmd()
