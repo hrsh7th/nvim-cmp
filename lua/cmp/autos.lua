@@ -63,7 +63,6 @@ local function nvim_auto()
     callback = _G.cmp.plugin.cmdline.enter,
   })
 
-  -- -    autocmd CmdlineEnter * call v:lua.cmp.plugin.cmdline.enter()
   vim.api.nvim_create_autocmd('CmdwinEnter', {
     group = ___cmp___,
     callback = _G.cmp.plugin.cmdline.leave,
@@ -104,11 +103,11 @@ end
 
 local function legacy_cmdline_mode()
   vim.cmd([[
-	augroup cmp-cmdline
-		autocmd!
-		autocmd CmdlineChanged * lua require'cmp.utils.autocmd'.emit('TextChanged')
-		autocmd CmdlineLeave * call v:lua.cmp.plugin.cmdline.leave()
-	augroup END
+  augroup cmp-cmdline
+    autocmd!
+    autocmd CmdlineChanged * lua require'cmp.utils.autocmd'.emit('TextChanged')
+    autocmd CmdlineLeave * call v:lua.cmp.plugin.cmdline.leave()
+  augroup END
 ]])
 end
 
