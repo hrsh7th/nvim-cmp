@@ -105,10 +105,26 @@ custom_entries_view.on_change = function(self)
   self.active = false
 end
 
+local function is_direction_top_down()
+  local c = config.get()
+  if (c.view and c.view.entries and c.view.entries.direction) == 'bottom_up' then
+    return false
+  else
+    return true
+  end
+end
+
 custom_entries_view.open = function(self, offset, entries)
   self.offset = offset
   self.entries = {}
   self.column_width = { abbr = 0, kind = 0, menu = 0 }
+
+  if not is_direction_top_down() then
+    local length = #entries
+    for i=1, length / 2 do
+      entries[i], entries[length - 1] = entries[length - 1], entries[i]
+    end
+  end
 
   -- Apply window options (that might be changed) on the custom completion menu.
   self.entries_win:option('winblend', vim.o.pumblend)
@@ -173,9 +189,17 @@ custom_entries_view.open = function(self, offset, entries)
   if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
     self:_select(preselect, { behavior = types.cmp.SelectBehavior.Select })
   elseif not string.match(config.get().completion.completeopt, 'noselect') then
-    self:_select(1, { behavior = types.cmp.SelectBehavior.Select })
+    if is_direction_top_down() then
+      self:_select(1, { behavior = types.cmp.SelectBehavior.Select })
+    else
+      self:_select(#self.entries - 1, { behavior = types.cmp.SelectBehavior.Select })
+    end
   else
-    self:_select(0, { behavior = types.cmp.SelectBehavior.Select })
+    if is_direction_top_down() then
+      self:_select(0, { behavior = types.cmp.SelectBehavior.Select })
+    else
+      self:_select(#self.entries, { behavior = types.cmp.SelectBehavior.Select })
+    end
   end
 end
 
@@ -237,11 +261,16 @@ end
 
 custom_entries_view.select_next_item = function(self, option)
   if self:visible() then
-    local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1] + 1
+    local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
+    if is_direction_top_down() then
+      cursor = cursor + 1
+    else
+      cursor = cursor - 1
+    end
     if not self.entries_win:option('cursorline') then
-      cursor = 1
+      cursor = (is_direction_top_down() and 1) or #self.entries
     elseif #self.entries < cursor then
-      cursor = 0
+      cursor = (not is_direction_top_down() and #self.entries) or 0
     end
     self:_select(cursor, option)
   end
@@ -249,9 +278,16 @@ end
 
 custom_entries_view.select_prev_item = function(self, option)
   if self:visible() then
-    local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1] - 1
+    local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
+    if is_direction_top_down() then
+      cursor = cursor - 1
+    else
+      cursor = cursor + 1
+    end
     if not self.entries_win:option('cursorline') then
-      cursor = #self.entries
+      cursor = (is_direction_top_down() and #self.entries) or 1
+    elseif #self.entries < cursor then
+      cursor = (not is_direction_top_down() and 0) or #self.entries
     end
     self:_select(cursor, option)
   end
