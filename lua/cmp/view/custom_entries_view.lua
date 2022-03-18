@@ -186,6 +186,8 @@ custom_entries_view.open = function(self, offset, entries)
     height = height,
     zindex = 1001,
   })
+  -- always set cursor when starting. It will be adjusted on the call to _select
+  vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
   if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
     self:_select(preselect, { behavior = types.cmp.SelectBehavior.Select })
   elseif not string.match(config.get().completion.completeopt, 'noselect') then
@@ -198,7 +200,7 @@ custom_entries_view.open = function(self, offset, entries)
     if is_direction_top_down() then
       self:_select(0, { behavior = types.cmp.SelectBehavior.Select })
     else
-      self:_select(#self.entries, { behavior = types.cmp.SelectBehavior.Select })
+      self:_select(#self.entries + 1, { behavior = types.cmp.SelectBehavior.Select })
     end
   end
 end
@@ -270,7 +272,7 @@ custom_entries_view.select_next_item = function(self, option)
     if not self.entries_win:option('cursorline') then
       cursor = (is_direction_top_down() and 1) or #self.entries
     elseif #self.entries < cursor then
-      cursor = (not is_direction_top_down() and #self.entries) or 0
+      cursor = (not is_direction_top_down() and #self.entries + 1) or 0
     end
     self:_select(cursor, option)
   end
@@ -287,7 +289,7 @@ custom_entries_view.select_prev_item = function(self, option)
     if not self.entries_win:option('cursorline') then
       cursor = (is_direction_top_down() and #self.entries) or 1
     elseif #self.entries < cursor then
-      cursor = (not is_direction_top_down() and 0) or #self.entries
+      cursor = (not is_direction_top_down() and 0) or #self.entries + 1
     end
     self:_select(cursor, option)
   end
@@ -309,7 +311,7 @@ end
 
 custom_entries_view.get_first_entry = function(self)
   if self:visible() then
-    return self.entries[1]
+    return (is_direction_top_down() and self.entries[1]) or self.entries[#self.entries]
   end
 end
 
@@ -331,9 +333,13 @@ custom_entries_view._select = function(self, cursor, option)
     self.prefix = string.sub(api.get_current_line(), self.offset, api.get_cursor()[2]) or ''
   end
 
-  self.active = cursor > 0 and is_insert
-  self.entries_win:option('cursorline', cursor > 0)
-  vim.api.nvim_win_set_cursor(self.entries_win.win, { math.max(cursor, 1), 0 })
+  self.active = cursor > 0 and cursor <= #self.entries and is_insert
+  self.entries_win:option('cursorline', cursor > 0 and cursor <= #self.entries)
+
+  vim.api.nvim_win_set_cursor(self.entries_win.win, {
+    math.max(math.min(cursor, #self.entries), 1),
+    0,
+  })
 
   if is_insert then
     self:_insert(self.entries[cursor] and self.entries[cursor]:get_vim_item(self.offset).word or self.prefix)
