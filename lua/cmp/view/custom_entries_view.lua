@@ -121,7 +121,7 @@ custom_entries_view.open = function(self, offset, entries)
 
   if not is_direction_top_down() then
     local length = #entries
-    for i=1, length / 2 do
+    for i = 1, length / 2 do
       entries[i], entries[length - 1] = entries[length - 1], entries[i]
     end
   end
