@@ -275,16 +275,16 @@ You can also use built-in mapping helpers.
   *cmp.mapping.abort* ()
     Same as |cmp.abort|
 
-  *cmp.mapping.select_next_item* (option: { behavior = cmp.SelectBehavior })
+  *cmp.mapping.select_next_item* (option: cmp.SelectOption)
     Same as |cmp.select_next_item|
 
-  *cmp.mapping.select_prev_item* (option: { behavior = cmp.SelectBehavior })
+  *cmp.mapping.select_prev_item* (option: cmp.SelectOption)
     Same as |cmp.select_prev_item|
 
   *cmp.mapping.scroll_docs* (delta: number)
     Same as |cmp.scroll_docs|
 
-  *cmp.mapping.complete* (option: cmp.CompleteParams)
+  *cmp.mapping.complete* (option: cmp.CompleteOption)
     Same as |cmp.complete|
 
   *cmp.mapping.complete_common_string* ()
@@ -376,7 +376,7 @@ mapping~
 
                                                      *cmp-config.snippet.expand*
 snippet.expand~
-  `fun(option: cmp.SnippetExpansionParams)`
+  `fun(option: { body: string, insert_text_mode: lsp.InsertTextMode })`
   The snippet expansion function. You must integrate your snippet engine plugin via this.
 
                                           *cmp-config.completion.keyword_length*
@@ -513,68 +513,27 @@ sources[n].group_index~
 <
                                                                *cmp-config.view*
 view~
-  `{ entries: cmp.EntriesConfig|string }`
-  Specify the view class to customize appearance.
+  `cmp.ViewConfig`
+  Specify the view class and custom options.
   Currently, the possible configurations are:
 
-                                           *cmp-config.window.completion.border*
-window.completion.border~
-  `string | string[] | nil`
-  Border characters used for the completion popup menu when
-  |experimental.native_menu| is disabled.
+                                                    *cmp-config.view.completion*
+view.completion~
+  `cmp.CompletionViewConfig`
+  Specify the completion menu view settings.
 
-                                     *cmp-config.window.completion.winhighlight*
-window.completion.winhighlight~
-  `string | cmp.WinhighlightConfig`
-  Is either a `string` matching the 'winhighlight' syntax, or a `table` of
-  `bordered` and `default` options which both specify 'winhighlight' settings
-  for when the completion window has and does not have a border, respectively.
-
-                                           *cmp-config.window.completion.zindex*
-window.completion.zindex~
-  `number`
-  The completion window's zindex.
-
-                                               *cmp-config.window.documentation*
-window.documentation~
-  `false | cmp.DocumentationConfig`
-  If set to `false`, the documentation of each item will not be shown.
-  Else, a table representing documentation configuration should be provided.
-  The following are possible options.
-
-                                        *cmp-config.window.documentation.border*
-window.documentation.border~
-  `string | string[] | nil`
-
-  Border characters used for documentation window.
-
-                                     *cmp-config.window.documentation.max_width*
-window.documentation.max_width~
-  `number`
-  The documentation window's max width.
-
-                                    *cmp-config.window.documentation.max_height*
-window.documentation.max_height~
-  `number`
-  The documentation window's max height.
-
-                                  *cmp-config.window.documentation.winhighlight*
-window.documentation.winhighlight~
-  `string | cmp.WinhighlightConfig`
-  Is either a `string` matching the 'winhighlight' syntax, or a `table` of
-  `bordered` and `default` options which both specify 'winhighlight' settings
-  for when the documentation window has and does not have a border,
-  respectively.
-
-                                        *cmp-config.window.documentation.zindex*
-window.documentation.zindex~
-  `number`
-  The documentation window's zindex.
+                                                    *cmp-config.view.completion*
+view.documentation~
+  `table`
+  Specify the view class and custom options.
+  Currently, the possible configurations are:
 
                                             *cmp-config.experimental.ghost_text*
 experimental.ghost_text~
   `boolean | { hl_group = string }`
   The boolean value to enable or disable the ghost_text feature.
+
+
 
 ==============================================================================
 Develop                                                            *cmp-develop*
@@ -592,36 +551,41 @@ NOTE:
 You can create custom source like the following example.
 
 >
-  local source = {}
+  local Source = {}
+
+  ---Create source instance.
+  Source.new = function()
+    return setmetatable({}, { __index = Source })
+  end
 
   ---Return this source is available in current context or not. (Optional)
   ---@return boolean
-  function source:is_available()
+  function Source:is_available()
     return true
   end
 
   ---Return the debug name of this source. (Optional)
   ---@return string
-  function source:get_debug_name()
+  function Source:get_debug_name()
     return 'debug name'
   end
 
   ---Return keyword pattern for triggering completion. (Optional)
   ---If this is ommited, nvim-cmp will use default keyword pattern. See |cmp-config.completion.keyword_pattern|
   ---@return string
-  function source:get_keyword_pattern()
+  function Source:get_keyword_pattern()
     return [[\k\+]]
   end
 
   ---Return trigger characters for triggering completion. (Optional)
-  function source:get_trigger_characters()
+  function Source:get_trigger_characters()
     return { '.' }
   end
 
   ---Invoke completion. (Required)
   ---@param params cmp.SourceCompletionApiParams
   ---@param callback fun(response: lsp.CompletionResponse|nil)
-  function source:complete(params, callback)
+  function Source:complete(params, callback)
     callback({
       { label = 'January' },
       { label = 'February' },
@@ -641,20 +605,71 @@ You can create custom source like the following example.
   ---Resolve completion item. (Optional)
   ---@param completion_item lsp.CompletionItem
   ---@param callback fun(completion_item: lsp.CompletionItem|nil)
-  function source:resolve(completion_item, callback)
+  function Source:resolve(completion_item, callback)
     callback(completion_item)
   end
 
   ---Execute command after item was accepted.
   ---@param completion_item lsp.CompletionItem
   ---@param callback fun(completion_item: lsp.CompletionItem|nil)
-  function source:execute(completion_item, callback)
+  function Source:execute(completion_item, callback)
     callback(completion_item)
   end
 
   ---Register custom source to nvim-cmp.
-  require('cmp').register_source('month', source.new())
+  require('cmp').register_source('month', Source.new())
 <
+
+
+Create custom completion view~
+
+You can create custom source like the following example.
+
+>
+  local CompletionView = {}
+
+  ---Create 
+  CompletionView.new = function()
+    return setmetatable({}, { __index = CompletionView })
+  end
+
+  ---Show completion menu.
+  function CompletionView:on_open(offset, entries)
+    ...
+  end
+
+  ---Apply `close` behavior to the view. 
+  ---The `close` means `just closed the view` not like an `<C-e>`.
+  function CompletionView:on_close()
+    ...
+  end
+
+  ---Apply `abort` behavior to the view. 
+  ---The `abort` means the behavior like native `<C-e>`.
+  ---The native `<C-e>` will close the menu and restore the current line to the state of before selecting the item. 
+  function CompletionView:on_abort()
+    ...
+  end
+
+  ---Return current viewport.
+  ---If this view renders the `border`, this method should return the viewport that contains the border's width/height.
+  ---This result will be used to render DocumentationView.
+  function CompletionView:get_viewport()
+    return { row: number, col: number, width: number, height: number }
+  end
+
+  ---Apply selection change if needed.
+  ---The `index` can be `-1` that means `nothing to select`.
+  ---@param index number
+  ---@param behavior cmp.SelectBehavior
+  function CompletionView:select(index, behavior
+    ...
+  end
+
+  require('cmp').register_completion_view('fancy', CompletionView.new())
+<
+
+
 
 ==============================================================================
 FAQ                                                                    *cmp-faq*

@@ -7,10 +7,13 @@ local custom_entries_view = require('cmp.view.custom_entries_view')
 local wildmenu_entries_view = require('cmp.view.wildmenu_entries_view')
 local native_entries_view = require('cmp.view.native_entries_view')
 local ghost_text_view = require('cmp.view.ghost_text_view')
+local default_completion_view = require('cmp.view.default_completion_view')
+
 
 ---@class cmp.View
 ---@field public event cmp.Event
 ---@field private resolve_dedup cmp.AsyncDedup
+---@field private completion_view cmp.CompletionView
 ---@field private native_entries_view cmp.NativeEntriesView
 ---@field private custom_entries_view cmp.CustomEntriesView
 ---@field private wildmenu_entries_view cmp.CustomEntriesView
@@ -30,6 +33,8 @@ view.new = function()
   self.ghost_text_view = ghost_text_view.new()
   self.event = event.new()
 
+  self.completion_view = default_completion_view.new()
+
   return self
 end
 
@@ -48,6 +53,91 @@ end
 ---@param ctx cmp.Context
 ---@param sources cmp.Source[]
 view.open = function(self, ctx, sources)
+  local offset, entries = self:_get_completion(ctx, sources)
+  -- complete_done.
+  if #entries ~= 0 then
+    self.completion_view:on_open(offset, entries)
+    self:_get_entries_view():open(offset, entries)
+  else
+    self:close()
+  end
+end
+
+---Close menu
+view.close = function(self)
+  if self:visible() then
+    self.event:emit('complete_done', {
+      entry = self:_get_entries_view():get_selected_entry(),
+    })
+  end
+  self.completion_view:on_close()
+  self:_get_entries_view():close()
+  self.docs_view:close()
+  self.ghost_text_view:hide()
+end
+
+---Abort menu
+view.abort = function(self)
+  self.completion_view:on_abort()
+  self:_get_entries_view():abort()
+  self.docs_view:close()
+  self.ghost_text_view:hide()
+end
+
+---Return the view is visible or not.
+---@return boolean
+view.visible = function(self)
+  return self:_get_entries_view():visible()
+end
+
+---Scroll documentation window if possible.
+---@param delta number
+view.scroll_docs = function(self, delta)
+  self.docs_view:scroll(delta)
+end
+
+---Select prev menu item.
+---@param option cmp.SelectOption
+view.select_next_item = function(self, option)
+  self:_get_entries_view():select_next_item(option)
+end
+
+---Select prev menu item.
+---@param option cmp.SelectOption
+view.select_prev_item = function(self, option)
+  self:_get_entries_view():select_prev_item(option)
+end
+
+---Get offset.
+view.get_offset = function(self)
+  return self:_get_entries_view():get_offset()
+end
+
+---Get entries.
+---@return cmp.Entry[]
+view.get_entries = function(self)
+  return self:_get_entries_view():get_entries()
+end
+
+---Get first entry
+---@param self cmp.Entry|nil
+view.get_first_entry = function(self)
+  return self:_get_entries_view():get_first_entry()
+end
+
+---Get current selected entry
+---@return cmp.Entry|nil
+view.get_selected_entry = function(self)
+  return self:_get_entries_view():get_selected_entry()
+end
+
+---Get current active entry
+---@return cmp.Entry|nil
+view.get_active_entry = function(self)
+  return self:_get_entries_view():get_active_entry()
+end
+
+view._get_completion = function(_, ctx, sources)
   local source_group_map = {}
   for _, s in ipairs(sources) do
     local group_index = s:get_source_config().group_index or 0
@@ -107,87 +197,18 @@ view.open = function(self, ctx, sources)
 
     -- open
     if #entries > 0 then
-      self:_get_entries_view():open(offset, entries)
-      break
+      local deduped = {}
+      local actual = {}
+      for _, e in ipairs(entries) do
+        if view.dup == 1 or not deduped[e.completion_item.label] then
+          table.insert(actual, e)
+          deduped[e.completion_item.label] = true
+        end
+      end
+      return offset, entries
     end
   end
-
-  -- complete_done.
-  if #entries == 0 then
-    self:close()
-  end
-end
-
----Close menu
-view.close = function(self)
-  if self:visible() then
-    self.event:emit('complete_done', {
-      entry = self:_get_entries_view():get_selected_entry(),
-    })
-  end
-  self:_get_entries_view():close()
-  self.docs_view:close()
-  self.ghost_text_view:hide()
-end
-
----Abort menu
-view.abort = function(self)
-  self:_get_entries_view():abort()
-  self.docs_view:close()
-  self.ghost_text_view:hide()
-end
-
----Return the view is visible or not.
----@return boolean
-view.visible = function(self)
-  return self:_get_entries_view():visible()
-end
-
----Scroll documentation window if possible.
----@param delta number
-view.scroll_docs = function(self, delta)
-  self.docs_view:scroll(delta)
-end
-
----Select prev menu item.
----@param option cmp.SelectOption
-view.select_next_item = function(self, option)
-  self:_get_entries_view():select_next_item(option)
-end
-
----Select prev menu item.
----@param option cmp.SelectOption
-view.select_prev_item = function(self, option)
-  self:_get_entries_view():select_prev_item(option)
-end
-
----Get offset.
-view.get_offset = function(self)
-  return self:_get_entries_view():get_offset()
-end
-
----Get entries.
----@return cmp.Entry[]
-view.get_entries = function(self)
-  return self:_get_entries_view():get_entries()
-end
-
----Get first entry
----@param self cmp.Entry|nil
-view.get_first_entry = function(self)
-  return self:_get_entries_view():get_first_entry()
-end
-
----Get current selected entry
----@return cmp.Entry|nil
-view.get_selected_entry = function(self)
-  return self:_get_entries_view():get_selected_entry()
-end
-
----Get current active entry
----@return cmp.Entry|nil
-view.get_active_entry = function(self)
-  return self:_get_entries_view():get_active_entry()
+  return -1, {}
 end
 
 ---Return current configured entries_view
