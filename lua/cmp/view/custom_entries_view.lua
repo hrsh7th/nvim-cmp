@@ -43,6 +43,7 @@ custom_entries_view.new = function()
   self.offset = -1
   self.active = false
   self.entries = {}
+  self.bottom_up = false
 
   autocmd.subscribe(
     'CompleteChanged',
@@ -105,12 +106,12 @@ custom_entries_view.on_change = function(self)
   self.active = false
 end
 
-local function is_direction_top_down()
+custom_entries_view.is_direction_top_down = function(self)
   local c = config.get()
-  if (c.view and c.view.entries and c.view.entries.direction) == 'bottom_up' then
-    return false
-  else
+  if (c.view and c.view.entries and c.view.entries.selection_order) == 'top_down' then
     return true
+  else
+    return not self.bottom_up
   end
 end
 
@@ -118,13 +119,6 @@ custom_entries_view.open = function(self, offset, entries)
   self.offset = offset
   self.entries = {}
   self.column_width = { abbr = 0, kind = 0, menu = 0 }
-
-  if not is_direction_top_down() then
-    local n = #entries
-    for i = 1, math.floor(n / 2) do
-      entries[i], entries[n - i + 1] = entries[n - i + 1], entries[i]
-    end
-  end
 
   -- Apply window options (that might be changed) on the custom completion menu.
   self.entries_win:option('winblend', vim.o.pumblend)
@@ -177,6 +171,22 @@ custom_entries_view.open = function(self, offset, entries)
     col = vim.o.columns - width - 1
   end
 
+  if pos[1] > row then
+    self.bottom_up = true
+  else
+    self.bottom_up = false
+  end
+
+  if not self:is_direction_top_down() then
+    local n = #self.entries
+    for i = 1, math.floor(n / 2) do
+      self.entries[i], self.entries[n - i + 1] = self.entries[n - i + 1], self.entries[i]
+    end
+    if preselect ~= 0 then
+      preselect = #self.entries - preselect + 1
+    end
+  end
+
   self.entries_win:open({
     relative = 'editor',
     style = 'minimal',
@@ -191,13 +201,13 @@ custom_entries_view.open = function(self, offset, entries)
   if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
     self:_select(preselect, { behavior = types.cmp.SelectBehavior.Select })
   elseif not string.match(config.get().completion.completeopt, 'noselect') then
-    if is_direction_top_down() then
+    if self:is_direction_top_down() then
       self:_select(1, { behavior = types.cmp.SelectBehavior.Select })
     else
       self:_select(#self.entries - 1, { behavior = types.cmp.SelectBehavior.Select })
     end
   else
-    if is_direction_top_down() then
+    if self:is_direction_top_down() then
       self:_select(0, { behavior = types.cmp.SelectBehavior.Select })
     else
       self:_select(#self.entries + 1, { behavior = types.cmp.SelectBehavior.Select })
@@ -211,6 +221,7 @@ custom_entries_view.close = function(self)
   self.active = false
   self.entries = {}
   self.entries_win:close()
+  self.bottom_up = false
 end
 
 custom_entries_view.abort = function(self)
@@ -264,15 +275,15 @@ end
 custom_entries_view.select_next_item = function(self, option)
   if self:visible() then
     local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
-    if is_direction_top_down() then
+    if self:is_direction_top_down() then
       cursor = cursor + 1
     else
       cursor = cursor - 1
     end
     if not self.entries_win:option('cursorline') then
-      cursor = (is_direction_top_down() and 1) or #self.entries
+      cursor = (self:is_direction_top_down() and 1) or #self.entries
     elseif #self.entries < cursor then
-      cursor = (not is_direction_top_down() and #self.entries + 1) or 0
+      cursor = (not self:is_direction_top_down() and #self.entries + 1) or 0
     end
     self:_select(cursor, option)
   end
@@ -281,15 +292,15 @@ end
 custom_entries_view.select_prev_item = function(self, option)
   if self:visible() then
     local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
-    if is_direction_top_down() then
+    if self:is_direction_top_down() then
       cursor = cursor - 1
     else
       cursor = cursor + 1
     end
     if not self.entries_win:option('cursorline') then
-      cursor = (is_direction_top_down() and #self.entries) or 1
+      cursor = (self:is_direction_top_down() and #self.entries) or 1
     elseif #self.entries < cursor then
-      cursor = (not is_direction_top_down() and 0) or #self.entries + 1
+      cursor = (not self:is_direction_top_down() and 0) or #self.entries + 1
     end
     self:_select(cursor, option)
   end
@@ -311,7 +322,7 @@ end
 
 custom_entries_view.get_first_entry = function(self)
   if self:visible() then
-    return (is_direction_top_down() and self.entries[1]) or self.entries[#self.entries]
+    return (self:is_direction_top_down() and self.entries[1]) or self.entries[#self.entries]
   end
 end
 
