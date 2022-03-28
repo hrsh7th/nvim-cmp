@@ -206,11 +206,12 @@ end
 misc.redraw = setmetatable({
   doing = false,
   force = false,
+  termcode = vim.api.nvim_replace_termcodes('<C-r><Esc>', true, true, true)
 }, {
   __call = function(self, force)
     if vim.tbl_contains({ '/', '?' }, vim.fn.getcmdtype()) then
       if vim.o.incsearch then
-        return vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-r>=""<CR>', true, true, true), 'n', true)
+        return vim.api.nvim_feedkeys(self.termcode, 'in', true)
       end
     end
 
