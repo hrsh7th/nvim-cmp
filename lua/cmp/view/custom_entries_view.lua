@@ -129,7 +129,6 @@ custom_entries_view.open = function(self, offset, entries)
   local lines = {}
   local dedup = {}
   local preselect = 0
-  local i = 1
   for _, e in ipairs(entries) do
     local view = e:get_view(offset, entries_buf)
     if view.dup == 1 or not dedup[e.completion_item.label] then
@@ -140,9 +139,8 @@ custom_entries_view.open = function(self, offset, entries)
       table.insert(self.entries, e)
       table.insert(lines, ' ')
       if preselect == 0 and e.completion_item.preselect then
-        preselect = i
+        preselect = #self.entries
       end
-      i = i + 1
     end
   end
   vim.api.nvim_buf_set_lines(entries_buf, 0, -1, false, lines)
