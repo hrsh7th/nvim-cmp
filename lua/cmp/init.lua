@@ -339,14 +339,14 @@ autocmd.subscribe('CursorMoved', function()
 end)
 
 autocmd.subscribe('InsertEnter', function()
-  cmp.config.compare.locals:update()
+  cmp.config.compare.scopes:update()
 end)
 
 cmp.event:on('complete_done', function(evt)
   if evt.entry then
     cmp.config.compare.recently_used:add_entry(evt.entry)
   end
-  cmp.config.compare.locals:update()
+  cmp.config.compare.scopes:update()
 end)
 
 cmp.event:on('confirm_done', function(evt)

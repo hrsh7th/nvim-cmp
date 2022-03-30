@@ -100,12 +100,12 @@ compare.order = function(entry1, entry2)
   end
 end
 
--- locals
-compare.locals = setmetatable({
-  locals_map = {},
+-- scopes
+compare.scopes = setmetatable({
+  scopes_map = {},
   update = function(self)
     local config = require('cmp').get_config()
-    if not vim.tbl_contains(config.sorting.comparators, compare.locals) then
+    if not vim.tbl_contains(config.sorting.comparators, compare.scopes) then
       return
     end
 
@@ -139,8 +139,8 @@ compare.locals = setmetatable({
         for _, definition in pairs(definitions) do
           if scope:id() == locals.containing_scope(definition.node, buf):id() then
             local text = ts_utils.get_node_text(definition.node)[1]
-            if not self.locals_map[text] then
-              self.locals_map[text] = depth
+            if not self.scopes_map[text] then
+              self.scopes_map[text] = depth
             end
           end
         end
@@ -150,8 +150,8 @@ compare.locals = setmetatable({
   end,
 }, {
   __call = function(self, entry1, entry2)
-    local local1 = self.locals_map[entry1:get_completion_item().label]
-    local local2 = self.locals_map[entry2:get_completion_item().label]
+    local local1 = self.scopes_map[entry1:get_completion_item().label]
+    local local2 = self.scopes_map[entry2:get_completion_item().label]
     if local1 ~= local2 then
       if local1 == nil then
         return false
