@@ -206,7 +206,7 @@ end
 misc.redraw = setmetatable({
   doing = false,
   force = false,
-  termcode = vim.api.nvim_replace_termcodes('<C-r><Esc>', true, true, true)
+  termcode = vim.api.nvim_replace_termcodes('<C-r><Esc>', true, true, true),
 }, {
   __call = function(self, force)
     if vim.tbl_contains({ '/', '?' }, vim.fn.getcmdtype()) then
