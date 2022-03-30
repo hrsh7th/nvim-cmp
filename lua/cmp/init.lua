@@ -340,6 +340,7 @@ end)
 
 autocmd.subscribe('InsertEnter', function()
   cmp.config.compare.scopes:update()
+  cmp.config.compare.locality:update()
 end)
 
 cmp.event:on('complete_done', function(evt)
@@ -347,6 +348,7 @@ cmp.event:on('complete_done', function(evt)
     cmp.config.compare.recently_used:add_entry(evt.entry)
   end
   cmp.config.compare.scopes:update()
+  cmp.config.compare.locality:update()
 end)
 
 cmp.event:on('confirm_done', function(evt)

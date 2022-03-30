@@ -100,6 +100,51 @@ compare.order = function(entry1, entry2)
   end
 end
 
+compare.locality = setmetatable({
+  lines_count = 10,
+  locality_map = {},
+  update = function(self)
+    local config = require('cmp').get_config()
+    if not vim.tbl_contains(config.sorting.comparators, compare.scopes) then
+      return
+    end
+
+    self.locality_map = {}
+
+    local win, buf = vim.api.nvim_get_current_win(), vim.api.nvim_get_current_buf()
+    local cursor_row = vim.api.nvim_win_get_cursor(win)[1] - 1
+    local max = vim.api.nvim_buf_line_count(buf)
+    for i = math.max(0, cursor_row - self.lines_count), math.min(max, cursor_row + self.lines_count) do
+      local buffer = vim.api.nvim_buf_get_lines(buf, i, i + 1, false)[1] or ''
+      local regexp = vim.regex(config.completion.keyword_pattern)
+      while buffer ~= ''do
+        local s, e = regexp:match_str(buffer)
+        if s and e then
+          local w = string.sub(buffer, s + 1, e)
+          self.locality_map[w] = math.min(self.locality_map[w] or math.huge, math.abs(i - cursor_row))
+          buffer = string.sub(buffer, e + 1)
+        else
+          break
+        end
+      end
+    end
+  end
+}, {
+  __call = function(self, entry1, entry2)
+    local local1 = self.locality_map[entry1:get_completion_item().label]
+    local local2 = self.locality_map[entry2:get_completion_item().label]
+    if local1 ~= local2 then
+      if local1 == nil then
+        return false
+      end
+      if local2 == nil then
+        return true
+      end
+      return local1 < local2
+    end
+  end
+})
+
 -- scopes
 compare.scopes = setmetatable({
   scopes_map = {},
