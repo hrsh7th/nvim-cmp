@@ -100,7 +100,7 @@ lua <<EOF
   -- Set configuration for specific filetype.
   cmp.setup.filetype('gitcommit', {
     sources = cmp.config.sources({
-      { name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it. 
+      { name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it.
     }, {
       { name = 'buffer' },
     })
@@ -133,9 +133,9 @@ EOF
 
 ### Where can I find more completion sources?
 
-You can search for various completion sources [here](https://github.com/topics/nvim-cmp).
+A list of available sources can be found in the [Wiki](https://github.com/hrsh7th/nvim-cmp/wiki/List-of-sources) or by searching for projects that match the nvim-cmp [GitHub topic](https://github.com/topics/nvim-cmp).
 
-### Where can I find the advanced configuration examples?
+### Where can I find advanced configuration examples?
 
 Please see the corresponding [FAQ](#how-to-show-name-of-item-kind-and-source-like-compe) section or [Wiki pages](https://github.com/hrsh7th/nvim-cmp/wiki).
 
