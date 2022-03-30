@@ -100,4 +100,68 @@ compare.order = function(entry1, entry2)
   end
 end
 
+-- locals
+compare.locals = setmetatable({
+  locals_map = {},
+  update = function(self)
+    local config = require('cmp').get_config()
+    if not vim.tbl_contains(config.sorting.comparators, compare.locals) then
+      return
+    end
+
+    local ok, locals = pcall(require, 'nvim-treesitter.locals')
+    if ok then
+      local win, buf = vim.api.nvim_get_current_win(), vim.api.nvim_get_current_buf()
+      local cursor_row = vim.api.nvim_win_get_cursor(win)[1] - 1
+      local ts_utils = require('nvim-treesitter.ts_utils')
+
+      -- Cursor scope.
+      local cursor_scope = nil
+      for _, scope in ipairs(locals.get_scopes(buf)) do
+        if not cursor_scope then
+          cursor_scope = scope
+        else
+          if scope:start() <= cursor_row and cursor_row <= scope:end_() then
+            if math.abs(scope:end_() - scope:start()) < math.abs(cursor_scope:end_() - cursor_scope:start()) then
+              cursor_scope = scope
+            end
+          end
+        end
+      end
+
+      -- Definitions.
+      local definitions = locals.get_definitions_lookup_table(buf)
+
+      -- Narrow definitions.
+      local depth = 0
+      for scope in locals.iter_scope_tree(cursor_scope, buf) do
+        -- Check scope's direct child.
+        for _, definition in pairs(definitions) do
+          if scope:id() == locals.containing_scope(definition.node, buf):id() then
+            local text = ts_utils.get_node_text(definition.node)[1]
+            if not self.locals_map[text] then
+              self.locals_map[text] = depth
+            end
+          end
+        end
+        depth = depth + 1
+      end
+    end
+  end,
+}, {
+  __call = function(self, entry1, entry2)
+    local local1 = self.locals_map[entry1:get_completion_item().label]
+    local local2 = self.locals_map[entry2:get_completion_item().label]
+    if local1 ~= local2 then
+      if local1 == nil then
+        return false
+      end
+      if local2 == nil then
+        return true
+      end
+      return local1 < local2
+    end
+  end,
+})
+
 return compare

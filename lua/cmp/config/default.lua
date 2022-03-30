@@ -101,6 +101,7 @@ return function()
         compare.exact,
         compare.score,
         compare.recently_used,
+        -- compare.locals,
         compare.kind,
         compare.sort_text,
         compare.length,
