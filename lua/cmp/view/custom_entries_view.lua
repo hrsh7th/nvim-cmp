@@ -110,6 +110,8 @@ custom_entries_view.is_direction_top_down = function(self)
   local c = config.get()
   if (c.view and c.view.entries and c.view.entries.selection_order) == 'top_down' then
     return true
+  elseif (c.view.entries == nil or c.view.entries.selection_order == nil) then
+    return true
   else
     return not self.bottom_up
   end
