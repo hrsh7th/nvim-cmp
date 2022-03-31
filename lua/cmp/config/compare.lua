@@ -101,6 +101,7 @@ compare.order = function(entry1, entry2)
   end
 end
 
+-- locality
 compare.locality = setmetatable({
   lines_count = 10,
   lines_cache = cache.new(),
@@ -122,6 +123,7 @@ compare.locality = setmetatable({
 
     self.locality_map = {}
     for i = math.max(0, cursor_row - self.lines_count), math.min(max, cursor_row + self.lines_count) do
+      local is_above = i < cursor_row
       local buffer = vim.api.nvim_buf_get_lines(buf, i, i + 1, false)[1] or ''
       local locality_map = self.lines_cache:ensure({ 'line', buffer }, function()
         local locality_map = {}
@@ -130,7 +132,8 @@ compare.locality = setmetatable({
           local s, e = regexp:match_str(buffer)
           if s and e then
             local w = string.sub(buffer, s + 1, e)
-            locality_map[w] = math.min(locality_map[w] or math.huge, math.abs(i - cursor_row))
+            local d = math.abs(i - cursor_row) - (is_above and 0.1 or 0)
+            locality_map[w] = math.min(locality_map[w] or math.huge, d)
             buffer = string.sub(buffer, e + 1)
           else
             break
