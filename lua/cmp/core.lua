@@ -15,7 +15,8 @@ local api = require('cmp.utils.api')
 local event = require('cmp.utils.event')
 
 local SOURCE_TIMEOUT = 500
-local THROTTLE_TIME = 80
+local DEBOUNCE_TIME = 80
+local THROTTLE_TIME = 40
 
 ---@class cmp.Core
 ---@field public suspending boolean
@@ -284,7 +285,8 @@ core.complete = function(self, ctx)
             end
           end
           if not self.view:get_active_entry() then
-            self.filter.timeout = self.view:visible() and THROTTLE_TIME or 0
+            self.filter.stop()
+            self.filter.timeout = self.view:visible() and DEBOUNCE_TIME or 0
             self:filter()
           end
         end

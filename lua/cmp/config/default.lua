@@ -99,8 +99,10 @@ return function()
       comparators = {
         compare.offset,
         compare.exact,
+        -- compare.scopes,
         compare.score,
         compare.recently_used,
+        compare.locality,
         compare.kind,
         compare.sort_text,
         compare.length,
