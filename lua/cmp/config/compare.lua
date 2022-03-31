@@ -145,8 +145,8 @@ compare.locality = setmetatable({
   end
 }, {
   __call = function(self, entry1, entry2)
-    local local1 = self.locality_map[entry1:get_completion_item().label]
-    local local2 = self.locality_map[entry2:get_completion_item().label]
+    local local1 = self.locality_map[entry1:get_word()]
+    local local2 = self.locality_map[entry2:get_word()]
     if local1 ~= local2 then
       if local1 == nil then
         return false
@@ -209,8 +209,8 @@ compare.scopes = setmetatable({
   end,
 }, {
   __call = function(self, entry1, entry2)
-    local local1 = self.scopes_map[entry1:get_completion_item().label]
-    local local2 = self.scopes_map[entry2:get_completion_item().label]
+    local local1 = self.scopes_map[entry1:get_word()]
+    local local2 = self.scopes_map[entry2:get_word()]
     if local1 ~= local2 then
       if local1 == nil then
         return false
