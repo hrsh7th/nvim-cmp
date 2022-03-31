@@ -177,14 +177,16 @@ compare.scopes = setmetatable({
       -- Cursor scope.
       local cursor_scope = nil
       for _, scope in ipairs(locals.get_scopes(buf)) do
-        if not cursor_scope then
-          cursor_scope = scope
-        else
-          if scope:start() <= cursor_row and cursor_row <= scope:end_() then
-            if math.abs(scope:end_() - scope:start()) < math.abs(cursor_scope:end_() - cursor_scope:start()) then
+        if scope:start() <= cursor_row and cursor_row <= scope:end_() then
+          if not cursor_scope then
+            cursor_scope = scope
+          else
+            if cursor_scope:start() <= scope:start() and scope:end_() <= cursor_scope:end_() then
               cursor_scope = scope
             end
           end
+        elseif cursor_scope and cursor_scope:end_() <= scope:start() then
+          break
         end
       end
 
@@ -194,12 +196,16 @@ compare.scopes = setmetatable({
       -- Narrow definitions.
       local depth = 0
       for scope in locals.iter_scope_tree(cursor_scope, buf) do
+        local s, e = scope:start(), scope:end_()
+
         -- Check scope's direct child.
         for _, definition in pairs(definitions) do
-          if scope:id() == locals.containing_scope(definition.node, buf):id() then
-            local text = ts_utils.get_node_text(definition.node)[1]
-            if not self.scopes_map[text] then
-              self.scopes_map[text] = depth
+          if s <= definition.node:start() and definition.node:end_() <= e then
+            if scope:id() == locals.containing_scope(definition.node, buf):id() then
+              local text = ts_utils.get_node_text(definition.node)[1]
+              if not self.scopes_map[text] then
+                self.scopes_map[text] = depth
+              end
             end
           end
         end
