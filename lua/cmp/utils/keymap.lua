@@ -152,7 +152,7 @@ keymap.solve = function(bufnr, mode, map)
   end
 
   if string.find(rhs, lhs, 1, true) == 1 then
-    local recursive = string.format('<SNR>_0(cmp.u.k.recursive:%s)', lhs)
+    local recursive = string.format('<SNR>0_(cmp.u.k.recursive:%s)', lhs)
     keymap.set_map(bufnr, mode, recursive, lhs, {
       noremap = true,
       script = map.script,
