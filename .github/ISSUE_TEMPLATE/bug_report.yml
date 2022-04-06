@@ -27,7 +27,7 @@ body:
 
   - type: textarea
     attributes:
-      label: "Minimal reproducible config"
+      label: "Minimal reproducible full config"
       description: "You must provide a working config based on [this](https://github.com/hrsh7th/nvim-cmp/blob/main/utils/vimrc.vim). Not part of config."
     validations:
       required: true
