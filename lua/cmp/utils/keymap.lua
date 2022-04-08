@@ -106,7 +106,9 @@ keymap.listen = function(mode, lhs, callback)
   local bufnr = existing.buffer and vim.api.nvim_get_current_buf() or -1
   local fallback = keymap.fallback(bufnr, mode, existing)
   keymap.set_map(bufnr, mode, lhs, function()
-    if mode == 'c' and vim.fn.getcmdtype() == '=' then
+    local ignore = false
+    ignore = ignore or (mode == 'c' and vim.fn.getcmdtype() == '=')
+    if ignore then
       fallback()
     else
       callback(lhs, misc.once(fallback))
@@ -132,7 +134,7 @@ keymap.fallback = function(bufnr, mode, map)
         nowait = map.nowait,
         silent = map.silent and mode ~= 'c',
       })
-      vim.api.nvim_feedkeys(keymap.t(fallback_expr), 'itm', true)
+      vim.api.nvim_feedkeys(keymap.t(fallback_expr), 'im', true)
     elseif not map.callback then
       local solved = keymap.solve(bufnr, mode, map)
       vim.api.nvim_feedkeys(solved.keys, solved.mode, true)
@@ -148,7 +150,7 @@ keymap.solve = function(bufnr, mode, map)
   local rhs = map.expr and (map.callback and map.callback() or vim.api.nvim_eval(keymap.t(map.rhs))) or keymap.t(map.rhs)
 
   if map.noremap then
-    return { keys = rhs, mode = 'itn' }
+    return { keys = rhs, mode = 'in' }
   end
 
   if string.find(rhs, lhs, 1, true) == 1 then
@@ -159,9 +161,9 @@ keymap.solve = function(bufnr, mode, map)
       nowait = map.nowait,
       silent = map.silent and mode ~= 'c',
     })
-    return { keys = keymap.t(recursive) .. string.gsub(rhs, '^' .. vim.pesc(lhs), ''), mode = 'itm' }
+    return { keys = keymap.t(recursive) .. string.gsub(rhs, '^' .. vim.pesc(lhs), ''), mode = 'im' }
   end
-  return { keys = rhs, mode = 'itm' }
+  return { keys = rhs, mode = 'im' }
 end
 
 ---Get map

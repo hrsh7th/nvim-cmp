@@ -8,7 +8,11 @@ local WIDE_HEIGHT = 40
 return function()
   return {
     enabled = function()
-      return vim.api.nvim_buf_get_option(0, 'buftype') ~= 'prompt'
+      local disabled = false
+      disabled = disabled or (vim.api.nvim_buf_get_option(0, 'buftype') == 'prompt')
+      disabled = disabled or (vim.fn.reg_recording() ~= '')
+      disabled = disabled or (vim.fn.reg_executing() ~= '')
+      return not disabled
     end,
 
     preselect = types.cmp.PreselectMode.Item,
