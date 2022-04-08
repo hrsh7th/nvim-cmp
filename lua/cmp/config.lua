@@ -158,7 +158,7 @@ end
 ---@return cmp.ConfigSchema
 config.normalize = function(c)
   -- make sure c is not 'nil'
-  local c = c == nil and {} or c
+  c = c == nil and {} or c
 
   if c.mapping then
     local normalized = {}

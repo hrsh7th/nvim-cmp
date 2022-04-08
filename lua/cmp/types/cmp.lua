@@ -144,6 +144,7 @@ cmp.ItemField.Menu = 'menu'
 
 ---@class cmp.CustomEntriesConfig
 ---@field name "'custom'"
+---@field selection_order "'top_down'"|"'near_cursor'"
 
 ---@class cmp.NativeEntriesConfig
 ---@field name "'native'"

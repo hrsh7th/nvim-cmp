@@ -137,7 +137,7 @@ return function()
     },
 
     view = {
-      entries = 'custom',
+      entries = { name = 'custom', selection_order = 'top_down' },
     },
   }
 end
