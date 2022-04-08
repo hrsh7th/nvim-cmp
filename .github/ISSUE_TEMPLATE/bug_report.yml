@@ -7,7 +7,7 @@ body:
     attributes:
       label: FAQ
       options:
-        - label: I have checked the [FAQ](https://github.com/hrsh7th/nvim-cmp#faq) and it didn't resolve my problem.
+        - label: I have checked the [FAQ](https://github.com/hrsh7th/nvim-cmp/blob/15f08a8faa22d52480cdcb9ef9ca698120f04363/doc/cmp.txt#L616) and it didn't resolve my problem.
           required: true
 
   - type: checkboxes
