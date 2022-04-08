@@ -1,5 +1,6 @@
 local compare = require('cmp.config.compare')
 local mapping = require('cmp.config.mapping')
+local keymap = require('cmp.utils.keymap')
 local types = require('cmp.types')
 
 local WIDE_HEIGHT = 40
@@ -37,7 +38,7 @@ return function()
         end,
       }),
       ['<Tab>'] = mapping({
-        c = function(fallback)
+        c = function()
           local cmp = require('cmp')
           if #cmp.core:get_sources() > 0 and not require('cmp.config').is_native_menu() then
             if cmp.visible() then
@@ -46,12 +47,16 @@ return function()
               cmp.complete()
             end
           else
-            fallback()
+            if vim.fn.pumvisible() == 0 then
+              vim.api.nvim_feedkeys(keymap.t('<C-z>'), 'in', true)
+            else
+              vim.api.nvim_feedkeys(keymap.t('<C-n>'), 'in', true)
+            end
           end
         end,
       }),
       ['<S-Tab>'] = mapping({
-        c = function(fallback)
+        c = function()
           local cmp = require('cmp')
           if #cmp.core:get_sources() > 0 and not require('cmp.config').is_native_menu() then
             if cmp.visible() then
@@ -60,7 +65,11 @@ return function()
               cmp.complete()
             end
           else
-            fallback()
+            if vim.fn.pumvisible() == 0 then
+              vim.api.nvim_feedkeys(keymap.t('<C-z><C-p><C-p>'), 'in', true)
+            else
+              vim.api.nvim_feedkeys(keymap.t('<C-p>'), 'in', true)
+            end
           end
         end,
       }),
