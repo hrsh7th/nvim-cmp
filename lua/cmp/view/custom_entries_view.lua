@@ -189,8 +189,6 @@ custom_entries_view.open = function(self, offset, entries)
     end
   end
 
-  self.entries_win.scrollbar = completion.scrollbar
-
   -- Apply window options (that might be changed) on the custom completion menu.
   self.entries_win:option('winblend', vim.o.pumblend)
   if border_info.visible then
