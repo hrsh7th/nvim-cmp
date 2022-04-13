@@ -515,20 +515,20 @@ view~
   Specify the view class to customize appearance.
   Currently, the possible configurations are:
 
-                            *cmp-config.window.{completion,documentation}.border*
+                           *cmp-config.window.{completion,documentation}.border*
 window.{completion,documentation}.border~
   `string | string[] | nil`
   Border characters used for the completion popup menu when
   |experimental.native_menu| is disabled.
 
-                      *cmp-config.window.{completion,documentation}.winhighlight*
+                     *cmp-config.window.{completion,documentation}.winhighlight*
 window.{completion,documentation}.winhighlight~
   `string | cmp.WinhighlightConfig`
   Is either a `string` matching the 'winhighlight' syntax, or a `table` of
   `bordered` and `default` options which both specify 'winhighlight' settings
   for when the completion window has and does not have a border, respectively.
 
-                            *cmp-config.window.{completion,documentation}.zindex*
+                           *cmp-config.window.{completion,documentation}.zindex*
 window.{completion,documentation}.zindex~
   `number`
   The completion window's zindex.
