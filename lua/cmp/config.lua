@@ -3,7 +3,6 @@ local cache = require('cmp.utils.cache')
 local keymap = require('cmp.utils.keymap')
 local misc = require('cmp.utils.misc')
 local api = require('cmp.utils.api')
-local str = require('cmp.utils.str')
 
 ---@class cmp.Config
 ---@field public g cmp.ConfigSchema
@@ -161,6 +160,7 @@ config.normalize = function(c)
   -- make sure c is not 'nil'
   c = c == nil and {} or c
 
+  -- Normalize mapping.
   if c.mapping then
     local normalized = {}
     for k, v in pairs(c.mapping) do
@@ -169,6 +169,7 @@ config.normalize = function(c)
     c.mapping = normalized
   end
 
+  -- Notice experimental.native_menu.
   if c.experimental and c.experimental.native_menu then
     vim.api.nvim_echo({
       { '[nvim-cmp] ', 'Normal' },
@@ -183,6 +184,7 @@ config.normalize = function(c)
     c.view.entries = c.view.entries or 'native'
   end
 
+  -- Notice sources.[n].opts
   if c.sources then
     for _, s in ipairs(c.sources) do
       if s.opts and not s.option then
