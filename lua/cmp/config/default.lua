@@ -1,6 +1,4 @@
 local compare = require('cmp.config.compare')
-local mapping = require('cmp.config.mapping')
-local keymap = require('cmp.utils.keymap')
 local types = require('cmp.types')
 
 local WIDE_HEIGHT = 40
@@ -18,66 +16,7 @@ return function()
 
     preselect = types.cmp.PreselectMode.Item,
 
-    mapping = {
-      ['<Down>'] = mapping({
-        i = mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Select }),
-        c = function(fallback)
-          local cmp = require('cmp')
-          cmp.close()
-          vim.schedule(cmp.suspend())
-          fallback()
-        end,
-      }),
-      ['<Up>'] = mapping({
-        i = mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Select }),
-        c = function(fallback)
-          local cmp = require('cmp')
-          cmp.close()
-          vim.schedule(cmp.suspend())
-          fallback()
-        end,
-      }),
-      ['<Tab>'] = mapping({
-        c = function()
-          local cmp = require('cmp')
-          if #cmp.core:get_sources() > 0 and not require('cmp.config').is_native_menu() then
-            if cmp.visible() then
-              cmp.select_next_item()
-            else
-              cmp.complete()
-            end
-          else
-            if vim.fn.pumvisible() == 0 then
-              vim.api.nvim_feedkeys(keymap.t('<C-z>'), 'in', true)
-            else
-              vim.api.nvim_feedkeys(keymap.t('<C-n>'), 'in', true)
-            end
-          end
-        end,
-      }),
-      ['<S-Tab>'] = mapping({
-        c = function()
-          local cmp = require('cmp')
-          if #cmp.core:get_sources() > 0 and not require('cmp.config').is_native_menu() then
-            if cmp.visible() then
-              cmp.select_prev_item()
-            else
-              cmp.complete()
-            end
-          else
-            if vim.fn.pumvisible() == 0 then
-              vim.api.nvim_feedkeys(keymap.t('<C-z><C-p><C-p>'), 'in', true)
-            else
-              vim.api.nvim_feedkeys(keymap.t('<C-p>'), 'in', true)
-            end
-          end
-        end,
-      }),
-      ['<C-n>'] = mapping(mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Insert }), { 'i', 'c' }),
-      ['<C-p>'] = mapping(mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Insert }), { 'i', 'c' }),
-      ['<C-y>'] = mapping.confirm({ select = false }),
-      ['<C-e>'] = mapping.abort(),
-    },
+    mapping = {},
 
     snippet = {
       expand = function()
