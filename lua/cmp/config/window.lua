@@ -10,4 +10,3 @@ window.bordered = function(opts)
 end
 
 return window
-

@@ -225,7 +225,7 @@ window.info = function(self)
     inner_height = self.style.height,
     border_info = border_info,
     scrollable = false,
-    scrollbar_offset = 0
+    scrollbar_offset = 0,
   }
 
   if self:get_content_height() > info.inner_height then
@@ -290,12 +290,7 @@ window.get_border_info = function(self)
   info.left = new_border[8] == '' and 0 or 1
   info.vert = info.top + info.bottom
   info.horiz = info.left + info.right
-  info.visible = not (
-    vim.tbl_contains({ '', ' ' }, new_border[2])
-    and vim.tbl_contains({ '', ' ' }, new_border[4])
-    and vim.tbl_contains({ '', ' ' }, new_border[6])
-    and vim.tbl_contains({ '', ' ' }, new_border[8])
-  )
+  info.visible = not (vim.tbl_contains({ '', ' ' }, new_border[2]) and vim.tbl_contains({ '', ' ' }, new_border[4]) and vim.tbl_contains({ '', ' ' }, new_border[6]) and vim.tbl_contains({ '', ' ' }, new_border[8]))
   return info
 end
 

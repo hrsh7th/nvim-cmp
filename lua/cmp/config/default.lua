@@ -144,13 +144,13 @@ return function()
 
     window = {
       completion = {
-        border = {'', '', '', '', '', '', '', ''},
+        border = { '', '', '', '', '', '', '', '' },
         winhighlight = 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None',
       },
       documentation = {
         max_height = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
         max_width = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
-        border = {'', '', '', ' ', '', '', '', ' '},
+        border = { '', '', '', ' ', '', '', '', ' ' },
         winhighlight = 'FloatBorder:NormalFloat',
       },
     },

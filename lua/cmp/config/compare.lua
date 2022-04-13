@@ -145,7 +145,7 @@ compare.locality = setmetatable({
         self.locality_map[w] = math.min(self.locality_map[w] or d, math.abs(i - cursor_row))
       end
     end
-  end
+  end,
 }, {
   __call = function(self, entry1, entry2)
     local local1 = self.locality_map[entry1:get_word()]
@@ -159,7 +159,7 @@ compare.locality = setmetatable({
       end
       return local1 < local2
     end
-  end
+  end,
 })
 
 -- scopes

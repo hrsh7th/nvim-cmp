@@ -165,12 +165,16 @@ custom_entries_view.open = function(self, offset, entries)
   if math.floor(vim.o.lines * 0.5) <= row + border_offset_row and vim.o.lines - row - border_offset_row <= math.min(DEFAULT_HEIGHT, height) then
     height = math.min(height, row - 1)
     row = row - height - border_offset_row - 1
-    if row < 0 then height = height + row end
+    if row < 0 then
+      height = height + row
+    end
   end
   if math.floor(vim.o.columns * 0.5) <= col + border_offset_col and vim.o.columns - col - border_offset_col <= width then
     width = math.min(width, vim.o.columns - 1)
     col = vim.o.columns - width - border_offset_col - 1
-    if col < 0 then width = width + col end
+    if col < 0 then
+      width = width + col
+    end
   end
 
   if pos[1] > row then
