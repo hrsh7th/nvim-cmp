@@ -154,7 +154,7 @@ config.is_native_menu = function()
 end
 
 ---Normalize mapping key
----@param c cmp.ConfigSchema
+---@param c any
 ---@return cmp.ConfigSchema
 config.normalize = function(c)
   -- make sure c is not 'nil'
@@ -182,6 +182,20 @@ config.normalize = function(c)
 
     c.view = c.view or {}
     c.view.entries = c.view.entries or 'native'
+  end
+
+  -- Notice documentation.
+  if c.documentation ~= nil then
+    vim.api.nvim_echo({
+      { '[nvim-cmp] ', 'Normal' },
+      { 'documentation', 'WarningMsg' },
+      { ' is deprecated.\n', 'Normal' },
+      { '[nvim-cmp] Please use ', 'Normal' },
+      { 'window.documentation= "native"', 'WarningMsg' },
+      { ' instead.', 'Normal' },
+    }, true, {})
+    c.window = c.window or {}
+    c.window.documentation = c.documentation
   end
 
   -- Notice sources.[n].opts
