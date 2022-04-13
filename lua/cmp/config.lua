@@ -82,7 +82,7 @@ config.get = function()
       global_config.revision or 0,
       onetime_config.revision or 0,
     }, function()
-      return config.normalize(misc.merge(onetime_config, global_config))
+      return misc.merge(config.normalize(onetime_config), config.normalize(global_config))
     end)
   elseif api.is_cmdline_mode() then
     local cmdtype = vim.fn.getcmdtype()
@@ -94,7 +94,7 @@ config.get = function()
       cmdtype,
       cmdline_config.revision or 0,
     }, function()
-      return config.normalize(misc.merge(cmdline_config, global_config))
+      return misc.merge(config.normalize(cmdline_config), misc.merge(global_config))
     end)
   else
     local bufnr = vim.api.nvim_get_current_buf()
@@ -111,9 +111,9 @@ config.get = function()
       buffer_config.revision or 0,
     }, function()
       local c = {}
-      c = config.normalize(misc.merge(c, buffer_config))
-      c = config.normalize(misc.merge(c, filetype_config))
-      c = config.normalize(misc.merge(c, global_config))
+      c = misc.merge(config.normalize(c), config.normalize(buffer_config))
+      c = misc.merge(config.normalize(c), config.normalize(filetype_config))
+      c = misc.merge(config.normalize(c), config.normalize(global_config))
       return c
     end)
   end

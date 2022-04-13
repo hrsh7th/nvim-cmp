@@ -50,7 +50,7 @@ mapping.preset.cmdline = function(override)
         if cmp.visible() then
           cmp.select_next_item()
         else
-          cmp.complete()
+          cmp.complete({ reason = cmp.ContextReason.Manual })
         end
       end
     },
@@ -60,7 +60,7 @@ mapping.preset.cmdline = function(override)
         if cmp.visible() then
           cmp.select_prev_item()
         else
-          cmp.complete()
+          cmp.complete({ reason = cmp.ContextReason.Manual })
         end
       end
     },
@@ -83,6 +83,9 @@ mapping.preset.cmdline = function(override)
           fallback()
         end
       end
+    },
+    ['<C-e>'] = {
+      c = mapping.close(),
     },
   })
 end
