@@ -63,7 +63,27 @@ mapping.preset.cmdline = function(override)
           cmp.complete()
         end
       end
-    }
+    },
+    ['<C-n>'] = {
+      c = function(fallback)
+        local cmp = require('cmp')
+        if cmp.visible() then
+          cmp.select_next_item()
+        else
+          fallback()
+        end
+      end
+    },
+    ['<C-p>'] = {
+      c = function(fallback)
+        local cmp = require('cmp')
+        if cmp.visible() then
+          cmp.select_prev_item()
+        else
+          fallback()
+        end
+      end
+    },
   })
 end
 

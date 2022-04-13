@@ -29,7 +29,7 @@ misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'enter' }, function()
   if config.is_native_menu() then
     return
   end
-  if vim.fn.expand('<afile>')~= '=' then
+  if vim.fn.expand('<afile>') ~= '=' then
     vim.schedule(function()
       if api.is_cmdline_mode() then
         vim.cmd [[
