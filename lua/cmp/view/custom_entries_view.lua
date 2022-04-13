@@ -191,11 +191,7 @@ custom_entries_view.open = function(self, offset, entries)
 
   -- Apply window options (that might be changed) on the custom completion menu.
   self.entries_win:option('winblend', vim.o.pumblend)
-  if border_info.visible then
-    self.entries_win:option('winhighlight', completion.winhighlight.bordered)
-  else
-    self.entries_win:option('winhighlight', completion.winhighlight.default)
-  end
+  self.entries_win:option('winhighlight', completion.winhighlight)
   self.entries_win:open({
     relative = 'editor',
     style = 'minimal',

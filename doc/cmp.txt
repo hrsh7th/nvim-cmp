@@ -14,6 +14,7 @@ Command                                                            |cmp-command|
 Highlight                                                        |cmp-highlight|
 Autocmd                                                            |cmp-autocmd|
 Config                                                              |cmp-config|
+Config Helper                                                |cmp-config-helper|
 Develop                                                            |cmp-develop|
 FAQ                                                                    |cmp-faq|
 
@@ -85,6 +86,10 @@ NOTE:
           -- require'snippy'.expand_snippet(args.body) -- For `snippy` users.
           -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
         end,
+      },
+      window = {
+        -- completion = cmp.config.window.bordered(),
+        -- documentation = cmp.config.window.bordered(),
       },
       mapping = {
         ['<C-d>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
@@ -331,15 +336,6 @@ Highlight                                                        *cmp-highlight*
 *CmpItemMenu*
   The menu field's highlight group.
 
-*CmpBorderedWindow_Normal*
-  The highlight group for the bordered window's |hi-Normal|.
-
-*CmpBorderedWindow_FloatBorder*
-  The highlight group for the bordered window's |hi-FloatBorder|.
-
-*CmpBorderedWindow_CursorLine*
-  The highlight group for the bordered window's |hi-Visual|.
-
 
 ==============================================================================
 Autocmd                                                            *cmp-autocmd*
@@ -349,6 +345,8 @@ autocommands for the User event with the following patterns.
 
 *CmpReady*
   Invoked when nvim-cmp gets sourced from `plugin/cmp.lua`.
+
+
 
 ==============================================================================
 Config                                                              *cmp-config*
@@ -517,36 +515,23 @@ view~
   Specify the view class to customize appearance.
   Currently, the possible configurations are:
 
-                                           *cmp-config.window.completion.border*
-window.completion.border~
+                            *cmp-config.window.{completion,documentation}.border*
+window.{completion,documentation}.border~
   `string | string[] | nil`
   Border characters used for the completion popup menu when
   |experimental.native_menu| is disabled.
 
-                                     *cmp-config.window.completion.winhighlight*
-window.completion.winhighlight~
+                      *cmp-config.window.{completion,documentation}.winhighlight*
+window.{completion,documentation}.winhighlight~
   `string | cmp.WinhighlightConfig`
   Is either a `string` matching the 'winhighlight' syntax, or a `table` of
   `bordered` and `default` options which both specify 'winhighlight' settings
   for when the completion window has and does not have a border, respectively.
 
-                                           *cmp-config.window.completion.zindex*
-window.completion.zindex~
+                            *cmp-config.window.{completion,documentation}.zindex*
+window.{completion,documentation}.zindex~
   `number`
   The completion window's zindex.
-
-                                               *cmp-config.window.documentation*
-window.documentation~
-  `false | cmp.DocumentationConfig`
-  If set to `false`, the documentation of each item will not be shown.
-  Else, a table representing documentation configuration should be provided.
-  The following are possible options.
-
-                                        *cmp-config.window.documentation.border*
-window.documentation.border~
-  `string | string[] | nil`
-
-  Border characters used for documentation window.
 
                                      *cmp-config.window.documentation.max_width*
 window.documentation.max_width~
@@ -558,23 +543,72 @@ window.documentation.max_height~
   `number`
   The documentation window's max height.
 
-                                  *cmp-config.window.documentation.winhighlight*
-window.documentation.winhighlight~
-  `string | cmp.WinhighlightConfig`
-  Is either a `string` matching the 'winhighlight' syntax, or a `table` of
-  `bordered` and `default` options which both specify 'winhighlight' settings
-  for when the documentation window has and does not have a border,
-  respectively.
-
-                                        *cmp-config.window.documentation.zindex*
-window.documentation.zindex~
-  `number`
-  The documentation window's zindex.
-
                                             *cmp-config.experimental.ghost_text*
 experimental.ghost_text~
   `boolean | { hl_group = string }`
   The boolean value to enable or disable the ghost_text feature.
+
+
+
+==============================================================================
+Config Helper                                                *cmp-config-helper*
+
+You can use the following configuration helpers.
+
+cmp.config.compare~
+
+  TBD
+
+cmp.config.context~
+
+  The `cmp.config.context` can be used to context-aware completion toggling. 
+>
+    cmp.setup {
+      enabled = function()
+        -- disable completion if the cursor is `Comment` syntax group. 
+        return not cmp.config.context.in_syntax_group('Comment')
+      end
+    }
+<
+  *cmp.config.context.in_syntax_group* (group)
+    You can specify the vim's built-in syntax group.
+    If you use tree-sitter, You should use `cmp.config.context.in_treesitter_capture` instead. 
+
+  *cmp.config.context.in_treesitter_capture* (capture)
+    You can specify the treesitter capture name.
+    If you don't use `nvim-treesitter`, this helper does not work correctly.
+
+cmp.config.mapping~
+
+  See |:help cmp-mapping|
+
+cmp.config.sources~
+
+  *cmp.config.sources* (...sources)
+    You can specify multiple sources arrays.
+    The sources are grouped in the order you specify, and the groups are displayed in a fallback, like chain completion.
+>
+    cmp.setup {
+      window = {
+        completion = cmp.config.window.bordered(),
+        documentation = cmp.config.window.bordered(),
+      }
+    }
+<
+cmp.config.window~
+
+  *cmp.config.window.bordered* (option)
+    Specify some window as `bordered`.
+    The option is described in the `cmp.ConfigSchema`.
+>
+    cmp.setup {
+      window = {
+        completion = cmp.config.window.bordered(),
+        documentation = cmp.config.window.bordered(),
+      }
+    }
+<
+
 
 ==============================================================================
 Develop                                                            *cmp-develop*

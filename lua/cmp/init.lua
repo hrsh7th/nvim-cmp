@@ -29,6 +29,7 @@ cmp.config.disable = misc.none
 cmp.config.compare = require('cmp.config.compare')
 cmp.config.sources = require('cmp.config.sources')
 cmp.config.mapping = require('cmp.config.mapping')
+cmp.config.window = require('cmp.config.window')
 
 ---Sync asynchronous process.
 cmp.sync = function(callback)

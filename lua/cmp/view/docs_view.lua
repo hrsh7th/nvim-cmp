@@ -86,11 +86,7 @@ docs_view.open = function(self, e, view)
 
   -- Render window.
   self.window:option('winblend', vim.o.pumblend)
-  if border_info.visible then
-    self.window:option('winhighlight', documentation.winhighlight.bordered)
-  else
-    self.window:option('winhighlight', documentation.winhighlight.default)
-  end
+  self.window:option('winhighlight', documentation.winhighlight)
   local style = {
     relative = 'editor',
     style = 'minimal',

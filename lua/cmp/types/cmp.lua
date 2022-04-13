@@ -100,19 +100,15 @@ cmp.ItemField.Menu = 'menu'
 
 ---@class cmp.CompletionWindowConfig
 ---@field public border string|string[]
----@field public winhighlight string|cmp.WinhighlightConfig
+---@field public winhighlight string
 ---@field public zindex number|nil
 
 ---@class cmp.DocumentationConfig
----@field public border string|string[]
 ---@field public max_height number|nil
 ---@field public max_width number|nil
----@field public winhighlight string|cmp.WinhighlightConfig
+---@field public border string|string[]
+---@field public winhighlight string
 ---@field public zindex number|nil
-
----@class cmp.WinhighlightConfig
----@field public bordered string
----@field public default string
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior

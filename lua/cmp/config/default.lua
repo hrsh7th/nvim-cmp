@@ -145,19 +145,13 @@ return function()
     window = {
       completion = {
         border = {'', '', '', '', '', '', '', ''},
-        winhighlight = {
-          bordered = 'Normal:CmpBorderedWindow_Normal,FloatBorder:CmpBorderedWindow_FloatBorder,CursorLine:CmpBorderedWindow_CursorLine,Search:None',
-          default = 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None',
-        },
+        winhighlight = 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None',
       },
       documentation = {
-        border = {'', '', '', ' ', '', '', '', ' '},
         max_height = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
         max_width = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
-        winhighlight = {
-          bordered = 'Normal:CmpBorderedWindow_Normal,FloatBorder:CmpBorderedWindow_FloatBorder,CursorLine:CmpBorderedWindow_CursorLine,Search:None',
-          default = 'FloatBorder:NormalFloat',
-        },
+        border = {'', '', '', ' ', '', '', '', ' '},
+        winhighlight = 'FloatBorder:NormalFloat',
       },
     },
   }

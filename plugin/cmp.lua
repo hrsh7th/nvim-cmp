@@ -99,10 +99,6 @@ vim.cmd [[
   highlight default link CmpItemAbbrMatchFuzzy CmpItemAbbrMatchFuzzyDefault
   highlight default link CmpItemKind CmpItemKindDefault
   highlight default link CmpItemMenu CmpItemMenuDefault
-
-  highlight default link CmpBorderedWindow_Normal Normal
-  highlight default link CmpBorderedWindow_FloatBorder Normal
-  highlight default link CmpBorderedWindow_CursorLine Visual
 ]]
 
 for name in pairs(types.lsp.CompletionItemKind) do
