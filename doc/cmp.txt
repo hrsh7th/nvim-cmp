@@ -704,7 +704,6 @@ How to disable the preselect feature? ~
   }
 <
 
-
 How to disable auto-completion?~
 How to use nvim-cmp as like omnifunc?~
 
@@ -732,6 +731,17 @@ How to setup on the specific buffer?~
     sources = {
       { name = 'path' },
       { name = 'buffer' },
+    }
+  })
+<
+
+How to disable documentation window?~
+
+  You can specify the following config.
+>
+  cmp.setup.filetype({ 'markdown', 'help' }, {
+    window = {
+      documentation = cmp.config.disable
     }
   })
 <

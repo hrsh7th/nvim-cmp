@@ -76,7 +76,6 @@ cmp.ItemField.Menu = 'menu'
 ---@field public preselect cmp.PreselectMode
 ---@field public completion cmp.CompletionConfig
 ---@field public window cmp.WindowConfig|nil
----@field public documentation cmp.DocumentationConfig|"false"
 ---@field public confirmation cmp.ConfirmationConfig
 ---@field public matching cmp.MatchingConfig
 ---@field public sorting cmp.SortingConfig
@@ -88,8 +87,8 @@ cmp.ItemField.Menu = 'menu'
 ---@field public experimental cmp.ExperimentalConfig
 
 --- @class cmp.WindowConfig
---- @field completion cmp.CompletionWindowConfig
---- @field documentation cmp.DocumentationConfig
+--- @field completion cmp.WindowConfig
+--- @field documentation cmp.WindowConfig|nil
 
 ---@class cmp.CompletionConfig
 ---@field public autocomplete cmp.TriggerEvent[]
@@ -98,17 +97,12 @@ cmp.ItemField.Menu = 'menu'
 ---@field public keyword_length number
 ---@field public keyword_pattern string
 
----@class cmp.CompletionWindowConfig
+---@class cmp.WindowConfig
 ---@field public border string|string[]
 ---@field public winhighlight string
 ---@field public zindex number|nil
-
----@class cmp.DocumentationConfig
----@field public max_height number|nil
 ---@field public max_width number|nil
----@field public border string|string[]
----@field public winhighlight string
----@field public zindex number|nil
+---@field public max_height number|nil
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior
