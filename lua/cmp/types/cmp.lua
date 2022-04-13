@@ -75,7 +75,7 @@ cmp.ItemField.Menu = 'menu'
 ---@field public enabled fun():boolean|boolean
 ---@field public preselect cmp.PreselectMode
 ---@field public completion cmp.CompletionConfig
----@field public documentation cmp.DocumentationConfig|"false"
+---@field public window cmp.WindowConfig|nil
 ---@field public confirmation cmp.ConfirmationConfig
 ---@field public matching cmp.MatchingConfig
 ---@field public sorting cmp.SortingConfig
@@ -86,19 +86,23 @@ cmp.ItemField.Menu = 'menu'
 ---@field public view cmp.ViewConfig
 ---@field public experimental cmp.ExperimentalConfig
 
+--- @class cmp.WindowConfig
+--- @field completion cmp.WindowConfig
+--- @field documentation cmp.WindowConfig|nil
+
 ---@class cmp.CompletionConfig
 ---@field public autocomplete cmp.TriggerEvent[]
 ---@field public completeopt string
----@field public keyword_pattern string
----@field public keyword_length number
 ---@field public get_trigger_characters fun(trigger_characters: string[]): string[]
+---@field public keyword_length number
+---@field public keyword_pattern string
 
----@class cmp.DocumentationConfig
----@field public border string[]
+---@class cmp.WindowConfig
+---@field public border string|string[]
 ---@field public winhighlight string
----@field public maxwidth number|nil
----@field public maxheight number|nil
 ---@field public zindex number|nil
+---@field public max_width number|nil
+---@field public max_height number|nil
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior

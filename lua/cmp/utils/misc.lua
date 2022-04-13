@@ -29,6 +29,24 @@ misc.concat = function(list1, list2)
   return new_list
 end
 
+---Repeat values
+---@generic T
+---@param str_or_tbl T
+---@param count number
+---@return T
+misc.rep = function(str_or_tbl, count)
+  if type(str_or_tbl) == 'string' then
+    return string.rep(str_or_tbl, count)
+  end
+  local rep = {}
+  for _ = 1, count do
+    for _, v in ipairs(str_or_tbl) do
+      table.insert(rep, v)
+    end
+  end
+  return rep
+end
+
 ---Return the valu is empty or not.
 ---@param v any
 ---@return boolean

@@ -86,12 +86,12 @@ return function()
     },
 
     completion = {
-      keyword_length = 1,
-      keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
       autocomplete = {
         types.cmp.TriggerEvent.TextChanged,
       },
       completeopt = 'menu,menuone,noselect',
+      keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
+      keyword_length = 1,
     },
 
     formatting = {
@@ -125,13 +125,6 @@ return function()
 
     sources = {},
 
-    documentation = {
-      border = { '', '', '', ' ', '', '', '', ' ' },
-      winhighlight = 'NormalFloat:NormalFloat,FloatBorder:NormalFloat',
-      maxwidth = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
-      maxheight = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
-    },
-
     confirmation = {
       default_behavior = types.cmp.ConfirmBehavior.Insert,
       get_commit_characters = function(commit_characters)
@@ -147,6 +140,19 @@ return function()
 
     view = {
       entries = { name = 'custom', selection_order = 'top_down' },
+    },
+
+    window = {
+      completion = {
+        border = { '', '', '', '', '', '', '', '' },
+        winhighlight = 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None',
+      },
+      documentation = {
+        max_height = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
+        max_width = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
+        border = { '', '', '', ' ', '', '', '', ' ' },
+        winhighlight = 'FloatBorder:NormalFloat',
+      },
     },
   }
 end

@@ -75,6 +75,10 @@ lua <<EOF
         -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
       end,
     },
+    window = {
+      -- completion = cmp.config.window.bordered(),
+      -- documentation = cmp.config.window.bordered(),
+    },
     mapping = {
       ['<C-b>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
       ['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
@@ -131,85 +135,16 @@ lua <<EOF
 EOF
 ```
 
+
+
 ### Where can I find more completion sources?
 
-A list of available sources can be found in the [Wiki](https://github.com/hrsh7th/nvim-cmp/wiki/List-of-sources) or by searching for projects that match the nvim-cmp [GitHub topic](https://github.com/topics/nvim-cmp).
+- See the [Wiki](https://github.com/hrsh7th/nvim-cmp/wiki/List-of-sources)
+- See the [GitHub topic](https://github.com/topics/nvim-cmp).
+
+
 
 ### Where can I find advanced configuration examples?
 
-Please see the corresponding [FAQ](#how-to-show-name-of-item-kind-and-source-like-compe) section or [Wiki pages](https://github.com/hrsh7th/nvim-cmp/wiki).
-
-
-Advanced configuration example
-====================
-
-### Use nvim-cmp as smart omnifunc handler.
-
-nvim-cmp can be used as flexible omnifunc manager.
-
-```lua
-local cmp = require('cmp')
-cmp.setup {
-  completion = {
-    autocomplete = false, -- disable auto-completion.
-  },
-}
-
-_G.vimrc = _G.vimrc or {}
-_G.vimrc.cmp = _G.vimrc.cmp or {}
-_G.vimrc.cmp.lsp = function()
-  cmp.complete({
-    config = {
-      sources = {
-        { name = 'nvim_lsp' }
-      }
-    }
-  })
-end
-_G.vimrc.cmp.snippet = function()
-  cmp.complete({
-    config = {
-      sources = {
-        { name = 'vsnip' }
-      }
-    }
-  })
-end
-
-vim.cmd([[
-  inoremap <C-x><C-o> <Cmd>lua vimrc.cmp.lsp()<CR>
-  inoremap <C-x><C-s> <Cmd>lua vimrc.cmp.snippet()<CR>
-]])
-```
-
-### Full managed completion behavior.
-
-```lua
-local cmp = require('cmp')
-
-cmp.setup {
-  completion = {
-    autocomplete = false, -- disable auto-completion.
-  }
-}
-
-_G.vimrc = _G.vimrc or {}
-_G.vimrc.cmp = _G.vimrc.cmp or {}
-_G.vimrc.cmp.on_text_changed = function()
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  local line = vim.api.nvim_get_current_line()
-  local before = string.sub(line, 1, cursor[2] + 1)
-  if before:match('%s*$') then
-    cmp.complete() -- Trigger completion only if the cursor is placed at the end of line.
-  end
-end
-vim.cmd([[
-  augroup vimrc
-    autocmd
-    autocmd TextChanged,TextChangedI,TextChangedP * call luaeval('vimrc.cmp.on_text_changed()')
-  augroup END
-]])
-```
-
-
+See the [Wiki](https://github.com/hrsh7th/nvim-cmp/wiki)
 

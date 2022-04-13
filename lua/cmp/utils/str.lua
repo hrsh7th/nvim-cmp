@@ -1,5 +1,4 @@
 local char = require('cmp.utils.char')
-local pattern = require('cmp.utils.pattern')
 
 local str = {}
 
@@ -71,23 +70,6 @@ str.remove_suffix = function(text, suffix)
     i = i + 1
   end
   return string.sub(text, 1, -#suffix - 1)
-end
-
----strikethrough
----@param text string
----@return string
-str.strikethrough = function(text)
-  local r = pattern.regex('.')
-  local buffer = ''
-  while text ~= '' do
-    local s, e = r:match_str(text)
-    if not s then
-      break
-    end
-    buffer = buffer .. string.sub(text, s, e) .. '̶'
-    text = string.sub(text, e + 1)
-  end
-  return buffer
 end
 
 ---trim

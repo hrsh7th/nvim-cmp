@@ -14,10 +14,9 @@ Command                                                            |cmp-command|
 Highlight                                                        |cmp-highlight|
 Autocmd                                                            |cmp-autocmd|
 Config                                                              |cmp-config|
+Config Helper                                                |cmp-config-helper|
 Develop                                                            |cmp-develop|
 FAQ                                                                    |cmp-faq|
-
-
 
 ==============================================================================
 Abstract                                                          *cmp-abstract*
@@ -29,8 +28,6 @@ This is nvim-cmp's document.
 2. The advanced configuration is noted in wiki.
   - https://github.com/hrsh7th/nvim-cmp/wiki
 
-
-
 ==============================================================================
 Concept                                                            *cmp-concept*
 
@@ -39,8 +36,6 @@ Concept                                                            *cmp-concept*
 - Smart handling of key mapping
 - No flicker
 
-
-
 ==============================================================================
 Usage                                                                *cmp-usage*
 
@@ -48,7 +43,7 @@ The recommendation configurations are the below.
 
 NOTE:
   1. You must setup `snippet.expand` function.
-  2. The `cmp.setup.cmdline` won't work if you are using `native` completion menu. 
+  2. The `cmp.setup.cmdline` won't work if you are using `native` completion menu.
   3. You can disable the `default` options via specifying `cmp.config.disable` value.
 >
   call plug#begin(s:plug_dir)
@@ -91,6 +86,10 @@ NOTE:
           -- require'snippy'.expand_snippet(args.body) -- For `snippy` users.
           -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
         end,
+      },
+      window = {
+        -- completion = cmp.config.window.bordered(),
+        -- documentation = cmp.config.window.bordered(),
       },
       mapping = {
         ['<C-d>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
@@ -138,7 +137,6 @@ NOTE:
     }
   EOF
 <
-
 
 ==============================================================================
 Function                                                          *cmp-function*
@@ -232,8 +230,6 @@ NOTE: You can call these functions in mapping via `<Cmd>lua require('cmp').compl
   - `complete_done`: emit after current completion is done.
   - `confirm_done`: emit after confirmation is done.
 
-
-
 ==============================================================================
 Mapping                                                            *cmp-mapping*
 
@@ -305,8 +301,6 @@ You can also use built-in mapping helpers.
 The built-in mapping helper is only available as a configuration option.
 If you want to call the nvim-cmp features directly, please use |cmp-function| instead.
 
-
-
 ==============================================================================
 Command                                                            *cmp-command*
 
@@ -314,8 +308,6 @@ Command                                                            *cmp-command*
   Prints source statuses for the current buffer and states.
   Sometimes `unknown` source will be printed but it isn't problem. (e.g. `cmp-nvim-lsp`)
   That the reason is the `cmp-nvim-lsp` will registered on the InsertEnter autocmd.
-
-
 
 ==============================================================================
 Highlight                                                        *cmp-highlight*
@@ -343,7 +335,6 @@ Highlight                                                        *cmp-highlight*
 <
 *CmpItemMenu*
   The menu field's highlight group.
-
 
 
 ==============================================================================
@@ -418,7 +409,7 @@ formatting.fields~
 formatting.format~
   `fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem`
   The function to customize the completion menu appearance. See |complete-items|.
-  This value also can be used to modify `dup` property. 
+  This value also can be used to modify `dup` property.
   NOTE: The `vim.CompletedItem` can have special properties `abbr_hl_group`,
   `kind_hl_group` and `menu_hl_group`.
 
@@ -524,11 +515,97 @@ view~
   Specify the view class to customize appearance.
   Currently, the possible configurations are:
 
+                           *cmp-config.window.{completion,documentation}.border*
+window.{completion,documentation}.border~
+  `string | string[] | nil`
+  Border characters used for the completion popup menu when
+  |experimental.native_menu| is disabled.
+
+                     *cmp-config.window.{completion,documentation}.winhighlight*
+window.{completion,documentation}.winhighlight~
+  `string | cmp.WinhighlightConfig`
+  Specify the window's winhighlight option.
+
+                           *cmp-config.window.{completion,documentation}.zindex*
+window.{completion,documentation}.zindex~
+  `number`
+  The completion window's zindex.
+
+                                     *cmp-config.window.documentation.max_width*
+window.documentation.max_width~
+  `number`
+  The documentation window's max width.
+
+                                    *cmp-config.window.documentation.max_height*
+window.documentation.max_height~
+  `number`
+  The documentation window's max height.
+
                                             *cmp-config.experimental.ghost_text*
 experimental.ghost_text~
   `boolean | { hl_group = string }`
   The boolean value to enable or disable the ghost_text feature.
 
+
+
+==============================================================================
+Config Helper                                                *cmp-config-helper*
+
+You can use the following configuration helpers.
+
+cmp.config.compare~
+
+  TBD
+
+cmp.config.context~
+
+  The `cmp.config.context` can be used to context-aware completion toggling. 
+>
+    cmp.setup {
+      enabled = function()
+        -- disable completion if the cursor is `Comment` syntax group. 
+        return not cmp.config.context.in_syntax_group('Comment')
+      end
+    }
+<
+  *cmp.config.context.in_syntax_group* (group)
+    You can specify the vim's built-in syntax group.
+    If you use tree-sitter, You should use `cmp.config.context.in_treesitter_capture` instead. 
+
+  *cmp.config.context.in_treesitter_capture* (capture)
+    You can specify the treesitter capture name.
+    If you don't use `nvim-treesitter`, this helper does not work correctly.
+
+cmp.config.mapping~
+
+  See |:help cmp-mapping|
+
+cmp.config.sources~
+
+  *cmp.config.sources* (...sources)
+    You can specify multiple sources arrays.
+    The sources are grouped in the order you specify, and the groups are displayed in a fallback, like chain completion.
+>
+    cmp.setup {
+      window = {
+        completion = cmp.config.window.bordered(),
+        documentation = cmp.config.window.bordered(),
+      }
+    }
+<
+cmp.config.window~
+
+  *cmp.config.window.bordered* (option)
+    Specify some window as `bordered`.
+    The option is described in the `cmp.ConfigSchema`.
+>
+    cmp.setup {
+      window = {
+        completion = cmp.config.window.bordered(),
+        documentation = cmp.config.window.bordered(),
+      }
+    }
+<
 
 
 ==============================================================================
@@ -611,7 +688,6 @@ You can create custom source like the following example.
   require('cmp').register_source('month', source.new())
 <
 
-
 ==============================================================================
 FAQ                                                                    *cmp-faq*
 
@@ -627,7 +703,6 @@ How to disable the preselect feature? ~
     preselect = cmp.PreselectMode.None
   }
 <
-
 
 How to disable auto-completion?~
 How to use nvim-cmp as like omnifunc?~
@@ -656,6 +731,17 @@ How to setup on the specific buffer?~
     sources = {
       { name = 'path' },
       { name = 'buffer' },
+    }
+  })
+<
+
+How to disable documentation window?~
+
+  You can specify the following config.
+>
+  cmp.setup.filetype({ 'markdown', 'help' }, {
+    window = {
+      documentation = cmp.config.disable
     }
   })
 <
@@ -689,8 +775,5 @@ How to customize menu appearance?~
 
   You can see the nvim-cmp wiki (https://github.com/hrsh7th/nvim-cmp/wiki).
 
-
-
 ==============================================================================
- vim:tw=78:ts=4:et:ft=help:norl:
-
+ vim:tw=78:ts=2:et:ft=help:norl:
