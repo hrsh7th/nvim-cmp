@@ -21,7 +21,7 @@ buffer.ensure = function(name)
     created_new = true
     buf = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_buf_set_option(buf, 'buftype', 'nofile')
-    vim.api.nvim_buf_set_option(buf, 'bufhidden', 'hide')
+    vim.api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
     buffer.cache[name] = buf
   end
   return buf, created_new
