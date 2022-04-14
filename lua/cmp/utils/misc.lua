@@ -99,9 +99,6 @@ misc.merge = function(v1, v2)
     if v2 == misc.none then
       return nil
     else
-      if type(v2) == 'table' then
-        return misc.merge({}, v2)
-      end
       return v2
     end
   end
