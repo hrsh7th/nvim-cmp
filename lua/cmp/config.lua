@@ -100,7 +100,6 @@ config.get = function()
       local c = {}
       c = misc.merge(c, config.normalize(cmdline_config))
       c = misc.merge(c, config.normalize(global_config))
-      print(vim.inspect(c.mapping))
       return c
     end)
   else
