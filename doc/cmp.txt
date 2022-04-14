@@ -527,6 +527,16 @@ window.{completion,documentation}.zindex~
   `number`
   The completion window's zindex.
 
+                                       *cmp-config.window.completion.col_offset*
+window.completion.col_offset~
+  `number`
+  Offsets the completion window relative to the cursor.
+
+                                     *cmp-config.window.completion.side_padding*
+window.completion.side_padding~
+  `number`
+  The ammount of padding to add on the completion window's sides
+
                                      *cmp-config.window.documentation.max_width*
 window.documentation.max_width~
   `number`
