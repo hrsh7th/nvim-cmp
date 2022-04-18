@@ -231,11 +231,12 @@ Mapping                                                            *cmp-mapping*
 
 The nvim-cmp's mapping mechanism is complex but flexible and user-friendly.
 
-You can specify the mapping as function that receives the `fallback` function as arguments.
+You can specify the mapping function that receives the `fallback` function as arguments.
 The `fallback` function can be used to call an existing mapping.
 
-For example, typical pair-wise plugins automatically defines a mapping for `<CR>` or `(`.
-The nvim-cmp will overwrite it but you can fallback to the original mapping via invoking the `fallback` function.
+For example, typical pair-wise plugins automatically define the mapping for `<CR>` or `(`.
+The nvim-cmp might overwrite it via your specified mapping configuration.
+But you can use existing mapping via invoking the `fallback` function.
 >
   cmp.setup {
     mapping = {
@@ -248,7 +249,20 @@ The nvim-cmp will overwrite it but you can fallback to the original mapping via 
       end
     }
   }
+< >
+  cmp.setup {
+    mapping = {
+      ['<Tab>'] = function(fallback)
+        if cmp.visible() then
+          cmp.select_next_item()
+        else
+          fallback()
+        end
+      end
+    }
+  }
 <
+
 And you can specify the mapping modes.
 >
   cmp.setup {

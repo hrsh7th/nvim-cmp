@@ -12,7 +12,7 @@ Readme!
 2. This is my hobby project. You can support me via GitHub sponsors.
 3. Bug reports are welcome, but I might not fix if you don't provide a minimal reproduction configuration and steps.
 4. The nvim-cmp documents is [here](./doc/cmp.txt).
-
+5. The nvim-cmp is designed for `customization`! It's not designed for `works out of the box`.
 
 
 Concept
