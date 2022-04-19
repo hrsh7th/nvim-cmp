@@ -4,8 +4,7 @@ set -eu pipefall
 
 declare -r INSTALL_DIR="$PWD/utils"
 declare -r RELEASE="0.10.0"
-declare -r OS="linux"
-# declare -r OS="$(uname -s)"
+declare -r OS=$([ "$(uname -s)" == "Darwin" ] && echo "macos" || echo "linux")
 declare -r FILENAME="stylua-$RELEASE-$OS"
 
 declare -a __deps=("curl" "unzip")

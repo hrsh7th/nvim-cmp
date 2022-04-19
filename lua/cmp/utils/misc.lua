@@ -251,4 +251,3 @@ misc.redraw = setmetatable({
 })
 
 return misc
-
