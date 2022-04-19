@@ -9,7 +9,7 @@ local types = require('cmp.types')
 local config = require('cmp.config')
 local highlight = require('cmp.utils.highlight')
 local emit = require('cmp.utils.autocmd').emit
-local autos = require('cmp.autocmds')
+local autocmds = require('cmp.autocmds')
 
 misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'leave' }, function()
   if vim.fn.expand('<afile>') ~= '=' then
@@ -29,7 +29,7 @@ misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'enter' }, function()
   if vim.fn.expand('<afile>') ~= '=' then
     vim.schedule(function()
       if api.is_cmdline_mode() then
-        autos.cmdline_mode()
+        autocmds.cmdline_mode()
         emit('CmdlineEnter')
       end
     end)
@@ -106,4 +106,4 @@ vim.cmd([[command! CmpStatus lua require('cmp').status()]])
 
 vim.cmd([[doautocmd <nomodeline> User CmpReady]])
 
-autos.autocmd()
+autocmds.autocmd()
