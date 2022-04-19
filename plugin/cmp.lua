@@ -9,7 +9,7 @@ local types = require('cmp.types')
 local config = require('cmp.config')
 local highlight = require('cmp.utils.highlight')
 local emit = require('cmp.utils.autocmd').emit
-local autos = require('cmp.autos')
+local autos = require('cmp.autocmds')
 
 misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'leave' }, function()
   if vim.fn.expand('<afile>') ~= '=' then
