@@ -260,10 +260,12 @@ entry.get_vim_item = function(self, suggest_offset)
     end
 
     -- remove duplicated string.
-    for i = 1, #word - 1 do
-      if str.has_prefix(self.context.cursor_after_line, string.sub(word, i, #word)) then
-        word = string.sub(word, 1, i - 1)
-        break
+    if self:get_offset() ~= self.context.cursor.col then
+      for i = 1, #word - 1 do
+        if str.has_prefix(self.context.cursor_after_line, string.sub(word, i, #word)) then
+          word = string.sub(word, 1, i - 1)
+          break
+        end
       end
     end
 
@@ -409,9 +411,14 @@ entry.get_documentation = function(self)
 
   -- detail
   if misc.safe(item.detail) and item.detail ~= '' then
+    local ft = self.context.filetype
+    local dot_index = string.find(ft, '%.')
+    if dot_index ~= nil then
+      ft = string.sub(ft, 0, dot_index - 1)
+    end
     table.insert(documents, {
       kind = types.lsp.MarkupKind.Markdown,
-      value = ('```%s\n%s\n```'):format(self.context.filetype, str.trim(item.detail)),
+      value = ('```%s\n%s\n```'):format(ft, str.trim(item.detail)),
     })
   end
 

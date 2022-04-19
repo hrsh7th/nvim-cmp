@@ -29,6 +29,7 @@ cmp.config.disable = misc.none
 cmp.config.compare = require('cmp.config.compare')
 cmp.config.sources = require('cmp.config.sources')
 cmp.config.mapping = require('cmp.config.mapping')
+cmp.config.window = require('cmp.config.window')
 
 ---Sync asynchronous process.
 cmp.sync = function(callback)
@@ -130,22 +131,17 @@ end)
 cmp.select_next_item = cmp.sync(function(option)
   option = option or {}
 
-  -- Hack: Ignore when executing macro.
-  if vim.fn.reg_executing() ~= '' then
-    return true
-  end
-
   if cmp.core.view:visible() then
     local release = cmp.core:suspend()
     cmp.core.view:select_next_item(option)
     vim.schedule(release)
     return true
   elseif vim.fn.pumvisible() == 1 then
-    -- Special handling for native puma. Required to facilitate key mapping processing.
+    -- Special handling for native pum. Required to facilitate key mapping processing.
     if (option.behavior or cmp.SelectBehavior.Insert) == cmp.SelectBehavior.Insert then
-      feedkeys.call(keymap.t('<C-n>'), 'n')
+      feedkeys.call(keymap.t('<C-n>'), 'in')
     else
-      feedkeys.call(keymap.t('<Down>'), 'n')
+      feedkeys.call(keymap.t('<Down>'), 'in')
     end
     return true
   end
@@ -156,22 +152,17 @@ end)
 cmp.select_prev_item = cmp.sync(function(option)
   option = option or {}
 
-  -- Hack: Ignore when executing macro.
-  if vim.fn.reg_executing() ~= '' then
-    return true
-  end
-
   if cmp.core.view:visible() then
     local release = cmp.core:suspend()
     cmp.core.view:select_prev_item(option)
     vim.schedule(release)
     return true
   elseif vim.fn.pumvisible() == 1 then
-    -- Special handling for native puma. Required to facilitate key mapping processing.
+    -- Special handling for native pum. Required to facilitate key mapping processing.
     if (option.behavior or cmp.SelectBehavior.Insert) == cmp.SelectBehavior.Insert then
-      feedkeys.call(keymap.t('<C-p>'), 'n')
+      feedkeys.call(keymap.t('<C-p>'), 'in')
     else
-      feedkeys.call(keymap.t('<Up>'), 'n')
+      feedkeys.call(keymap.t('<Up>'), 'in')
     end
     return true
   end
@@ -193,11 +184,6 @@ cmp.confirm = cmp.sync(function(option, callback)
   option = option or {}
   callback = callback or function() end
 
-  -- Hack: Ignore when executing macro.
-  if vim.fn.reg_executing() ~= '' then
-    return true
-  end
-
   local e = cmp.core.view:get_selected_entry() or (option.select and cmp.core.view:get_first_entry() or nil)
   if e then
     cmp.core:confirm(e, {
@@ -210,7 +196,7 @@ cmp.confirm = cmp.sync(function(option, callback)
   else
     -- Special handling for native puma. Required to facilitate key mapping processing.
     if vim.fn.complete_info({ 'selected' }).selected ~= -1 then
-      feedkeys.call(keymap.t('<C-y>'), 'n')
+      feedkeys.call(keymap.t('<C-y>'), 'in')
       return true
     end
     return false
@@ -338,10 +324,17 @@ autocmd.subscribe('CursorMoved', function()
   end
 end)
 
+autocmd.subscribe('InsertEnter', function()
+  cmp.config.compare.scopes:update()
+  cmp.config.compare.locality:update()
+end)
+
 cmp.event:on('complete_done', function(evt)
   if evt.entry then
     cmp.config.compare.recently_used:add_entry(evt.entry)
   end
+  cmp.config.compare.scopes:update()
+  cmp.config.compare.locality:update()
 end)
 
 cmp.event:on('confirm_done', function(evt)

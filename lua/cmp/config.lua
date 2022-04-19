@@ -29,7 +29,7 @@ config.onetime = {}
 ---Set configuration for global.
 ---@param c cmp.ConfigSchema
 config.set_global = function(c)
-  config.global = misc.merge(config.normalize(c), config.normalize(config.global))
+  config.global = config.normalize(misc.merge(c, config.global))
   config.global.revision = config.global.revision or 1
   config.global.revision = config.global.revision + 1
 end
@@ -82,7 +82,10 @@ config.get = function()
       global_config.revision or 0,
       onetime_config.revision or 0,
     }, function()
-      return misc.merge(config.normalize(onetime_config), config.normalize(global_config))
+      local c = {}
+      c = misc.merge(c, config.normalize(onetime_config))
+      c = misc.merge(c, config.normalize(global_config))
+      return c
     end)
   elseif api.is_cmdline_mode() then
     local cmdtype = vim.fn.getcmdtype()
@@ -94,7 +97,10 @@ config.get = function()
       cmdtype,
       cmdline_config.revision or 0,
     }, function()
-      return misc.merge(config.normalize(cmdline_config), config.normalize(global_config))
+      local c = {}
+      c = misc.merge(c, config.normalize(cmdline_config))
+      c = misc.merge(c, config.normalize(global_config))
+      return c
     end)
   else
     local bufnr = vim.api.nvim_get_current_buf()
@@ -111,9 +117,9 @@ config.get = function()
       buffer_config.revision or 0,
     }, function()
       local c = {}
-      c = misc.merge(c, config.normalize(buffer_config))
-      c = misc.merge(c, config.normalize(filetype_config))
-      c = misc.merge(c, config.normalize(global_config))
+      c = misc.merge(config.normalize(c), config.normalize(buffer_config))
+      c = misc.merge(config.normalize(c), config.normalize(filetype_config))
+      c = misc.merge(config.normalize(c), config.normalize(global_config))
       return c
     end)
   end
@@ -154,9 +160,13 @@ config.is_native_menu = function()
 end
 
 ---Normalize mapping key
----@param c cmp.ConfigSchema
+---@param c any
 ---@return cmp.ConfigSchema
 config.normalize = function(c)
+  -- make sure c is not 'nil'
+  c = c == nil and {} or c
+
+  -- Normalize mapping.
   if c.mapping then
     local normalized = {}
     for k, v in pairs(c.mapping) do
@@ -165,6 +175,7 @@ config.normalize = function(c)
     c.mapping = normalized
   end
 
+  -- Notice experimental.native_menu.
   if c.experimental and c.experimental.native_menu then
     vim.api.nvim_echo({
       { '[nvim-cmp] ', 'Normal' },
@@ -179,6 +190,21 @@ config.normalize = function(c)
     c.view.entries = c.view.entries or 'native'
   end
 
+  -- Notice documentation.
+  if c.documentation ~= nil then
+    vim.api.nvim_echo({
+      { '[nvim-cmp] ', 'Normal' },
+      { 'documentation', 'WarningMsg' },
+      { ' is deprecated.\n', 'Normal' },
+      { '[nvim-cmp] Please use ', 'Normal' },
+      { 'window.documentation= "native"', 'WarningMsg' },
+      { ' instead.', 'Normal' },
+    }, true, {})
+    c.window = c.window or {}
+    c.window.documentation = c.documentation
+  end
+
+  -- Notice sources.[n].opts
   if c.sources then
     for _, s in ipairs(c.sources) do
       if s.opts and not s.option then

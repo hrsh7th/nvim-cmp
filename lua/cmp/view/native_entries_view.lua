@@ -101,7 +101,7 @@ native_entries_view.info = function(self)
   if self:visible() then
     local info = vim.fn.pum_getpos()
     return {
-      width = info.width + (info.scrollbar and 1 or 0),
+      width = info.width + (info.scrollable and 1 or 0),
       height = info.height,
       row = info.row,
       col = info.col,

@@ -80,7 +80,7 @@ view.open = function(self, ctx, sources)
     -- create filtered entries.
     local offset = ctx.cursor.col
     for i, s in ipairs(source_group) do
-      if s.offset <= offset then
+      if s.offset <= ctx.cursor.col then
         if not has_triggered_by_symbol_source or s.is_triggered_by_symbol then
           -- source order priority bonus.
           local priority = s:get_source_config().priority or ((#source_group - (i - 1)) * config.get().sorting.priority_weight)

@@ -8,11 +8,11 @@ Completion sources are installed from external repositories and "sourced".
 Readme!
 ====================
 
-1. nvim-cmp's breaking changes are documented [here](https://github.com/hrsh7th/nvim-cmp/issues/231).
+1. There is a Github issue that documents [breaking changes](https://github.com/hrsh7th/nvim-cmp/issues/231) for nvim-cmp. Subscribe to the issue to be notified of upcoming breaking changes.
 2. This is my hobby project. You can support me via GitHub sponsors.
 3. Bug reports are welcome, but I might not fix if you don't provide a minimal reproduction configuration and steps.
 4. The nvim-cmp documents is [here](./doc/cmp.txt).
-
+5. The nvim-cmp is designed for `customization`! It's not designed for `works out of the box`.
 
 
 Concept
@@ -75,17 +75,17 @@ lua <<EOF
         -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
       end,
     },
-    mapping = {
-      ['<C-b>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
-      ['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
-      ['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
-      ['<C-y>'] = cmp.config.disable, -- Specify `cmp.config.disable` if you want to remove the default `<C-y>` mapping.
-      ['<C-e>'] = cmp.mapping({
-        i = cmp.mapping.abort(),
-        c = cmp.mapping.close(),
-      }),
-      ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+    window = {
+      -- completion = cmp.config.window.bordered(),
+      -- documentation = cmp.config.window.bordered(),
     },
+    mapping = cmp.mapping.preset.insert({
+      ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+      ['<C-f>'] = cmp.mapping.scroll_docs(4),
+      ['<C-Space>'] = cmp.mapping.complete(),
+      ['<C-e>'] = cmp.mapping.abort(),
+      ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+    }),
     sources = cmp.config.sources({
       { name = 'nvim_lsp' },
       { name = 'vsnip' }, -- For vsnip users.
@@ -100,7 +100,7 @@ lua <<EOF
   -- Set configuration for specific filetype.
   cmp.setup.filetype('gitcommit', {
     sources = cmp.config.sources({
-      { name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it. 
+      { name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it.
     }, {
       { name = 'buffer' },
     })
@@ -108,6 +108,7 @@ lua <<EOF
 
   -- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
   cmp.setup.cmdline('/', {
+    mapping = cmp.mapping.preset.cmdline(),
     sources = {
       { name = 'buffer' }
     }
@@ -115,6 +116,7 @@ lua <<EOF
 
   -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
   cmp.setup.cmdline(':', {
+    mapping = cmp.mapping.preset.cmdline(),
     sources = cmp.config.sources({
       { name = 'path' }
     }, {
@@ -131,85 +133,16 @@ lua <<EOF
 EOF
 ```
 
+
+
 ### Where can I find more completion sources?
 
-You can search for various completion sources [here](https://github.com/topics/nvim-cmp).
-
-### Where can I find the advanced configuration examples?
-
-Please see the corresponding [FAQ](#how-to-show-name-of-item-kind-and-source-like-compe) section or [Wiki pages](https://github.com/hrsh7th/nvim-cmp/wiki).
+- See the [Wiki](https://github.com/hrsh7th/nvim-cmp/wiki/List-of-sources)
+- See the [GitHub topic](https://github.com/topics/nvim-cmp).
 
 
-Advanced configuration example
-====================
 
-### Use nvim-cmp as smart omnifunc handler.
+### Where can I find advanced configuration examples?
 
-nvim-cmp can be used as flexible omnifunc manager.
-
-```lua
-local cmp = require('cmp')
-cmp.setup {
-  completion = {
-    autocomplete = false, -- disable auto-completion.
-  },
-}
-
-_G.vimrc = _G.vimrc or {}
-_G.vimrc.cmp = _G.vimrc.cmp or {}
-_G.vimrc.cmp.lsp = function()
-  cmp.complete({
-    config = {
-      sources = {
-        { name = 'nvim_lsp' }
-      }
-    }
-  })
-end
-_G.vimrc.cmp.snippet = function()
-  cmp.complete({
-    config = {
-      sources = {
-        { name = 'vsnip' }
-      }
-    }
-  })
-end
-
-vim.cmd([[
-  inoremap <C-x><C-o> <Cmd>lua vimrc.cmp.lsp()<CR>
-  inoremap <C-x><C-s> <Cmd>lua vimrc.cmp.snippet()<CR>
-]])
-```
-
-### Full managed completion behavior.
-
-```lua
-local cmp = require('cmp')
-
-cmp.setup {
-  completion = {
-    autocomplete = false, -- disable auto-completion.
-  }
-}
-
-_G.vimrc = _G.vimrc or {}
-_G.vimrc.cmp = _G.vimrc.cmp or {}
-_G.vimrc.cmp.on_text_changed = function()
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  local line = vim.api.nvim_get_current_line()
-  local before = string.sub(line, 1, cursor[2] + 1)
-  if before:match('%s*$') then
-    cmp.complete() -- Trigger completion only if the cursor is placed at the end of line.
-  end
-end
-vim.cmd([[
-  augroup vimrc
-    autocmd
-    autocmd TextChanged,TextChangedI,TextChangedP * call luaeval('vimrc.cmp.on_text_changed()')
-  augroup END
-]])
-```
-
-
+See the [Wiki](https://github.com/hrsh7th/nvim-cmp/wiki)
 

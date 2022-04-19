@@ -29,6 +29,24 @@ misc.concat = function(list1, list2)
   return new_list
 end
 
+---Repeat values
+---@generic T
+---@param str_or_tbl T
+---@param count number
+---@return T
+misc.rep = function(str_or_tbl, count)
+  if type(str_or_tbl) == 'string' then
+    return string.rep(str_or_tbl, count)
+  end
+  local rep = {}
+  for _ = 1, count do
+    for _, v in ipairs(str_or_tbl) do
+      table.insert(rep, v)
+    end
+  end
+  return rep
+end
+
 ---Return the valu is empty or not.
 ---@param v any
 ---@return boolean
@@ -206,11 +224,12 @@ end
 misc.redraw = setmetatable({
   doing = false,
   force = false,
+  termcode = vim.api.nvim_replace_termcodes('<C-r><Esc>', true, true, true),
 }, {
   __call = function(self, force)
     if vim.tbl_contains({ '/', '?' }, vim.fn.getcmdtype()) then
       if vim.o.incsearch then
-        return vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-r>=""<CR>', true, true, true), 'n', true)
+        return vim.api.nvim_feedkeys(self.termcode, 'in', true)
       end
     end
 
@@ -232,3 +251,4 @@ misc.redraw = setmetatable({
 })
 
 return misc
+

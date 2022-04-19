@@ -20,8 +20,6 @@ buffer.ensure = function(name)
   if not buf then
     created_new = true
     buf = vim.api.nvim_create_buf(false, true)
-    vim.api.nvim_buf_set_option(buf, 'buftype', 'nofile')
-    vim.api.nvim_buf_set_option(buf, 'bufhidden', 'hide')
     buffer.cache[name] = buf
   end
   return buf, created_new

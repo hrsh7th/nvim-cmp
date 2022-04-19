@@ -15,7 +15,8 @@ local api = require('cmp.utils.api')
 local event = require('cmp.utils.event')
 
 local SOURCE_TIMEOUT = 500
-local THROTTLE_TIME = 80
+local DEBOUNCE_TIME = 80
+local THROTTLE_TIME = 40
 
 ---@class cmp.Core
 ---@field public suspending boolean
@@ -284,7 +285,8 @@ core.complete = function(self, ctx)
             end
           end
           if not self.view:get_active_entry() then
-            self.filter.timeout = self.view:visible() and THROTTLE_TIME or 0
+            self.filter.stop()
+            self.filter.timeout = self.view:visible() and DEBOUNCE_TIME or 0
             self:filter()
           end
         end
@@ -372,7 +374,7 @@ core.confirm = function(self, e, option, callback)
       local keys = {}
       table.insert(keys, keymap.backspace(ctx.cursor.character - misc.to_utfindex(ctx.cursor_line, e:get_offset())))
       table.insert(keys, string.sub(e.context.cursor_before_line, e:get_offset()))
-      feedkeys.call(table.concat(keys, ''), 'int')
+      feedkeys.call(table.concat(keys, ''), 'in')
     else
       vim.api.nvim_buf_set_text(0, ctx.cursor.row - 1, e:get_offset() - 1, ctx.cursor.row - 1, ctx.cursor.col - 1, {
         string.sub(e.context.cursor_before_line, e:get_offset()),
@@ -460,7 +462,7 @@ core.confirm = function(self, e, option, callback)
       table.insert(keys, string.rep(keymap.t('<BS>'), diff_before))
       table.insert(keys, string.rep(keymap.t('<Del>'), diff_after))
       table.insert(keys, new_text)
-      feedkeys.call(table.concat(keys, ''), 'int')
+      feedkeys.call(table.concat(keys, ''), 'in')
     end
   end)
   feedkeys.call(keymap.indentkeys(vim.bo.indentkeys), 'n')
