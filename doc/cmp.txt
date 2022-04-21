@@ -528,18 +528,20 @@ view~
                            *cmp-config.window.{completion,documentation}.border*
 window.{completion,documentation}.border~
   `string | string[] | nil`
-  Border characters used for the completion popup menu when
-  |experimental.native_menu| is disabled.
+  Border characters used for the completion popup menu when |experimental.native_menu| is disabled.
+  See :h |nvim_open_win|.
 
                      *cmp-config.window.{completion,documentation}.winhighlight*
 window.{completion,documentation}.winhighlight~
   `string | cmp.WinhighlightConfig`
   Specify the window's winhighlight option.
+  See :h |nvim_open_win|.
 
                            *cmp-config.window.{completion,documentation}.zindex*
 window.{completion,documentation}.zindex~
   `number`
   The completion window's zindex.
+  See :h |nvim_open_win|.
 
                                      *cmp-config.window.documentation.max_width*
 window.documentation.max_width~
