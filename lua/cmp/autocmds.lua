@@ -8,7 +8,7 @@ function M.autocmd()
     callback = function()
       emit('InsertEnter')
     end,
-    desc = [[autocmd InsertEnter * lua require'cmp.utils.autocmd'.emit('InsertEnter')]],
+    desc = 'nvim-cmp: emits autocmd event for InsertEnter',
   })
 
   vim.api.nvim_create_autocmd('InsertLeave', {
@@ -16,7 +16,7 @@ function M.autocmd()
     callback = function()
       emit('InsertLeave')
     end,
-    desc = [[autocmd InsertLeave * lua require'cmp.utils.autocmd'.emit('InsertLeave')]],
+    desc = 'nvim-cmp: emits autocmd event for InsertLeave',
   })
 
   vim.api.nvim_create_autocmd({
@@ -28,7 +28,7 @@ function M.autocmd()
     callback = function()
       emit('TextChanged')
     end,
-    desc = [[autocmd TextChangedI,TextChangedP * lua require'cmp.utils.autocmd'.emit('TextChanged')]],
+    desc = 'nvim-cmp: emits autocmd event for TextChangedI and TextChangedP',
   })
 
   vim.api.nvim_create_autocmd('CursorMovedI', {
@@ -36,7 +36,7 @@ function M.autocmd()
     callback = function()
       emit('CursorMoved')
     end,
-    desc = [[autocmd CursorMovedI * lua require'cmp.utils.autocmd'.emit('CursorMoved')]],
+    desc = 'nvim-cmp: emits autocmd event for CursorMovedI',
   })
 
   vim.api.nvim_create_autocmd('CompleteChanged', {
@@ -44,7 +44,7 @@ function M.autocmd()
     callback = function()
       emit('CompleteChanged')
     end,
-    desc = [[autocmd CompleteChanged * lua require'cmp.utils.autocmd'.emit('CompleteChanged')]],
+    desc = 'nvim-cmp: emits autocmd event for CompleteChanged',
   })
 
   vim.api.nvim_create_autocmd('CompleteDone', {
@@ -52,26 +52,26 @@ function M.autocmd()
     callback = function()
       emit('CompleteDone')
     end,
-    desc = [[autocmd CompleteDone * lua require'cmp.utils.autocmd'.emit('CompleteDone')]],
+    desc = 'nvim-cmp: emits autocmd event for CompleteDone',
   })
 
   vim.api.nvim_create_autocmd('ColorScheme', {
     group = ___cmp___,
     callback = _G.cmp.plugin.colorscheme,
-    desc = [[autocmd ColorScheme * call v:lua.cmp.plugin.colorscheme()]],
+    desc = 'nvim-cmp: calling _G.cmp.plugin.colorscheme on ColorScheme event',
   })
 
   -- for entering cmdwin with `<C-f>`
   vim.api.nvim_create_autocmd('CmdlineEnter', {
     group = ___cmp___,
     callback = _G.cmp.plugin.cmdline.enter,
-    desc = [[autocmd CmdlineEnter * call v:lua.cmp.plugin.cmdline.enter()]],
+    desc = 'nvim-cmp: calling _G.cmp.plugin.cmdline.enter on CmdlineEnter event',
   })
 
   vim.api.nvim_create_autocmd('CmdwinEnter', {
     group = ___cmp___,
     callback = _G.cmp.plugin.cmdline.leave,
-    desc = [[autocmd CmdwinEnter * call v:lua.cmp.plugin.cmdline.leave()]],
+    desc = 'nvim-cmp: calling _G.cmp.plugin.cmdline.leave on CmdwinEnter',
   })
 end
 
@@ -82,13 +82,13 @@ function M.cmdline_mode()
     callback = function()
       emit('TextChanged')
     end,
-    desc = [[autocmd CmdlineChanged * lua require'cmp.utils.autocmd'.emit('TextChanged')]],
+    desc = 'nvim-cmp: emits autocmd TextChanged event on CmdlineChanged',
   })
 
   vim.api.nvim_create_autocmd('CmdlineLeave', {
     group = cmp_cmdline,
     callback = _G.cmp.plugin.cmdline.leave,
-    desc = [[autocmd CmdlineLeave * call v:lua.cmp.plugin.cmdline.leave()]],
+    desc = 'nvim-cmp: calling _G.cmp.plugin.cmdline.leave on CmdlineLeave event',
   })
 end
 
