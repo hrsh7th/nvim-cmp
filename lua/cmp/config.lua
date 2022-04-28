@@ -197,7 +197,7 @@ config.normalize = function(c)
       { 'documentation', 'WarningMsg' },
       { ' is deprecated.\n', 'Normal' },
       { '[nvim-cmp] Please use ', 'Normal' },
-      { 'window.documentation= "native"', 'WarningMsg' },
+      { 'window.documentation = cmp.config.window.bordered()', 'WarningMsg' },
       { ' instead.', 'Normal' },
     }, true, {})
     c.window = c.window or {}
