@@ -410,6 +410,12 @@ completion.completeopt~
   The vim's completeopt like setting. See 'completeopt'.
   Besically, You don't need to modify this.
 
+                                 *cmp-config.confirmation.get_commit_characters*
+confirmation.get_commit_characters~
+  `fun(commit_characters:string[]):string[]`
+  You can append or exclude commitCharacters via this configuration option function.
+  The commitCharacters is defined in LSP spec.
+
                                                   *cmp-config.formatting.fields*
 formatting.fields~
   `cmp.ItemField[]`
@@ -716,6 +722,21 @@ How to disable the preselect feature? ~
     preselect = cmp.PreselectMode.None
   }
 <
+
+Why nvim-cmp confirm item automatically?~
+How to disable commitCharacters?~
+
+  You can disable commitCharacters feature (that defined in LSP spec).
+>
+  cmp.setup {
+    confirmation = {
+      get_commit_characters = function(commit_characters)
+        return {}
+      end
+    }
+  }
+<
+
 
 How to disable auto-completion?~
 How to use nvim-cmp as like omnifunc?~
