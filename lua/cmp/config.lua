@@ -82,7 +82,10 @@ config.get = function()
       global_config.revision or 0,
       onetime_config.revision or 0,
     }, function()
-      return misc.merge(config.normalize(onetime_config), config.normalize(global_config))
+      local c = {}
+      c = misc.merge(c, config.normalize(onetime_config))
+      c = misc.merge(c, config.normalize(global_config))
+      return c
     end)
   elseif api.is_cmdline_mode() then
     local cmdtype = vim.fn.getcmdtype()
@@ -94,7 +97,10 @@ config.get = function()
       cmdtype,
       cmdline_config.revision or 0,
     }, function()
-      return misc.merge(config.normalize(cmdline_config), misc.merge(global_config))
+      local c = {}
+      c = misc.merge(c, config.normalize(cmdline_config))
+      c = misc.merge(c, config.normalize(global_config))
+      return c
     end)
   else
     local bufnr = vim.api.nvim_get_current_buf()
@@ -191,7 +197,7 @@ config.normalize = function(c)
       { 'documentation', 'WarningMsg' },
       { ' is deprecated.\n', 'Normal' },
       { '[nvim-cmp] Please use ', 'Normal' },
-      { 'window.documentation= "native"', 'WarningMsg' },
+      { 'window.documentation = cmp.config.window.bordered()', 'WarningMsg' },
       { ' instead.', 'Normal' },
     }, true, {})
     c.window = c.window or {}

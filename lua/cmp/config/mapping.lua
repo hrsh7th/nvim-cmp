@@ -1,7 +1,7 @@
 local types = require('cmp.types')
 local misc = require('cmp.utils.misc')
 local feedkeys = require('cmp.utils.feedkeys')
-local keymap   = require('cmp.utils.keymap')
+local keymap = require('cmp.utils.keymap')
 
 local mapping = setmetatable({}, {
   __call = function(_, invoke, modes)
@@ -39,7 +39,7 @@ mapping.preset.insert = function(override)
     },
     ['<C-e>'] = {
       i = mapping.abort(),
-    }
+    },
   })
 end
 
@@ -54,7 +54,7 @@ mapping.preset.cmdline = function(override)
         else
           feedkeys.call(keymap.t('<C-z>'), 'n')
         end
-      end
+      end,
     },
     ['<S-Tab>'] = {
       c = function()
@@ -64,7 +64,7 @@ mapping.preset.cmdline = function(override)
         else
           feedkeys.call(keymap.t('<C-z>'), 'n')
         end
-      end
+      end,
     },
     ['<C-n>'] = {
       c = function(fallback)
@@ -74,7 +74,7 @@ mapping.preset.cmdline = function(override)
         else
           fallback()
         end
-      end
+      end,
     },
     ['<C-p>'] = {
       c = function(fallback)
@@ -84,7 +84,7 @@ mapping.preset.cmdline = function(override)
         else
           fallback()
         end
-      end
+      end,
     },
     ['<C-e>'] = {
       c = mapping.close(),

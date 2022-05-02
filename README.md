@@ -8,11 +8,11 @@ Completion sources are installed from external repositories and "sourced".
 Readme!
 ====================
 
-1. nvim-cmp's breaking changes are documented [here](https://github.com/hrsh7th/nvim-cmp/issues/231).
+1. There is a Github issue that documents [breaking changes](https://github.com/hrsh7th/nvim-cmp/issues/231) for nvim-cmp. Subscribe to the issue to be notified of upcoming breaking changes.
 2. This is my hobby project. You can support me via GitHub sponsors.
 3. Bug reports are welcome, but I might not fix if you don't provide a minimal reproduction configuration and steps.
 4. The nvim-cmp documents is [here](./doc/cmp.txt).
-
+5. The nvim-cmp is designed for `customization`! It's not designed to `work out of the box`.
 
 
 Concept
