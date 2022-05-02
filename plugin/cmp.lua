@@ -37,55 +37,32 @@ misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'enter' }, function()
 end)
 
 misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
-  highlight.inherit('CmpItemAbbrDefault', 'Pmenu', {
-    guibg = 'NONE',
-    ctermbg = 'NONE',
-  })
-  highlight.inherit('CmpItemAbbrDeprecatedDefault', 'Comment', {
-    gui = 'NONE',
-    guibg = 'NONE',
-    ctermbg = 'NONE',
-  })
-  highlight.inherit('CmpItemAbbrMatchDefault', 'Pmenu', {
-    gui = 'NONE',
-    guibg = 'NONE',
-    ctermbg = 'NONE',
-  })
-  highlight.inherit('CmpItemAbbrMatchFuzzyDefault', 'Pmenu', {
-    gui = 'NONE',
-    guibg = 'NONE',
-    ctermbg = 'NONE',
-  })
-  highlight.inherit('CmpItemKindDefault', 'Special', {
-    guibg = 'NONE',
-    ctermbg = 'NONE',
-  })
-  highlight.inherit('CmpItemMenuDefault', 'Pmenu', {
-    guibg = 'NONE',
-    ctermbg = 'NONE',
-  })
+  highlight.inherit('CmpItemAbbrDefault', 'Pmenu', { bg = 'NONE' })
+  highlight.inherit('CmpItemAbbrDeprecatedDefault', 'Comment', { bg = 'NONE' })
+  highlight.inherit('CmpItemAbbrMatchDefault', 'Pmenu', { bg = 'NONE' })
+  highlight.inherit('CmpItemAbbrMatchFuzzyDefault', 'Pmenu', { bg = 'NONE' })
+  highlight.inherit('CmpItemKindDefault', 'Special', { bg = 'NONE' })
+  highlight.inherit('CmpItemMenuDefault', 'Pmenu', { bg = 'NONE' })
   for name in pairs(types.lsp.CompletionItemKind) do
     if type(name) == 'string' then
-      vim.cmd(([[highlight default link CmpItemKind%sDefault CmpItemKind]]):format(name))
+      vim.api.nvim_set_hl(0, ('CmpItemKind%sDefault'):format(name), { link = 'CmpItemKind' })
     end
   end
 end)
 _G.cmp.plugin.colorscheme()
 
-vim.cmd([[
-  highlight default link CmpItemAbbr CmpItemAbbrDefault
-  highlight default link CmpItemAbbrDeprecated CmpItemAbbrDeprecatedDefault
-  highlight default link CmpItemAbbrMatch CmpItemAbbrMatchDefault
-  highlight default link CmpItemAbbrMatchFuzzy CmpItemAbbrMatchFuzzyDefault
-  highlight default link CmpItemKind CmpItemKindDefault
-  highlight default link CmpItemMenu CmpItemMenuDefault
-]])
+vim.api.nvim_set_hl(0, 'CmpItemAbbr', { link = 'CmpItemAbbrDefault' })
+vim.api.nvim_set_hl(0, 'CmpItemAbbrDeprecated', { link = 'CmpItemAbbrDeprecatedDefault' })
+vim.api.nvim_set_hl(0, 'CmpItemAbbrMatch', { link = 'CmpItemAbbrMatchDefault' })
+vim.api.nvim_set_hl(0, 'CmpItemAbbrMatchFuzzy', { link = 'CmpItemAbbrMatchFuzzyDefault' })
+vim.api.nvim_set_hl(0, 'CmpItemKind', { link = 'CmpItemKindDefault' })
+vim.api.nvim_set_hl(0, 'CmpItemMenu', { link = 'CmpItemMenuDefault' })
 
 for name in pairs(types.lsp.CompletionItemKind) do
   if type(name) == 'string' then
     local hi = ('CmpItemKind%s'):format(name)
     if vim.fn.hlexists(hi) ~= 1 then
-      vim.cmd(([[highlight default link %s %sDefault]]):format(hi, hi))
+      vim.api.nvim_set_hl(0, hi, { link = ('%sDefault'):format(hi) })
     end
   end
 end
