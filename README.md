@@ -24,7 +24,6 @@ Concept
 - No flicker
 
 
-
 Setup
 ====================
 
@@ -134,15 +133,14 @@ EOF
 ```
 
 
-
 ### Where can I find more completion sources?
 
 - See the [Wiki](https://github.com/hrsh7th/nvim-cmp/wiki/List-of-sources)
 - See the [GitHub topic](https://github.com/topics/nvim-cmp).
 
 
-
 ### Where can I find advanced configuration examples?
 
 See the [Wiki](https://github.com/hrsh7th/nvim-cmp/wiki)
+
 
