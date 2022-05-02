@@ -3,27 +3,24 @@ if vim.g.loaded_cmp then
 end
 vim.g.loaded_cmp = true
 
-local api = require "cmp.utils.api"
+local api = require('cmp.utils.api')
 local misc = require('cmp.utils.misc')
 local types = require('cmp.types')
 local config = require('cmp.config')
 local highlight = require('cmp.utils.highlight')
+local emit = require('cmp.utils.autocmd').emit
+local autocmds = require('cmp.autocmds')
 
--- TODO: https://github.com/neovim/neovim/pull/14661
-vim.cmd [[
-  augroup ___cmp___
-    autocmd!
-    autocmd InsertEnter * lua require'cmp.utils.autocmd'.emit('InsertEnter')
-    autocmd InsertLeave * lua require'cmp.utils.autocmd'.emit('InsertLeave')
-    autocmd TextChangedI,TextChangedP * lua require'cmp.utils.autocmd'.emit('TextChanged')
-    autocmd CursorMovedI * lua require'cmp.utils.autocmd'.emit('CursorMoved')
-    autocmd CompleteChanged * lua require'cmp.utils.autocmd'.emit('CompleteChanged')
-    autocmd CompleteDone * lua require'cmp.utils.autocmd'.emit('CompleteDone')
-    autocmd ColorScheme * call v:lua.cmp.plugin.colorscheme()
-    autocmd CmdlineEnter * call v:lua.cmp.plugin.cmdline.enter()
-    autocmd CmdwinEnter * call v:lua.cmp.plugin.cmdline.leave() " for entering cmdwin with `<C-f>`
-  augroup END
-]]
+misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'leave' }, function()
+  if vim.fn.expand('<afile>') ~= '=' then
+    vim.cmd([[
+      augroup cmp-cmdline
+        autocmd!
+      augroup END
+    ]])
+    emit('CmdlineLeave')
+  end
+end)
 
 misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'enter' }, function()
   if config.is_native_menu() then
@@ -32,27 +29,10 @@ misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'enter' }, function()
   if vim.fn.expand('<afile>') ~= '=' then
     vim.schedule(function()
       if api.is_cmdline_mode() then
-        vim.cmd [[
-          augroup cmp-cmdline
-            autocmd!
-            autocmd CmdlineChanged * lua require'cmp.utils.autocmd'.emit('TextChanged')
-            autocmd CmdlineLeave * call v:lua.cmp.plugin.cmdline.leave()
-          augroup END
-        ]]
-        require('cmp.utils.autocmd').emit('CmdlineEnter')
+        autocmds.cmdline_mode()
+        emit('CmdlineEnter')
       end
     end)
-  end
-end)
-
-misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'leave' }, function()
-  if vim.fn.expand('<afile>') ~= '=' then
-    vim.cmd [[
-      augroup cmp-cmdline
-        autocmd!
-      augroup END
-    ]]
-    require('cmp.utils.autocmd').emit('CmdlineLeave')
   end
 end)
 
@@ -92,14 +72,14 @@ misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
 end)
 _G.cmp.plugin.colorscheme()
 
-vim.cmd [[
+vim.cmd([[
   highlight default link CmpItemAbbr CmpItemAbbrDefault
   highlight default link CmpItemAbbrDeprecated CmpItemAbbrDeprecatedDefault
   highlight default link CmpItemAbbrMatch CmpItemAbbrMatchDefault
   highlight default link CmpItemAbbrMatchFuzzy CmpItemAbbrMatchFuzzyDefault
   highlight default link CmpItemKind CmpItemKindDefault
   highlight default link CmpItemMenu CmpItemMenuDefault
-]]
+]])
 
 for name in pairs(types.lsp.CompletionItemKind) do
   if type(name) == 'string' then
@@ -122,7 +102,8 @@ if vim.on_key then
   end, vim.api.nvim_create_namespace('cmp.plugin'))
 end
 
-vim.cmd [[command! CmpStatus lua require('cmp').status()]]
+vim.cmd([[command! CmpStatus lua require('cmp').status()]])
 
-vim.cmd [[doautocmd <nomodeline> User CmpReady]]
+vim.cmd([[doautocmd <nomodeline> User CmpReady]])
 
+autocmds.autocmd()
