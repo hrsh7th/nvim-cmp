@@ -102,7 +102,9 @@ if vim.on_key then
   end, vim.api.nvim_create_namespace('cmp.plugin'))
 end
 
-vim.cmd([[command! CmpStatus lua require('cmp').status()]])
+vim.api.nvim_create_user_command('CmpStatus', function()
+  require('cmp').status()
+end, { desc = 'Check status of cmp sources' })
 
 vim.cmd([[doautocmd <nomodeline> User CmpReady]])
 
