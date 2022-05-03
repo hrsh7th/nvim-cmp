@@ -21,7 +21,7 @@ autocmd.subscribe = function(events, callback)
         group = autocmd.group,
         callback = function()
           autocmd.emit(event)
-        end
+        end,
       })
     end
     table.insert(autocmd.events[event], callback)
@@ -51,4 +51,3 @@ autocmd.emit = function(event)
 end
 
 return autocmd
-
