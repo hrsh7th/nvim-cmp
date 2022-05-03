@@ -5,6 +5,7 @@ local feedkeys = require('cmp.utils.feedkeys')
 local autocmd = require('cmp.utils.autocmd')
 local keymap = require('cmp.utils.keymap')
 local misc = require('cmp.utils.misc')
+local async = require('cmp.utils.async')
 
 local cmp = {}
 
@@ -283,51 +284,48 @@ cmp.setup = setmetatable({
   end,
 })
 
-autocmd.subscribe('InsertEnter', function()
-  feedkeys.call('', 'i', function()
+-- In InsertEnter autocmd, vim will detects mode=normal unexpectedly.
+autocmd.subscribe(
+  { 'InsertEnter', 'CmdlineEnter' },
+  async.debounce_safe_state(function()
     if config.enabled() then
+      cmp.config.compare.scopes:update()
+      cmp.config.compare.locality:update()
       cmp.core:prepare()
       cmp.core:on_change('InsertEnter')
     end
   end)
-end)
+)
 
-autocmd.subscribe('InsertLeave', function()
-  cmp.core:reset()
-  cmp.core.view:close()
-end)
+-- async.throttle is needed for performance. The mapping `:<C-u>...<CR>` will fire `CmdlineChanged` for each character.
+autocmd.subscribe(
+  { 'TextChangedI', 'TextChangedP', 'CmdlineChanged' },
+  async.debounce_safe_state(function()
+    if config.enabled() then
+      cmp.core:on_change('TextChanged')
+    end
+  end)
+)
 
-autocmd.subscribe('CmdlineEnter', function()
+-- If make this asynchronous, the completion menu will not close when the command output is displayed.
+autocmd.subscribe({ 'InsertLeave', 'CmdlineLeave' }, function()
   if config.enabled() then
-    cmp.core:prepare()
-    cmp.core:on_change('InsertEnter')
-  end
-end)
-
-autocmd.subscribe('CmdlineLeave', function()
-  cmp.core:reset()
-  cmp.core.view:close()
-end)
-
-autocmd.subscribe('TextChanged', function()
-  if config.enabled() then
-    cmp.core:on_change('TextChanged')
-  end
-end)
-
-autocmd.subscribe('CursorMoved', function()
-  if config.enabled() then
-    cmp.core:on_moved()
-  else
     cmp.core:reset()
     cmp.core.view:close()
   end
 end)
 
-autocmd.subscribe('InsertEnter', function()
-  cmp.config.compare.scopes:update()
-  cmp.config.compare.locality:update()
-end)
+autocmd.subscribe(
+  'CursorMovedI',
+  async.debounce_safe_state(function()
+    if config.enabled() then
+      cmp.core:on_moved()
+    else
+      cmp.core:reset()
+      cmp.core.view:close()
+    end
+  end)
+)
 
 cmp.event:on('complete_done', function(evt)
   if evt.entry then
