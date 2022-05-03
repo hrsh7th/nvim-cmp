@@ -4,39 +4,11 @@ end
 vim.g.loaded_cmp = true
 
 local api = require('cmp.utils.api')
-local misc = require('cmp.utils.misc')
 local types = require('cmp.types')
-local config = require('cmp.config')
 local highlight = require('cmp.utils.highlight')
-local emit = require('cmp.utils.autocmd').emit
-local autocmds = require('cmp.autocmds')
+local autocmd = require('cmp.utils.autocmd')
 
-misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'leave' }, function()
-  if vim.fn.expand('<afile>') ~= '=' then
-    vim.cmd([[
-      augroup cmp-cmdline
-        autocmd!
-      augroup END
-    ]])
-    emit('CmdlineLeave')
-  end
-end)
-
-misc.set(_G, { 'cmp', 'plugin', 'cmdline', 'enter' }, function()
-  if config.is_native_menu() then
-    return
-  end
-  if vim.fn.expand('<afile>') ~= '=' then
-    vim.schedule(function()
-      if api.is_cmdline_mode() then
-        autocmds.cmdline_mode()
-        emit('CmdlineEnter')
-      end
-    end)
-  end
-end)
-
-misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
+autocmd.subscribe('ColorScheme', function()
   highlight.inherit('CmpItemAbbrDefault', 'Pmenu', { bg = 'NONE', default = true })
   highlight.inherit('CmpItemAbbrDeprecatedDefault', 'Comment', { bg = 'NONE', default = true })
   highlight.inherit('CmpItemAbbrMatchDefault', 'Pmenu', { bg = 'NONE', default = true })
@@ -49,7 +21,7 @@ misc.set(_G, { 'cmp', 'plugin', 'colorscheme' }, function()
     end
   end
 end)
-_G.cmp.plugin.colorscheme()
+autocmd.emit('ColorScheme')
 
 vim.api.nvim_set_hl(0, 'CmpItemAbbr', { link = 'CmpItemAbbrDefault', default = true })
 vim.api.nvim_set_hl(0, 'CmpItemAbbrDeprecated', { link = 'CmpItemAbbrDeprecatedDefault', default = true })
@@ -72,7 +44,7 @@ if vim.on_key then
     if keys == vim.api.nvim_replace_termcodes('<C-c>', true, true, true) then
       vim.schedule(function()
         if not api.is_suitable_mode() then
-          require('cmp.utils.autocmd').emit('InsertLeave')
+          autocmd.emit('InsertLeave')
         end
       end)
     end
@@ -85,4 +57,3 @@ end, { desc = 'Check status of cmp sources' })
 
 vim.cmd([[doautocmd <nomodeline> User CmpReady]])
 
-autocmds.autocmd()

@@ -5,6 +5,7 @@ local feedkeys = require('cmp.utils.feedkeys')
 local autocmd = require('cmp.utils.autocmd')
 local keymap = require('cmp.utils.keymap')
 local misc = require('cmp.utils.misc')
+local api  = require('cmp.utils.api')
 
 local cmp = {}
 
@@ -283,36 +284,31 @@ cmp.setup = setmetatable({
   end,
 })
 
-autocmd.subscribe('InsertEnter', function()
+autocmd.subscribe({ 'InsertEnter', 'CmdlineEnter' }, function()
+  -- In InsertEnter autocmd, vim will detects mode=normal unexpectedly.
   feedkeys.call('', 'i', function()
-    if config.enabled() then
-      cmp.core:prepare()
-      cmp.core:on_change('InsertEnter')
+    if api.is_suitable_mode() then
+      if config.enabled() then
+        cmp.config.compare.scopes:update()
+        cmp.config.compare.locality:update()
+        cmp.core:prepare()
+        cmp.core:on_change('InsertEnter')
+      end
     end
   end)
 end)
 
-autocmd.subscribe('InsertLeave', function()
-  cmp.core:reset()
-  cmp.core.view:close()
-end)
-
-autocmd.subscribe('CmdlineEnter', function()
-  if config.enabled() then
-    cmp.core:prepare()
-    cmp.core:on_change('InsertEnter')
+autocmd.subscribe({ 'TextChangedI', 'TextChangedP', 'CmdlineChanged' }, function()
+  if api.is_suitable_mode() then
+    if config.enabled() then
+      cmp.core:on_change('TextChanged')
+    end
   end
 end)
 
-autocmd.subscribe('CmdlineLeave', function()
+autocmd.subscribe({ 'InsertLeave', 'CmdlineLeave' }, function()
   cmp.core:reset()
   cmp.core.view:close()
-end)
-
-autocmd.subscribe('TextChanged', function()
-  if config.enabled() then
-    cmp.core:on_change('TextChanged')
-  end
 end)
 
 autocmd.subscribe('CursorMoved', function()
@@ -322,11 +318,6 @@ autocmd.subscribe('CursorMoved', function()
     cmp.core:reset()
     cmp.core.view:close()
   end
-end)
-
-autocmd.subscribe('InsertEnter', function()
-  cmp.config.compare.scopes:update()
-  cmp.config.compare.locality:update()
 end)
 
 cmp.event:on('complete_done', function(evt)
