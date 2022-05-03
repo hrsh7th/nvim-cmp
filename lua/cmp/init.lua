@@ -316,7 +316,7 @@ autocmd.subscribe({ 'InsertLeave', 'CmdlineLeave' }, function()
 end)
 
 autocmd.subscribe(
-  'CursorMoved',
+  'CursorMovedI',
   async.debounce_safe_state(function()
     if config.enabled() then
       cmp.core:on_moved()
