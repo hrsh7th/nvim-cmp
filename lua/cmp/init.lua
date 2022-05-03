@@ -5,7 +5,7 @@ local feedkeys = require('cmp.utils.feedkeys')
 local autocmd = require('cmp.utils.autocmd')
 local keymap = require('cmp.utils.keymap')
 local misc = require('cmp.utils.misc')
-local api = require('cmp.utils.api')
+local async = require('cmp.utils.async')
 
 local cmp = {}
 
@@ -287,24 +287,21 @@ cmp.setup = setmetatable({
 autocmd.subscribe({ 'InsertEnter', 'CmdlineEnter' }, function()
   -- In InsertEnter autocmd, vim will detects mode=normal unexpectedly.
   feedkeys.call('', 'i', function()
-    if api.is_suitable_mode() then
-      if config.enabled() then
-        cmp.config.compare.scopes:update()
-        cmp.config.compare.locality:update()
-        cmp.core:prepare()
-        cmp.core:on_change('InsertEnter')
-      end
+    if config.enabled() then
+      cmp.config.compare.scopes:update()
+      cmp.config.compare.locality:update()
+      cmp.core:prepare()
+      cmp.core:on_change('InsertEnter')
     end
   end)
 end)
 
-autocmd.subscribe({ 'TextChangedI', 'TextChangedP', 'CmdlineChanged' }, function()
-  if api.is_suitable_mode() then
-    if config.enabled() then
-      cmp.core:on_change('TextChanged')
-    end
+-- async.throttle is needed for performance. The mapping `:<C-u>...<CR>` will fire `CmdlineChanged` for each character.
+autocmd.subscribe({ 'TextChangedI', 'TextChangedP', 'CmdlineChanged' }, async.throttle(function()
+  if config.enabled() then
+    cmp.core:on_change('TextChanged')
   end
-end)
+end, 1))
 
 autocmd.subscribe({ 'InsertLeave', 'CmdlineLeave' }, function()
   cmp.core:reset()

@@ -8,6 +8,19 @@ local types = require('cmp.types')
 local highlight = require('cmp.utils.highlight')
 local autocmd = require('cmp.utils.autocmd')
 
+vim.api.nvim_set_hl(0, 'CmpItemAbbr', { link = 'CmpItemAbbrDefault', default = true })
+vim.api.nvim_set_hl(0, 'CmpItemAbbrDeprecated', { link = 'CmpItemAbbrDeprecatedDefault', default = true })
+vim.api.nvim_set_hl(0, 'CmpItemAbbrMatch', { link = 'CmpItemAbbrMatchDefault', default = true })
+vim.api.nvim_set_hl(0, 'CmpItemAbbrMatchFuzzy', { link = 'CmpItemAbbrMatchFuzzyDefault', default = true })
+vim.api.nvim_set_hl(0, 'CmpItemKind', { link = 'CmpItemKindDefault', default = true })
+vim.api.nvim_set_hl(0, 'CmpItemMenu', { link = 'CmpItemMenuDefault', default = true })
+for kind in pairs(types.lsp.CompletionItemKind) do
+  if type(kind) == 'string' then
+    local name = ('CmpItemKind%s'):format(kind)
+    vim.api.nvim_set_hl(0, name, { link = ('%sDefault'):format(name), default = true })
+  end
+end
+
 autocmd.subscribe('ColorScheme', function()
   highlight.inherit('CmpItemAbbrDefault', 'Pmenu', { bg = 'NONE', default = true })
   highlight.inherit('CmpItemAbbrDeprecatedDefault', 'Comment', { bg = 'NONE', default = true })
@@ -22,22 +35,6 @@ autocmd.subscribe('ColorScheme', function()
   end
 end)
 autocmd.emit('ColorScheme')
-
-vim.api.nvim_set_hl(0, 'CmpItemAbbr', { link = 'CmpItemAbbrDefault', default = true })
-vim.api.nvim_set_hl(0, 'CmpItemAbbrDeprecated', { link = 'CmpItemAbbrDeprecatedDefault', default = true })
-vim.api.nvim_set_hl(0, 'CmpItemAbbrMatch', { link = 'CmpItemAbbrMatchDefault', default = true })
-vim.api.nvim_set_hl(0, 'CmpItemAbbrMatchFuzzy', { link = 'CmpItemAbbrMatchFuzzyDefault', default = true })
-vim.api.nvim_set_hl(0, 'CmpItemKind', { link = 'CmpItemKindDefault', default = true })
-vim.api.nvim_set_hl(0, 'CmpItemMenu', { link = 'CmpItemMenuDefault', default = true })
-
-for name in pairs(types.lsp.CompletionItemKind) do
-  if type(name) == 'string' then
-    local hi = ('CmpItemKind%s'):format(name)
-    if vim.fn.hlexists(hi) ~= 1 then
-      vim.api.nvim_set_hl(0, hi, { link = ('%sDefault'):format(hi), default = true })
-    end
-  end
-end
 
 if vim.on_key then
   vim.on_key(function(keys)
