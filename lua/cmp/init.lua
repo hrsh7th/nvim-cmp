@@ -297,11 +297,14 @@ autocmd.subscribe({ 'InsertEnter', 'CmdlineEnter' }, function()
 end)
 
 -- async.throttle is needed for performance. The mapping `:<C-u>...<CR>` will fire `CmdlineChanged` for each character.
-autocmd.subscribe({ 'TextChangedI', 'TextChangedP', 'CmdlineChanged' }, async.debounce_safe_state(function()
-  if config.enabled() then
-    cmp.core:on_change('TextChanged')
-  end
-end))
+autocmd.subscribe(
+  { 'TextChangedI', 'TextChangedP', 'CmdlineChanged' },
+  async.debounce_safe_state(function()
+    if config.enabled() then
+      cmp.core:on_change('TextChanged')
+    end
+  end)
+)
 
 autocmd.subscribe({ 'InsertLeave', 'CmdlineLeave' }, function()
   cmp.core:reset()
