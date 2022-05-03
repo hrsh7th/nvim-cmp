@@ -309,10 +309,8 @@ autocmd.subscribe(
 
 -- If make this asynchronous, the completion menu will not close when the command output is displayed.
 autocmd.subscribe({ 'InsertLeave', 'CmdlineLeave' }, function()
-  if config.enabled() then
-    cmp.core:reset()
-    cmp.core.view:close()
-  end
+  cmp.core:reset()
+  cmp.core.view:close()
 end)
 
 autocmd.subscribe(
