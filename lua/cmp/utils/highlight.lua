@@ -20,7 +20,7 @@ highlight.inherit = function(name, source, settings)
         v = v == 1
       end
       if v then
-        settings[key] = v == '' and 'NONE' or v
+        settings[key] = v == '' or 'NONE' or v
       end
     end
   end
