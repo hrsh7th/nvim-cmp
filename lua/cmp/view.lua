@@ -108,6 +108,9 @@ view.open = function(self, ctx, sources)
     -- open
     if #entries > 0 then
       self:_get_entries_view():open(offset, entries)
+      self.event:emit('view_opened', {
+        window = self:_get_entries_view(),
+      })
       break
     end
   end
@@ -128,6 +131,9 @@ view.close = function(self)
   self:_get_entries_view():close()
   self.docs_view:close()
   self.ghost_text_view:hide()
+  self.event:emit('view_closed', {
+    window = self:_get_entries_view(),
+  })
 end
 
 ---Abort menu
@@ -135,6 +141,9 @@ view.abort = function(self)
   self:_get_entries_view():abort()
   self.docs_view:close()
   self.ghost_text_view:hide()
+  self.event:emit('view_closed', {
+    window = self:_get_entries_view(),
+  })
 end
 
 ---Return the view is visible or not.
