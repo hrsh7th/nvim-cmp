@@ -1,5 +1,3 @@
-local feedkeys = require('cmp.utils.feedkeys')
-
 local async = {}
 
 ---@class cmp.AsyncThrottle
@@ -112,14 +110,14 @@ async.sync = function(runner, timeout)
 end
 
 ---Wait and callback for next safe state.
-async.debounce_safe_state = function(callback)
+async.debounce_next_tick = function(callback)
   local running = false
   return function()
     if running then
       return
     end
     running = true
-    feedkeys.call('', 'n', function()
+    vim.schedule(function()
       running = false
       callback()
     end)

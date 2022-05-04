@@ -287,7 +287,7 @@ cmp.setup = setmetatable({
 -- In InsertEnter autocmd, vim will detects mode=normal unexpectedly.
 autocmd.subscribe(
   { 'InsertEnter', 'CmdlineEnter' },
-  async.debounce_safe_state(function()
+  async.debounce_next_tick(function()
     if config.enabled() then
       cmp.config.compare.scopes:update()
       cmp.config.compare.locality:update()
@@ -300,9 +300,21 @@ autocmd.subscribe(
 -- async.throttle is needed for performance. The mapping `:<C-u>...<CR>` will fire `CmdlineChanged` for each character.
 autocmd.subscribe(
   { 'TextChangedI', 'TextChangedP', 'CmdlineChanged' },
-  async.debounce_safe_state(function()
+  async.debounce_next_tick(function()
     if config.enabled() then
       cmp.core:on_change('TextChanged')
+    end
+  end)
+)
+
+autocmd.subscribe(
+  'CursorMovedI',
+  async.debounce_next_tick(function()
+    if config.enabled() then
+      cmp.core:on_moved()
+    else
+      cmp.core:reset()
+      cmp.core.view:close()
     end
   end)
 )
@@ -312,18 +324,6 @@ autocmd.subscribe({ 'InsertLeave', 'CmdlineLeave' }, function()
   cmp.core:reset()
   cmp.core.view:close()
 end)
-
-autocmd.subscribe(
-  'CursorMovedI',
-  async.debounce_safe_state(function()
-    if config.enabled() then
-      cmp.core:on_moved()
-    else
-      cmp.core:reset()
-      cmp.core.view:close()
-    end
-  end)
-)
 
 cmp.event:on('complete_done', function(evt)
   if evt.entry then

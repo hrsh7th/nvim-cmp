@@ -74,9 +74,10 @@ end
 ---Suspend completion
 core.suspend = function(self)
   self.suspending = true
-  return function()
+  -- It's needed to avoid conflicting with autocmd debouncing.
+  return vim.schedule_wrap(function()
     self.suspending = false
-  end
+  end)
 end
 
 ---Get sources that sorted by priority
