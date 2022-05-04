@@ -16,12 +16,13 @@ highlight.inherit = function(name, source, settings)
   for _, key in ipairs(highlight.keys) do
     if not settings[key] then
       local v = vim.fn.synIDattr(vim.fn.hlID(source), key)
-      if key ~= 'fg' and key ~= 'bg' then
+      if key == 'fg' or key == 'bg' then
+        local n = tonumber(v, 10)
+        v = type(n) == 'number' and n or v
+      else
         v = v == 1
       end
-      if v then
-        settings[key] = v == '' and 'NONE' or v
-      end
+      settings[key] = v == '' and 'NONE' or v
     end
   end
   vim.api.nvim_set_hl(0, name, settings)
