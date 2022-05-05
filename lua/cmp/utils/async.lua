@@ -109,4 +109,19 @@ async.sync = function(runner, timeout)
   end, 10, false)
 end
 
+---Wait and callback for next safe state.
+async.debounce_next_tick = function(callback)
+  local running = false
+  return function()
+    if running then
+      return
+    end
+    running = true
+    vim.schedule(function()
+      running = false
+      callback()
+    end)
+  end
+end
+
 return async

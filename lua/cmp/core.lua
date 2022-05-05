@@ -16,7 +16,7 @@ local event = require('cmp.utils.event')
 
 local SOURCE_TIMEOUT = 500
 local DEBOUNCE_TIME = 80
-local THROTTLE_TIME = 60
+local THROTTLE_TIME = 40
 
 ---@class cmp.Core
 ---@field public suspending boolean
@@ -76,9 +76,10 @@ end
 ---Suspend completion
 core.suspend = function(self)
   self.suspending = true
-  return function()
+  -- It's needed to avoid conflicting with autocmd debouncing.
+  return vim.schedule_wrap(function()
     self.suspending = false
-  end
+  end)
 end
 
 ---Get sources that sorted by priority

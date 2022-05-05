@@ -66,8 +66,14 @@ end
 --
 --     `candlesingle` -> candle#accept#single
 --      ^^^^^^~~~~~~     ^^^^^^        ~~~~~~
---
 --      * The `accept`'s `a` should not match to `candle`'s `a`
+--
+--   7. Avoid false positive matching
+--
+--     `,` -> print,
+--                 ~
+--      * Typically, the middle match with symbol characters only is false positive. should be ignored.
+--
 --
 ---Match entry
 ---@param input string
@@ -100,12 +106,14 @@ matcher.match = function(input, word, option)
   local input_end_index = 1
   local word_index = 1
   local word_bound_index = 1
+  local no_symbol_match = false
   while input_end_index <= #input and word_index <= #word do
     local m = matcher.find_match_region(input, input_start_index, input_end_index, word, word_index)
     if m and input_end_index <= m.input_match_end then
       m.index = word_bound_index
       input_start_index = m.input_match_start + 1
       input_end_index = m.input_match_end + 1
+      no_symbol_match = no_symbol_match or m.no_symbol_match
       word_index = char.get_next_semantic_index(word, m.word_match_end)
       table.insert(matches, m)
     else
@@ -144,6 +152,10 @@ matcher.match = function(input, word, option)
         break
       end
     end
+  end
+
+  if no_symbol_match and not prefix then
+    return 0, {}
   end
 
   -- Compute prefix match score
@@ -260,6 +272,7 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
   local word_offset = 0
   local strict_count = 0
   local match_count = 0
+  local no_symbol_match = false
   while input_index <= #input and word_index + word_offset <= #word do
     local c1 = string.byte(input, input_index)
     local c2 = string.byte(word, word_index + word_offset)
@@ -272,6 +285,7 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
       strict_count = strict_count + (c1 == c2 and 1 or 0)
       match_count = match_count + 1
       word_offset = word_offset + 1
+      no_symbol_match = no_symbol_match or char.is_symbol(c1)
     else
       -- Match end (partial region)
       if input_match_start ~= -1 then
@@ -281,6 +295,7 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
           word_match_start = word_index,
           word_match_end = word_index + word_offset - 1,
           strict_ratio = strict_count / match_count,
+          no_symbol_match = no_symbol_match,
           fuzzy = false,
         }
       else
@@ -298,6 +313,7 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
       word_match_start = word_index,
       word_match_end = word_index + word_offset - 1,
       strict_ratio = strict_count / match_count,
+      no_symbol_match = no_symbol_match,
       fuzzy = false,
     }
   end
