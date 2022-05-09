@@ -285,39 +285,33 @@ cmp.setup = setmetatable({
 })
 
 -- In InsertEnter autocmd, vim will detects mode=normal unexpectedly.
-autocmd.subscribe(
-  { 'InsertEnter', 'CmdlineEnter' },
-  async.debounce_next_tick(function()
-    if config.enabled() then
-      cmp.config.compare.scopes:update()
-      cmp.config.compare.locality:update()
-      cmp.core:prepare()
-      cmp.core:on_change('InsertEnter')
-    end
-  end)
-)
+local on_insert_enter = function()
+  if config.enabled() then
+    cmp.config.compare.scopes:update()
+    cmp.config.compare.locality:update()
+    cmp.core:prepare()
+    cmp.core:on_change('InsertEnter')
+  end
+end
+autocmd.subscribe({ 'InsertEnter', 'CmdlineEnter' }, async.debounce_next_tick(on_insert_enter))
 
 -- async.throttle is needed for performance. The mapping `:<C-u>...<CR>` will fire `CmdlineChanged` for each character.
-autocmd.subscribe(
-  { 'TextChangedI', 'TextChangedP', 'CmdlineChanged' },
-  async.debounce_next_tick(function()
-    if config.enabled() then
-      cmp.core:on_change('TextChanged')
-    end
-  end)
-)
+local on_text_changed = function()
+  if config.enabled() then
+    cmp.core:on_change('TextChanged')
+  end
+end
+autocmd.subscribe({ 'TextChangedI', 'TextChangedP' }, on_text_changed)
+autocmd.subscribe('CmdlineChanged', async.debounce_next_tick(on_text_changed))
 
-autocmd.subscribe(
-  'CursorMovedI',
-  async.debounce_next_tick(function()
-    if config.enabled() then
-      cmp.core:on_moved()
+autocmd.subscribe('CursorMovedI', function()
+  if config.enabled() then
+    cmp.core:on_moved()
     else
-      cmp.core:reset()
-      cmp.core.view:close()
-    end
-  end)
-)
+    cmp.core:reset()
+    cmp.core.view:close()
+  end
+end)
 
 -- If make this asynchronous, the completion menu will not close when the command output is displayed.
 autocmd.subscribe({ 'InsertLeave', 'CmdlineLeave' }, function()
