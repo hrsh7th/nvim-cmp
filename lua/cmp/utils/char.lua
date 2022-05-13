@@ -1,20 +1,22 @@
+local _
+
 local alpha = {}
-string.gsub('abcdefghijklmnopqrstuvwxyz', '.', function(char)
+_ = string.gsub('abcdefghijklmnopqrstuvwxyz', '.', function(char)
   alpha[string.byte(char)] = true
 end)
 
 local ALPHA = {}
-string.gsub('ABCDEFGHIJKLMNOPQRSTUVWXYZ', '.', function(char)
+_ = string.gsub('ABCDEFGHIJKLMNOPQRSTUVWXYZ', '.', function(char)
   ALPHA[string.byte(char)] = true
 end)
 
 local digit = {}
-string.gsub('1234567890', '.', function(char)
+_ = string.gsub('1234567890', '.', function(char)
   digit[string.byte(char)] = true
 end)
 
 local white = {}
-string.gsub(' \t\n', '.', function(char)
+_ = string.gsub(' \t\n', '.', function(char)
   white[string.byte(char)] = true
 end)
 

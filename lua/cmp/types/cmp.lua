@@ -1,37 +1,43 @@
 local cmp = {}
 
----@alias cmp.ConfirmBehavior "'insert'" | "'replace'"
-cmp.ConfirmBehavior = {}
-cmp.ConfirmBehavior.Insert = 'insert'
-cmp.ConfirmBehavior.Replace = 'replace'
+---@alias cmp.ConfirmBehavior 'insert' | 'replace'
+cmp.ConfirmBehavior = {
+  Insert = 'insert',
+  Replace = 'replace',
+}
 
----@alias cmp.SelectBehavior "'insert'" | "'select'"
-cmp.SelectBehavior = {}
-cmp.SelectBehavior.Insert = 'insert'
-cmp.SelectBehavior.Select = 'select'
+---@alias cmp.SelectBehavior 'insert' | 'select'
+cmp.SelectBehavior = {
+  Insert = 'insert',
+  Select = 'select',
+}
 
----@alias cmp.ContextReason "'auto'" | "'manual'" | "'none'"
-cmp.ContextReason = {}
-cmp.ContextReason.Auto = 'auto'
-cmp.ContextReason.Manual = 'manual'
-cmp.ContextReason.TriggerOnly = 'triggerOnly'
-cmp.ContextReason.None = 'none'
+---@alias cmp.ContextReason 'auto' | 'manual' 'triggerOnly' | 'none'
+cmp.ContextReason = {
+  Auto = 'auto',
+  Manual = 'manual',
+  TriggerOnly = 'triggerOnly',
+  None = 'none',
+}
 
----@alias cmp.TriggerEvent "'InsertEnter'" | "'TextChanged'"
-cmp.TriggerEvent = {}
-cmp.TriggerEvent.InsertEnter = 'InsertEnter'
-cmp.TriggerEvent.TextChanged = 'TextChanged'
+---@alias cmp.TriggerEvent 'InsertEnter' | 'TextChanged'
+cmp.TriggerEvent = {
+  InsertEnter = 'InsertEnter',
+  TextChanged = 'TextChanged',
+}
 
----@alias cmp.PreselectMode "'item'" | "'None'"
-cmp.PreselectMode = {}
-cmp.PreselectMode.Item = 'item'
-cmp.PreselectMode.None = 'none'
+---@alias cmp.PreselectMode 'item' | 'None'
+cmp.PreselectMode = {
+  Item = 'item',
+  None = 'none',
+}
 
----@alias cmp.ItemField "'abbr'" | "'kind'" | "'menu'"
-cmp.ItemField = {}
-cmp.ItemField.Abbr = 'abbr'
-cmp.ItemField.Kind = 'kind'
-cmp.ItemField.Menu = 'menu'
+---@alias cmp.ItemField 'abbr' | 'kind' | 'menu'
+cmp.ItemField = {
+  Abbr = 'abbr',
+  Kind = 'kind',
+  Menu = 'menu',
+}
 
 ---@class cmp.ContextOption
 ---@field public reason cmp.ContextReason|nil
@@ -86,9 +92,9 @@ cmp.ItemField.Menu = 'menu'
 ---@field public view cmp.ViewConfig
 ---@field public experimental cmp.ExperimentalConfig
 
---- @class cmp.WindowConfig
---- @field completion cmp.WindowConfig
---- @field documentation cmp.WindowConfig|nil
+---@class cmp.WindowConfig
+---@field completion cmp.WindowConfig
+---@field documentation cmp.WindowConfig|nil
 
 ---@class cmp.CompletionConfig
 ---@field public autocomplete cmp.TriggerEvent[]
@@ -125,8 +131,7 @@ cmp.ItemField.Menu = 'menu'
 ---@field public expand fun(args: cmp.SnippetExpansionParams)
 
 ---@class cmp.ExperimentalConfig
----@field public native_menu boolean
----@field public ghost_text cmp.GhostTextConfig|"false"
+---@field public ghost_text cmp.GhostTextConfig|false
 
 ---@class cmp.GhostTextConfig
 ---@field hl_group string
@@ -147,14 +152,14 @@ cmp.ItemField.Menu = 'menu'
 ---@alias cmp.EntriesConfig cmp.CustomEntriesConfig|cmp.NativeEntriesConfig|cmp.WildmenuEntriesConfig|string
 
 ---@class cmp.CustomEntriesConfig
----@field name "'custom'"
----@field selection_order "'top_down'"|"'near_cursor'"
+---@field name 'custom'
+---@field selection_order 'top_down'|'near_cursor'
 
 ---@class cmp.NativeEntriesConfig
----@field name "'native'"
+---@field name 'native'
 
 ---@class cmp.WildmenuEntriesConfig
----@field name "'wildmenu'"
+---@field name 'wildmenu'
 ---@field separator string|nil
 
 return cmp

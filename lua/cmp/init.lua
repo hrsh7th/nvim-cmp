@@ -307,7 +307,7 @@ autocmd.subscribe('CmdlineChanged', async.debounce_next_tick(on_text_changed))
 autocmd.subscribe('CursorMovedI', function()
   if config.enabled() then
     cmp.core:on_moved()
-    else
+  else
     cmp.core:reset()
     cmp.core.view:close()
   end

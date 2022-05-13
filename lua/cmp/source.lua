@@ -26,7 +26,7 @@ local char = require('cmp.utils.char')
 ---@field public complete_dedup function
 local source = {}
 
----@alias cmp.SourceStatus "1" | "2" | "3"
+---@alias cmp.SourceStatus 1 | 2 | 3
 source.SourceStatus = {}
 source.SourceStatus.WAITING = 1
 source.SourceStatus.FETCHING = 2
