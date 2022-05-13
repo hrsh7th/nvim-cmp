@@ -128,6 +128,7 @@ lsp.CompletionItemKind = {
   Operator = 24,
   TypeParameter = 25,
 }
+lsp.CompletionItemKind = vim.tbl_add_reverse_lookup(lsp.CompletionItemKind)
 
 ---@class lsp.CompletionContext
 ---@field public triggerKind lsp.CompletionTriggerKind
