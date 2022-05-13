@@ -16,12 +16,15 @@ end
 ---@param keys string
 ---@return string
 keymap.normalize = function(keys)
-  vim.api.nvim_set_keymap('t', '<Plug>(cmp.utils.keymap.normalize)', keys, {})
-  for _, map in ipairs(vim.api.nvim_get_keymap('t')) do
-    if keymap.equals(map.lhs, '<Plug>(cmp.utils.keymap.normalize)') then
-      return map.rhs
+  local normalize_buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_keymap(normalize_buf, 't', keys, '<Plug>(cmp.utils.keymap.normalize)', {})
+  for _, map in ipairs(vim.api.nvim_buf_get_keymap(normalize_buf, 't')) do
+    if keymap.equals(map.rhs, '<Plug>(cmp.utils.keymap.normalize)') then
+      vim.api.nvim_buf_delete(normalize_buf, {})
+      return map.lhs
     end
   end
+  vim.api.nvim_buf_delete(normalize_buf, {})
   return keys
 end
 
