@@ -3,6 +3,10 @@ if vim.g.loaded_cmp then
 end
 vim.g.loaded_cmp = true
 
+if not vim.api.nvim_create_autocmd then
+  return print('[nvim-cmp] Your nvim does not has `nvim_create_autocmd` function. Please update to latest nvim.')
+end
+
 local api = require('cmp.utils.api')
 local types = require('cmp.types')
 local highlight = require('cmp.utils.highlight')
