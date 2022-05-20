@@ -170,6 +170,10 @@ lsp.CompletionItemKind = vim.tbl_add_reverse_lookup(lsp.CompletionItemKind)
 ---@field public detail string|nil
 ---@field public description string|nil
 
+---@class lsp.Cmp
+---@field public kind_text string
+---@field public kind_hl_group string
+
 ---@class lsp.CompletionItem
 ---@field public label string
 ---@field public labelDetails lsp.CompletionItemLabelDetails|nil
@@ -189,6 +193,7 @@ lsp.CompletionItemKind = vim.tbl_add_reverse_lookup(lsp.CompletionItemKind)
 ---@field public commitCharacters string[]|nil
 ---@field public command lsp.Command|nil
 ---@field public data any|nil
+---@field public cmp lsp.Cmp|nil
 ---
 ---TODO: Should send the issue for upstream?
 ---@field public word string|nil
