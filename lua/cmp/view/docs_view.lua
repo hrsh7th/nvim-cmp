@@ -1,5 +1,6 @@
 local window = require('cmp.utils.window')
 local config = require('cmp.config')
+local buffer = require('cmp.utils.buffer')
 
 ---@class cmp.DocsView
 ---@field public window cmp.Window
@@ -157,6 +158,8 @@ docs_view.send_to_preview_window = function(self)
   vim.cmd([[stopinsert]])
   local pwin = get_preview_window()
   vim.api.nvim_win_set_buf(pwin, self.window:get_buffer())
+  buffer.cache[self.window.name] = nil -- release buffer cache as it's now managed manually by the user
+  self.window:close()
 end
 
 return docs_view
