@@ -172,7 +172,7 @@ end)
 
 ---Scrolling documentation window if possible
 cmp.scroll_docs = cmp.sync(function(delta)
-  if cmp.core.view:visible() then
+  if cmp.core.view.docs_view:visible() then
     cmp.core.view:scroll_docs(delta)
     return true
   else
