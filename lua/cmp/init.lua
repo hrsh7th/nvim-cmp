@@ -170,6 +170,16 @@ cmp.select_prev_item = cmp.sync(function(option)
   return false
 end)
 
+--Opens the docs window (if visible) in a preview window
+cmp.open_docs_preview = cmp.sync(function()
+  if cmp.core.view.docs_view:visible() then
+    cmp.core.view.docs_view:send_to_preview_window()
+    return true
+  else
+    return false
+  end
+end)
+
 ---Scrolling documentation window if possible
 cmp.scroll_docs = cmp.sync(function(delta)
   if cmp.core.view:visible() then

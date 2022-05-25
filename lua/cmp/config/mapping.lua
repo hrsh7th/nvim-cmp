@@ -138,6 +138,15 @@ mapping.scroll_docs = function(delta)
   end
 end
 
+--Opens the docs window (if visible) in a preview window
+mapping.open_docs_preview = function()
+  return function(fallback)
+    if not require('cmp').open_docs_preview() then
+      fallback()
+    end
+  end
+end
+
 ---Select next completion item.
 mapping.select_next_item = function(option)
   return function(fallback)

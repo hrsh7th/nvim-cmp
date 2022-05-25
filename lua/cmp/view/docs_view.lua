@@ -16,6 +16,12 @@ docs_view.new = function()
   self.window:option('linebreak', true)
   self.window:option('scrolloff', 0)
   self.window:option('wrap', true)
+  self.window:buffer_option('modifiable', false)
+  self.window:buffer_option('undolevels', -1)
+  self.window:buffer_option('buflisted', false)
+  self.window:buffer_option('buftype', 'nofile')
+  self.window:buffer_option('bufhidden', 'wipe')
+  self.window:buffer_option('swapfile', false)
   return self
 end
 
@@ -47,12 +53,14 @@ docs_view.open = function(self, e, view)
     self.entry = e
     vim.api.nvim_buf_call(self.window:get_buffer(), function()
       vim.cmd([[syntax clear]])
-      vim.api.nvim_buf_set_lines(self.window:get_buffer(), 0, -1, false, {})
+      vim.api.nvim_buf_set_option(0, 'modifiable', true)
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, {})
+      vim.lsp.util.stylize_markdown(0, documents, {
+        max_width = max_width,
+        max_height = documentation.max_height,
+      })
+      vim.api.nvim_buf_set_option(0, 'modifiable', false)
     end)
-    vim.lsp.util.stylize_markdown(self.window:get_buffer(), documents, {
-      max_width = max_width,
-      max_height = documentation.max_height,
-    })
   end
 
   -- Calculate window size.
@@ -131,6 +139,24 @@ end
 
 docs_view.visible = function(self)
   return self.window:visible()
+end
+
+docs_view.send_to_preview_window = function(self)
+  local function get_preview_window()
+    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(vim.api.nvim_get_current_tabpage())) do
+      if vim.api.nvim_win_get_option(win, 'previewwindow') then
+        return win
+      end
+    end
+    vim.cmd([[new]])
+    local pwin = vim.api.nvim_get_current_win()
+    vim.api.nvim_win_set_option(pwin, 'previewwindow', true)
+    vim.api.nvim_win_set_height(pwin, vim.api.nvim_get_option('previewheight'))
+    return pwin
+  end
+  vim.cmd([[stopinsert]])
+  local pwin = get_preview_window()
+  vim.api.nvim_win_set_buf(pwin, self.window:get_buffer())
 end
 
 return docs_view
