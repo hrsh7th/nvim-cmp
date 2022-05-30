@@ -146,17 +146,19 @@ docs_view.send_to_preview_window = function(self)
   local function get_preview_window()
     for _, win in ipairs(vim.api.nvim_tabpage_list_wins(vim.api.nvim_get_current_tabpage())) do
       if vim.api.nvim_win_get_option(win, 'previewwindow') then
-        return win
+        return win, false
       end
     end
     vim.cmd([[new]])
     local pwin = vim.api.nvim_get_current_win()
     vim.api.nvim_win_set_option(pwin, 'previewwindow', true)
     vim.api.nvim_win_set_height(pwin, vim.api.nvim_get_option('previewheight'))
-    return pwin
+    return pwin, true
   end
-  vim.cmd([[stopinsert]])
-  local pwin = get_preview_window()
+  local pwin, new_window = get_preview_window()
+  if new_window then
+    vim.cmd([[stopinsert]])
+  end
   vim.api.nvim_win_set_buf(pwin, self.window:get_buffer())
   buffer.cache[self.window.name] = nil -- release buffer cache as it's now managed manually by the user
   self.window:close()
