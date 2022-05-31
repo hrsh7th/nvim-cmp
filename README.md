@@ -10,17 +10,14 @@ Readme!
 
 1. There is a Github issue that documents [breaking changes](https://github.com/hrsh7th/nvim-cmp/issues/231) for nvim-cmp. Subscribe to the issue to be notified of upcoming breaking changes.
 2. This is my hobby project. You can support me via GitHub sponsors.
-3. Bug reports are welcome, but I might not fix if you don't provide a minimal reproduction configuration and steps.
-4. The nvim-cmp documents is [here](./doc/cmp.txt).
-5. The nvim-cmp is designed for `customization`! It's not designed to `work out of the box`.
-
+3. Bug reports are welcome, but don't expect a fix unless you provide minimal configuration and steps to reproduce your issue.
 
 Concept
 ====================
 
 - Full support for LSP completion related capabilities
 - Powerful customizability via Lua functions
-- Smart handling of key mapping
+- Smart handling of key mappings
 - No flicker
 
 
@@ -29,7 +26,7 @@ Setup
 
 ### Recommended Configuration
 
-This example configuration uses `vim-plug` as the plugin manager and `vim-vsnip` as snippet plugin.
+This example configuration uses `vim-plug` as the plugin manager and `vim-vsnip` as a snippet plugin.
 
 ```lua
 call plug#begin(s:plug_dir)
@@ -135,12 +132,9 @@ EOF
 
 ### Where can I find more completion sources?
 
-- See the [Wiki](https://github.com/hrsh7th/nvim-cmp/wiki/List-of-sources)
-- See the [GitHub topic](https://github.com/topics/nvim-cmp).
+Have a look at the [Wiki](https://github.com/hrsh7th/nvim-cmp/wiki/List-of-sources) and the `nvim-cmp` [GitHub topic](https://github.com/topics/nvim-cmp).
 
 
 ### Where can I find advanced configuration examples?
 
-See the [Wiki](https://github.com/hrsh7th/nvim-cmp/wiki)
-
-
+See the [Wiki](https://github.com/hrsh7th/nvim-cmp/wiki).
