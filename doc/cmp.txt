@@ -366,6 +366,16 @@ enabled~
   `boolean | fun(): boolean`
   Toggles the plugin on and off.
 
+                                                *cmp-config.performance.debounce*
+performance.debounce~
+  `number`
+  Sets debounce time
+
+                                                *cmp-config.performance.throttle*
+performance.throttle~
+  `number`
+  Sets throttle time
+
                                                           *cmp-config.preselect*
 preselect~
   `cmp.PreselectMode`

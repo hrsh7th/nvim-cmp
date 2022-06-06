@@ -80,6 +80,7 @@ cmp.ItemField = {
 ---@class cmp.ConfigSchema
 ---@field private revision number
 ---@field public enabled fun():boolean|boolean
+---@field public performance cmp.PerformanceConfig
 ---@field public preselect cmp.PreselectMode
 ---@field public completion cmp.CompletionConfig
 ---@field public window cmp.WindowConfig|nil
@@ -92,6 +93,10 @@ cmp.ItemField = {
 ---@field public sources cmp.SourceConfig[]
 ---@field public view cmp.ViewConfig
 ---@field public experimental cmp.ExperimentalConfig
+
+---@class cmp.PerformanceConfig
+---@field public debounce number
+---@field public throttle number
 
 ---@class cmp.WindowConfig
 ---@field completion cmp.WindowConfig
