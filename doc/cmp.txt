@@ -639,6 +639,10 @@ You can create custom source like the following example.
 >
   local source = {}
 
+  function source.new()
+      return setmetatable({}, { __index = source })
+  end
+
   ---Return this source is available in current context or not. (Optional)
   ---@return boolean
   function source:is_available()
