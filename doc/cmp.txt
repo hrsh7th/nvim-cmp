@@ -485,7 +485,7 @@ sources[n].keyword_length~
 
                                          *cmp-config.sources[n].keyword_pattern*
 sources[n].keyword_pattern~
-  `number`
+  `string`
   The source specific keyword pattern.
 
                                       *cmp-config.sources[n].trigger_characters*
