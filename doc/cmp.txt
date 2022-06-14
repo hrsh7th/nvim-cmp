@@ -366,6 +366,19 @@ enabled~
   `boolean | fun(): boolean`
   Toggles the plugin on and off.
 
+                                                *cmp-config.performance.debounce*
+performance.debounce~
+  `number`
+  Sets debounce time
+  This is the interval used to group up completions from different sources
+  for filtering and displaying.
+
+                                                *cmp-config.performance.throttle*
+performance.throttle~
+  `number`
+  Sets throttle time
+  This is used to delay filtering and displaying completions.
+
                                                           *cmp-config.preselect*
 preselect~
   `cmp.PreselectMode`

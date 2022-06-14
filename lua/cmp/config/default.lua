@@ -14,6 +14,11 @@ return function()
       return not disabled
     end,
 
+    performance = {
+      debounce = 80,
+      throttle = 40,
+    },
+
     preselect = types.cmp.PreselectMode.Item,
 
     mapping = {},

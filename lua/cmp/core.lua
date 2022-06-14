@@ -15,8 +15,6 @@ local api = require('cmp.utils.api')
 local event = require('cmp.utils.event')
 
 local SOURCE_TIMEOUT = 500
-local DEBOUNCE_TIME = 80
-local THROTTLE_TIME = 40
 
 ---@class cmp.Core
 ---@field public suspending boolean
@@ -169,7 +167,7 @@ core.on_change = function(self, trigger_event)
       if vim.tbl_contains(config.get().completion.autocomplete or {}, trigger_event) then
         self:complete(ctx)
       else
-        self.filter.timeout = self.view:visible() and THROTTLE_TIME or 0
+        self.filter.timeout = self.view:visible() and config.get().performance.throttle or 0
         self:filter()
       end
     else
@@ -279,7 +277,7 @@ core.complete = function(self, ctx)
         else
           if not self.view:get_active_entry() then
             self.filter.stop()
-            self.filter.timeout = DEBOUNCE_TIME
+            self.filter.timeout = config.get().performance.debounce
             self:filter()
           end
         end
@@ -289,14 +287,14 @@ core.complete = function(self, ctx)
   end
 
   if not self.view:get_active_entry() then
-    self.filter.timeout = self.view:visible() and THROTTLE_TIME or 1
+    self.filter.timeout = self.view:visible() and config.get().performance.throttle or 1
     self:filter()
   end
 end
 
 ---Update completion menu
 core.filter = async.throttle(function(self)
-  self.filter.timeout = THROTTLE_TIME
+  self.filter.timeout = config.get().performance.throttle
 
   -- Check invalid condition.
   local ignore = false
@@ -335,7 +333,7 @@ core.filter = async.throttle(function(self)
   end) == 0 then
     config.set_onetime({})
   end
-end, THROTTLE_TIME)
+end, config.get().performance.throttle)
 
 ---Confirm completion.
 ---@param e cmp.Entry
