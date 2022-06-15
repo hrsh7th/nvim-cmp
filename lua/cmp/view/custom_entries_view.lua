@@ -8,8 +8,6 @@ local keymap = require('cmp.utils.keymap')
 local misc = require('cmp.utils.misc')
 local api = require('cmp.utils.api')
 
-local SIDE_PADDING = 1
-
 local DEFAULT_HEIGHT = 10 -- @see https://github.com/vim/vim/blob/master/src/popupmenu.c#L45
 
 ---@class cmp.CustomEntriesView
@@ -65,7 +63,7 @@ custom_entries_view.new = function()
         local e = self.entries[i + 1]
         if e then
           local v = e:get_view(self.offset, buf)
-          local o = SIDE_PADDING
+          local o = config.get().window.completion.side_padding
           local a = 0
           for _, field in ipairs(fields) do
             if field == types.cmp.ItemField.Abbr then
@@ -200,7 +198,7 @@ custom_entries_view.open = function(self, offset, entries)
     relative = 'editor',
     style = 'minimal',
     row = math.max(0, row),
-    col = math.max(0, col),
+    col = math.max(0, col + completion.col_offset),
     width = width,
     height = height,
     border = completion.border,
@@ -255,12 +253,12 @@ custom_entries_view.draw = function(self)
     if e then
       local view = e:get_view(self.offset, entries_buf)
       local text = {}
-      table.insert(text, string.rep(' ', SIDE_PADDING))
+      table.insert(text, string.rep(' ', config.get().window.completion.side_padding))
       for _, field in ipairs(fields) do
         table.insert(text, view[field].text)
         table.insert(text, string.rep(' ', 1 + self.column_width[field] - view[field].width))
       end
-      table.insert(text, string.rep(' ', SIDE_PADDING))
+      table.insert(text, string.rep(' ', config.get().window.completion.side_padding))
       table.insert(texts, table.concat(text, ''))
     end
   end
