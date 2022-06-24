@@ -34,9 +34,11 @@ core.new = function()
   self.view.event:on('keymap', function(...)
     self:on_keymap(...)
   end)
-  self.view.event:on('complete_done', function(evt)
-    self.event:emit('complete_done', evt)
-  end)
+  for _, event_name in ipairs({ 'complete_done', 'menu_opened', 'menu_closed' }) do
+    self.view.event:on(event_name, function(evt)
+      self.event:emit(event_name, evt)
+    end)
+  end
   return self
 end
 

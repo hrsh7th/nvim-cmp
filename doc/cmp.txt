@@ -222,6 +222,10 @@ NOTE: `<Cmd>lua require('cmp').complete()<CR>` can be used to call these functio
 
   - `complete_done`: emit after current completion is done.
   - `confirm_done`: emit after confirmation is done.
+  - `menu_opened`: emit after opening a new completion menu. Called with a table holding a key
+    named `window`, pointing to the completion menu implementation.
+  - `menu_closed`: emit after completion menu is closed. Called with a table holding a key
+    named `window`, pointing to the completion menu implementation.
 
 ==============================================================================
 Mapping                                                            *cmp-mapping*
