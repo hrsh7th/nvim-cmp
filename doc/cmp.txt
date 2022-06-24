@@ -772,7 +772,7 @@ How to use nvim-cmp as omnifunc?~
     ...
   }
 <
-  Then you will need to nvoke completion manually.
+  Then you will need to invoke completion manually.
 >
   inoremap <C-x><C-o> <Cmd>lua require('cmp').complete()<CR>
 <
