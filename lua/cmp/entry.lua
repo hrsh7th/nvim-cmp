@@ -380,7 +380,7 @@ entry.match = function(self, input, matching_config)
     end
 
     if self:get_filter_text() ~= self:get_completion_item().label then
-      _, matches = matcher.match(input, self:get_completion_item().label, { self:get_word() })
+      _, matches = matcher.match(input, self:get_completion_item().label, { synonyms = { self:get_word() } })
     end
 
     return { score = score, matches = matches }
