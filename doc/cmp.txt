@@ -546,6 +546,38 @@ sources[n].group_index~
       })
     }
 <
+
+                                             *cmp-config.sources[n].entry_filter*
+sources[n].entry_filter~
+  `function`
+  A source-specific entry filter, with the following function signature:
+>
+  --- @param entry cmp.Entry
+  --- @param ctx cmp.Context
+  --- @return boolean
+  function(entry, ctx) end
+<
+
+  Returning `true` will keep the entry, while returning `false` will remove it.
+
+  This can be used to hide certain entries from a given source. For instance, you
+  could hide all entries with kind `Text` from the `nvim_lsp` filter using the
+  following source definition:
+>
+  {
+    name = 'nvim_lsp',
+    entry_filter = function(entry, ctx)
+      local kind = require('cmp.types').lsp.CompletionItemKind[entry:get_kind()]
+
+      if kind == 'Text' then return false end
+
+      return true
+    end
+  }
+<
+  Using the `ctx` parameter, you can further customize the behaviour of the
+  source.
+
                                                                *cmp-config.view*
 view~
   `{ entries: cmp.EntriesConfig|string }`
