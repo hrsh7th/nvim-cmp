@@ -88,8 +88,8 @@ matcher.match = function(input, word, option)
     return matcher.PREFIX_FACTOR + matcher.NOT_FUZZY_FACTOR, {}
   end
 
-  -- Ignore if input is long than word
-  if #input > #word then
+  -- Ignore if input is identical to or longer than word
+  if input == word or #input > #word then
     return 0, {}
   end
 
