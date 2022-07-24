@@ -7,6 +7,17 @@ local keymap = require('cmp.utils.keymap')
 local misc = require('cmp.utils.misc')
 local async = require('cmp.utils.async')
 
+---@tag cmp.nvim
+
+---@brief [[
+--- cmp.nvim is a completion plugin engine.
+---
+--- Testimonials:
+---
+--- > It is my favorite completion plugin to date.
+---     - TJ DeVries
+---@brief ]]
+
 local cmp = {}
 
 cmp.core = core.new()
