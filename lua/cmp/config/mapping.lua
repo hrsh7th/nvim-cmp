@@ -62,7 +62,7 @@ mapping.preset.cmdline = function(override)
         if cmp.visible() then
           cmp.select_prev_item()
         else
-          feedkeys.call(keymap.t('<C-z>'), 'n')
+          feedkeys.call(keymap.t('<S-Tab>'), 'n')
         end
       end,
     },
