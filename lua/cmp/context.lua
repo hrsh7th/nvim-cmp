@@ -10,8 +10,8 @@ local api = require('cmp.utils.api')
 ---@field public prev_context cmp.Context
 ---@field public option cmp.ContextOption
 ---@field public filetype string
----@field public time number
----@field public bufnr number
+---@field public time integer
+---@field public bufnr integer
 ---@field public cursor vim.Position|lsp.Position
 ---@field public cursor_line string
 ---@field public cursor_after_line string
@@ -31,8 +31,8 @@ context.empty = function()
 end
 
 ---Create new context
----@param prev_context cmp.Context
----@param option cmp.ContextOption
+---@param prev_context? cmp.Context
+---@param option? cmp.ContextOption
 ---@return cmp.Context
 context.new = function(prev_context, option)
   option = option or {}
@@ -65,7 +65,7 @@ context.get_reason = function(self)
 end
 
 ---Get keyword pattern offset
----@return number|nil
+---@return integer
 context.get_offset = function(self, keyword_pattern)
   return self.cache:ensure({ 'get_offset', keyword_pattern, self.cursor_before_line }, function()
     return pattern.offset(keyword_pattern .. '\\m$', self.cursor_before_line) or self.cursor.col

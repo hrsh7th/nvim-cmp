@@ -50,7 +50,7 @@ end
 ---Register completion sources
 ---@param name string
 ---@param s cmp.Source
----@return number
+---@return integer
 cmp.register_source = function(name, s)
   local src = source.new(name, s)
   cmp.core:register_source(src)
@@ -58,7 +58,7 @@ cmp.register_source = function(name, s)
 end
 
 ---Unregister completion source
----@param id number
+---@param id integer
 cmp.unregister_source = function(id)
   cmp.core:unregister_source(id)
 end

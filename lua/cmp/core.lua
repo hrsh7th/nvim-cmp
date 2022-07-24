@@ -49,7 +49,7 @@ core.register_source = function(self, s)
 end
 
 ---Unregister source
----@param source_id string
+---@param source_id integer
 core.unregister_source = function(self, source_id)
   self.sources[source_id] = nil
 end

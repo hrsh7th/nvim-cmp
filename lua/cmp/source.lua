@@ -10,16 +10,16 @@ local pattern = require('cmp.utils.pattern')
 local char = require('cmp.utils.char')
 
 ---@class cmp.Source
----@field public id number
+---@field public id integer
 ---@field public name string
 ---@field public source any
 ---@field public cache cmp.Cache
----@field public revision number
+---@field public revision integer
 ---@field public incomplete boolean
 ---@field public is_triggered_by_symbol boolean
 ---@field public entries cmp.Entry[]
----@field public offset number
----@field public request_offset number
+---@field public offset integer
+---@field public request_offset integer
 ---@field public context cmp.Context
 ---@field public completion_context lsp.CompletionContext|nil
 ---@field public status cmp.SourceStatus
@@ -132,10 +132,10 @@ source.get_entries = function(self, ctx)
 end
 
 ---Get default insert range
----@return lsp.Range|nil
+---@return lsp.Range
 source.get_default_insert_range = function(self)
   if not self.context then
-    return nil
+    error('context is not initialized yet.')
   end
 
   return self.cache:ensure({ 'get_default_insert_range', self.revision }, function()
@@ -153,10 +153,10 @@ source.get_default_insert_range = function(self)
 end
 
 ---Get default replace range
----@return lsp.Range|nil
+---@return lsp.Range
 source.get_default_replace_range = function(self)
   if not self.context then
-    return nil
+    error('context is not initialized yet.')
   end
 
   return self.cache:ensure({ 'get_default_replace_range', self.revision }, function()
@@ -223,7 +223,7 @@ source.get_keyword_pattern = function(self)
 end
 
 ---Get keyword_length
----@return number
+---@return integer
 source.get_keyword_length = function(self)
   local c = self:get_source_config()
   if c.keyword_length then

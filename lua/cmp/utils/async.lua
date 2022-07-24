@@ -2,13 +2,13 @@ local async = {}
 
 ---@class cmp.AsyncThrottle
 ---@field public running boolean
----@field public timeout number
----@field public sync function(self: cmp.AsyncThrottle, timeout: number|nil)
+---@field public timeout integer
+---@field public sync function(self: cmp.AsyncThrottle, timeout: integer|nil)
 ---@field public stop function
 ---@field public __call function
 
 ---@param fn function
----@param timeout number
+---@param timeout integer
 ---@return cmp.AsyncThrottle
 async.throttle = function(fn, timeout)
   local time = nil
@@ -60,7 +60,7 @@ end
 
 ---Timeout callback function
 ---@param fn function
----@param timeout number
+---@param timeout integer
 ---@return function
 async.timeout = function(fn, timeout)
   local timer

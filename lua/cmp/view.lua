@@ -153,7 +153,7 @@ view.visible = function(self)
 end
 
 ---Scroll documentation window if possible.
----@param delta number
+---@param delta integer
 view.scroll_docs = function(self, delta)
   self.docs_view:scroll(delta)
 end

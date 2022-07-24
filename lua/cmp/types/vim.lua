@@ -12,8 +12,8 @@
 ---@field public menu_hl_group string|nil
 
 ---@class vim.Position
----@field public row number
----@field public col number
+---@field public row integer
+---@field public col integer
 
 ---@class vim.Range
 ---@field public start vim.Position

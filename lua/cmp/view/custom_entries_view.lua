@@ -12,7 +12,7 @@ local DEFAULT_HEIGHT = 10 -- @see https://github.com/vim/vim/blob/master/src/pop
 
 ---@class cmp.CustomEntriesView
 ---@field private entries_win cmp.Window
----@field private offset number
+---@field private offset integer
 ---@field private active boolean
 ---@field private entries cmp.Entry[]
 ---@field private column_width any

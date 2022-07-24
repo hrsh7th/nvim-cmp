@@ -68,7 +68,7 @@ keymap.undojoin = function()
 end
 
 ---Create backspace keys.
----@param count number
+---@param count integer
 ---@return string
 keymap.backspace = function(count)
   if type(count) == 'string' then

@@ -51,7 +51,7 @@ cmp.ItemField = {
 
 ---@class cmp.SnippetExpansionParams
 ---@field public body string
----@field public insert_text_mode number
+---@field public insert_text_mode integer
 
 ---@class cmp.CompleteParams
 ---@field public reason? cmp.ContextReason
@@ -67,7 +67,7 @@ cmp.ItemField = {
 ---@class cmp.SourceApiParams: cmp.SourceConfig
 
 ---@class cmp.SourceCompletionApiParams : cmp.SourceConfig
----@field public offset number
+---@field public offset integer
 ---@field public context cmp.Context
 ---@field public completion_context lsp.CompletionContext
 
@@ -78,7 +78,7 @@ cmp.ItemField = {
 ---@field public s nil|function(fallback: function): void
 
 ---@class cmp.ConfigSchema
----@field private revision number
+---@field private revision integer
 ---@field public enabled fun():boolean|boolean
 ---@field public performance cmp.PerformanceConfig
 ---@field public preselect cmp.PreselectMode
@@ -95,8 +95,8 @@ cmp.ItemField = {
 ---@field public experimental cmp.ExperimentalConfig
 
 ---@class cmp.PerformanceConfig
----@field public debounce number
----@field public throttle number
+---@field public debounce integer
+---@field public throttle integer
 
 ---@class cmp.WindowConfig
 ---@field completion cmp.WindowConfig
@@ -106,15 +106,15 @@ cmp.ItemField = {
 ---@field public autocomplete cmp.TriggerEvent[]
 ---@field public completeopt string
 ---@field public get_trigger_characters fun(trigger_characters: string[]): string[]
----@field public keyword_length number
+---@field public keyword_length integer
 ---@field public keyword_pattern string
 
 ---@class cmp.WindowConfig
 ---@field public border string|string[]
 ---@field public winhighlight string
----@field public zindex number|nil
----@field public max_width number|nil
----@field public max_height number|nil
+---@field public zindex integer|nil
+---@field public max_width integer|nil
+---@field public max_height integer|nil
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior
@@ -126,7 +126,7 @@ cmp.ItemField = {
 ---@field public disallow_prefix_unmatching boolean
 
 ---@class cmp.SortingConfig
----@field public priority_weight number
+---@field public priority_weight integer
 ---@field public comparators function[]
 
 ---@class cmp.FormattingConfig
@@ -145,12 +145,12 @@ cmp.ItemField = {
 ---@class cmp.SourceConfig
 ---@field public name string
 ---@field public option table|nil
----@field public priority number|nil
+---@field public priority integer|nil
 ---@field public trigger_characters string[]|nil
 ---@field public keyword_pattern string|nil
----@field public keyword_length number|nil
----@field public max_item_count number|nil
----@field public group_index number|nil
+---@field public keyword_length integer|nil
+---@field public max_item_count integer|nil
+---@field public group_index integer|nil
 
 ---@class cmp.ViewConfig
 ---@field public entries cmp.EntriesConfig

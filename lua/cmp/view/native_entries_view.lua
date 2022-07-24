@@ -7,10 +7,10 @@ local config = require('cmp.config')
 local api = require('cmp.utils.api')
 
 ---@class cmp.NativeEntriesView
----@field private offset number
+---@field private offset integer
 ---@field private items vim.CompletedItem
 ---@field private entries cmp.Entry[]
----@field private preselect_index number
+---@field private preselect_index integer
 ---@field public event cmp.Event
 local native_entries_view = {}
 

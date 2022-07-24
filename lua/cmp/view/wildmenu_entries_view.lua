@@ -9,7 +9,7 @@ local misc = require('cmp.utils.misc')
 local api = require('cmp.utils.api')
 
 ---@class cmp.CustomEntriesView
----@field private offset number
+---@field private offset integer
 ---@field private entries_win cmp.Window
 ---@field private active boolean
 ---@field private entries cmp.Entry[]

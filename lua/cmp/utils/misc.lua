@@ -32,7 +32,7 @@ end
 ---Repeat values
 ---@generic T
 ---@param str_or_tbl T
----@param count number
+---@param count integer
 ---@return T
 misc.rep = function(str_or_tbl, count)
   if type(str_or_tbl) == 'string' then
@@ -124,8 +124,9 @@ misc.id = setmetatable({
 })
 
 ---Check the value is nil or not.
----@param v boolean
----@return boolean
+---@generic T|nil|vim.NIL
+---@param v T
+---@return T|nil
 misc.safe = function(v)
   if v == nil or v == vim.NIL then
     return nil
@@ -184,8 +185,8 @@ end
 
 ---Safe version of vim.str_utfindex
 ---@param text string
----@param vimindex number|nil
----@return number
+---@param vimindex integer|nil
+---@return integer
 misc.to_utfindex = function(text, vimindex)
   vimindex = vimindex or #text + 1
   return vim.str_utfindex(text, math.max(0, math.min(vimindex - 1, #text)))
@@ -193,8 +194,8 @@ end
 
 ---Safe version of vim.str_byteindex
 ---@param text string
----@param utfindex number
----@return number
+---@param utfindex integer
+---@return integer
 misc.to_vimindex = function(text, utfindex)
   utfindex = utfindex or #text
   for i = utfindex, 1, -1 do

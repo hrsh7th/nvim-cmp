@@ -5,18 +5,18 @@ local api = require('cmp.utils.api')
 
 ---@class cmp.WindowStyle
 ---@field public relative string
----@field public row number
----@field public col number
----@field public width number
----@field public height number
+---@field public row integer
+---@field public col integer
+---@field public width integer
+---@field public height integer
 ---@field public border string|string[]|nil
----@field public zindex number|nil
+---@field public zindex integer|nil
 
 ---@class cmp.Window
 ---@field public name string
----@field public win number|nil
----@field public thumb_win number|nil
----@field public sbar_win number|nil
+---@field public win integer|nil
+---@field public thumb_win integer|nil
+---@field public sbar_win integer|nil
 ---@field public style cmp.WindowStyle
 ---@field public opt table<string, any>
 ---@field public buffer_opt table<string, any>
@@ -91,7 +91,7 @@ window.set_style = function(self, style)
 end
 
 ---Return buffer id.
----@return number
+---@return integer
 window.get_buffer = function(self)
   local buf, created_new = buffer.ensure(self.name)
   if created_new then
@@ -240,7 +240,7 @@ window.info = function(self)
 end
 
 ---Return border information.
----@return { top: number, left: number, right: number, bottom: number, vert: number, horiz: number, visible: boolean }
+---@return { top: integer, left: integer, right: integer, bottom: integer, vert: integer, horiz: integer, visible: boolean }
 window.get_border_info = function(self)
   local border = self.style.border
   if not border or border == 'none' then
@@ -296,7 +296,7 @@ end
 
 ---Get scroll height.
 ---NOTE: The result of vim.fn.strdisplaywidth depends on the buffer it was called in (see comment in cmp.Entry.get_view).
----@return number
+---@return integer
 window.get_content_height = function(self)
   if not self:option('wrap') then
     return vim.api.nvim_buf_line_count(self:get_buffer())

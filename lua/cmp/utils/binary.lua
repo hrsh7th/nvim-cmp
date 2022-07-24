@@ -12,7 +12,7 @@ end
 ---@param list any[]
 ---@param item any
 ---@param func fun(a: any, b: any): 1|-1|0
----@return number
+---@return integer
 binary.search = function(list, item, func)
   local s = 1
   local e = #list

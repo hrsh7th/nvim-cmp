@@ -79,7 +79,7 @@ end
 ---@param input string
 ---@param word string
 ---@param option { synonyms: string[], disallow_fuzzy_matching: boolean, disallow_partial_matching: boolean, disallow_prefix_unmatching: boolean }
----@return number
+---@return integer
 matcher.match = function(input, word, option)
   option = option or {}
 
