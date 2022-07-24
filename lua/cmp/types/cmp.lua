@@ -12,7 +12,7 @@ cmp.SelectBehavior = {
   Select = 'select',
 }
 
----@alias cmp.ContextReason 'auto' | 'manual' 'triggerOnly' | 'none'
+---@alias cmp.ContextReason 'auto' | 'manual' | 'triggerOnly' | 'none'
 cmp.ContextReason = {
   Auto = 'auto',
   Manual = 'manual',
