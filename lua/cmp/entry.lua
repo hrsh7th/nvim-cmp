@@ -269,10 +269,13 @@ entry.get_vim_item = function(self, suggest_offset)
       end
     end
 
+    local cmp_opts = self:get_completion_item().cmp or {}
+
     local vim_item = {
       word = word,
       abbr = abbr,
-      kind = types.lsp.CompletionItemKind[self:get_kind()] or types.lsp.CompletionItemKind[1],
+      kind = cmp_opts.kind_text or types.lsp.CompletionItemKind[self:get_kind()] or types.lsp.CompletionItemKind[1],
+      kind_hl_group = cmp_opts.kind_hl_group,
       menu = menu,
       dup = self:get_completion_item().dup or 1,
     }
