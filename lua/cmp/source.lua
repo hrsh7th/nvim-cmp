@@ -115,7 +115,11 @@ source.get_entries = function(self, ctx)
     if e.score >= 1 then
       e.matches = match.matches
       e.exact = e:get_filter_text() == inputs[o] or e:get_word() == inputs[o]
-      table.insert(entries, e)
+
+      local filter = self:get_source_config().filter
+      if not filter or not filter(e, ctx) then
+        table.insert(entries, e)
+      end
     end
   end
   self.cache:set({ 'get_entries', self.revision, ctx.cursor_before_line }, entries)
