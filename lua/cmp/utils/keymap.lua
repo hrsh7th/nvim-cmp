@@ -68,7 +68,7 @@ keymap.undojoin = function()
 end
 
 ---Create backspace keys.
----@param count integer
+---@param count string|integer
 ---@return string
 keymap.backspace = function(count)
   if type(count) == 'string' then
@@ -83,7 +83,7 @@ keymap.backspace = function(count)
 end
 
 ---Update indentkeys.
----@param expr string
+---@param expr? string
 ---@return string
 keymap.indentkeys = function(expr)
   return string.format(keymap.t('<Cmd>set indentkeys=%s<CR>'), expr and vim.fn.escape(expr, '| \t\\') or '')

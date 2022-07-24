@@ -44,6 +44,7 @@ api.get_current_line = function()
   return vim.api.nvim_get_current_line()
 end
 
+---@return { [1]: integer, [2]: integer }
 api.get_cursor = function()
   if api.is_cmdline_mode() then
     return { vim.o.lines - (vim.api.nvim_get_option('cmdheight') or 1) + 1, vim.fn.getcmdpos() - 1 }

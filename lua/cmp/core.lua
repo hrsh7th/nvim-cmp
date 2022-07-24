@@ -14,8 +14,6 @@ local types = require('cmp.types')
 local api = require('cmp.utils.api')
 local event = require('cmp.utils.event')
 
-local SOURCE_TIMEOUT = 500
-
 ---@class cmp.Core
 ---@field public suspending boolean
 ---@field public view cmp.View
@@ -55,7 +53,7 @@ core.unregister_source = function(self, source_id)
 end
 
 ---Get new context
----@param option cmp.ContextOption
+---@param option? cmp.ContextOption
 ---@return cmp.Context
 core.get_context = function(self, option)
   local prev = self.context:clone()
@@ -81,7 +79,7 @@ core.suspend = function(self)
 end
 
 ---Get sources that sorted by priority
----@param filter cmp.SourceStatus[]|fun(s: cmp.Source): boolean
+---@param filter? cmp.SourceStatus[]|fun(s: cmp.Source): boolean
 ---@return cmp.Source[]
 core.get_sources = function(self, filter)
   local f = function(s)
@@ -241,7 +239,7 @@ core.complete_common_string = function(self)
   config.set_onetime({})
 
   local cursor = api.get_cursor()
-  local offset = self.view:get_offset()
+  local offset = self.view:get_offset() or cursor[2]
   local common_string
   for _, e in ipairs(self.view:get_entries()) do
     local vim_item = e:get_vim_item(offset)
@@ -309,8 +307,8 @@ core.filter = async.throttle(function(self)
   local sources = {}
   for _, s in ipairs(self:get_sources({ source.SourceStatus.FETCHING, source.SourceStatus.COMPLETED })) do
     -- Reserve filter call for timeout.
-    if not s.incomplete and SOURCE_TIMEOUT > s:get_fetching_time() then
-      self.filter.timeout = SOURCE_TIMEOUT - s:get_fetching_time()
+    if not s.incomplete and config.get().performance.fetching_timeout > s:get_fetching_time() then
+      self.filter.timeout = config.get().performance.fetching_timeout - s:get_fetching_time()
       self:filter()
       if #sources == 0 then
         return

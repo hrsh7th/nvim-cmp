@@ -15,8 +15,9 @@ return function()
     end,
 
     performance = {
-      debounce = 80,
-      throttle = 40,
+      debounce = 60,
+      throttle = 30,
+      fetching_timeout = 200,
     },
 
     preselect = types.cmp.PreselectMode.Item,

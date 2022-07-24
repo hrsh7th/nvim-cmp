@@ -383,6 +383,12 @@ performance.throttle~
   Sets throttle time
   This is used to delay filtering and displaying completions.
 
+                                        *cmp-config.performance.fetching_timeout*
+  performance.fetching_timeout~
+    `number`
+    Sets the timeout of candidate fetching process.
+    The nvim-cmp will wait to display the most prioritized source.
+
                                                           *cmp-config.preselect*
 preselect~
   `cmp.PreselectMode`

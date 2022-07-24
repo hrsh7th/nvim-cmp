@@ -97,6 +97,7 @@ cmp.ItemField = {
 ---@class cmp.PerformanceConfig
 ---@field public debounce integer
 ---@field public throttle integer
+---@field public fetching_timeout integer
 
 ---@class cmp.WindowConfig
 ---@field completion cmp.WindowConfig
