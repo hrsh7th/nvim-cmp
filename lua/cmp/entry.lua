@@ -442,7 +442,7 @@ entry.get_documentation = function(self)
         value = value,
       })
     end
-  elseif type(documentation) == 'table' and documentation.value ~= '' then
+  elseif type(documentation) == 'table' and not misc.empty(documentation.value) then
     local value = str.trim(documentation.value)
     if value ~= '' then
       table.insert(documents, {
