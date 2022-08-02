@@ -57,7 +57,16 @@ api.get_screen_cursor = function()
     local cursor = api.get_cursor()
     return { cursor[1], cursor[2] + 1 }
   end
-  return { vim.fn.winline(), vim.fn.wincol() - 1 }
+  local cursor = api.get_cursor()
+  local pos = vim.fn.screenpos(0, cursor[1], cursor[2] + 1)
+  -- account for vim.fn.screenpos bug with virtual lines
+  local pos_after
+  if cursor[1] + 1 > vim.api.nvim_buf_line_count(0) then
+    pos_after = pos.row + 1
+  else
+    pos_after = vim.fn.screenpos(0, cursor[1] + 1, cursor[2] + 1).row
+  end
+  return { pos.row + (pos_after - pos.row - 1), pos.col - 1 }
 end
 
 api.get_cursor_before_line = function()
