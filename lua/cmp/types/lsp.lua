@@ -134,9 +134,17 @@ lsp.CompletionItemKind = vim.tbl_add_reverse_lookup(lsp.CompletionItemKind)
 ---@field public triggerKind lsp.CompletionTriggerKind
 ---@field public triggerCharacter string|nil
 
+---@class lsp.CompletionItemDefaults
+---@field public commitCharacters string[]?
+---@field public editRange lsp.Range|{ insert: lsp.Range, replace: lsp.Range }|nil
+---@field public insertTextFormat lsp.InsertTextFormat
+---@field public insertTextMode lsp.InsertTextMode
+---@field public data any?
+
 ---@class lsp.CompletionList
 ---@field public isIncomplete boolean
 ---@field public items lsp.CompletionItem[]
+---@field public itemDefaults lsp.CompletionItemDefaults?
 
 ---@alias lsp.CompletionResponse lsp.CompletionList|lsp.CompletionItem[]|nil
 
@@ -175,7 +183,7 @@ lsp.CompletionItemKind = vim.tbl_add_reverse_lookup(lsp.CompletionItemKind)
 ---@field public detail string|nil
 ---@field public description string|nil
 
----@class lsp.Cmp
+---@class lsp.CmpExtension
 ---@field public kind_text string
 ---@field public kind_hl_group string
 
@@ -194,13 +202,12 @@ lsp.CompletionItemKind = vim.tbl_add_reverse_lookup(lsp.CompletionItemKind)
 ---@field public insertTextFormat lsp.InsertTextFormat
 ---@field public insertTextMode lsp.InsertTextMode
 ---@field public textEdit lsp.TextEdit|lsp.InsertReplaceTextEdit|nil
+---@field public textEditText string?
 ---@field public additionalTextEdits lsp.TextEdit[]
 ---@field public commitCharacters string[]|nil
 ---@field public command lsp.Command|nil
 ---@field public data any|nil
----@field public cmp lsp.Cmp|nil
----
----TODO: Should send the issue for upstream?
+---@field public cmp lsp.CmpExtension|nil
 ---@field public word string|nil
 ---@field public dup boolean|nil
 
