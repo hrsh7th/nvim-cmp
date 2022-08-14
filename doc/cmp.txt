@@ -807,6 +807,12 @@ How to disable the documentation window?~
   })
 <
 
+I'm using clangd. The menu items are mis-indented.~
+
+  It's caused by clangd. You can specify `--header-insertion-decorators` for
+  clangd's command-line arguments. See #999.
+
+
 How to integrate with copilot.vim?~
 
   Copilot.vim and nvim-cmp both have a `key-mapping fallback` mechanism.
