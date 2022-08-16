@@ -3,6 +3,20 @@ local misc = require('cmp.utils.misc')
 local feedkeys = require('cmp.utils.feedkeys')
 local keymap = require('cmp.utils.keymap')
 
+local function merge_keymaps(base, override)
+  local normalized_base = {}
+  for k, v in pairs(base) do
+    normalized_base[keymap.normalize(k)] = v
+  end
+
+  local normalized_override = {}
+  for k, v in pairs(override) do
+    normalized_override[keymap.normalize(k)] = v
+  end
+
+  return misc.merge(normalized_base, normalized_override)
+end
+
 local mapping = setmetatable({}, {
   __call = function(_, invoke, modes)
     if type(invoke) == 'function' then
@@ -21,7 +35,7 @@ mapping.preset = {}
 
 ---Mapping preset insert-mode configuration.
 mapping.preset.insert = function(override)
-  return misc.merge(override or {}, {
+  return merge_keymaps(override or {}, {
     ['<Down>'] = {
       i = mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Select }),
     },
@@ -45,7 +59,7 @@ end
 
 ---Mapping preset cmdline-mode configuration.
 mapping.preset.cmdline = function(override)
-  return misc.merge(override or {}, {
+  return merge_keymaps(override or {}, {
     ['<Tab>'] = {
       c = function()
         local cmp = require('cmp')
