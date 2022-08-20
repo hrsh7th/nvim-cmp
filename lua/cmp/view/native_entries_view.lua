@@ -77,7 +77,10 @@ native_entries_view.open = function(self, offset, entries)
 end
 
 native_entries_view.close = function(self)
-  if api.is_insert_mode() and self:visible() then
+  if api.is_suitable_mode() and self:visible() then
+		if vim.api.nvim_get_mode()["mode"] == "i" then
+      vim.fn.complete(1, {})
+    end
     vim.api.nvim_select_popupmenu_item(-1, false, true, {})
   end
   self.offset = -1
