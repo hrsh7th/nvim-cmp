@@ -37,6 +37,7 @@ custom_entries_view.new = function()
   -- always rendered one column wide, which removes the unpredictability coming
   -- from variable width of the tab character.
   self.entries_win:buffer_option('tabstop', 1)
+  self.entries_win:buffer_option('filetype', 'cmp_menu')
   self.event = event.new()
   self.offset = -1
   self.active = false
