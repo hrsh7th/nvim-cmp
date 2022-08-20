@@ -225,7 +225,8 @@ end
 misc.redraw = setmetatable({
   doing = false,
   force = false,
-  termcode = vim.api.nvim_replace_termcodes('<C-r><Esc>', true, true, true),
+  -- We use `<Up><Down>` to redraw the screen. (Previously, We use <C-r><ESC>. it will remove the unmatches search history.)
+  termcode = vim.api.nvim_replace_termcodes('<Up><Down>', true, true, true),
 }, {
   __call = function(self, force)
     if vim.tbl_contains({ '/', '?' }, vim.fn.getcmdtype()) then
