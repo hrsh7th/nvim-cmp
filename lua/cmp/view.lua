@@ -209,9 +209,16 @@ view._get_entries_view = function(self)
   local c = config.get()
   local v = self.custom_entries_view
   if (c.view and c.view.entries and (c.view.entries.name or c.view.entries)) == 'wildmenu' then
+    self.custom_entries_view:close()
+    self.native_entries_view:close()
     v = self.wildmenu_entries_view
   elseif (c.view and c.view.entries and (c.view.entries.name or c.view.entries)) == 'native' then
+    self.custom_entries_view:close()
+    self.wildmenu_entries_view:close()
     v = self.native_entries_view
+  else
+    self.native_entries_view:close()
+    self.wildmenu_entries_view:close()
   end
   v.event:on('change', function()
     self:on_entry_change()
