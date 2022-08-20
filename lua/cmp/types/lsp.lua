@@ -6,7 +6,7 @@ local lsp = {}
 
 lsp.Position = {
   ---Convert lsp.Position to vim.Position
-  ---@param buf integer|string
+  ---@param buf integer
   ---@param position lsp.Position
   ---@return vim.Position
   to_vim = function(buf, position)
@@ -26,7 +26,7 @@ lsp.Position = {
     }
   end,
   ---Convert vim.Position to lsp.Position
-  ---@param buf integer|string
+  ---@param buf integer
   ---@param position vim.Position
   ---@return lsp.Position
   to_lsp = function(buf, position)
