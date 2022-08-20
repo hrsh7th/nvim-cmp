@@ -463,7 +463,6 @@ core.confirm = function(self, e, option, callback)
   end)
   feedkeys.call(keymap.indentkeys(vim.bo.indentkeys), 'n')
   feedkeys.call('', 'n', function()
-    release()
     e:execute(vim.schedule_wrap(function()
       release()
       self.event:emit('confirm_done', {
