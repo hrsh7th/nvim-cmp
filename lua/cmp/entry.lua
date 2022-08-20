@@ -333,8 +333,12 @@ end
 entry.get_replace_range = function(self)
   return self.cache:ensure({ 'get_replace_range', self.resolved_completion_item and 1 or 0 }, function()
     local replace_range
-    if misc.safe(self:get_completion_item().textEdit) and misc.safe(self:get_completion_item().textEdit.replace) then
-      replace_range = self:get_completion_item().textEdit.replace
+    if misc.safe(self:get_completion_item().textEdit) then
+      if misc.safe(self:get_completion_item().textEdit.replace) then
+        replace_range = self:get_completion_item().textEdit.replace
+      else
+        replace_range = self:get_completion_item().textEdit.range
+      end
     else
       replace_range = {
         start = {
