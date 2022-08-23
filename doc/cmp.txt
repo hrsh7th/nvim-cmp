@@ -552,10 +552,7 @@ sources[n].entry_filter~
   `function`
   A source-specific entry filter, with the following function signature:
 >
-  --- @param entry cmp.Entry
-  --- @param ctx cmp.Context
-  --- @return boolean
-  function(entry, ctx) end
+  function(entry: cmp.Entry, ctx: cmp.Context): boolean
 <
 
   Returning `true` will keep the entry, while returning `false` will remove it.
@@ -567,9 +564,7 @@ sources[n].entry_filter~
   {
     name = 'nvim_lsp',
     entry_filter = function(entry, ctx)
-      local kind = require('cmp.types').lsp.CompletionItemKind[entry:get_kind()]
-
-      return kind ~= 'Text'
+      return require('cmp.types').lsp.CompletionItemKind[entry:get_kind()] ~= 'Text'
     end
   }
 <
