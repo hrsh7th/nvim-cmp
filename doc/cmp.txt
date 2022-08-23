@@ -569,9 +569,7 @@ sources[n].entry_filter~
     entry_filter = function(entry, ctx)
       local kind = require('cmp.types').lsp.CompletionItemKind[entry:get_kind()]
 
-      if kind == 'Text' then return false end
-
-      return true
+      return kind ~= 'Text'
     end
   }
 <
