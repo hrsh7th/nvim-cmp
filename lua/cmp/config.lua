@@ -74,7 +74,9 @@ end
 ---@return cmp.ConfigSchema
 config.get = function()
   local global_config = config.global
-  if config.onetime.sources then
+
+  -- The config object already has `revision` key.
+  if #vim.tbl_keys(config.onetime) > 1 then
     local onetime_config = config.onetime
     return config.cache:ensure({
       'get',

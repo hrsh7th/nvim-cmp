@@ -369,6 +369,7 @@ core.confirm = function(self, e, option, callback)
       table.insert(keys, string.sub(e.context.cursor_before_line, e:get_offset()))
       feedkeys.call(table.concat(keys, ''), 'in')
     else
+      vim.cmd([[silent! undojoin]])
       vim.api.nvim_buf_set_text(0, ctx.cursor.row - 1, e:get_offset() - 1, ctx.cursor.row - 1, ctx.cursor.col - 1, {
         string.sub(e.context.cursor_before_line, e:get_offset()),
       })
@@ -400,9 +401,11 @@ core.confirm = function(self, e, option, callback)
         if has_cursor_line_text_edit then
           return
         end
+        vim.cmd([[silent! undojoin]])
         vim.lsp.util.apply_text_edits(text_edits, ctx.bufnr, 'utf-16')
       end)
     else
+      vim.cmd([[silent! undojoin]])
       vim.lsp.util.apply_text_edits(e:get_completion_item().additionalTextEdits, ctx.bufnr, 'utf-16')
     end
   end)

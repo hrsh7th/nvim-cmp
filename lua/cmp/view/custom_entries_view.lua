@@ -37,6 +37,7 @@ custom_entries_view.new = function()
   -- always rendered one column wide, which removes the unpredictability coming
   -- from variable width of the tab character.
   self.entries_win:buffer_option('tabstop', 1)
+  self.entries_win:buffer_option('filetype', 'cmp_menu')
   self.event = event.new()
   self.offset = -1
   self.active = false
@@ -124,7 +125,7 @@ custom_entries_view.open = function(self, offset, entries)
   local entries_buf = self.entries_win:get_buffer()
   local lines = {}
   local dedup = {}
-  local preselect = 0
+  local preselect_index = 0
   for _, e in ipairs(entries) do
     local view = e:get_view(offset, entries_buf)
     if view.dup == 1 or not dedup[e.completion_item.label] then
@@ -134,8 +135,8 @@ custom_entries_view.open = function(self, offset, entries)
       self.column_width.menu = math.max(self.column_width.menu, view.menu.width)
       table.insert(self.entries, e)
       table.insert(lines, ' ')
-      if preselect == 0 and e.completion_item.preselect then
-        preselect = #self.entries
+      if preselect_index == 0 and e.completion_item.preselect then
+        preselect_index = #self.entries
       end
     end
   end
@@ -186,8 +187,8 @@ custom_entries_view.open = function(self, offset, entries)
     for i = 1, math.floor(n / 2) do
       self.entries[i], self.entries[n - i + 1] = self.entries[n - i + 1], self.entries[i]
     end
-    if preselect ~= 0 then
-      preselect = #self.entries - preselect + 1
+    if preselect_index ~= 0 then
+      preselect_index = #self.entries - preselect_index + 1
     end
   end
 
@@ -206,8 +207,8 @@ custom_entries_view.open = function(self, offset, entries)
   })
   -- always set cursor when starting. It will be adjusted on the call to _select
   vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
-  if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
-    self:_select(preselect, { behavior = types.cmp.SelectBehavior.Select })
+  if preselect_index > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
+    self:_select(preselect_index, { behavior = types.cmp.SelectBehavior.Select })
   elseif not string.match(config.get().completion.completeopt, 'noselect') then
     if self:is_direction_top_down() then
       self:_select(1, { behavior = types.cmp.SelectBehavior.Select })
