@@ -7,12 +7,26 @@ local async = {}
 ---@field public stop function
 ---@field public __call function
 
+local timers = {}
+
+vim.api.nvim_create_autocmd('VimLeavePre', {
+  callback = function()
+    for _, timer in pairs(timers) do
+      if timer and not timer:is_closing() then
+        timer:stop()
+        timer:close()
+      end
+    end
+  end
+})
+
 ---@param fn function
 ---@param timeout integer
 ---@return cmp.AsyncThrottle
 async.throttle = function(fn, timeout)
   local time = nil
   local timer = vim.loop.new_timer()
+  timers[#timers+1] = timer
   return setmetatable({
     running = false,
     timeout = timeout,
