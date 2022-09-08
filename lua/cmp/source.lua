@@ -101,6 +101,8 @@ source.get_entries = function(self, ctx)
     return self.entries
   end)()
 
+  local entry_filter = self:get_entry_filter()
+
   local inputs = {}
   local entries = {}
   for _, e in ipairs(target_entries) do
@@ -115,7 +117,10 @@ source.get_entries = function(self, ctx)
     if e.score >= 1 then
       e.matches = match.matches
       e.exact = e:get_filter_text() == inputs[o] or e:get_word() == inputs[o]
-      table.insert(entries, e)
+
+      if entry_filter(e, ctx) then
+        table.insert(entries, e)
+      end
     end
   end
   self.cache:set({ 'get_entries', self.revision, ctx.cursor_before_line }, entries)
@@ -230,6 +235,16 @@ source.get_keyword_length = function(self)
     return c.keyword_length
   end
   return config.get().completion.keyword_length or 1
+end
+
+---Get filter
+--@return function
+source.get_entry_filter = function(self)
+  local c = self:get_source_config()
+  if c.entry_filter then
+    return c.entry_filter
+  end
+  return function(_, _) return true end
 end
 
 ---Invoke completion
