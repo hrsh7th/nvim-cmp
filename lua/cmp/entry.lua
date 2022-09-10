@@ -339,7 +339,9 @@ entry.get_replace_range = function(self)
       else
         replace_range = self:get_completion_item().textEdit.range
       end
-    else
+    end
+
+    if not replace_range or (self.context.cursor.character == replace_range['end'].character) then
       replace_range = {
         start = {
           line = self.source_replace_range.start.line,
