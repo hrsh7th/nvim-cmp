@@ -102,13 +102,15 @@ lua <<EOF
     })
   })
 
-  -- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
-  cmp.setup.cmdline('/', {
-    mapping = cmp.mapping.preset.cmdline(),
-    sources = {
-      { name = 'buffer' }
-    }
-  })
+  -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
+  for _,v in pairs({ '/', '?' })
+    cmp.setup.cmdline(v, {
+      mapping = cmp.mapping.preset.cmdline(),
+      sources = {
+        { name = 'buffer' }
+      }
+    })
+  end
 
   -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
   cmp.setup.cmdline(':', {
