@@ -103,7 +103,7 @@ lua <<EOF
   })
 
   -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
-  for _,v in pairs({ '/', '?' })
+  for _,v in pairs({ '/', '?' }) do
     cmp.setup.cmdline(v, {
       mapping = cmp.mapping.preset.cmdline(),
       sources = {
