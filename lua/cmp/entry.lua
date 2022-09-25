@@ -60,13 +60,15 @@ entry.get_offset = function(self)
       local range = misc.safe(self:get_completion_item().textEdit.insert) or
           misc.safe(self:get_completion_item().textEdit.range)
       if range then
-        local c = misc.to_vimindex(self.context.cursor_line, range.start.character)
-        for idx = c, self.source_offset do
-          if not char.is_white(string.byte(self.context.cursor_line, idx)) then
-            offset = idx
-            break
+        offset = self.context.cache:ensure({ 'entry', 'get_offset', range.start.character }, function()
+          local c = misc.to_vimindex(self.context.cursor_line, range.start.character)
+          for idx = c, self.source_offset do
+            if not char.is_white(string.byte(self.context.cursor_line, idx)) then
+              return idx
+            end
           end
-        end
+          return offset
+        end)
       end
     else
       -- NOTE
@@ -213,7 +215,8 @@ entry.get_view = function(self, suggest_offset, entries_buf)
       view.kind.text = item.kind or ''
       view.kind.bytes = #view.kind.text
       view.kind.width = vim.fn.strdisplaywidth(view.kind.text)
-      view.kind.hl_group = item.kind_hl_group or ('CmpItemKind' .. (types.lsp.CompletionItemKind[self:get_kind()] or '')
+      view.kind.hl_group = item.kind_hl_group or
+          ('CmpItemKind' .. (types.lsp.CompletionItemKind[self:get_kind()] or '')
           )
       view.menu = {}
       view.menu.text = item.menu or ''

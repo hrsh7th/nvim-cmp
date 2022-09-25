@@ -105,13 +105,14 @@ source.get_entries = function(self, ctx)
 
   local inputs = {}
   local entries = {}
+  local matching_config = self:get_matching_config()
   for _, e in ipairs(target_entries) do
     local o = e:get_offset()
     if not inputs[o] then
       inputs[o] = string.sub(ctx.cursor_before_line, o)
     end
 
-    local match = e:match(inputs[o], self:get_matching_config())
+    local match = e:match(inputs[o], matching_config)
     e.score = match.score
     e.exact = false
     if e.score >= 1 then

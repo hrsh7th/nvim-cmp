@@ -58,6 +58,7 @@ end
 core.get_context = function(self, option)
   local prev = self.context:clone()
   prev.prev_context = nil
+  prev.cache = nil
   local ctx = context.new(prev, option)
   self:set_context(ctx)
   return self.context

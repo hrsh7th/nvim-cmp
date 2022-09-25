@@ -1,4 +1,3 @@
-local cache = require('cmp.utils.cache')
 local misc = require('cmp.utils.misc')
 local buffer = require('cmp.utils.buffer')
 local api = require('cmp.utils.api')
@@ -20,7 +19,6 @@ local api = require('cmp.utils.api')
 ---@field public style cmp.WindowStyle
 ---@field public opt table<string, any>
 ---@field public buffer_opt table<string, any>
----@field public cache cmp.Cache
 local window = {}
 
 ---new
@@ -32,7 +30,6 @@ window.new = function()
   self.sbar_win = nil
   self.thumb_win = nil
   self.style = {}
-  self.cache = cache.new()
   self.opt = {}
   self.buffer_opt = {}
   return self
