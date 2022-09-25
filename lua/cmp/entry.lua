@@ -54,7 +54,7 @@ end
 ---Make offset value
 ---@return integer
 entry.get_offset = function(self)
-  return self.cache:ensure({ 'get_offset', self.resolved_completion_item and 1 or 0 }, function()
+  return self.cache:ensure('get_offset', function()
     local offset = self.source_offset
     if misc.safe(self:get_completion_item().textEdit) then
       local range = misc.safe(self:get_completion_item().textEdit.insert) or
@@ -104,7 +104,7 @@ end
 ---NOTE: This method doesn't clear the cache after completionItem/resolve.
 ---@return string
 entry.get_word = function(self)
-  return self.cache:ensure({ 'get_word' }, function()
+  return self.cache:ensure('get_word', function()
     --NOTE: This is nvim-cmp specific implementation.
     if misc.safe(self:get_completion_item().word) then
       return self:get_completion_item().word
@@ -133,18 +133,19 @@ entry.get_word = function(self)
 end
 
 ---Get overwrite information
----@return integer, integer
+---@return integer[]
 entry.get_overwrite = function(self)
-  return self.cache:ensure({ 'get_overwrite', self.resolved_completion_item and 1 or 0 }, function()
+  return self.cache:ensure('get_overwrite', function()
     if misc.safe(self:get_completion_item().textEdit) then
-      local r = misc.safe(self:get_completion_item().textEdit.insert) or
-          misc.safe(self:get_completion_item().textEdit.range)
-      if r then
-        local s = misc.to_vimindex(self.context.cursor_line, r.start.character)
-        local e = misc.to_vimindex(self.context.cursor_line, r['end'].character)
-        local before = self.context.cursor.col - s
-        local after = e - self.context.cursor.col
-        return { before, after }
+      local range = misc.safe(self:get_completion_item().textEdit.insert) or misc.safe(self:get_completion_item().textEdit.range)
+      if range then
+        return self.context.cache:ensure({ 'entry', 'get_overwrite', range.start.character, range['end'].character }, function()
+          local s = misc.to_vimindex(self.context.cursor_line, range.start.character)
+          local e = misc.to_vimindex(self.context.cursor_line, range['end'].character)
+          local before = self.context.cursor.col - s
+          local after = e - self.context.cursor.col
+          return { before, after }
+        end)
       end
     end
     return { 0, 0 }
@@ -154,7 +155,7 @@ end
 ---Create filter text
 ---@return string
 entry.get_filter_text = function(self)
-  return self.cache:ensure({ 'get_filter_text', self.resolved_completion_item and 1 or 0 }, function()
+  return self.cache:ensure('get_filter_text', function()
     local word
     if misc.safe(self:get_completion_item().filterText) then
       word = self:get_completion_item().filterText
@@ -168,7 +169,7 @@ end
 ---Get LSP's insert text
 ---@return string
 entry.get_insert_text = function(self)
-  return self.cache:ensure({ 'get_insert_text', self.resolved_completion_item and 1 or 0 }, function()
+  return self.cache:ensure('get_insert_text', function()
     local word
     if misc.safe(self:get_completion_item().textEdit) then
       word = str.trim(self:get_completion_item().textEdit.newText)
@@ -200,7 +201,7 @@ end
 ---@return { abbr: { text: string, bytes: integer, width: integer, hl_group: string }, kind: { text: string, bytes: integer, width: integer, hl_group: string }, menu: { text: string, bytes: integer, width: integer, hl_group: string } }
 entry.get_view = function(self, suggest_offset, entries_buf)
   local item = self:get_vim_item(suggest_offset)
-  return self.cache:ensure({ 'get_view', self.resolved_completion_item and 1 or 0, entries_buf }, function()
+  return self.cache:ensure({ 'get_view', entries_buf }, function()
     local view = {}
     -- The result of vim.fn.strdisplaywidth depends on which buffer it was
     -- called in because it reads the values of the option 'tabstop' when
@@ -233,7 +234,7 @@ end
 ---@param suggest_offset integer
 ---@return vim.CompletedItem
 entry.get_vim_item = function(self, suggest_offset)
-  return self.cache:ensure({ 'get_vim_item', suggest_offset, self.resolved_completion_item and 1 or 0 }, function()
+  return self.cache:ensure({ 'get_vim_item', suggest_offset }, function()
     local completion_item = self:get_completion_item()
     local word = self:get_word()
     local abbr = str.oneline(completion_item.label)
@@ -334,7 +335,7 @@ end
 ---Return replace range
 ---@return lsp.Range|nil
 entry.get_replace_range = function(self)
-  return self.cache:ensure({ 'get_replace_range', self.resolved_completion_item and 1 or 0 }, function()
+  return self.cache:ensure('get_replace_range', function()
     local replace_range
     if misc.safe(self:get_completion_item().textEdit) then
       if misc.safe(self:get_completion_item().textEdit.replace) then
@@ -408,7 +409,7 @@ end
 ---Get resolved completion item if possible.
 ---@return lsp.CompletionItem
 entry.get_completion_item = function(self)
-  return self.cache:ensure({ 'get_completion_item', self.resolved_completion_item and 1 or 0 }, function()
+  return self.cache:ensure('get_completion_item', function()
     if self.resolved_completion_item then
       local completion_item = misc.copy(self.completion_item)
       for k, v in pairs(self.resolved_completion_item) do
@@ -486,6 +487,7 @@ entry.resolve = function(self, callback)
     self.resolving = true
     self.source:resolve(self.completion_item, function(completion_item)
       self.resolved_completion_item = misc.safe(completion_item) or self.completion_item
+      self.cache:clear()
       for _, c in ipairs(self.resolved_callbacks) do
         c()
       end
