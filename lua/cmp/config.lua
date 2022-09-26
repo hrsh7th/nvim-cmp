@@ -57,10 +57,12 @@ end
 ---Set configuration for cmdline
 ---@param c cmp.ConfigSchema
 ---@param cmdtype string
-config.set_cmdline = function(c, cmdtype)
-  local revision = (config.cmdline[cmdtype] or {}).revision or 1
-  config.cmdline[cmdtype] = c or {}
-  config.cmdline[cmdtype].revision = revision + 1
+config.set_cmdline = function(c, cmdtypes)
+  for _, cmdtype in ipairs(type(cmdtypes) == 'table' and cmdtypes or { cmdtypes }) do
+    local revision = (config.cmdline[cmdtype] or {}).revision or 1
+    config.cmdline[cmdtype] = c or {}
+    config.cmdline[cmdtype].revision = revision + 1
+  end
 end
 
 ---Set configuration as oneshot completion.
