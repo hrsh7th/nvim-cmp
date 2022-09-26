@@ -245,7 +245,9 @@ source.get_entry_filter = function(self)
   if c.entry_filter then
     return c.entry_filter
   end
-  return function(_, _) return true end
+  return function(_, _)
+    return true
+  end
 end
 
 ---Invoke completion

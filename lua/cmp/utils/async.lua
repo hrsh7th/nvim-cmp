@@ -17,7 +17,7 @@ vim.api.nvim_create_autocmd('VimLeavePre', {
         timer:close()
       end
     end
-  end
+  end,
 })
 
 ---@param fn function
@@ -26,7 +26,7 @@ vim.api.nvim_create_autocmd('VimLeavePre', {
 async.throttle = function(fn, timeout)
   local time = nil
   local timer = vim.loop.new_timer()
-  timers[#timers+1] = timer
+  timers[#timers + 1] = timer
   return setmetatable({
     running = false,
     timeout = timeout,
