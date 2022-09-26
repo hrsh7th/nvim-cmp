@@ -61,7 +61,7 @@ cmp.ItemField = {
 ---@field public __call fun(c: cmp.ConfigSchema)
 ---@field public buffer fun(c: cmp.ConfigSchema)
 ---@field public global fun(c: cmp.ConfigSchema)
----@field public cmdline fun(type: string, c: cmp.ConfigSchema)
+---@field public cmdline fun(type: string|string[], c: cmp.ConfigSchema)
 ---@field public filetype fun(type: string|string[], c: cmp.ConfigSchema)
 
 ---@class cmp.SourceApiParams: cmp.SourceConfig
