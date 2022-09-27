@@ -57,8 +57,7 @@ entry.get_offset = function(self)
   return self.cache:ensure('get_offset', function()
     local offset = self.source_offset
     if misc.safe(self:get_completion_item().textEdit) then
-      local range = misc.safe(self:get_completion_item().textEdit.insert) or
-          misc.safe(self:get_completion_item().textEdit.range)
+      local range = misc.safe(self:get_completion_item().textEdit.insert) or misc.safe(self:get_completion_item().textEdit.range)
       if range then
         offset = self.context.cache:ensure({ 'entry', 'get_offset', range.start.character }, function()
           local c = misc.to_vimindex(self.context.cursor_line, range.start.character)
@@ -191,8 +190,7 @@ end
 ---Return the item is deprecated or not.
 ---@return boolean
 entry.is_deprecated = function(self)
-  return self:get_completion_item().deprecated or
-      vim.tbl_contains(self:get_completion_item().tags or {}, types.lsp.CompletionItemTag.Deprecated)
+  return self:get_completion_item().deprecated or vim.tbl_contains(self:get_completion_item().tags or {}, types.lsp.CompletionItemTag.Deprecated)
 end
 
 ---Return view information.
@@ -216,9 +214,7 @@ entry.get_view = function(self, suggest_offset, entries_buf)
       view.kind.text = item.kind or ''
       view.kind.bytes = #view.kind.text
       view.kind.width = vim.fn.strdisplaywidth(view.kind.text)
-      view.kind.hl_group = item.kind_hl_group or
-          ('CmpItemKind' .. (types.lsp.CompletionItemKind[self:get_kind()] or '')
-          )
+      view.kind.hl_group = item.kind_hl_group or ('CmpItemKind' .. (types.lsp.CompletionItemKind[self:get_kind()] or ''))
       view.menu = {}
       view.menu.text = item.menu or ''
       view.menu.bytes = #view.menu.text
@@ -323,8 +319,7 @@ entry.get_insert_range = function(self)
     insert_range = {
       start = {
         line = self.context.cursor.row - 1,
-        character = math.min(misc.to_utfindex(self.context.cursor_line, self:get_offset()),
-          self.source_insert_range.start.character),
+        character = math.min(misc.to_utfindex(self.context.cursor_line, self:get_offset()), self.source_insert_range.start.character),
       },
       ['end'] = self.source_insert_range['end'],
     }
@@ -347,8 +342,7 @@ entry.get_replace_range = function(self)
       replace_range = {
         start = {
           line = self.source_replace_range.start.line,
-          character = math.min(misc.to_utfindex(self.context.cursor_line, self:get_offset()),
-            self.source_replace_range.start.character),
+          character = math.min(misc.to_utfindex(self.context.cursor_line, self:get_offset()), self.source_replace_range.start.character),
         },
         ['end'] = self.source_replace_range['end'],
       }
