@@ -246,6 +246,10 @@ end
 
 custom_entries_view.draw = function(self)
   local info = vim.fn.getwininfo(self.entries_win.win)[1]
+  if info == nil then
+    return
+  end
+
   local topline = info.topline - 1
   local botline = info.topline + info.height - 1
   local texts = {}
