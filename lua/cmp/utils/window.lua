@@ -84,9 +84,15 @@ window.set_style = function(self, style)
   local info = self:info()
 
   if vim.o.lines and vim.o.lines <= info.row + info.height + 1 then
-    self.style.height = vim.o.lines - info.row - info.border_info.vert - 1
+    self.style.height = vim.o.lines - info.row - info.border_info.vert
+    if api.is_cmdline_mode() and vim.o.cmdheight > 0 then
+      self.style.height = self.style.height - 1
+    end
   end
 
+  if api.is_cmdline_mode() and vim.o.cmdheight <= 0 then
+    self.style.row = self.style.row - 1
+  end
   self.style.zindex = self.style.zindex or 1
 end
 
@@ -137,7 +143,7 @@ window.update = function(self)
         relative = 'editor',
         style = 'minimal',
         width = 1,
-        height = math.max(1, self.style.height),
+        height = self.style.height,
         row = info.row,
         col = info.col + info.width - info.scrollbar_offset, -- info.col was already contained the scrollbar offset.
         zindex = (self.style.zindex and (self.style.zindex + 1) or 1),
