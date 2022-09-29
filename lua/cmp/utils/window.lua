@@ -158,9 +158,8 @@ window.update = function(self)
     end
 
     -- Draw the scrollbar thumb
-    local wininfo = vim.fn.getwininfo(self.win)
     local thumb_height = math.floor(info.inner_height * (info.inner_height / self:get_content_height()) + 0.5)
-    local thumb_offset = (wininfo[1] and math.floor(info.inner_height * (wininfo[1].topline / self:get_content_height())) or 0)
+    local thumb_offset = math.floor(info.inner_height * (vim.fn.getwininfo(self.win)[1].topline / self:get_content_height()))
 
     local style = {
       relative = 'editor',
@@ -190,7 +189,7 @@ window.update = function(self)
   end
 
   -- In cmdline, vim does not redraw automatically.
-  if api.is_cmdline_mode() and self.win then
+  if api.is_cmdline_mode() then
     vim.api.nvim_win_call(self.win, function()
       misc.redraw()
     end)

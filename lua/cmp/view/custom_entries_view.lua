@@ -206,9 +206,7 @@ custom_entries_view.open = function(self, offset, entries)
     zindex = completion.zindex or 1001,
   })
   -- always set cursor when starting. It will be adjusted on the call to _select
-  if self.entries_win.win then
-    vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
-  end
+  vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
   if preselect_index > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
     self:_select(preselect_index, { behavior = types.cmp.SelectBehavior.Select })
   elseif not string.match(config.get().completion.completeopt, 'noselect') then
@@ -246,10 +244,6 @@ end
 
 custom_entries_view.draw = function(self)
   local info = vim.fn.getwininfo(self.entries_win.win)[1]
-  if info == nil then
-    return
-  end
-
   local topline = info.topline - 1
   local botline = info.topline + info.height - 1
   local texts = {}
@@ -362,12 +356,10 @@ custom_entries_view._select = function(self, cursor, option)
   self.active = cursor > 0 and cursor <= #self.entries and is_insert
   self.entries_win:option('cursorline', cursor > 0 and cursor <= #self.entries)
 
-  if self.entries_win.win then
-    vim.api.nvim_win_set_cursor(self.entries_win.win, {
-      math.max(math.min(cursor, #self.entries), 1),
-      0,
-    })
-  end
+  vim.api.nvim_win_set_cursor(self.entries_win.win, {
+    math.max(math.min(cursor, #self.entries), 1),
+    0,
+  })
 
   if is_insert then
     self:_insert(self.entries[cursor] and self.entries[cursor]:get_vim_item(self.offset).word or self.prefix)
