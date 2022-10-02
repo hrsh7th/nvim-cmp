@@ -56,7 +56,7 @@ end
 
 ---Set configuration for cmdline
 ---@param c cmp.ConfigSchema
----@param cmdtype string
+---@param cmdtypes string|string[]
 config.set_cmdline = function(c, cmdtypes)
   for _, cmdtype in ipairs(type(cmdtypes) == 'table' and cmdtypes or { cmdtypes }) do
     local revision = (config.cmdline[cmdtype] or {}).revision or 1
