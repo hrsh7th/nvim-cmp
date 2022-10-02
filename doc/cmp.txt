@@ -609,6 +609,12 @@ window.{completion,documentation}.zindex~
   The completion window's zindex.
   See |nvim_open_win|.
 
+                        *cmp-config.window.{completion,documentation}.scrolloff*
+window.completion.scrolloff~
+  `number`
+  Specify the window's scrolloff option.
+  See |'scrolloff'|.
+
                                        *cmp-config.window.completion.col_offset*
 window.completion.col_offset~
   `number`

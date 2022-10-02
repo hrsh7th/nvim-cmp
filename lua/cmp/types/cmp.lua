@@ -116,6 +116,7 @@ cmp.ItemField = {
 ---@field public zindex integer|nil
 ---@field public max_width integer|nil
 ---@field public max_height integer|nil
+---@field public scrolloff integer|nil
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior

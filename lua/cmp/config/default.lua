@@ -91,6 +91,7 @@ return function()
       completion = {
         border = { '', '', '', '', '', '', '', '' },
         winhighlight = 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None',
+        scrolloff = 0,
         col_offset = 0,
         side_padding = 1,
       },
