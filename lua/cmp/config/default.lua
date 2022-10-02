@@ -40,6 +40,7 @@ return function()
     },
 
     formatting = {
+      expandable_indicator = true,
       fields = { 'abbr', 'kind', 'menu' },
       format = function(_, vim_item)
         return vim_item
