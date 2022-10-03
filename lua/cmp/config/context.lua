@@ -33,7 +33,7 @@ context.in_treesitter_capture = function(capture)
     return false
   end
 
-  local node_types = {}
+  local match = false
 
   self.tree:for_each_tree(function(tstree, tree)
     if not tstree then
@@ -52,14 +52,20 @@ context.in_treesitter_capture = function(capture)
     end
 
     local iter = query:query():iter_captures(root, self.bufnr, row, row + 1)
-    for _, node, _ in iter do
-      if ts_utils.is_in_node_range(node, row, col) then
-        table.insert(node_types, node:type())
+    for the_capture, node, _ in iter do
+      local hl = query.hl_cache[the_capture]
+
+      if hl and ts_utils.is_in_node_range(node, row, col) then
+        local c = query._query.captures[the_capture] -- name of the capture in the query
+        if c == capture then
+          match = true
+          return
+        end
       end
     end
   end, true)
 
-  return vim.tbl_contains(node_types, capture)
+  return match
 end
 
 return context
