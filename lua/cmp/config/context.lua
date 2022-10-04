@@ -4,8 +4,12 @@ local context = {}
 ---@param group string | []string
 ---@return boolean
 context.in_syntax_group = function(group)
-  local lnum, col = vim.fn.line('.'), math.min(vim.fn.col('.'), #vim.fn.getline('.'))
-  for _, syn_id in ipairs(vim.fn.synstack(lnum, col)) do
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  if not vim.api.nvim_get_mode().mode == 'i' then
+    col = col + 1
+  end
+
+  for _, syn_id in ipairs(vim.fn.synstack(row, col)) do
     syn_id = vim.fn.synIDtrans(syn_id) -- Resolve :highlight links
     local g = vim.fn.synIDattr(syn_id, 'name')
     if type(group) == 'string' and g == group then
@@ -14,6 +18,7 @@ context.in_syntax_group = function(group)
       return true
     end
   end
+
   return false
 end
 
@@ -22,12 +27,12 @@ end
 ---@return boolean
 context.in_treesitter_capture = function(capture)
   local buf = vim.api.nvim_get_current_buf()
-
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   row = row - 1
   if vim.api.nvim_get_mode().mode == 'i' then
     col = col - 1
   end
+
   local captures_at_cursor = vim.tbl_map(function(x)
     return x.capture
   end, require('vim.treesitter').get_captures_at_pos(buf, row, col))
