@@ -1,13 +1,16 @@
 local context = {}
 
 ---Check if cursor is in syntax group
----@param group string
+---@param group string | []string
 ---@return boolean
 context.in_syntax_group = function(group)
   local lnum, col = vim.fn.line('.'), math.min(vim.fn.col('.'), #vim.fn.getline('.'))
   for _, syn_id in ipairs(vim.fn.synstack(lnum, col)) do
     syn_id = vim.fn.synIDtrans(syn_id) -- Resolve :highlight links
-    if vim.fn.synIDattr(syn_id, 'name') == group then
+    local g = vim.fn.synIDattr(syn_id, 'name')
+    if type(group) == 'string' and g == group then
+      return true
+    elseif type(group) == 'table' and vim.tbl_contains(group, g) then
       return true
     end
   end
@@ -15,7 +18,7 @@ context.in_syntax_group = function(group)
 end
 
 ---Check if cursor is in treesitter capture
----@param capture string
+---@param capture string | []string
 ---@return boolean
 context.in_treesitter_capture = function(capture)
   local highlighter = require('vim.treesitter.highlighter')
@@ -57,7 +60,10 @@ context.in_treesitter_capture = function(capture)
 
       if hl and ts_utils.is_in_node_range(node, row, col) then
         local c = query._query.captures[the_capture] -- name of the capture in the query
-        if c == capture then
+        if type(capture) == 'string' and c == capture then
+          match = true
+          return
+        elseif type(capture) == 'table' and vim.tbl_contains(capture, c) then
           match = true
           return
         end
