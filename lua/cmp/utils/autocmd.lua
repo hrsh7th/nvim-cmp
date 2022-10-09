@@ -46,6 +46,11 @@ autocmd.emit = function(event)
   debug.log(string.format('>>> %s', event))
   autocmd.events[event] = autocmd.events[event] or {}
   for _, callback in ipairs(autocmd.events[event]) do
+    local ok, err = pcall(callback)
+    if not ok then
+      debug.log(err)
+      return
+    end
     callback()
   end
 end
