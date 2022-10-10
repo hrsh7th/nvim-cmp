@@ -33,9 +33,13 @@ context.in_treesitter_capture = function(capture)
     col = col - 1
   end
 
+  local get_captures_at_pos = -- See neovim/neovim#20331
+    require('vim.treesitter').get_captures_at_pos -- for neovim >= 0.8
+    or require('vim.treesitter').get_captures_at_position -- for neovim < 0.8
+
   local captures_at_cursor = vim.tbl_map(function(x)
     return x.capture
-  end, require('vim.treesitter').get_captures_at_pos(buf, row, col))
+  end, get_captures_at_pos(buf, row, col))
 
   if vim.tbl_isempty(captures_at_cursor) then
     return false
