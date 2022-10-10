@@ -127,17 +127,21 @@ end
 keymap.fallback = function(bufnr, mode, map)
   return function()
     if map.expr then
-      local fallback_lhs = string.format('<Plug>(cmp.u.k.fallback_expr:%s)', map.lhs)
-      keymap.set_map(bufnr, mode, fallback_lhs, function()
-        return keymap.solve(bufnr, mode, map).keys
-      end, {
-        expr = true,
-        noremap = map.noremap,
-        script = map.script,
-        nowait = map.nowait,
-        silent = map.silent and mode ~= 'c',
-      })
-      vim.api.nvim_feedkeys(keymap.t(fallback_lhs), 'im', true)
+      if map.callback then
+        vim.api.nvim_feedkeys(keymap.t(map.callback()), 'in', true)
+      else
+        local fallback_lhs = string.format('<Plug>(cmp.u.k.fallback_expr:%s)', map.lhs)
+        keymap.set_map(bufnr, mode, fallback_lhs, function()
+          return keymap.solve(bufnr, mode, map).keys
+        end, {
+          expr = true,
+          noremap = map.noremap,
+          script = map.script,
+          nowait = map.nowait,
+          silent = map.silent and mode ~= 'c',
+        })
+        vim.api.nvim_feedkeys(keymap.t(fallback_lhs), 'im', true)
+      end
     elseif map.callback then
       map.callback()
     else
