@@ -241,6 +241,10 @@ keymap.set_map = function(bufnr, mode, lhs, rhs, opts)
   end
   opts.desc = 'cmp.utils.keymap.set_map'
 
+  if vim.fn.has('nvim-0.8') == 0 then
+    opts.replace_keycodes = nil
+  end
+
   if bufnr == -1 then
     vim.api.nvim_set_keymap(mode, lhs, rhs, opts)
   else
