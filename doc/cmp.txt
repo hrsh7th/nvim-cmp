@@ -783,7 +783,7 @@ Here is an example on how to create a custom source:
   end
 
   ---Register your source to nvim-cmp.
-  require('cmp').register_source('month', source.new())
+  require('cmp').register_source('month', source)
 <
 ==============================================================================
 FAQ                                                                    *cmp-faq*
