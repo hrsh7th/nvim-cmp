@@ -290,41 +290,6 @@ describe('entry', function()
     assert.are.equal(e:get_vim_item(e:get_offset()).word, 'string')
   end)
 
-  it('[ansiblels] 1', function()
-    local item = {
-      detail = 'ansible.builtin',
-      filterText = 'blockinfile ansible.builtin.blockinfile',
-      kind = 7,
-      label = 'blockinfile',
-      sortText = '2_blockinfile',
-      textEdit = {
-        newText = '',
-        range = {
-          ['end'] = {
-            character = 7,
-            line = 15,
-          },
-          start = {
-            character = 6,
-            line = 15,
-          },
-        },
-      },
-    }
-    local s = source.new('dummy', {
-      resolve = function(_, _, callback)
-        item.textEdit.newText = 'modified'
-        callback(item)
-      end,
-    })
-    local e = entry.new(spec.state('', 1, 1).manual(), s, item)
-    assert.are.equal(e:get_vim_item(e:get_offset()).word, 'blockinfile')
-    async.sync(function(done)
-      e:resolve(done)
-    end, 100)
-    assert.are.equal(e:get_vim_item(e:get_offset()).word, 'blockinfile')
-  end)
-
   it('[#47] word should not contain \\n character', function()
     local state = spec.state('', 1, 1)
 
