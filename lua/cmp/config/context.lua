@@ -1,3 +1,5 @@
+local api = require('cmp.utils.api')
+
 local context = {}
 
 ---Check if cursor is in syntax group
@@ -5,7 +7,7 @@ local context = {}
 ---@return boolean
 context.in_syntax_group = function(group)
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  if not vim.api.nvim_get_mode().mode == 'i' then
+  if not api.is_insert_mode() then
     col = col + 1
   end
 
@@ -34,8 +36,7 @@ context.in_treesitter_capture = function(capture)
   end
 
   local get_captures_at_pos = -- See neovim/neovim#20331
-    require('vim.treesitter').get_captures_at_pos -- for neovim >= 0.8
-    or require('vim.treesitter').get_captures_at_position -- for neovim < 0.8
+    require('vim.treesitter').get_captures_at_pos -- for neovim >= 0.8 or require('vim.treesitter').get_captures_at_position -- for neovim < 0.8
 
   local captures_at_cursor = vim.tbl_map(function(x)
     return x.capture

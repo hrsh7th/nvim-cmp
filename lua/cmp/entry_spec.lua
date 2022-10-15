@@ -1,6 +1,4 @@
 local spec = require('cmp.utils.spec')
-local source = require('cmp.source')
-local async = require('cmp.utils.async')
 
 local entry = require('cmp.entry')
 
