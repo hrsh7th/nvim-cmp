@@ -8,8 +8,9 @@ window.bordered = function(opts)
     zindex = opts.zindex or 1001,
     scrolloff = opts.scrolloff or 0,
     col_offset = opts.col_offset or 0,
-    left_side_padding = 1,
-    right_side_padding = 1,
+    side_padding = opts.side_padding or 1,
+    left_side_padding = opts.side_padding or 1,
+    right_side_padding = opts.side_padding or 1,
   }
 end
 
