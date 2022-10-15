@@ -63,7 +63,7 @@ custom_entries_view.new = function()
         local e = self.entries[i + 1]
         if e then
           local v = e:get_view(self.offset, buf)
-          local o = config.get().window.completion.side_padding
+          local o = config.get().window.completion.left_side_padding
           local a = 0
           for _, field in ipairs(fields) do
             if field == types.cmp.ItemField.Abbr then
@@ -76,7 +76,7 @@ custom_entries_view.new = function()
               hl_mode = 'combine',
               ephemeral = true,
             })
-            o = o + v[field].bytes + (self.column_width[field] - v[field].width) + 1
+            o = o + v[field].bytes + (self.column_width[field] - v[field].width)
           end
 
           for _, m in ipairs(e.matches or {}) do
@@ -119,7 +119,17 @@ custom_entries_view.open = function(self, offset, entries)
   local completion = config.get().window.completion
   self.offset = offset
   self.entries = {}
+  local custom_fields = {}
+  for _, field in ipairs(config.get().formatting.fields) do
+    if not vim.tbl_contains({ 'abbr', 'kind', 'menu' }, field) then
+      table.insert(custom_fields, field)
+    end
+  end
+
   self.column_width = { abbr = 0, kind = 0, menu = 0 }
+  for _, field in ipairs(custom_fields) do
+    self.column_width[field] = 0
+  end
 
   local entries_buf = self.entries_win:get_buffer()
   local lines = {}
@@ -129,6 +139,10 @@ custom_entries_view.open = function(self, offset, entries)
     local view = e:get_view(offset, entries_buf)
     if view.dup == 1 or not dedup[e.completion_item.label] then
       dedup[e.completion_item.label] = true
+      for _, field in ipairs(custom_fields) do
+        self.column_width[field] = math.max(0, view[field].width)
+      end
+
       self.column_width.abbr = math.max(self.column_width.abbr, view.abbr.width)
       self.column_width.kind = math.max(self.column_width.kind, view.kind.width)
       self.column_width.menu = math.max(self.column_width.menu, view.menu.width)
@@ -142,11 +156,13 @@ custom_entries_view.open = function(self, offset, entries)
   vim.api.nvim_buf_set_lines(entries_buf, 0, -1, false, lines)
   vim.api.nvim_buf_set_option(entries_buf, 'modified', false)
 
-  local width = 0
-  width = width + 1
-  width = width + self.column_width.abbr + (self.column_width.kind > 0 and 1 or 0)
-  width = width + self.column_width.kind + (self.column_width.menu > 0 and 1 or 0)
-  width = width + self.column_width.menu + 1
+  local width = config.get().window.completion['left_side_padding'] + config.get().window.completion['right_side_padding']
+  width = width + self.column_width.abbr -- + (self.column_width.kind > 0 and 1 or 0)
+  width = width + self.column_width.kind -- + (self.column_width.menu > 0 and 1 or 0)
+  width = width + self.column_width.menu -- + 1
+  for _, field in ipairs(custom_fields) do
+    width = width + self.column_width[field] -- + (self.column_width[field] > 0 and 1 or 0)
+  end
 
   local height = vim.api.nvim_get_option('pumheight')
   height = height ~= 0 and height or #self.entries
@@ -254,12 +270,12 @@ custom_entries_view.draw = function(self)
     if e then
       local view = e:get_view(self.offset, entries_buf)
       local text = {}
-      table.insert(text, string.rep(' ', config.get().window.completion.side_padding))
+      table.insert(text, string.rep(' ', config.get().window.completion.left_side_padding))
       for _, field in ipairs(fields) do
         table.insert(text, view[field].text)
-        table.insert(text, string.rep(' ', 1 + self.column_width[field] - view[field].width))
+        table.insert(text, string.rep(' ', self.column_width[field] - view[field].width))
       end
-      table.insert(text, string.rep(' ', config.get().window.completion.side_padding))
+      table.insert(text, string.rep(' ', config.get().window.completion.right_side_padding))
       table.insert(texts, table.concat(text, ''))
     end
   end

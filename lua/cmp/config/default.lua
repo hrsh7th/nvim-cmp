@@ -94,7 +94,8 @@ return function()
         winhighlight = 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None',
         scrolloff = 0,
         col_offset = 0,
-        side_padding = 1,
+        left_side_padding = 1,
+        right_side_padding = 1,
       },
       documentation = {
         max_height = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
