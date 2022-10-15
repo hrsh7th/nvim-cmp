@@ -26,6 +26,7 @@ keymap.normalize = function(keys)
     end
   end
   vim.api.nvim_buf_del_keymap(normalize_buf, 't', keys)
+  vim.api.nvim_buf_delete(normalize_buf, {})
   return keys
 end
 
