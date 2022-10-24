@@ -169,11 +169,11 @@ NOTE: `<Cmd>lua require('cmp').complete()<CR>` can be used to call these functio
 *cmp.abort* ()
   Closes the completion menu and restore the current line to the state before the current completion was started.
 
-*cmp.select_next_item* (option: { behavior = cmp.SelectBehavior })
-  Select the next item.
+*cmp.select_next_item* (option: { behavior = cmp.SelectBehavior, count = 1 })
+  Select the next item. Set count with large number to select pagedown.
 
-*cmp.select_prev_item* (option: { behavior = cmp.SelectBehavior })*
-  Select the previous item.
+*cmp.select_prev_item* (option: { behavior = cmp.SelectBehavior, count = 1 })
+  Select the previous item. Set count with large number to select pageup.
 
 *cmp.scroll_docs* (delta: number)
   Scroll the documentation window if visible.
@@ -292,10 +292,10 @@ There are also builtin mapping helper functions you can use:
   *cmp.mapping.abort* ()
     Same as |cmp.abort|.
 
-  *cmp.mapping.select_next_item* (option: { behavior = cmp.SelectBehavior })
+  *cmp.mapping.select_next_item* (option: { behavior = cmp.SelectBehavior, count = 1 })
     Same as |cmp.select_next_item|.
 
-  *cmp.mapping.select_prev_item* (option: { behavior = cmp.SelectBehavior })
+  *cmp.mapping.select_prev_item* (option: { behavior = cmp.SelectBehavior, count = 1 })
     Same as |cmp.select_prev_item|.
 
   *cmp.mapping.scroll_docs* (delta: number)
