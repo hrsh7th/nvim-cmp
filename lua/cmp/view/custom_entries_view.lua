@@ -213,7 +213,7 @@ custom_entries_view.open = function(self, offset, entries)
     if self:is_direction_top_down() then
       self:_select(1, { behavior = types.cmp.SelectBehavior.Select })
     else
-      self:_select(#self.entries - 1, { behavior = types.cmp.SelectBehavior.Select })
+      self:_select(#self.entries, { behavior = types.cmp.SelectBehavior.Select })
     end
   else
     if self:is_direction_top_down() then
