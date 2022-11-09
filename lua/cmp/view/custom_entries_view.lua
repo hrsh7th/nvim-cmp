@@ -154,7 +154,8 @@ custom_entries_view.open = function(self, offset, entries)
 
   local pos = api.get_screen_cursor()
   local cursor = api.get_cursor()
-  local delta = cursor[2] + 1 - self.offset
+  local cursor_before_line = api.get_cursor_before_line()
+  local delta = vim.fn.strdisplaywidth(cursor_before_line:sub(-cursor[2])) + 1 - self.offset
   local row, col = pos[1], pos[2] - delta - 1
 
   local border_info = window.get_border_info({ style = completion })
