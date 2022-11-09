@@ -285,16 +285,33 @@ end
 custom_entries_view.select_next_item = function(self, option)
   if self:visible() then
     local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
-    if self:is_direction_top_down() then
-      cursor = cursor + 1
-    else
-      cursor = cursor - 1
-    end
+    local is_top_down = self:is_direction_top_down()
+    local last = #self.entries
+
     if not self.entries_win:option('cursorline') then
-      cursor = (self:is_direction_top_down() and 1) or #self.entries
-    elseif #self.entries < cursor then
-      cursor = (not self:is_direction_top_down() and #self.entries + 1) or 0
+      cursor = (is_top_down and 1) or last
+    else
+      if is_top_down then
+        if cursor == last then
+          cursor = 0
+        else
+          cursor = cursor + option.count
+          if last < cursor then
+            cursor = last
+          end
+        end
+      else
+        if cursor == 0 then
+          cursor = last
+        else
+          cursor = cursor - option.count
+          if cursor < 0 then
+            cursor = 0
+          end
+        end
+      end
     end
+
     self:_select(cursor, option)
   end
 end
@@ -302,16 +319,33 @@ end
 custom_entries_view.select_prev_item = function(self, option)
   if self:visible() then
     local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
-    if self:is_direction_top_down() then
-      cursor = cursor - 1
-    else
-      cursor = cursor + 1
-    end
+    local is_top_down = self:is_direction_top_down()
+    local last = #self.entries
+
     if not self.entries_win:option('cursorline') then
-      cursor = (self:is_direction_top_down() and #self.entries) or 1
-    elseif #self.entries < cursor then
-      cursor = (not self:is_direction_top_down() and 0) or #self.entries + 1
+      cursor = (is_top_down and last) or 1
+    else
+      if is_top_down then
+        if cursor == 1 then
+          cursor = 0
+        else
+          cursor = cursor - option.count
+          if cursor < 0 then
+            cursor = 1
+          end
+        end
+      else
+        if cursor == last then
+          cursor = 0
+        else
+          cursor = cursor + option.count
+          if last < cursor then
+            cursor = last
+          end
+        end
+      end
     end
+
     self:_select(cursor, option)
   end
 end
