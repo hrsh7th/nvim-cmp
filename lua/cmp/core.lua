@@ -405,11 +405,12 @@ core.confirm = function(self, e, option, callback)
           return
         end
         vim.cmd([[silent! undojoin]])
-        vim.lsp.util.apply_text_edits(text_edits, ctx.bufnr, 'utf-16')
+        vim.lsp.util.apply_text_edits(text_edits, ctx.bufnr, e.source:get_position_encoding())
       end)
     else
       vim.cmd([[silent! undojoin]])
-      vim.lsp.util.apply_text_edits(e:get_completion_item().additionalTextEdits, ctx.bufnr, 'utf-16')
+      vim.lsp.util.apply_text_edits(e:get_completion_item().additionalTextEdits, ctx.bufnr,
+        e.source:get_position_encoding())
     end
   end)
   feedkeys.call('', 'n', function()
@@ -432,15 +433,17 @@ core.confirm = function(self, e, option, callback)
     local new_text = completion_item.textEdit.newText
 
     if api.is_insert_mode() then
-      local is_snippet = completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet
       completion_item.textEdit.range.start.line = ctx.cursor.line
       completion_item.textEdit.range.start.character = ctx.cursor.character - diff_before
       completion_item.textEdit.range['end'].line = ctx.cursor.line
       completion_item.textEdit.range['end'].character = ctx.cursor.character + diff_after
+
+      local is_snippet = completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet
       if is_snippet then
         completion_item.textEdit.newText = ''
       end
       vim.lsp.util.apply_text_edits({ completion_item.textEdit }, ctx.bufnr, 'utf-16')
+
       local texts = vim.split(completion_item.textEdit.newText, '\n')
       local position = completion_item.textEdit.range.start
       position.line = position.line + (#texts - 1)
@@ -451,6 +454,7 @@ core.confirm = function(self, e, option, callback)
       end
       local pos = types.lsp.Position.to_vim(0, position)
       vim.api.nvim_win_set_cursor(0, { pos.row, pos.col - 1 })
+
       if is_snippet then
         config.get().snippet.expand({
           body = new_text,

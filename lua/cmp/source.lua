@@ -223,7 +223,10 @@ source.get_keyword_pattern = function(self)
     return c.keyword_pattern
   end
   if self.source.get_keyword_pattern then
-    return self.source:get_keyword_pattern(misc.copy(c))
+    local keyword_pattern = self.source:get_keyword_pattern(misc.copy(c))
+    if keyword_pattern then
+      return keyword_pattern
+    end
   end
   return config.get().completion.keyword_pattern
 end
@@ -250,10 +253,18 @@ source.get_entry_filter = function(self)
   end
 end
 
+---Get lsp.PositionEncodingKind
+source.get_position_encoding = function(self)
+  if self.source.get_position_encoding then
+    return self.source:get_position_encoding()
+  end
+  return types.lsp.PositionEncodingKind.UTF8
+end
+
 ---Invoke completion
 ---@param ctx cmp.Context
 ---@param callback function
----@return boolean Return true if not trigger completion.
+---@return boolean? Return true if not trigger completion.
 source.complete = function(self, ctx, callback)
   local offset = ctx:get_offset(self:get_keyword_pattern())
 
@@ -318,6 +329,7 @@ source.complete = function(self, ctx, callback)
       completion_context = completion_context,
     }),
     self.complete_dedup(vim.schedule_wrap(function(response)
+      ---@type lsp.CompletionResponse
       response = response or {}
 
       self.incomplete = response.isIncomplete or false
@@ -331,7 +343,7 @@ source.complete = function(self, ctx, callback)
         self.entries = {}
         for i, item in ipairs(response.items or response) do
           if (misc.safe(item) or {}).label then
-            local e = entry.new(ctx, self, item)
+            local e = entry.new(ctx, self, item, response.itemDefaults)
             self.entries[i] = e
             self.offset = math.min(self.offset, e:get_offset())
           end

@@ -29,8 +29,9 @@ local entry = {}
 ---@param ctx cmp.Context
 ---@param source cmp.Source
 ---@param completion_item lsp.CompletionItem
+---@param item_defaults? lsp.internal.CompletionItemDefaults
 ---@return cmp.Entry
-entry.new = function(ctx, source, completion_item)
+entry.new = function(ctx, source, completion_item, item_defaults)
   local self = setmetatable({}, { __index = entry })
   self.id = misc.id('entry.new')
   self.cache = cache.new()
@@ -43,7 +44,7 @@ entry.new = function(ctx, source, completion_item)
   self.source_offset = source.request_offset
   self.source_insert_range = source:get_default_insert_range()
   self.source_replace_range = source:get_default_replace_range()
-  self.completion_item = completion_item
+  self.completion_item = self:fill_defaults(completion_item, item_defaults)
   self.resolved_completion_item = nil
   self.resolved_callbacks = {}
   self.resolving = false
@@ -60,8 +61,8 @@ entry.get_offset = function(self)
       local range = misc.safe(self:get_completion_item().textEdit.insert) or misc.safe(self:get_completion_item().textEdit.range)
       if range then
         offset = self.context.cache:ensure({ 'entry', 'get_offset', range.start.character }, function()
-          local c = misc.to_vimindex(self.context.cursor_line, range.start.character)
-          for idx = c, self.source_offset do
+          local start = types.lsp.Position.to_utf8(self.context.cursor_line, range.start).character + 1
+          for idx = start, self.source_offset do
             if not char.is_white(string.byte(self.context.cursor_line, idx)) then
               return idx
             end
@@ -139,10 +140,10 @@ entry.get_overwrite = function(self)
       local range = misc.safe(self:get_completion_item().textEdit.insert) or misc.safe(self:get_completion_item().textEdit.range)
       if range then
         return self.context.cache:ensure({ 'entry', 'get_overwrite', range.start.character, range['end'].character }, function()
-          local s = misc.to_vimindex(self.context.cursor_line, range.start.character)
-          local e = misc.to_vimindex(self.context.cursor_line, range['end'].character)
-          local before = self.context.cursor.col - s
-          local after = e - self.context.cursor.col
+          local vim_start = types.lsp.Position.to_utf8(self.context.cursor_line, range.start).character + 1
+          local vim_end = types.lsp.Position.to_utf8(self.context.cursor_line, range['end']).character + 1
+          local before = self.context.cursor.col - vim_start
+          local after = vim_end - self.context.cursor.col
           return { before, after }
         end)
       end
@@ -490,6 +491,48 @@ entry.resolve = function(self, callback)
       end
     end)
   end
+end
+
+---@param completion_item lsp.CompletionItem
+---@param defaults? lsp.internal.CompletionItemDefaults
+---@return lsp.CompletionItem
+entry.fill_defaults = function(_, completion_item, defaults)
+  defaults = defaults or {}
+
+  if defaults.data then
+    completion_item.data = completion_item.data or defaults.data
+  end
+
+  if defaults.commitCharacters then
+    completion_item.commitCharacters = completion_item.commitCharacters or defaults.commitCharacters
+  end
+
+  if defaults.insertTextFormat then
+    completion_item.insertTextFormat = completion_item.insertTextFormat or defaults.insertTextFormat
+  end
+
+  if defaults.insertTextMode then
+    completion_item.insertTextMode = completion_item.insertTextMode or defaults.insertTextMode
+  end
+
+  if defaults.editRange then
+    if not completion_item.textEdit then
+      if defaults.editRange.insert then
+        completion_item.textEdit = {
+          insert = defaults.editRange.insert,
+          replace = defaults.editRange.replace,
+          newText = completion_item.textEditText or completion_item.label,
+        }
+      else
+        completion_item.textEdit = {
+          range = defaults.editRange,
+          newText = completion_item.textEditText or completion_item.label,
+        }
+      end
+    end
+  end
+
+  return completion_item
 end
 
 return entry
