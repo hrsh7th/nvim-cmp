@@ -125,7 +125,7 @@ core.on_keymap = function(self, keys, fallback)
     }, function()
       local ctx = self:get_context()
       local word = e:get_word()
-      if string.sub(ctx.cursor_before_line, -#word, ctx.cursor.col - 1) == word and is_printable then
+      if string.sub(ctx.cursor_before_line, - #word, ctx.cursor.col - 1) == word and is_printable then
         fallback()
       else
         self:reset()
@@ -221,7 +221,7 @@ end
 
 ---Complete common string for current completed entries.
 core.complete_common_string = function(self)
-  if not self.view:visible() or self.view:get_active_entry() then
+  if not self.view:visible() or self.view:get_selected_entry() then
     return false
   end
 
@@ -250,8 +250,10 @@ core.complete_common_string = function(self)
       common_string = str.get_common_string(common_string, vim_item.word)
     end
   end
-  if common_string and #common_string > (1 + cursor[2] - offset) then
-    feedkeys.call(keymap.backspace(string.sub(api.get_current_line(), offset, cursor[2])) .. common_string, 'n')
+  local cursor_before_line = api.get_cursor_before_line()
+  local pretext = cursor_before_line:sub(offset)
+  if common_string and #common_string > #pretext then
+    feedkeys.call(keymap.backspace(pretext) .. common_string, 'n')
     return true
   end
   return false
@@ -415,7 +417,8 @@ core.confirm = function(self, e, option, callback)
     local completion_item = misc.copy(e:get_completion_item())
     if not misc.safe(completion_item.textEdit) then
       completion_item.textEdit = {}
-      completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.word or completion_item.label
+      completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.word or
+          completion_item.label
     end
     local behavior = option.behavior or config.get().confirmation.default_behavior
     if behavior == types.cmp.ConfirmBehavior.Replace then
