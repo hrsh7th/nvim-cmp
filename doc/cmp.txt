@@ -735,6 +735,13 @@ Here is an example on how to create a custom source:
     return 'debug name'
   end
 
+  ---Return LSP's PositionEncodingKind.
+  ---@NOTE: default is `utf-8`
+  ---@return lsp.PositionEncodingKind
+  function source:get_position_encoding()
+    return 'utf-8'
+  end
+
   ---Return the keyword pattern for triggering completion (optional).
   ---If this is ommited, nvim-cmp will use a default keyword pattern. See |cmp-config.completion.keyword_pattern|.
   ---@return string
