@@ -140,15 +140,9 @@ cmp.select_next_item = cmp.sync(function(option)
     return true
   elseif vim.fn.pumvisible() == 1 then
     if option.behavior == cmp.SelectBehavior.Insert then
-      while option.count > 0 do
-        feedkeys.call(keymap.t('<C-n>'), 'in')
-        option.count = option.count - 1
-      end
+      feedkeys.call(keymap.t(string.rep('<C-n>', option.count)), 'in')
     else
-      while option.count > 0 do
-        feedkeys.call(keymap.t('<Down>'), 'in')
-        option.count = option.count - 1
-      end
+      feedkeys.call(keymap.t(string.rep('<Down>', option.count)), 'in')
     end
     return true
   end
@@ -168,15 +162,9 @@ cmp.select_prev_item = cmp.sync(function(option)
     return true
   elseif vim.fn.pumvisible() == 1 then
     if option.behavior == cmp.SelectBehavior.Insert then
-      while option.count > 0 do
-        feedkeys.call(keymap.t('<C-p>'), 'in')
-        option.count = option.count - 1
-      end
+      feedkeys.call(keymap.t(string.rep('<C-p>', option.count)), 'in')
     else
-      while option.count > 0 do
-        feedkeys.call(keymap.t('<Up>'), 'in')
-        option.count = option.count - 1
-      end
+      feedkeys.call(keymap.t(string.rep('<Up>', option.count)), 'in')
     end
     return true
   end
