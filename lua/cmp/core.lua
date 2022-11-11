@@ -125,7 +125,7 @@ core.on_keymap = function(self, keys, fallback)
     }, function()
       local ctx = self:get_context()
       local word = e:get_word()
-      if string.sub(ctx.cursor_before_line, - #word, ctx.cursor.col - 1) == word and is_printable then
+      if string.sub(ctx.cursor_before_line, -#word, ctx.cursor.col - 1) == word and is_printable then
         fallback()
       else
         self:reset()
@@ -417,8 +417,7 @@ core.confirm = function(self, e, option, callback)
     local completion_item = misc.copy(e:get_completion_item())
     if not misc.safe(completion_item.textEdit) then
       completion_item.textEdit = {}
-      completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.word or
-          completion_item.label
+      completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.word or completion_item.label
     end
     local behavior = option.behavior or config.get().confirmation.default_behavior
     if behavior == types.cmp.ConfirmBehavior.Replace then
