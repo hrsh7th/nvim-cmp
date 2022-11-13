@@ -58,11 +58,10 @@ entry.get_offset = function(self)
   return self.cache:ensure('get_offset', function()
     local offset = self.source_offset
     if misc.safe(self:get_completion_item().textEdit) then
-      local range = misc.safe(self:get_completion_item().textEdit.insert) or misc.safe(self:get_completion_item().textEdit.range)
+      local range = self:get_insert_range()
       if range then
-        offset = self.context.cache:ensure({ 'entry', 'get_offset', range.start.character }, function()
-          local start = types.lsp.Position.to_utf8(self.context.cursor_line, range.start).character + 1
-          for idx = start, self.source_offset do
+        offset = self.context.cache:ensure({ 'entry', 'get_offset', tostring(range.start.character) }, function()
+          for idx = range.start.character + 1, self.source_offset do
             if not char.is_white(string.byte(self.context.cursor_line, idx)) then
               return idx
             end
@@ -129,7 +128,7 @@ entry.get_word = function(self)
       word = str.trim(self:get_completion_item().label)
     end
     return str.oneline(word)
-  end)
+  end) --[[@as string]]
 end
 
 ---Get overwrite information
@@ -137,15 +136,17 @@ end
 entry.get_overwrite = function(self)
   return self.cache:ensure('get_overwrite', function()
     if misc.safe(self:get_completion_item().textEdit) then
-      local range = misc.safe(self:get_completion_item().textEdit.insert) or misc.safe(self:get_completion_item().textEdit.range)
+      local range = self:get_insert_range()
       if range then
-        return self.context.cache:ensure({ 'entry', 'get_overwrite', range.start.character, range['end'].character }, function()
-          local vim_start = types.lsp.Position.to_utf8(self.context.cursor_line, range.start).character + 1
-          local vim_end = types.lsp.Position.to_utf8(self.context.cursor_line, range['end']).character + 1
-          local before = self.context.cursor.col - vim_start
-          local after = vim_end - self.context.cursor.col
-          return { before, after }
-        end)
+        return self.context.cache:ensure({ 'entry', 'get_overwrite', tostring(range.start.character),
+          tostring(range['end'].character) },
+          function()
+            local vim_start = range.start.character + 1
+            local vim_end = range['end'].character + 1
+            local before = self.context.cursor.col - vim_start
+            local after = vim_end - self.context.cursor.col
+            return { before, after }
+          end)
       end
     end
     return { 0, 0 }
@@ -191,7 +192,8 @@ end
 ---Return the item is deprecated or not.
 ---@return boolean
 entry.is_deprecated = function(self)
-  return self:get_completion_item().deprecated or vim.tbl_contains(self:get_completion_item().tags or {}, types.lsp.CompletionItemTag.Deprecated)
+  return self:get_completion_item().deprecated or
+      vim.tbl_contains(self:get_completion_item().tags or {}, types.lsp.CompletionItemTag.Deprecated)
 end
 
 ---Return view information.
@@ -200,7 +202,7 @@ end
 ---@return { abbr: { text: string, bytes: integer, width: integer, hl_group: string }, kind: { text: string, bytes: integer, width: integer, hl_group: string }, menu: { text: string, bytes: integer, width: integer, hl_group: string } }
 entry.get_view = function(self, suggest_offset, entries_buf)
   local item = self:get_vim_item(suggest_offset)
-  return self.cache:ensure({ 'get_view', entries_buf }, function()
+  return self.cache:ensure({ 'get_view', tostring(entries_buf) }, function()
     local view = {}
     -- The result of vim.fn.strdisplaywidth depends on which buffer it was
     -- called in because it reads the values of the option 'tabstop' when
@@ -215,7 +217,9 @@ entry.get_view = function(self, suggest_offset, entries_buf)
       view.kind.text = item.kind or ''
       view.kind.bytes = #view.kind.text
       view.kind.width = vim.fn.strdisplaywidth(view.kind.text)
-      view.kind.hl_group = item.kind_hl_group or ('CmpItemKind' .. (types.lsp.CompletionItemKind[self:get_kind()] or ''))
+      view.kind.hl_group = item.kind_hl_group or
+          ('CmpItemKind' .. (types.lsp.CompletionItemKind[self:get_kind()] or '')
+          )
       view.menu = {}
       view.menu.text = item.menu or ''
       view.menu.bytes = #view.menu.text
@@ -231,7 +235,7 @@ end
 ---@param suggest_offset integer
 ---@return vim.CompletedItem
 entry.get_vim_item = function(self, suggest_offset)
-  return self.cache:ensure({ 'get_vim_item', suggest_offset }, function()
+  return self.cache:ensure({ 'get_vim_item', tostring(suggest_offset) }, function()
     local completion_item = self:get_completion_item()
     local word = self:get_word()
     local abbr = str.oneline(completion_item.label)
@@ -315,13 +319,17 @@ entry.get_insert_range = function(self)
     if misc.safe(self:get_completion_item().textEdit.insert) then
       insert_range = self:get_completion_item().textEdit.insert
     else
-      insert_range = self:get_completion_item().textEdit.range
+      insert_range = self:get_completion_item().textEdit.range --[[@as lsp.Range]]
     end
+    insert_range = {
+      start = self:convert_position_encoding(insert_range.start),
+      ['end'] = self:convert_position_encoding(insert_range['end']),
+    }
   else
     insert_range = {
       start = {
         line = self.context.cursor.row - 1,
-        character = math.min(misc.to_utfindex(self.context.cursor_line, self:get_offset()), self.source_insert_range.start.character),
+        character = self:get_offset() - 1,
       },
       ['end'] = self.source_insert_range['end'],
     }
@@ -338,15 +346,19 @@ entry.get_replace_range = function(self)
       if misc.safe(self:get_completion_item().textEdit.replace) then
         replace_range = self:get_completion_item().textEdit.replace
       else
-        replace_range = self:get_completion_item().textEdit.range
+        replace_range = self:get_completion_item().textEdit.range --[[@as lsp.Range]]
       end
+      replace_range = {
+        start = self:convert_position_encoding(replace_range.start),
+        ['end'] = self:convert_position_encoding(replace_range['end']),
+      }
     end
 
     if not replace_range or (self.context.cursor.character == replace_range['end'].character) then
       replace_range = {
         start = {
           line = self.source_replace_range.start.line,
-          character = math.min(misc.to_utfindex(self.context.cursor_line, self:get_offset()), self.source_replace_range.start.character),
+          character = self:get_offset() - 1
         },
         ['end'] = self.source_replace_range['end'],
       }
@@ -362,10 +374,10 @@ end
 entry.match = function(self, input, matching_config)
   return self.match_cache:ensure({
     input,
-    self.resolved_completion_item and 1 or 0,
-    matching_config.disallow_fuzzy_matching and 1 or 0,
-    matching_config.disallow_partial_matching and 1 or 0,
-    matching_config.disallow_prefix_unmatching and 1 or 0,
+    self.resolved_completion_item and '1' or '0',
+    matching_config.disallow_fuzzy_matching and '1' or '0',
+    matching_config.disallow_partial_matching and '1' or '0',
+    matching_config.disallow_prefix_unmatching and '1' or '0',
   }, function()
     local option = {
       disallow_fuzzy_matching = matching_config.disallow_fuzzy_matching,
@@ -525,7 +537,7 @@ entry.fill_defaults = function(_, completion_item, defaults)
         }
       else
         completion_item.textEdit = {
-          range = defaults.editRange,
+          range = defaults.editRange --[[@as lsp.Range]] ,
           newText = completion_item.textEditText or completion_item.label,
         }
       end
@@ -533,6 +545,20 @@ entry.fill_defaults = function(_, completion_item, defaults)
   end
 
   return completion_item
+end
+
+---Convert the oneline range encoding.
+entry.convert_position_encoding = function(self, position)
+  local from_encoding = self.source:get_position_encoding_kind()
+  return self.context.cache:ensure('entry.convert_position_encoding.' .. position.character .. '.' .. from_encoding,
+    function()
+      return types.lsp.Position.to_utf8(
+        self.context.cursor_line,
+        position,
+        from_encoding
+      )
+    end
+  )
 end
 
 return entry

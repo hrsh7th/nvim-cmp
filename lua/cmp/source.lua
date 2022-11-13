@@ -137,7 +137,7 @@ source.get_entries = function(self, ctx)
   return limited_entries
 end
 
----Get default insert range
+---Get default insert range (UTF8 byte index).
 ---@return lsp.Range
 source.get_default_insert_range = function(self)
   if not self.context then
@@ -148,17 +148,17 @@ source.get_default_insert_range = function(self)
     return {
       start = {
         line = self.context.cursor.row - 1,
-        character = misc.to_utfindex(self.context.cursor_line, self.offset),
+        character = self.offset - 1,
       },
       ['end'] = {
         line = self.context.cursor.row - 1,
-        character = misc.to_utfindex(self.context.cursor_line, self.context.cursor.col),
+        character = self.context.cursor.col - 1,
       },
     }
   end)
 end
 
----Get default replace range
+---Get default replace range (UTF8 byte index).
 ---@return lsp.Range
 source.get_default_replace_range = function(self)
   if not self.context then
@@ -170,11 +170,11 @@ source.get_default_replace_range = function(self)
     return {
       start = {
         line = self.context.cursor.row - 1,
-        character = misc.to_utfindex(self.context.cursor_line, self.offset),
+        character = self.offset,
       },
       ['end'] = {
         line = self.context.cursor.row - 1,
-        character = misc.to_utfindex(self.context.cursor_line, e and self.offset + e - 1 or self.context.cursor.col),
+        character = (e and self.offset + e - 2 or self.context.cursor.col - 1),
       },
     }
   end)
@@ -254,9 +254,10 @@ source.get_entry_filter = function(self)
 end
 
 ---Get lsp.PositionEncodingKind
-source.get_position_encoding = function(self)
-  if self.source.get_position_encoding then
-    return self.source:get_position_encoding()
+---@return lsp.PositionEncodingKind
+source.get_position_encoding_kind = function(self)
+  if self.source.get_position_encoding_kind then
+    return self.source:get_position_encoding_kind()
   end
   return types.lsp.PositionEncodingKind.UTF8
 end

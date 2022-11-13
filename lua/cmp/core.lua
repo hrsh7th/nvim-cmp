@@ -344,7 +344,10 @@ end, config.get().performance.throttle)
 ---@param callback function
 core.confirm = function(self, e, option, callback)
   if not (e and not e.confirmed) then
-    return callback()
+    if callback then
+      callback()
+    end
+    return
   end
   e.confirmed = true
 
@@ -405,12 +408,12 @@ core.confirm = function(self, e, option, callback)
           return
         end
         vim.cmd([[silent! undojoin]])
-        vim.lsp.util.apply_text_edits(text_edits, ctx.bufnr, e.source:get_position_encoding())
+        vim.lsp.util.apply_text_edits(text_edits, ctx.bufnr, e.source:get_position_encoding_kind())
       end)
     else
       vim.cmd([[silent! undojoin]])
       vim.lsp.util.apply_text_edits(e:get_completion_item().additionalTextEdits, ctx.bufnr,
-        e.source:get_position_encoding())
+        e.source:get_position_encoding_kind())
     end
   end)
   feedkeys.call('', 'n', function()
@@ -418,8 +421,7 @@ core.confirm = function(self, e, option, callback)
     local completion_item = misc.copy(e:get_completion_item())
     if not misc.safe(completion_item.textEdit) then
       completion_item.textEdit = {}
-      completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.word or
-          completion_item.label
+      completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.word or completion_item.label
     end
     local behavior = option.behavior or config.get().confirmation.default_behavior
     if behavior == types.cmp.ConfirmBehavior.Replace then
@@ -428,8 +430,8 @@ core.confirm = function(self, e, option, callback)
       completion_item.textEdit.range = e:get_insert_range()
     end
 
-    local diff_before = math.max(0, e.context.cursor.character - completion_item.textEdit.range.start.character)
-    local diff_after = math.max(0, completion_item.textEdit.range['end'].character - e.context.cursor.character)
+    local diff_before = math.max(0, e.context.cursor.col - (completion_item.textEdit.range.start.character + 1))
+    local diff_after = math.max(0, (completion_item.textEdit.range['end'].character + 1) - e.context.cursor.col)
     local new_text = completion_item.textEdit.newText
 
     if api.is_insert_mode() then
@@ -442,18 +444,11 @@ core.confirm = function(self, e, option, callback)
       if is_snippet then
         completion_item.textEdit.newText = ''
       end
-      vim.lsp.util.apply_text_edits({ completion_item.textEdit }, ctx.bufnr, 'utf-16')
-
-      local texts = vim.split(completion_item.textEdit.newText, '\n')
-      local position = completion_item.textEdit.range.start
-      position.line = position.line + (#texts - 1)
-      if #texts == 1 then
-        position.character = position.character + misc.to_utfindex(texts[1])
-      else
-        position.character = misc.to_utfindex(texts[#texts])
-      end
-      local pos = types.lsp.Position.to_vim(0, position)
-      vim.api.nvim_win_set_cursor(0, { pos.row, pos.col - 1 })
+      vim.lsp.util.apply_text_edits({ completion_item.textEdit }, ctx.bufnr, 'utf-8')
+      vim.api.nvim_win_set_cursor(0, {
+        completion_item.textEdit.range.start.line + 1,
+        completion_item.textEdit.range.start.character,
+      })
 
       if is_snippet then
         config.get().snippet.expand({
