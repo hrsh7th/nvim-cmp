@@ -4,11 +4,12 @@ local misc = require('cmp.utils.misc')
 ---@class lsp
 local lsp = {}
 
----@alias lsp.PositionEncodingKind 'utf-16' | 'utf-16' | 'utf-32'
-lsp.PositionEncodingKind = {}
-lsp.PositionEncodingKind.UTF8 = 'utf-8'
-lsp.PositionEncodingKind.UTF16 = 'utf-16'
-lsp.PositionEncodingKind.UTF32 = 'utf-32'
+---@enum lsp.PositionEncodingKind
+lsp.PositionEncodingKind = {
+  UTF8 = 'utf-8',
+  UTF16 = 'utf-16',
+  UTF32 = 'utf-32',
+}
 
 lsp.Position = {
   ---Convert lsp.Position to vim.Position

@@ -11,6 +11,9 @@ describe('cmp.core', function()
     local confirm = function(request, filter, completion_item)
       local c = core.new()
       local s = source.new('spec', {
+      get_position_encoding_kind = function()
+        return types.lsp.PositionEncodingKind.UTF16
+      end,
         complete = function(_, _, callback)
           callback({ completion_item })
         end,
@@ -23,7 +26,8 @@ describe('cmp.core', function()
         end)
       end)
       feedkeys.call(filter, 'n', function()
-        c:confirm(c.sources[s.id].entries[1], {})
+        c:confirm(c.sources[s.id].entries[1], {}, function()
+        end)
       end)
       local state = {}
       feedkeys.call('', 'x', function()
