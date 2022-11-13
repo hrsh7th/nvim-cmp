@@ -79,7 +79,7 @@ cmp.ItemField = {
 
 ---@class cmp.ConfigSchema
 ---@field private revision integer
----@field public enabled fun():boolean|boolean
+---@field public enabled boolean | fun(): boolean
 ---@field public performance cmp.PerformanceConfig
 ---@field public preselect cmp.PreselectMode
 ---@field public completion cmp.CompletionConfig
