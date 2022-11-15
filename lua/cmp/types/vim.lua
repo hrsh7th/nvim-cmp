@@ -11,7 +11,7 @@
 ---@field public kind_hl_group string|nil
 ---@field public menu_hl_group string|nil
 
----@class vim.Position
+---@class vim.Position 1-based index
 ---@field public row integer
 ---@field public col integer
 
