@@ -354,7 +354,7 @@ entry.get_replace_range = function(self)
       }
     end
 
-    if not replace_range or (self.context.cursor.character == replace_range['end'].character) then
+    if not replace_range or ((self.context.cursor.col - 1) == replace_range['end'].character) then
       replace_range = {
         start = {
           line = self.source_replace_range.start.line,

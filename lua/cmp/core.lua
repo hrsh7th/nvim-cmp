@@ -360,9 +360,10 @@ core.confirm = function(self, e, option, callback)
 
   feedkeys.call(keymap.indentkeys(), 'n')
   feedkeys.call('', 'n', function()
+    -- Emulate `<C-y>` behavior to save `.` register.
     local ctx = context.new()
     local keys = {}
-    table.insert(keys, keymap.backspace(ctx.cursor.character - misc.to_utfindex(ctx.cursor_line, e:get_offset())))
+    table.insert(keys, keymap.backspace(ctx.cursor_before_line:sub(e:get_offset())))
     table.insert(keys, e:get_word())
     table.insert(keys, keymap.undobreak())
     feedkeys.call(table.concat(keys, ''), 'in')
@@ -371,7 +372,7 @@ core.confirm = function(self, e, option, callback)
     local ctx = context.new()
     if api.is_cmdline_mode() then
       local keys = {}
-      table.insert(keys, keymap.backspace(ctx.cursor.character - misc.to_utfindex(ctx.cursor_line, e:get_offset())))
+      table.insert(keys, keymap.backspace(ctx.cursor_before_line:sub(e:get_offset())))
       table.insert(keys, string.sub(e.context.cursor_before_line, e:get_offset()))
       feedkeys.call(table.concat(keys, ''), 'in')
     else
@@ -412,8 +413,11 @@ core.confirm = function(self, e, option, callback)
       end)
     else
       vim.cmd([[silent! undojoin]])
-      vim.lsp.util.apply_text_edits(e:get_completion_item().additionalTextEdits, ctx.bufnr,
-        e.source:get_position_encoding_kind())
+      vim.lsp.util.apply_text_edits(
+        e:get_completion_item().additionalTextEdits,
+        ctx.bufnr,
+        e.source:get_position_encoding_kind()
+      )
     end
   end)
   feedkeys.call('', 'n', function()
@@ -436,20 +440,27 @@ core.confirm = function(self, e, option, callback)
 
     if api.is_insert_mode() then
       completion_item.textEdit.range.start.line = ctx.cursor.line
-      completion_item.textEdit.range.start.character = ctx.cursor.character - diff_before
+      completion_item.textEdit.range.start.character = (e.context.cursor.col - 1) - diff_before
       completion_item.textEdit.range['end'].line = ctx.cursor.line
-      completion_item.textEdit.range['end'].character = ctx.cursor.character + diff_after
+      completion_item.textEdit.range['end'].character = (ctx.cursor.col - 1) + diff_after
 
       local is_snippet = completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet
       if is_snippet then
         completion_item.textEdit.newText = ''
       end
       vim.lsp.util.apply_text_edits({ completion_item.textEdit }, ctx.bufnr, 'utf-8')
-      vim.api.nvim_win_set_cursor(0, {
-        completion_item.textEdit.range.start.line + 1,
-        completion_item.textEdit.range.start.character,
-      })
 
+      local texts = vim.split(completion_item.textEdit.newText, '\n')
+      vim.api.nvim_win_set_cursor(0, {
+        completion_item.textEdit.range.start.line + #texts,
+        (
+          #texts == 1 and (
+            completion_item.textEdit.range.start.character + #texts[1]
+          ) or (
+            #texts[#texts]
+          )
+        )
+      })
       if is_snippet then
         config.get().snippet.expand({
           body = new_text,
@@ -458,8 +469,8 @@ core.confirm = function(self, e, option, callback)
       end
     else
       local keys = {}
-      table.insert(keys, string.rep(keymap.t('<BS>'), diff_before))
-      table.insert(keys, string.rep(keymap.t('<Del>'), diff_after))
+      table.insert(keys, keymap.backspace(ctx.cursor_line:sub(completion_item.textEdit.range.start.character + 1, ctx.cursor.col - 1)))
+      table.insert(keys, keymap.delete(ctx.cursor_line:sub(ctx.cursor.col, completion_item.textEdit.range['end'].character)))
       table.insert(keys, new_text)
       feedkeys.call(table.concat(keys, ''), 'in')
     end

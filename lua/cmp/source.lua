@@ -46,7 +46,6 @@ source.new = function(name, s)
 end
 
 ---Reset current completion state
----@return boolean
 source.reset = function(self)
   self.cache:clear()
   self.revision = self.revision + 1
@@ -124,7 +123,7 @@ source.get_entries = function(self, ctx)
       end
     end
   end
-  self.cache:set({ 'get_entries', self.revision, ctx.cursor_before_line }, entries)
+  self.cache:set({ 'get_entries', tostring(self.revision), ctx.cursor_before_line }, entries)
 
   local max_item_count = self:get_source_config().max_item_count or 200
   local limited_entries = {}
@@ -144,7 +143,7 @@ source.get_default_insert_range = function(self)
     error('context is not initialized yet.')
   end
 
-  return self.cache:ensure({ 'get_default_insert_range', self.revision }, function()
+  return self.cache:ensure({ 'get_default_insert_range', tostring(self.revision) }, function()
     return {
       start = {
         line = self.context.cursor.row - 1,
@@ -165,7 +164,7 @@ source.get_default_replace_range = function(self)
     error('context is not initialized yet.')
   end
 
-  return self.cache:ensure({ 'get_default_replace_range', self.revision }, function()
+  return self.cache:ensure({ 'get_default_replace_range', tostring(self.revision) }, function()
     local _, e = pattern.offset('^' .. '\\%(' .. self:get_keyword_pattern() .. '\\)', string.sub(self.context.cursor_line, self.offset))
     return {
       start = {
@@ -242,11 +241,11 @@ source.get_keyword_length = function(self)
 end
 
 ---Get filter
---@return function
+--@return fun(entry: cmp.Entry, context: cmp.Context): boolean
 source.get_entry_filter = function(self)
   local c = self:get_source_config()
   if c.entry_filter then
-    return c.entry_filter
+    return c.entry_filter --[[@as fun(entry: cmp.Entry, context: cmp.Context): boolean]]
   end
   return function(_, _)
     return true
@@ -259,7 +258,7 @@ source.get_position_encoding_kind = function(self)
   if self.source.get_position_encoding_kind then
     return self.source:get_position_encoding_kind()
   end
-  return types.lsp.PositionEncodingKind.UTF8
+  return types.lsp.PositionEncodingKind.UTF16
 end
 
 ---Invoke completion
