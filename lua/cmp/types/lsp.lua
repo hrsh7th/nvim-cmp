@@ -118,7 +118,7 @@ lsp.Position = {
       end
     end
     return position
-  end
+  end,
 }
 
 lsp.Range = {
