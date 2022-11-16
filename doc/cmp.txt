@@ -630,6 +630,11 @@ window.completion.side_padding~
   `number`
   The ammount of padding to add on the completion window's sides
 
+                                     *cmp-config.window.completion.hide_scrollbar*
+window.completion.hide_scrollbar~
+  `boolean`
+  Wether the scrollbar should be hidden even if there are more items that fit
+
                                      *cmp-config.window.documentation.max_width*
 window.documentation.max_width~
   `number`
