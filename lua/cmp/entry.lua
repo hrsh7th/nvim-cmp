@@ -138,15 +138,13 @@ entry.get_overwrite = function(self)
     if misc.safe(self:get_completion_item().textEdit) then
       local range = self:get_insert_range()
       if range then
-        return self.context.cache:ensure({ 'entry', 'get_overwrite', tostring(range.start.character),
-          tostring(range['end'].character) },
-          function()
-            local vim_start = range.start.character + 1
-            local vim_end = range['end'].character + 1
-            local before = self.context.cursor.col - vim_start
-            local after = vim_end - self.context.cursor.col
-            return { before, after }
-          end)
+        return self.context.cache:ensure({ 'entry', 'get_overwrite', tostring(range.start.character), tostring(range['end'].character) }, function()
+          local vim_start = range.start.character + 1
+          local vim_end = range['end'].character + 1
+          local before = self.context.cursor.col - vim_start
+          local after = vim_end - self.context.cursor.col
+          return { before, after }
+        end)
       end
     end
     return { 0, 0 }
@@ -192,8 +190,7 @@ end
 ---Return the item is deprecated or not.
 ---@return boolean
 entry.is_deprecated = function(self)
-  return self:get_completion_item().deprecated or
-      vim.tbl_contains(self:get_completion_item().tags or {}, types.lsp.CompletionItemTag.Deprecated)
+  return self:get_completion_item().deprecated or vim.tbl_contains(self:get_completion_item().tags or {}, types.lsp.CompletionItemTag.Deprecated)
 end
 
 ---Return view information.
@@ -217,9 +214,7 @@ entry.get_view = function(self, suggest_offset, entries_buf)
       view.kind.text = item.kind or ''
       view.kind.bytes = #view.kind.text
       view.kind.width = vim.fn.strdisplaywidth(view.kind.text)
-      view.kind.hl_group = item.kind_hl_group or
-          ('CmpItemKind' .. (types.lsp.CompletionItemKind[self:get_kind()] or '')
-          )
+      view.kind.hl_group = item.kind_hl_group or ('CmpItemKind' .. (types.lsp.CompletionItemKind[self:get_kind()] or ''))
       view.menu = {}
       view.menu.text = item.menu or ''
       view.menu.bytes = #view.menu.text
@@ -358,7 +353,7 @@ entry.get_replace_range = function(self)
       replace_range = {
         start = {
           line = self.source_replace_range.start.line,
-          character = self:get_offset() - 1
+          character = self:get_offset() - 1,
         },
         ['end'] = self.source_replace_range['end'],
       }
@@ -537,7 +532,7 @@ entry.fill_defaults = function(_, completion_item, defaults)
         }
       else
         completion_item.textEdit = {
-          range = defaults.editRange --[[@as lsp.Range]] ,
+          range = defaults.editRange, --[[@as lsp.Range]]
           newText = completion_item.textEditText or completion_item.label,
         }
       end
@@ -550,15 +545,9 @@ end
 ---Convert the oneline range encoding.
 entry.convert_position_encoding = function(self, position)
   local from_encoding = self.source:get_position_encoding_kind()
-  return self.context.cache:ensure('entry.convert_position_encoding.' .. position.character .. '.' .. from_encoding,
-    function()
-      return types.lsp.Position.to_utf8(
-        self.context.cursor_line,
-        position,
-        from_encoding
-      )
-    end
-  )
+  return self.context.cache:ensure('entry.convert_position_encoding.' .. position.character .. '.' .. from_encoding, function()
+    return types.lsp.Position.to_utf8(self.context.cursor_line, position, from_encoding)
+  end)
 end
 
 return entry

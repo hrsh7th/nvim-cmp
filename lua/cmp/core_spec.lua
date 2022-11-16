@@ -18,9 +18,9 @@ describe('cmp.core', function()
 
       local c = core.new()
       local s = source.new('spec', {
-      get_position_encoding_kind = function()
-        return option.position_encoding_kind or types.lsp.PositionEncodingKind.UTF16
-      end,
+        get_position_encoding_kind = function()
+          return option.position_encoding_kind or types.lsp.PositionEncodingKind.UTF16
+        end,
         complete = function(_, _, callback)
           callback({ completion_item })
         end,
@@ -33,8 +33,7 @@ describe('cmp.core', function()
         end)
       end)
       feedkeys.call(filter, 'n', function()
-        c:confirm(c.sources[s.id].entries[1], {}, function()
-        end)
+        c:confirm(c.sources[s.id].entries[1], {}, function() end)
       end)
       local state = {}
       feedkeys.call('', 'x', function()
@@ -127,37 +126,37 @@ describe('cmp.core', function()
       for _, case in ipairs({
         {
           encoding = types.lsp.PositionEncodingKind.UTF8,
-          char_size = #char
+          char_size = #char,
         },
         {
           encoding = types.lsp.PositionEncodingKind.UTF16,
-          char_size = select(2, vim.str_utfindex(char))
+          char_size = select(2, vim.str_utfindex(char)),
         },
         {
           encoding = types.lsp.PositionEncodingKind.UTF32,
-          char_size = select(1, vim.str_utfindex(char))
+          char_size = select(1, vim.str_utfindex(char)),
         },
       }) do
-        it('textEdit & multibyte: ' .. case.encoding , function()
-        local state = confirm(keymap.t('i%s:%s%s:%s<Left><Left><Left>'):format(char, char, char, char), char, {
+        it('textEdit & multibyte: ' .. case.encoding, function()
+          local state = confirm(keymap.t('i%s:%s%s:%s<Left><Left><Left>'):format(char, char, char, char), char, {
             label = char .. char .. char,
             textEdit = {
               range = {
                 start = {
                   line = 0,
-                  character = case.char_size + #':'
+                  character = case.char_size + #':',
                 },
                 ['end'] = {
                   line = 0,
-                  character = case.char_size + #':' + case.char_size + case.char_size
+                  character = case.char_size + #':' + case.char_size + case.char_size,
                 },
               },
               newText = char .. char .. char .. char .. char,
-            }
+            },
           }, {
-            position_encoding_kind = case.encoding
+            position_encoding_kind = case.encoding,
           })
-          vim.pretty_print({ state = state, case = case  })
+          vim.pretty_print({ state = state, case = case })
           assert.are.same(state.buffer, { ('%s:%s%s%s%s%s:%s'):format(char, char, char, char, char, char, char) })
           assert.are.same(state.cursor, { 1, #('%s:%s%s%s%s%s'):format(char, char, char, char, char, char) })
         end)
