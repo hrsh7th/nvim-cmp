@@ -127,8 +127,8 @@ end
 ---Update
 window.update = function(self)
   local info = self:info()
-  local hide_scrollbar = config.get().window.completion.hide_scrollbar
-  if info.scrollable and not hide_scrollbar then
+  local scrollbar = config.get().window.completion.scrollbar
+  if info.scrollable and scrollbar then
     -- Draw the background of the scrollbar
 
     if not info.border_info.visible then
