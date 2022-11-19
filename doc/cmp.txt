@@ -540,6 +540,11 @@ sources[n].max_item_count~
   `number`
   The source-specific item count.
 
+                                          *cmp-config.sources[n].enabled*
+sources[n].enabled~
+  `boolean | fun(ctx: cmp.Source.context): boolean`
+  Whether this source should be enabled.
+
                                              *cmp-config.sources[n].group_index*
 sources[n].group_index~
   `number`

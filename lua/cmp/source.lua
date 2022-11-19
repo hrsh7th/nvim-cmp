@@ -80,11 +80,28 @@ source.get_fetching_time = function(self)
   return 100 * 1000 -- return pseudo time if source isn't fetching.
 end
 
+---Return whether this source is enabled
+---@return boolean
+source.enabled = function(self)
+  local _e = self:get_source_config().enabled
+  if type(_e) == 'boolean' then
+    return _e
+  elseif type(_e) == 'function' then
+    return _e(self.context)
+  else
+    return true
+  end
+end
+
 ---Return filtered entries
 ---@param ctx cmp.Context
 ---@return cmp.Entry[]
 source.get_entries = function(self, ctx)
   if self.offset == -1 then
+    return {}
+  end
+
+  if not self:enabled() then
     return {}
   end
 
