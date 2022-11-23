@@ -389,8 +389,9 @@ entry.match = function(self, input, matching_config)
       },
     }
 
-    local score, matches, _
-    score, matches = matcher.match(input, self:get_filter_text(), option)
+    local score, matches, filter_text, _
+    filter_text = self:get_filter_text()
+    score, matches = matcher.match(input, filter_text, option)
 
     -- Support the language server that doesn't respect VSCode's behaviors.
     if score == 0 then
@@ -402,14 +403,17 @@ entry.match = function(self, input, matching_config)
           accept = accept or string.match(prefix, '^[^%a]+$')
           accept = accept or string.find(self:get_completion_item().textEdit.newText, prefix, 1, true)
           if accept then
-            score, matches = matcher.match(input, prefix .. self:get_filter_text(), option)
+            filter_text = prefix .. self:get_filter_text()
+            score, matches = matcher.match(input, filter_text, option)
           end
         end
       end
     end
 
-    if self:get_filter_text() ~= self:get_completion_item().label then
-      _, matches = matcher.match(input, self:get_completion_item().label, { synonyms = { self:get_word() } })
+    local vim_item = self:get_vim_item(self:get_offset())
+    if filter_text ~= vim_item.abbr then
+      filter_text = vim_item.abbr or vim_item.word
+      _, matches = matcher.match(input, filter_text, option)
     end
 
     return { score = score, matches = matches }
