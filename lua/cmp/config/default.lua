@@ -5,7 +5,8 @@ local WIDE_HEIGHT = 40
 
 ---@return cmp.ConfigSchema
 return function()
-  return {
+  ---@type cmp.ConfigSchema
+  local config = {
     enabled = function()
       local disabled = false
       disabled = disabled or (vim.api.nvim_buf_get_option(0, 'buftype') == 'prompt')
@@ -17,7 +18,7 @@ return function()
     performance = {
       debounce = 60,
       throttle = 30,
-      fetching_timeout = 200,
+      fetching_timeout = 500,
     },
 
     preselect = types.cmp.PreselectMode.Item,
@@ -25,7 +26,7 @@ return function()
     mapping = {},
 
     snippet = {
-      expand = function()
+      expand = function(_)
         error('snippet engine is not configured.')
       end,
     },
@@ -105,4 +106,5 @@ return function()
       },
     },
   }
+  return config
 end

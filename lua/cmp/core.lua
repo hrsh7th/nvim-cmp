@@ -369,6 +369,7 @@ core.confirm = function(self, e, option, callback)
     feedkeys.call(table.concat(keys, ''), 'in')
   end)
   feedkeys.call('', 'n', function()
+    -- Restore the line at the time of request.
     local ctx = context.new()
     if api.is_cmdline_mode() then
       local keys = {}
@@ -377,13 +378,12 @@ core.confirm = function(self, e, option, callback)
       feedkeys.call(table.concat(keys, ''), 'in')
     else
       vim.cmd([[silent! undojoin]])
-      vim.api.nvim_buf_set_text(0, ctx.cursor.row - 1, e:get_offset() - 1, ctx.cursor.row - 1, ctx.cursor.col - 1, {
-        string.sub(e.context.cursor_before_line, e:get_offset()),
-      })
+      vim.api.nvim_set_current_line(e.context.cursor_line)
       vim.api.nvim_win_set_cursor(0, { e.context.cursor.row, e.context.cursor.col - 1 })
     end
   end)
   feedkeys.call('', 'n', function()
+    -- Apply additionalTextEdits.
     local ctx = context.new()
     if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) == 0 then
       e:resolve(function()
