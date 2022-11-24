@@ -436,7 +436,7 @@ core.confirm = function(self, e, option, callback)
 
     if api.is_insert_mode() then
       completion_item.textEdit.range.start.line = ctx.cursor.line
-      completion_item.textEdit.range.start.character = (e.context.cursor.col - 1) - diff_before
+      completion_item.textEdit.range.start.character = (ctx.cursor.col - 1) - diff_before
       completion_item.textEdit.range['end'].line = ctx.cursor.line
       completion_item.textEdit.range['end'].character = (ctx.cursor.col - 1) + diff_after
 
