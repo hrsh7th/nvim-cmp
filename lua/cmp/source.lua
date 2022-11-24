@@ -289,7 +289,7 @@ source.complete = function(self, ctx, callback)
       triggerCharacter = before_char,
     }
   elseif ctx:get_reason() ~= types.cmp.ContextReason.TriggerOnly then
-    if self:get_keyword_length() <= (ctx.cursor.col - offset) then
+    if offset < ctx.cursor.col and self:get_keyword_length() <= (ctx.cursor.col - offset) then
       if self.incomplete and self.context.cursor.col ~= ctx.cursor.col and self.status ~= source.SourceStatus.FETCHING then
         completion_context = {
           triggerKind = types.lsp.CompletionTriggerKind.TriggerForIncompleteCompletions,

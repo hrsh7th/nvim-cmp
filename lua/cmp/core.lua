@@ -433,13 +433,26 @@ core.confirm = function(self, e, option, callback)
     local diff_before = math.max(0, e.context.cursor.col - (completion_item.textEdit.range.start.character + 1))
     local diff_after = math.max(0, (completion_item.textEdit.range['end'].character + 1) - e.context.cursor.col)
     local new_text = completion_item.textEdit.newText
-
+    completion_item.textEdit.range.start.line = ctx.cursor.line
+    completion_item.textEdit.range.start.character = (ctx.cursor.col - 1) - diff_before
+    completion_item.textEdit.range['end'].line = ctx.cursor.line
+    completion_item.textEdit.range['end'].character = (ctx.cursor.col - 1) + diff_after
     if api.is_insert_mode() then
-      completion_item.textEdit.range.start.line = ctx.cursor.line
-      completion_item.textEdit.range.start.character = (ctx.cursor.col - 1) - diff_before
-      completion_item.textEdit.range['end'].line = ctx.cursor.line
-      completion_item.textEdit.range['end'].character = (ctx.cursor.col - 1) + diff_after
-
+      if false then
+        --To use complex expansion debug.
+        vim.pretty_print({
+          diff_before = diff_before,
+          diff_after = diff_after,
+          new_text = new_text,
+          text_edit_new_text = completion_item.textEdit.newText,
+          range_start = completion_item.textEdit.range.start.character,
+          range_end = completion_item.textEdit.range['end'].character,
+          original_range_start = e:get_completion_item().textEdit.range.start.character,
+          original_range_end = e:get_completion_item().textEdit.range['end'].character,
+          cursor_line = ctx.cursor_line,
+          cursor_col0 = ctx.cursor.col - 1,
+        })
+      end
       local is_snippet = completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet
       if is_snippet then
         completion_item.textEdit.newText = ''
