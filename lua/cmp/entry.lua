@@ -495,6 +495,10 @@ entry.resolve = function(self, callback)
   if not self.resolving then
     self.resolving = true
     self.source:resolve(self.completion_item, function(completion_item)
+      self.resolving = false
+      if not completion_item then
+        return
+      end
       self.resolved_completion_item = misc.safe(completion_item) or self.completion_item
       self.cache:clear()
       for _, c in ipairs(self.resolved_callbacks) do
