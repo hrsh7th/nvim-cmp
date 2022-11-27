@@ -125,7 +125,7 @@ core.on_keymap = function(self, keys, fallback)
     }, function()
       local ctx = self:get_context()
       local word = e:get_word()
-      if string.sub(ctx.cursor_before_line, -#word, ctx.cursor.col - 1) == word and is_printable then
+      if string.sub(ctx.cursor_before_line, - #word, ctx.cursor.col - 1) == word and is_printable then
         fallback()
       else
         self:reset()
@@ -378,7 +378,11 @@ core.confirm = function(self, e, option, callback)
       feedkeys.call(table.concat(keys, ''), 'in')
     else
       vim.cmd([[silent! undojoin]])
-      vim.api.nvim_set_current_line(e.context.cursor_line)
+      -- This logic must be used nvim_buf_set_text.
+      -- If not used, the snippet engine's placeholder wil be broken.
+      vim.api.nvim_buf_set_text(0, e.context.cursor.row - 1, e:get_offset() - 1, ctx.cursor.row - 1, ctx.cursor.col - 1, {
+        e.context.cursor_before_line:sub(e:get_offset())
+      })
       vim.api.nvim_win_set_cursor(0, { e.context.cursor.row, e.context.cursor.col - 1 })
     end
   end)
