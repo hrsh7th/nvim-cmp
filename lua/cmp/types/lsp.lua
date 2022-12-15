@@ -4,10 +4,18 @@ local misc = require('cmp.utils.misc')
 ---@class lsp
 local lsp = {}
 
+---@enum lsp.PositionEncodingKind
+lsp.PositionEncodingKind = {
+  UTF8 = 'utf-8',
+  UTF16 = 'utf-16',
+  UTF32 = 'utf-32',
+}
+
 lsp.Position = {
   ---Convert lsp.Position to vim.Position
   ---@param buf integer
   ---@param position lsp.Position
+  --
   ---@return vim.Position
   to_vim = function(buf, position)
     if not vim.api.nvim_buf_is_loaded(buf) then
@@ -45,11 +53,77 @@ lsp.Position = {
       character = position.col - 1,
     }
   end,
+
+  ---Convert position to utf8 from specified encoding.
+  ---@param text string
+  ---@param position lsp.Position
+  ---@param from_encoding? lsp.PositionEncodingKind
+  ---@return lsp.Position
+  to_utf8 = function(text, position, from_encoding)
+    from_encoding = from_encoding or lsp.PositionEncodingKind.UTF16
+    if from_encoding == lsp.PositionEncodingKind.UTF8 then
+      return position
+    end
+
+    local ok, byteindex = pcall(function()
+      return vim.str_byteindex(text, position.character, from_encoding == lsp.PositionEncodingKind.UTF16)
+    end)
+    if not ok then
+      return position
+    end
+    return { line = position.line, character = byteindex }
+  end,
+
+  ---Convert position to utf16 from specified encoding.
+  ---@param text string
+  ---@param position lsp.Position
+  ---@param from_encoding? lsp.PositionEncodingKind
+  ---@return lsp.Position
+  to_utf16 = function(text, position, from_encoding)
+    from_encoding = from_encoding or lsp.PositionEncodingKind.UTF16
+    if from_encoding == lsp.PositionEncodingKind.UTF16 then
+      return position
+    end
+
+    local utf8 = lsp.Position.to_utf8(text, position, from_encoding)
+    for index = utf8.character, 0, -1 do
+      local ok, utf16index = pcall(function()
+        return select(2, vim.str_utfindex(text, index))
+      end)
+      if ok then
+        return { line = utf8.line, character = utf16index }
+      end
+    end
+    return position
+  end,
+
+  ---Convert position to utf32 from specified encoding.
+  ---@param text string
+  ---@param position lsp.Position
+  ---@param from_encoding? lsp.PositionEncodingKind
+  ---@return lsp.Position
+  to_utf32 = function(text, position, from_encoding)
+    from_encoding = from_encoding or lsp.PositionEncodingKind.UTF16
+    if from_encoding == lsp.PositionEncodingKind.UTF32 then
+      return position
+    end
+
+    local utf8 = lsp.Position.to_utf8(text, position, from_encoding)
+    for index = utf8.character, 0, -1 do
+      local ok, utf32index = pcall(function()
+        return select(1, vim.str_utfindex(text, index))
+      end)
+      if ok then
+        return { line = utf8.line, character = utf32index }
+      end
+    end
+    return position
+  end,
 }
 
 lsp.Range = {
   ---Convert lsp.Range to vim.Range
-  ---@param buf integer|string
+  ---@param buf integer
   ---@param range lsp.Range
   ---@return vim.Range
   to_vim = function(buf, range)
@@ -60,7 +134,7 @@ lsp.Range = {
   end,
 
   ---Convert vim.Range to lsp.Range
-  ---@param buf integer|string
+  ---@param buf integer
   ---@param range vim.Range
   ---@return lsp.Range
   to_lsp = function(buf, range)
@@ -130,15 +204,23 @@ lsp.CompletionItemKind = {
 }
 lsp.CompletionItemKind = vim.tbl_add_reverse_lookup(lsp.CompletionItemKind)
 
+---@class lsp.internal.CompletionItemDefaults
+---@field public commitCharacters? string[]
+---@field public editRange? lsp.Range | { insert: lsp.Range, replace: lsp.Range }
+---@field public insertTextFormat? lsp.InsertTextFormat
+---@field public insertTextMode? lsp.InsertTextMode
+---@field public data? any
+
 ---@class lsp.CompletionContext
 ---@field public triggerKind lsp.CompletionTriggerKind
 ---@field public triggerCharacter string|nil
 
 ---@class lsp.CompletionList
 ---@field public isIncomplete boolean
+---@field public itemDefaults? lsp.internal.CompletionItemDefaults
 ---@field public items lsp.CompletionItem[]
 
----@alias lsp.CompletionResponse lsp.CompletionList|lsp.CompletionItem[]|nil
+---@alias lsp.CompletionResponse lsp.CompletionList|lsp.CompletionItem[]
 
 ---@class lsp.MarkupContent
 ---@field public kind lsp.MarkupKind
@@ -168,37 +250,38 @@ lsp.CompletionItemKind = vim.tbl_add_reverse_lookup(lsp.CompletionItemKind)
 ---@field public newText string
 
 ---@class lsp.internal.ReplaceTextEdit
----@field public insert lsp.Range
+---@field public replace lsp.Range
 ---@field public newText string
 
 ---@class lsp.CompletionItemLabelDetails
----@field public detail string|nil
----@field public description string|nil
+---@field public detail? string
+---@field public description? string
 
----@class lsp.Cmp
+---@class lsp.internal.CmpCompletionExtension
 ---@field public kind_text string
 ---@field public kind_hl_group string
 
 ---@class lsp.CompletionItem
 ---@field public label string
----@field public labelDetails lsp.CompletionItemLabelDetails|nil
----@field public kind lsp.CompletionItemKind|nil
----@field public tags lsp.CompletionItemTag[]|nil
----@field public detail string|nil
----@field public documentation lsp.MarkupContent|string|nil
----@field public deprecated boolean|nil
----@field public preselect boolean|nil
----@field public sortText string|nil
----@field public filterText string|nil
----@field public insertText string|nil
----@field public insertTextFormat lsp.InsertTextFormat
----@field public insertTextMode lsp.InsertTextMode
----@field public textEdit lsp.TextEdit|lsp.InsertReplaceTextEdit|nil
----@field public additionalTextEdits lsp.TextEdit[]
----@field public commitCharacters string[]|nil
----@field public command lsp.Command|nil
----@field public data any|nil
----@field public cmp lsp.Cmp|nil
+---@field public labelDetails? lsp.CompletionItemLabelDetails
+---@field public kind? lsp.CompletionItemKind
+---@field public tags? lsp.CompletionItemTag[]
+---@field public detail? string
+---@field public documentation? lsp.MarkupContent|string
+---@field public deprecated? boolean
+---@field public preselect? boolean
+---@field public sortText? string
+---@field public filterText? string
+---@field public insertText? string
+---@field public insertTextFormat? lsp.InsertTextFormat
+---@field public insertTextMode? lsp.InsertTextMode
+---@field public textEdit? lsp.TextEdit|lsp.InsertReplaceTextEdit
+---@field public textEditText? string
+---@field public additionalTextEdits? lsp.TextEdit[]
+---@field public commitCharacters? string[]
+---@field public command? lsp.Command
+---@field public data? any
+---@field public cmp? lsp.internal.CmpCompletionExtension
 ---
 ---TODO: Should send the issue for upstream?
 ---@field public word string|nil

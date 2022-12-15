@@ -1,6 +1,7 @@
 local misc = require('cmp.utils.misc')
 local buffer = require('cmp.utils.buffer')
 local api = require('cmp.utils.api')
+local config = require('cmp.config')
 
 ---@class cmp.WindowStyle
 ---@field public relative string
@@ -213,6 +214,7 @@ end
 ---Return win info.
 window.info = function(self)
   local border_info = self:get_border_info()
+  local scrollbar = config.get().window.completion.scrollbar
   local info = {
     row = self.style.row,
     col = self.style.col,
@@ -225,7 +227,7 @@ window.info = function(self)
     scrollbar_offset = 0,
   }
 
-  if self:get_content_height() > info.inner_height then
+  if self:get_content_height() > info.inner_height and scrollbar then
     info.scrollable = true
     if not border_info.visible then
       info.scrollbar_offset = 1

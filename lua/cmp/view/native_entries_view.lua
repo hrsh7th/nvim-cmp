@@ -122,9 +122,9 @@ native_entries_view.select_next_item = function(self, option)
   end
   if self:visible() then
     if (option.behavior or types.cmp.SelectBehavior.Insert) == types.cmp.SelectBehavior.Insert then
-      feedkeys.call(keymap.t(string.format('%s<C-n>', option.count), 'n', callback))
+      feedkeys.call(keymap.t(string.rep('<C-n>', option.count)), 'n', callback)
     else
-      feedkeys.call(keymap.t(string.format('%s<Down>', option.count)), 'n', callback)
+      feedkeys.call(keymap.t(string.rep('<Down>', option.count)), 'n', callback)
     end
   end
 end
@@ -135,9 +135,9 @@ native_entries_view.select_prev_item = function(self, option)
   end
   if self:visible() then
     if (option.behavior or types.cmp.SelectBehavior.Insert) == types.cmp.SelectBehavior.Insert then
-      feedkeys.call(keymap.t(string.format('%s<C-p>', option.count), 'n', callback))
+      feedkeys.call(keymap.t(string.rep('<C-p>', option.count)), 'n', callback)
     else
-      feedkeys.call(keymap.t(string.format('%s<Up>', option.count)), 'n', callback)
+      feedkeys.call(keymap.t(string.rep('<Up>', option.count)), 'n', callback)
     end
   end
 end

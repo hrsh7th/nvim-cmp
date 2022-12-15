@@ -15,6 +15,7 @@ docs_view.new = function()
   self.window:option('foldenable', false)
   self.window:option('linebreak', true)
   self.window:option('scrolloff', 0)
+  self.window:option('showbreak', 'NONE')
   self.window:option('wrap', true)
   self.window:buffer_option('filetype', 'cmp_docs')
   return self

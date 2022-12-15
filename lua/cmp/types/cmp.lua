@@ -79,7 +79,7 @@ cmp.ItemField = {
 
 ---@class cmp.ConfigSchema
 ---@field private revision integer
----@field public enabled fun():boolean|boolean
+---@field public enabled boolean | fun(): boolean
 ---@field public performance cmp.PerformanceConfig
 ---@field public preselect cmp.PreselectMode
 ---@field public completion cmp.CompletionConfig
@@ -117,6 +117,7 @@ cmp.ItemField = {
 ---@field public max_width integer|nil
 ---@field public max_height integer|nil
 ---@field public scrolloff integer|nil
+---@field public scrollbar boolean|true
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior

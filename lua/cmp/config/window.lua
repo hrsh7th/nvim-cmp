@@ -9,6 +9,7 @@ window.bordered = function(opts)
     scrolloff = opts.scrolloff or 0,
     col_offset = opts.col_offset or 0,
     side_padding = opts.side_padding or 1,
+    scrollbar = opts.scrollbar == nil and true or opts.scrollbar,
   }
 end
 
