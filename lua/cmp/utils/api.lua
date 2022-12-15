@@ -55,7 +55,7 @@ end
 api.get_screen_cursor = function()
   if api.is_cmdline_mode() then
     local cursor = api.get_cursor()
-    return { cursor[1], cursor[2] + 1 }
+    return { cursor[1], vim.fn.strdisplaywidth(string.sub(vim.fn.getcmdline(), 1, cursor[2] + 1)) }
   end
   local cursor = api.get_cursor()
   local pos = vim.fn.screenpos(0, cursor[1], cursor[2] + 1)
