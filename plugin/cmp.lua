@@ -57,4 +57,3 @@ vim.api.nvim_create_user_command('CmpStatus', function()
 end, { desc = 'Check status of cmp sources' })
 
 vim.cmd([[doautocmd <nomodeline> User CmpReady]])
-
