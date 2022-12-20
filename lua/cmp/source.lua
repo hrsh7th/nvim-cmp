@@ -105,6 +105,7 @@ source.get_entries = function(self, ctx)
   local inputs = {}
   local entries = {}
   local matching_config = self:get_matching_config()
+  local hide_snippets = config.get().snippet.hide_snippets
   for _, e in ipairs(target_entries) do
     local o = e:get_offset()
     if not inputs[o] then
@@ -118,7 +119,12 @@ source.get_entries = function(self, ctx)
       e.matches = match.matches
       e.exact = e:get_filter_text() == inputs[o] or e:get_word() == inputs[o]
 
-      if entry_filter(e, ctx) then
+      local show_entry = true
+      if hide_snippets then
+        show_entry = e:get_kind() ~= types.lsp.CompletionItemKind.Snippet
+      end
+
+      if show_entry and entry_filter(e, ctx) then
         table.insert(entries, e)
       end
     end
