@@ -316,10 +316,7 @@ entry.get_insert_range = function(self)
     else
       insert_range = self:get_completion_item().textEdit.range --[[@as lsp.Range]]
     end
-    insert_range = {
-      start = self:convert_position_encoding(insert_range.start),
-      ['end'] = self:convert_position_encoding(insert_range['end']),
-    }
+    insert_range = self:convert_range_encoding(insert_range)
   else
     insert_range = {
       start = {
@@ -343,10 +340,7 @@ entry.get_replace_range = function(self)
       else
         replace_range = self:get_completion_item().textEdit.range --[[@as lsp.Range]]
       end
-      replace_range = {
-        start = self:convert_position_encoding(replace_range.start),
-        ['end'] = self:convert_position_encoding(replace_range['end']),
-      }
+      replace_range = self:convert_range_encoding(replace_range)
     end
 
     if not replace_range or ((self.context.cursor.col - 1) == replace_range['end'].character) then
@@ -551,10 +545,13 @@ entry.fill_defaults = function(_, completion_item, defaults)
 end
 
 ---Convert the oneline range encoding.
-entry.convert_position_encoding = function(self, position)
+entry.convert_range_encoding = function(self, range)
   local from_encoding = self.source:get_position_encoding_kind()
-  return self.context.cache:ensure('entry.convert_position_encoding.' .. position.character .. '.' .. from_encoding, function()
-    return types.lsp.Position.to_utf8(self.context.cursor_line, position, from_encoding)
+  return self.context.cache:ensure('entry.convert_range_encoding.' .. range.start.character .. '.' .. range['end'].character .. '.' .. from_encoding, function()
+    return {
+      start = types.lsp.Position.to_utf8(self.context.cursor_line, range.start, from_encoding),
+      ['end'] = types.lsp.Position.to_utf8(self.context.cursor_line, range['end'], from_encoding),
+    }
   end)
 end
 
