@@ -7,8 +7,8 @@ local config = require('cmp.config')
 ---@field public relative string
 ---@field public row integer
 ---@field public col integer
----@field public width integer
----@field public height integer
+---@field public width integer|float
+---@field public height integer|float
 ---@field public border string|string[]|nil
 ---@field public zindex integer|nil
 
@@ -86,6 +86,11 @@ window.set_style = function(self, style)
   end
 
   self.style.zindex = self.style.zindex or 1
+
+  --- GUI clients are allowed to return fractional bounds, but we need integer
+  --- bounds to open the window
+  self.style.width = math.ceil(self.style.width)
+  self.style.height = math.ceil(self.style.height)
 end
 
 ---Return buffer id.
