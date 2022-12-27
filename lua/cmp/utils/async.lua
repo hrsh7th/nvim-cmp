@@ -1,3 +1,5 @@
+local feedkeys = require('cmp.utils.feedkeys')
+
 local async = {}
 
 ---@class cmp.AsyncThrottle
@@ -135,6 +137,13 @@ async.debounce_next_tick = function(callback)
       running = false
       callback()
     end)
+  end
+end
+
+---Wait and callback for consuming next keymap.
+async.debounce_next_tick_by_keymap = function(callback)
+  return function()
+    feedkeys.call('', '', callback)
   end
 end
 
