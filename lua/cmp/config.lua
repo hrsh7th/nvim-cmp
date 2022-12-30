@@ -4,6 +4,16 @@ local keymap = require('cmp.utils.keymap')
 local misc = require('cmp.utils.misc')
 local api = require('cmp.utils.api')
 
+---@param lines (string | { [1]: string, [2]: string })[]
+local function echo(lines)
+  for i, line in ipairs(lines) do
+    if type(line) == 'string' then
+      lines[i] = { line, 'Normal' }
+    end
+  end
+  vim.api.nvim_echo(lines, true, {})
+end
+
 ---@class cmp.Config
 ---@field public g cmp.ConfigSchema
 local config = {}
@@ -83,8 +93,8 @@ config.get = function()
     return config.cache:ensure({
       'get',
       'onetime',
-      global_config.revision or 0,
-      onetime_config.revision or 0,
+      tostring(global_config.revision or 0),
+      tostring(onetime_config.revision or 0),
     }, function()
       local c = {}
       c = misc.merge(c, config.normalize(onetime_config))
@@ -97,9 +107,9 @@ config.get = function()
     return config.cache:ensure({
       'get',
       'cmdline',
-      global_config.revision or 0,
+      tostring(global_config.revision or 0),
       cmdtype,
-      cmdline_config.revision or 0,
+      tostring(cmdline_config.revision or 0),
     }, function()
       local c = {}
       c = misc.merge(c, config.normalize(cmdline_config))
@@ -114,11 +124,11 @@ config.get = function()
     return config.cache:ensure({
       'get',
       'default',
-      global_config.revision or 0,
+      tostring(global_config.revision or 0),
       filetype,
-      filetype_config.revision or 0,
+      tostring(filetype_config.revision or 0),
       bufnr,
-      buffer_config.revision or 0,
+      tostring(buffer_config.revision or 0),
     }, function()
       local c = {}
       c = misc.merge(config.normalize(c), config.normalize(buffer_config))
@@ -148,7 +158,7 @@ config.get_source_config = function(name)
       return s
     end
   end
-  return nil
+  error('Specified source is not found: ' .. name)
 end
 
 ---Return the current menu is native or not.
@@ -179,14 +189,10 @@ config.normalize = function(c)
 
   -- Notice experimental.native_menu.
   if c.experimental and c.experimental.native_menu then
-    vim.api.nvim_echo({
-      { '[nvim-cmp] ', 'Normal' },
-      { 'experimental.native_menu', 'WarningMsg' },
-      { ' is deprecated.\n', 'Normal' },
-      { '[nvim-cmp] Please use ', 'Normal' },
-      { 'view.entries = "native"', 'WarningMsg' },
-      { ' instead.', 'Normal' },
-    }, true, {})
+    echo({
+      '[nvim-cmp] ', { 'experimental.native_menu', 'WarningMsg' }, ' is deprecated.\n',
+      '[nvim-cmp] Please use ', { 'view.entries = "native"', 'WarningMsg' }, ' instead.',
+    })
 
     c.view = c.view or {}
     c.view.entries = c.view.entries or 'native'
@@ -194,14 +200,10 @@ config.normalize = function(c)
 
   -- Notice documentation.
   if c.documentation ~= nil then
-    vim.api.nvim_echo({
-      { '[nvim-cmp] ', 'Normal' },
-      { 'documentation', 'WarningMsg' },
-      { ' is deprecated.\n', 'Normal' },
-      { '[nvim-cmp] Please use ', 'Normal' },
-      { 'window.documentation = cmp.config.window.bordered()', 'WarningMsg' },
-      { ' instead.', 'Normal' },
-    }, true, {})
+    echo({
+      '[nvim-cmp] ', { 'documentation', 'WarningMsg' }, ' is deprecated.\n',
+      '[nvim-cmp] Please use ', { 'window.documentation = cmp.config.window.bordered()', 'WarningMsg' }, ' instead.'
+    })
     c.window = c.window or {}
     c.window.documentation = c.documentation
   end
@@ -209,19 +211,45 @@ config.normalize = function(c)
   -- Notice sources.[n].opts
   if c.sources then
     for _, s in ipairs(c.sources) do
+
+      -- rename: opts -> option
       if s.opts and not s.option then
         s.option = s.opts
         s.opts = nil
-        vim.api.nvim_echo({
-          { '[nvim-cmp] ', 'Normal' },
-          { 'sources[number].opts', 'WarningMsg' },
-          { ' is deprecated.\n', 'Normal' },
-          { '[nvim-cmp] Please use ', 'Normal' },
-          { 'sources[number].option', 'WarningMsg' },
-          { ' instead.', 'Normal' },
-        }, true, {})
+        echo({
+          '[nvim-cmp] ', { 'sources[number].opts', 'WarningMsg' }, ' is deprecated.\n',
+          '[nvim-cmp] Please use ', { 'sources[number].option', 'WarningMsg' }, ' instead.',
+        })
       end
       s.option = s.option or {}
+
+      -- deprecated: trigger_characters
+      if s.trigger_characters then
+        echo({
+          '[nvim-cmp] ', { 'sources[number].trigger_characters', 'WarningMsg' }, ' is deprecated.\n',
+          '[nvim-cmp] Please use ', { 'sources[number].orverride.get_trigger_characters', 'WarningMsg' }, ' instead.'
+        })
+        if not s.override or s.override.get_trigger_characters then
+          s.override = s.override or {}
+          s.override.get_trigger_characters = function()
+            return s.trigger_characters
+          end
+        end
+      end
+
+      -- deprecated: keyword_pattern
+      if s.keyword_pattern then
+        echo({
+          '[nvim-cmp] ', { 'sources[number].keyword_pattern', 'WarningMsg' }, ' is deprecated.\n',
+          '[nvim-cmp] Please use ', { 'sources[number].orverride.get_keyword_pattern', 'WarningMsg' }, ' instead.'
+        })
+        if not s.override or s.override.get_keyword_pattern then
+          s.override = s.override or {}
+          s.override.get_keyword_pattern = function()
+            return s.keyword_pattern
+          end
+        end
+      end
     end
   end
 
