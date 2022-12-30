@@ -190,8 +190,12 @@ config.normalize = function(c)
   -- Notice experimental.native_menu.
   if c.experimental and c.experimental.native_menu then
     echo({
-      '[nvim-cmp] ', { 'experimental.native_menu', 'WarningMsg' }, ' is deprecated.\n',
-      '[nvim-cmp] Please use ', { 'view.entries = "native"', 'WarningMsg' }, ' instead.',
+      '[nvim-cmp] ',
+      { 'experimental.native_menu', 'WarningMsg' },
+      ' is deprecated.\n',
+      '[nvim-cmp] Please use ',
+      { 'view.entries = "native"', 'WarningMsg' },
+      ' instead.',
     })
 
     c.view = c.view or {}
@@ -201,8 +205,12 @@ config.normalize = function(c)
   -- Notice documentation.
   if c.documentation ~= nil then
     echo({
-      '[nvim-cmp] ', { 'documentation', 'WarningMsg' }, ' is deprecated.\n',
-      '[nvim-cmp] Please use ', { 'window.documentation = cmp.config.window.bordered()', 'WarningMsg' }, ' instead.'
+      '[nvim-cmp] ',
+      { 'documentation', 'WarningMsg' },
+      ' is deprecated.\n',
+      '[nvim-cmp] Please use ',
+      { 'window.documentation = cmp.config.window.bordered()', 'WarningMsg' },
+      ' instead.',
     })
     c.window = c.window or {}
     c.window.documentation = c.documentation
@@ -211,14 +219,17 @@ config.normalize = function(c)
   -- Notice sources.[n].opts
   if c.sources then
     for _, s in ipairs(c.sources) do
-
       -- rename: opts -> option
       if s.opts and not s.option then
         s.option = s.opts
         s.opts = nil
         echo({
-          '[nvim-cmp] ', { 'sources[number].opts', 'WarningMsg' }, ' is deprecated.\n',
-          '[nvim-cmp] Please use ', { 'sources[number].option', 'WarningMsg' }, ' instead.',
+          '[nvim-cmp] ',
+          { 'sources[number].opts', 'WarningMsg' },
+          ' is deprecated.\n',
+          '[nvim-cmp] Please use ',
+          { 'sources[number].option', 'WarningMsg' },
+          ' instead.',
         })
       end
       s.option = s.option or {}
@@ -226,8 +237,12 @@ config.normalize = function(c)
       -- deprecated: trigger_characters
       if s.trigger_characters then
         echo({
-          '[nvim-cmp] ', { 'sources[number].trigger_characters', 'WarningMsg' }, ' is deprecated.\n',
-          '[nvim-cmp] Please use ', { 'sources[number].orverride.get_trigger_characters', 'WarningMsg' }, ' instead.'
+          '[nvim-cmp] ',
+          { 'sources[number].trigger_characters', 'WarningMsg' },
+          ' is deprecated.\n',
+          '[nvim-cmp] Please use ',
+          { 'sources[number].orverride.get_trigger_characters', 'WarningMsg' },
+          ' instead.',
         })
         if not s.override or s.override.get_trigger_characters then
           s.override = s.override or {}
@@ -240,8 +255,12 @@ config.normalize = function(c)
       -- deprecated: keyword_pattern
       if s.keyword_pattern then
         echo({
-          '[nvim-cmp] ', { 'sources[number].keyword_pattern', 'WarningMsg' }, ' is deprecated.\n',
-          '[nvim-cmp] Please use ', { 'sources[number].orverride.get_keyword_pattern', 'WarningMsg' }, ' instead.'
+          '[nvim-cmp] ',
+          { 'sources[number].keyword_pattern', 'WarningMsg' },
+          ' is deprecated.\n',
+          '[nvim-cmp] Please use ',
+          { 'sources[number].orverride.get_keyword_pattern', 'WarningMsg' },
+          ' instead.',
         })
         if not s.override or s.override.get_keyword_pattern then
           s.override = s.override or {}
