@@ -12,7 +12,7 @@ local char = require('cmp.utils.char')
 ---@class cmp.Source
 ---@field public id integer
 ---@field public name string
----@field public source any
+---@field public source cmp.CustomSource
 ---@field public cache cmp.Cache
 ---@field public revision integer
 ---@field public incomplete boolean
@@ -32,6 +32,8 @@ source.SourceStatus.WAITING = 1
 source.SourceStatus.FETCHING = 2
 source.SourceStatus.COMPLETED = 3
 
+---@param name string
+---@param s cmp.CustomSource
 ---@return cmp.Source
 source.new = function(name, s)
   local self = setmetatable({}, { __index = source })
@@ -63,7 +65,27 @@ end
 ---Return source config
 ---@return cmp.SourceConfig
 source.get_source_config = function(self)
-  return config.get_source_config(self.name) or {}
+  local c = config.get_source_config(self.name) or {}
+  c.override = c.override or {}
+  c.override.is_available = c.override.is_available or function(is_available)
+    return is_available()
+  end
+  c.override.get_keyword_pattern = c.override.get_keyword_pattern or function(params, get_keyword_pattern)
+    return get_keyword_pattern(params)
+  end
+  c.override.get_trigger_characters = c.override.get_trigger_characters or function(params, get_trigger_characters)
+    return get_trigger_characters(params)
+  end
+  c.override.complete = c.override.complete or function(params, callback, complete)
+    complete(params, callback)
+  end
+  c.override.resolve = c.override.resolve or function(completion_item, callback, resolve)
+    resolve(completion_item, callback)
+  end
+  c.override.execute = c.override.execute or function(completion_item, callback, execute)
+    execute(completion_item, callback)
+  end
+  return c
 end
 
 ---Return matching config
@@ -179,57 +201,6 @@ source.get_default_replace_range = function(self)
   end)
 end
 
----Return source name.
-source.get_debug_name = function(self)
-  local name = self.name
-  if self.source.get_debug_name then
-    name = self.source:get_debug_name()
-  end
-  return name
-end
-
----Return the source is available or not.
-source.is_available = function(self)
-  if self.source.is_available then
-    return self.source:is_available()
-  end
-  return true
-end
-
----Get trigger_characters
----@return string[]
-source.get_trigger_characters = function(self)
-  local c = self:get_source_config()
-  if c.trigger_characters then
-    return c.trigger_characters
-  end
-
-  local trigger_characters = {}
-  if self.source.get_trigger_characters then
-    trigger_characters = self.source:get_trigger_characters(misc.copy(c)) or {}
-  end
-  if config.get().completion.get_trigger_characters then
-    return config.get().completion.get_trigger_characters(trigger_characters)
-  end
-  return trigger_characters
-end
-
----Get keyword_pattern
----@return string
-source.get_keyword_pattern = function(self)
-  local c = self:get_source_config()
-  if c.keyword_pattern then
-    return c.keyword_pattern
-  end
-  if self.source.get_keyword_pattern then
-    local keyword_pattern = self.source:get_keyword_pattern(misc.copy(c))
-    if keyword_pattern then
-      return keyword_pattern
-    end
-  end
-  return config.get().completion.keyword_pattern
-end
-
 ---Get keyword_length
 ---@return integer
 source.get_keyword_length = function(self)
@@ -252,6 +223,15 @@ source.get_entry_filter = function(self)
   end
 end
 
+---Return source name.
+source.get_debug_name = function(self)
+  local name = self.name
+  if self.source.get_debug_name then
+    name = self.source:get_debug_name()
+  end
+  return name
+end
+
 ---Get lsp.PositionEncodingKind
 ---@return lsp.PositionEncodingKind
 source.get_position_encoding_kind = function(self)
@@ -259,6 +239,54 @@ source.get_position_encoding_kind = function(self)
     return self.source:get_position_encoding_kind()
   end
   return types.lsp.PositionEncodingKind.UTF16
+end
+
+---Return the source is available or not.
+source.is_available = function(self)
+  local params = self:get_source_config()
+  return params.override.is_available(function()
+    if self.source.is_available then
+      return self.source:is_available()
+    end
+    return true
+  end)
+end
+
+---Get trigger_characters
+---@return string[]
+source.get_trigger_characters = function(self)
+  local params = self:get_source_config()
+  return params.override.get_trigger_characters(
+    params,
+    function(params)
+      local trigger_characters = {}
+      if self.source.get_trigger_characters then
+        trigger_characters = self.source:get_trigger_characters(misc.copy(params)) or {}
+      end
+      if config.get().completion.get_trigger_characters then
+        return config.get().completion.get_trigger_characters(trigger_characters)
+      end
+      return trigger_characters
+    end
+  )
+end
+
+---Get keyword_pattern
+---@return string
+source.get_keyword_pattern = function(self)
+  local params = self:get_source_config()
+  return params.override.get_keyword_pattern(
+    params,
+    function(params)
+      if self.source.get_keyword_pattern then
+        local keyword_pattern = self.source:get_keyword_pattern(misc.copy(params))
+        if keyword_pattern then
+          return keyword_pattern
+        end
+      end
+      return config.get().completion.keyword_pattern
+    end
+  )
 end
 
 ---Invoke completion
@@ -322,7 +350,9 @@ source.complete = function(self, ctx, callback)
   self.request_offset = offset
   self.context = ctx
   self.completion_context = completion_context
-  self.source:complete(
+
+  local params = self:get_source_config()
+  params.override.complete(
     vim.tbl_extend('keep', misc.copy(self:get_source_config()), {
       offset = self.offset,
       context = ctx,
@@ -363,7 +393,10 @@ source.complete = function(self, ctx, callback)
         self.status = prev_status
       end
       callback()
-    end))
+    end)),
+    function(params, callback)
+      self.source:complete(params, callback)
+    end
   )
   return true
 end
@@ -372,11 +405,16 @@ end
 ---@param item lsp.CompletionItem
 ---@param callback fun(item: lsp.CompletionItem)
 source.resolve = function(self, item, callback)
-  if not self.source.resolve then
-    return callback(item)
-  end
-  self.source:resolve(item, function(resolved_item)
+  local params = self:get_source_config()
+  params.override.resolve(item, function(resolved_item)
     callback(resolved_item or item)
+  end, function(item, callback)
+    if not self.source.resolve then
+      return callback(item)
+    end
+    self.source:resolve(item, function(resolved_item)
+      callback(resolved_item or item)
+    end)
   end)
 end
 
@@ -384,11 +422,14 @@ end
 ---@param item lsp.CompletionItem
 ---@param callback fun()
 source.execute = function(self, item, callback)
-  if not self.source.execute then
-    return callback()
-  end
-  self.source:execute(item, function()
+  local params = self:get_source_config()
+  params.override.execute(item, function()
     callback()
+  end, function(item, callback)
+    if not self.source.execute then
+      return callback()
+    end
+    self.source:execute(item, callback)
   end)
 end
 

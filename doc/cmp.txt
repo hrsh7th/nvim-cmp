@@ -515,20 +515,26 @@ sources[n].option~
   `table`
   Any specific options defined by the source itself.
 
+                                                *cmp-config.sources[n].override*
+sources[n].override~
+  `cmp.SourceOverrideConfig`
+  A table that sets up functions to override the behavior of the custom source.
+  Implemented as the following type definitions.
+  (For advanced users.)
+>lua
+  ---@class cmp.SourceOverrideConfig
+  ---@field public is_available? fun(is_available: fun(): boolean): boolean
+  ---@field public get_trigger_characters? fun(params: cmp.SourceApiParams, get_trigger_characters: (fun(params: cmp.SourceApiParams): string[])): string[]
+  ---@field public get_keyword_pattern? fun(params: cmp.SourceApiParams, get_keyword_pattern: fun(params: cmp.SourceApiParams): string): string
+  ---@field public complete fun(params: cmp.SourceCompletionApiParams, callback: fun(response: lsp.CompletionResponse), complete: fun(params: cmp.SourceCompletionApiParams, callback: fun(response: lsp.CompletionResponse)))
+  ---@field public resolve fun(completion_item: lsp.CompletionItem, callback: fun(completion_item: lsp.CompletionItem), resolve: fun(completion_item: lsp.CompletionItem, callback: fun(completion_item: lsp.CompletionItem)))
+  ---@field public execute fun(completion_item: lsp.CompletionItem, callback: fun(), execute: fun(completion_item: lsp.CompletionItem, callback: fun()))
+<
+
                                           *cmp-config.sources[n].keyword_length*
 sources[n].keyword_length~
   `number`
   The source-specific keyword length to trigger auto completion.
-
-                                         *cmp-config.sources[n].keyword_pattern*
-sources[n].keyword_pattern~
-  `string`
-  The source-specific keyword pattern.
-
-                                      *cmp-config.sources[n].trigger_characters*
-sources[n].trigger_characters~
-  `string[]`
-  A source-specific keyword pattern.
 
                                                 *cmp-config.sources[n].priority*
 sources[n].priority~
@@ -592,9 +598,8 @@ sources[n].entry_filter~
 
                                                                *cmp-config.view*
 view~
-  `{ entries: cmp.EntriesConfig|string }`
+  `{ entries: cmp.CustomEntriesConfig|NativeEntriesConfig|cmp.WildmenuEntriesConfig|string }`
   The view class used to customize nvim-cmp's appearance.
-  Currently available configuration options are:
 
                            *cmp-config.window.{completion,documentation}.border*
 window.{completion,documentation}.border~
@@ -789,7 +794,7 @@ Here is an example on how to create a custom source:
 
   ---Executed after the item was selected.
   ---@param completion_item lsp.CompletionItem
-  ---@param callback fun(completion_item: lsp.CompletionItem|nil)
+  ---@param callback fun()
   function source:execute(completion_item, callback)
     callback(completion_item)
   end

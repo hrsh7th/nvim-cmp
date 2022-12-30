@@ -57,6 +57,16 @@ cmp.ItemField = {
 ---@field public reason? cmp.ContextReason
 ---@field public config? cmp.ConfigSchema
 
+---@class cmp.CustomSource
+---@field public get_debug_name? fun(self: cmp.CustomSource): string
+---@field public get_position_encoding_kind? fun(self: cmp.CustomSource): lsp.PositionEncodingKind
+---@field public is_available? fun(self: cmp.CustomSource): boolean
+---@field public get_trigger_characters? fun(self: cmp.CustomSource, config: cmp.SourceApiParams): string[]
+---@field public get_keyword_pattern? fun(self: cmp.CustomSource, config: cmp.SourceApiParams): string
+---@field public complete fun(self: cmp.CustomSource, config: cmp.SourceCompletionApiParams, callback: fun(response: lsp.CompletionResponse))
+---@field public resolve? fun(self: cmp.CustomSource, completion_item: lsp.CompletionItem, callback: fun(completion_item: lsp.CompletionItem))
+---@field public execute? fun(self: cmp.CustomSource, completion_item: lsp.CompletionItem, callback: fun())
+
 ---@class cmp.Setup
 ---@field public __call fun(c: cmp.ConfigSchema)
 ---@field public buffer fun(c: cmp.ConfigSchema)
@@ -64,21 +74,23 @@ cmp.ItemField = {
 ---@field public cmdline fun(type: string|string[], c: cmp.ConfigSchema)
 ---@field public filetype fun(type: string|string[], c: cmp.ConfigSchema)
 
----@class cmp.SourceApiParams: cmp.SourceConfig
+---@alias cmp.SourceApiParams cmp.SourceConfig
 
 ---@class cmp.SourceCompletionApiParams : cmp.SourceConfig
 ---@field public offset integer
 ---@field public context cmp.Context
 ---@field public completion_context lsp.CompletionContext
 
----@class cmp.Mapping
+---@class cmp.ModeMapping
 ---@field public i nil|function(fallback: function): void
 ---@field public c nil|function(fallback: function): void
 ---@field public x nil|function(fallback: function): void
 ---@field public s nil|function(fallback: function): void
 
+---@alias cmp.Mapping cmp.ModeMapping|function(fallback: function): void
+
 ---@class cmp.ConfigSchema
----@field private revision integer
+---@field public revision integer
 ---@field public enabled boolean | fun(): boolean
 ---@field public performance cmp.PerformanceConfig
 ---@field public preselect cmp.PreselectMode
@@ -100,8 +112,8 @@ cmp.ItemField = {
 ---@field public fetching_timeout integer
 
 ---@class cmp.WindowConfig
----@field completion cmp.WindowConfig
----@field documentation cmp.WindowConfig|nil
+---@field completion cmp.CompletionWindowConfig
+---@field documentation cmp.DocumentationWindowConfig|nil
 
 ---@class cmp.CompletionConfig
 ---@field public autocomplete cmp.TriggerEvent[]
@@ -110,14 +122,20 @@ cmp.ItemField = {
 ---@field public keyword_length integer
 ---@field public keyword_pattern string
 
----@class cmp.WindowConfig
+---@class cmp.BaseWindowConfig
 ---@field public border string|string[]
 ---@field public winhighlight string
 ---@field public zindex integer|nil
+
+---@class cmp.CompletionWindowConfig : cmp.BaseWindowConfig
+---@field public col_offset integer
+---@field public side_padding integer
+---@field public scrolloff integer|nil
+---@field public scrollbar boolean
+
+---@class cmp.DocumentationWindowConfig : cmp.BaseWindowConfig
 ---@field public max_width integer|nil
 ---@field public max_height integer|nil
----@field public scrolloff integer|nil
----@field public scrollbar boolean|true
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior
@@ -149,18 +167,23 @@ cmp.ItemField = {
 ---@class cmp.SourceConfig
 ---@field public name string
 ---@field public option table|nil
+---@field public override? cmp.SourceOverrideConfig
 ---@field public priority integer|nil
----@field public trigger_characters string[]|nil
----@field public keyword_pattern string|nil
 ---@field public keyword_length integer|nil
 ---@field public max_item_count integer|nil
 ---@field public group_index integer|nil
 ---@field public entry_filter nil|function(entry: cmp.Entry, ctx: cmp.Context): boolean
 
----@class cmp.ViewConfig
----@field public entries cmp.EntriesConfig
+---@class cmp.SourceOverrideConfig
+---@field public is_available? fun(is_available: fun(): boolean): boolean
+---@field public get_trigger_characters? fun(params: cmp.SourceApiParams, get_trigger_characters: (fun(params: cmp.SourceApiParams): string[])): string[]
+---@field public get_keyword_pattern? fun(params: cmp.SourceApiParams, get_keyword_pattern: fun(params: cmp.SourceApiParams): string): string
+---@field public complete fun(params: cmp.SourceCompletionApiParams, callback: fun(response: lsp.CompletionResponse), complete: fun(params: cmp.SourceCompletionApiParams, callback: fun(response: lsp.CompletionResponse)))
+---@field public resolve fun(completion_item: lsp.CompletionItem, callback: fun(completion_item: lsp.CompletionItem), resolve: fun(completion_item: lsp.CompletionItem, callback: fun(completion_item: lsp.CompletionItem)))
+---@field public execute fun(completion_item: lsp.CompletionItem, callback: fun(), execute: fun(completion_item: lsp.CompletionItem, callback: fun()))
 
----@alias cmp.EntriesConfig cmp.CustomEntriesConfig|cmp.NativeEntriesConfig|cmp.WildmenuEntriesConfig|string
+---@class cmp.ViewConfig
+---@field public entries cmp.CustomEntriesConfig|cmp.NativeEntriesConfig|cmp.WildmenuEntriesConfig|string
 
 ---@class cmp.CustomEntriesConfig
 ---@field name 'custom'
