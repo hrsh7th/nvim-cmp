@@ -234,6 +234,8 @@ config.normalize = function(c)
       end
       s.option = s.option or {}
 
+      s.override = s.override or {}
+
       -- deprecated: trigger_characters
       if s.trigger_characters then
         echo({
@@ -244,8 +246,7 @@ config.normalize = function(c)
           { 'sources[number].orverride.get_trigger_characters', 'WarningMsg' },
           ' instead.',
         })
-        if not s.override or s.override.get_trigger_characters then
-          s.override = s.override or {}
+        if not s.override.get_trigger_characters then
           s.override.get_trigger_characters = function()
             return s.trigger_characters
           end
@@ -262,7 +263,7 @@ config.normalize = function(c)
           { 'sources[number].orverride.get_keyword_pattern', 'WarningMsg' },
           ' instead.',
         })
-        if not s.override or s.override.get_keyword_pattern then
+        if not s.override.get_keyword_pattern then
           s.override = s.override or {}
           s.override.get_keyword_pattern = function()
             return s.keyword_pattern

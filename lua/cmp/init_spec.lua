@@ -10,7 +10,7 @@ local Keymap = require('cmp.kit.Vim.Keymap')
 describe('cmp', function()
   before_each(spec.before)
 
-  local function setup(override)
+  local function setup(override, option)
     local c = core.new()
     local s = source.new('spec', {
       complete = function(_, _, callback)
@@ -20,10 +20,10 @@ describe('cmp', function()
     c:register_source(s)
     config.set_buffer({
       sources = {
-        {
+        vim.tbl_deep_extend('keep', {
           name = 'spec',
           override = override,
-        },
+        }, option or {}),
       },
     }, vim.api.nvim_get_current_buf())
     c:prepare()
@@ -54,6 +54,45 @@ describe('cmp', function()
       vim.wait(200)
       assert.equals(1, #c.view:get_entries())
     end))
+  end)
+
+  it('should work source[n].override.get_keyword_pattern from deprecated keyword_pattern option', function()
+    local c = setup({
+      complete = function(_, callback)
+        callback({
+          { label = '123' },
+        })
+      end,
+    }, {
+      keyword_pattern = [[\d\+]],
+    })
+    Keymap.spec(Async.async(function()
+      -- o
+      Keymap.send('io', 'ni'):await()
+      c:complete(c:get_context({ reason = types.cmp.ContextReason.Auto }))
+      vim.wait(200)
+      assert.equals(0, #c.view:get_entries())
+
+      -- ok
+      Keymap.send(Keymap.termcodes('<BS>1'), 'ni'):await()
+      c:complete(c:get_context({ reason = types.cmp.ContextReason.Auto }))
+      vim.wait(200)
+      assert.equals(1, #c.view:get_entries())
+    end))
+  end)
+
+  it('should work source[n].override.get_trigger_characters from deprecated trigger_characters option', function()
+    local c = setup({
+      complete = function(_, callback)
+        callback({
+          { label = 'override' },
+        })
+      end,
+    }, {
+      trigger_characters = { 'v' }
+    })
+    ---@diagnostic disable-next-line: undefined-field
+    assert.are.same(vim.tbl_values(c.sources)[1]:get_trigger_characters(), { 'v' })
   end)
 
   it('should work source[n].override.complete', function()
