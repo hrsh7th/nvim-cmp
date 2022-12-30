@@ -256,37 +256,31 @@ end
 ---@return string[]
 source.get_trigger_characters = function(self)
   local params = self:get_source_config()
-  return params.override.get_trigger_characters(
-    params,
-    function(params)
-      local trigger_characters = {}
-      if self.source.get_trigger_characters then
-        trigger_characters = self.source:get_trigger_characters(misc.copy(params)) or {}
-      end
-      if config.get().completion.get_trigger_characters then
-        return config.get().completion.get_trigger_characters(trigger_characters)
-      end
-      return trigger_characters
+  return params.override.get_trigger_characters(params, function(params)
+    local trigger_characters = {}
+    if self.source.get_trigger_characters then
+      trigger_characters = self.source:get_trigger_characters(misc.copy(params)) or {}
     end
-  )
+    if config.get().completion.get_trigger_characters then
+      return config.get().completion.get_trigger_characters(trigger_characters)
+    end
+    return trigger_characters
+  end)
 end
 
 ---Get keyword_pattern
 ---@return string
 source.get_keyword_pattern = function(self)
   local params = self:get_source_config()
-  return params.override.get_keyword_pattern(
-    params,
-    function(params)
-      if self.source.get_keyword_pattern then
-        local keyword_pattern = self.source:get_keyword_pattern(misc.copy(params))
-        if keyword_pattern then
-          return keyword_pattern
-        end
+  return params.override.get_keyword_pattern(params, function(params)
+    if self.source.get_keyword_pattern then
+      local keyword_pattern = self.source:get_keyword_pattern(misc.copy(params))
+      if keyword_pattern then
+        return keyword_pattern
       end
-      return config.get().completion.keyword_pattern
     end
-  )
+    return config.get().completion.keyword_pattern
+  end)
 end
 
 ---Invoke completion

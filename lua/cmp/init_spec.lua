@@ -81,7 +81,7 @@ describe('cmp', function()
       end,
       resolve = function(_, callback)
         callback({ label = 'override:resolved' })
-      end
+      end,
     })
     Keymap.spec(Async.async(function()
       Keymap.send('io', 'ni'):await()
@@ -104,7 +104,7 @@ describe('cmp', function()
       execute = function(_, callback)
         vim.api.nvim_set_current_line('ok')
         callback()
-      end
+      end,
     })
     Keymap.spec(Async.async(function()
       Keymap.send('io', 'ni'):await()
@@ -116,5 +116,4 @@ describe('cmp', function()
       assert.equals('ok', vim.api.nvim_get_current_line())
     end))
   end)
-
 end)
