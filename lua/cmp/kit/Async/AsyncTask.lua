@@ -26,13 +26,17 @@ local function settle(task, status, value)
   if status == AsyncTask.Status.Rejected then
     if not task.chained and not task.synced then
       local timer = uv.new_timer()
-      timer:start(0, 0, kit.safe_schedule_wrap(function()
-        timer:stop()
-        timer:close()
-        if not task.chained and not task.synced then
-          AsyncTask.on_unhandled_rejection(value)
-        end
-      end))
+      timer:start(
+        0,
+        0,
+        kit.safe_schedule_wrap(function()
+          timer:stop()
+          timer:close()
+          if not task.chained and not task.synced then
+            AsyncTask.on_unhandled_rejection(value)
+          end
+        end)
+      )
     end
   end
 end
