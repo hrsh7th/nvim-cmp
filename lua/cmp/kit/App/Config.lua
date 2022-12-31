@@ -4,8 +4,8 @@ local Cache = require('cmp.kit.App.Cache')
 ---@alias cmp.kit.App.Config.SchemaInternal cmp.kit.App.Config.Schema|{ revision: integer }
 
 ---@class cmp.kit.App.Config
----@field private cache cmp.kit.App.Cache
----@field private default cmp.kit.App.Config.SchemaInternal
+---@field private _cache cmp.kit.App.Cache
+---@field private _default cmp.kit.App.Config.SchemaInternal
 ---@field private _global cmp.kit.App.Config.SchemaInternal
 ---@field private _filetype table<string, cmp.kit.App.Config.SchemaInternal>
 ---@field private _buffer table<integer, cmp.kit.App.Config.SchemaInternal>
@@ -16,12 +16,18 @@ Config.__index = Config
 ---@param default? cmp.kit.App.Config.Schema
 function Config.new(default)
   local self = setmetatable({}, Config)
-  self.cache = Cache.new()
-  self.default = default or {}
+  self._cache = Cache.new()
+  self._default = default or {}
   self._global = {}
   self._filetype = {}
   self._buffer = {}
   return self
+end
+
+---Set default configuration.
+---@param default cmp.kit.App.Config.Schema
+function Config:default(default)
+  self._default = default
 end
 
 ---Update global config.
@@ -58,12 +64,12 @@ end
 function Config:get()
   local filetype = vim.api.nvim_buf_get_option(0, 'filetype')
   local bufnr = vim.api.nvim_get_current_buf()
-  return self.cache:ensure({
+  return self._cache:ensure({
     tostring(self._global.revision or 0),
     tostring((self._buffer[bufnr] or {}).revision or 0),
     tostring((self._filetype[filetype] or {}).revision or 0),
   }, function()
-    local config = self.default
+    local config = self._default
     config = kit.merge(self._global, config)
     config = kit.merge(self._filetype[filetype] or {}, config)
     config = kit.merge(self._buffer[bufnr] or {}, config)
