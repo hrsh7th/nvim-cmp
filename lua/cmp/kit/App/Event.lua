@@ -42,8 +42,10 @@ function Event:off(name, listener)
     self._events[name] = nil
   else
     for i = #self._events[name], 1, -1 do
-      table.remove(self._events[name], i)
-      break
+      if self._events[name][i] == listener then
+        table.remove(self._events[name], i)
+        break
+      end
     end
   end
 end

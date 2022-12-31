@@ -26,6 +26,7 @@ end
 ---@param text string
 ---@param pattern string
 ---@param pos number 1-origin index
+---@return string?, integer?, integer? 1-origin-index
 function RegExp.extract_at(text, pattern, pos)
   local before_text = text:sub(1, pos - 1)
   local after_text = text:sub(pos)

@@ -89,7 +89,7 @@ describe('cmp', function()
         })
       end,
     }, {
-      trigger_characters = { 'v' }
+      trigger_characters = { 'v' },
     })
     ---@diagnostic disable-next-line: undefined-field
     assert.are.same(vim.tbl_values(c.sources)[1]:get_trigger_characters(), { 'v' })
