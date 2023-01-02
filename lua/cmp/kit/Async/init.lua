@@ -2,7 +2,7 @@ local AsyncTask = require('cmp.kit.Async.AsyncTask')
 
 local Async = {}
 
----@type string<thread, integer>
+---@type table<thread, integer>
 Async.___threads___ = {}
 
 ---Run async function immediately.
@@ -12,6 +12,12 @@ Async.___threads___ = {}
 ---@return cmp.kit.Async.AsyncTask
 function Async.run(runner, ...)
   return Async.async(runner)(...)
+end
+
+---Return current context is async coroutine or not.
+---@return boolean
+function Async.in_context()
+  return Async.___threads___[coroutine.running()] ~= nil
 end
 
 ---Create async function.

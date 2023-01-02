@@ -158,16 +158,7 @@ config.get_source_config = function(name)
       return s
     end
   end
-  error('Specified source is not found: ' .. name)
-end
-
----Return the current menu is native or not.
-config.is_native_menu = function()
-  local c = config.get()
-  if c.view and c.view.entries then
-    return c.view.entries == 'native' or c.view.entries.name == 'native'
-  end
-  return false
+  return {}
 end
 
 ---Normalize mapping key
@@ -185,21 +176,6 @@ config.normalize = function(c)
       normalized[keymap.normalize(k)] = mapping(v, { 'i' })
     end
     c.mapping = normalized
-  end
-
-  -- Notice experimental.native_menu.
-  if c.experimental and c.experimental.native_menu then
-    echo({
-      '[nvim-cmp] ',
-      { 'experimental.native_menu', 'WarningMsg' },
-      ' is deprecated.\n',
-      '[nvim-cmp] Please use ',
-      { 'view.entries = "native"', 'WarningMsg' },
-      ' instead.',
-    })
-
-    c.view = c.view or {}
-    c.view.entries = c.view.entries or 'native'
   end
 
   -- Notice documentation.

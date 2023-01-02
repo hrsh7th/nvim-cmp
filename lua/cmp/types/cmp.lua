@@ -103,7 +103,6 @@ cmp.ItemField = {
 ---@field public snippet cmp.SnippetConfig
 ---@field public mapping table<string, cmp.Mapping>
 ---@field public sources cmp.SourceConfig[]
----@field public view cmp.ViewConfig
 ---@field public experimental cmp.ExperimentalConfig
 
 ---@class cmp.PerformanceConfig
@@ -181,19 +180,5 @@ cmp.ItemField = {
 ---@field public complete fun(params: cmp.SourceCompletionApiParams, callback: fun(response: lsp.CompletionResponse), complete: fun(params: cmp.SourceCompletionApiParams, callback: fun(response: lsp.CompletionResponse)))
 ---@field public resolve fun(completion_item: lsp.CompletionItem, callback: fun(completion_item: lsp.CompletionItem), resolve: fun(completion_item: lsp.CompletionItem, callback: fun(completion_item: lsp.CompletionItem)))
 ---@field public execute fun(completion_item: lsp.CompletionItem, callback: fun(), execute: fun(completion_item: lsp.CompletionItem, callback: fun()))
-
----@class cmp.ViewConfig
----@field public entries cmp.CustomEntriesConfig|cmp.NativeEntriesConfig|cmp.WildmenuEntriesConfig|string
-
----@class cmp.CustomEntriesConfig
----@field name 'custom'
----@field selection_order 'top_down'|'near_cursor'
-
----@class cmp.NativeEntriesConfig
----@field name 'native'
-
----@class cmp.WildmenuEntriesConfig
----@field name 'wildmenu'
----@field separator string|nil
 
 return cmp

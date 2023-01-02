@@ -99,7 +99,11 @@ window.get_buffer = function(self)
   local buf, created_new = buffer.ensure(self.name)
   if created_new then
     for k, v in pairs(self.buffer_opt) do
-      vim.api.nvim_buf_set_option(buf, k, v)
+      pcall(function()
+        vim.api.nvim_set_option_value(k, v, {
+          buf = buf
+        })
+      end)
     end
   end
   return buf

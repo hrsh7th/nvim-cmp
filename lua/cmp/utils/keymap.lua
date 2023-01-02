@@ -1,6 +1,7 @@
 local misc = require('cmp.utils.misc')
 local buffer = require('cmp.utils.buffer')
 local api = require('cmp.utils.api')
+local Async = require('cmp.kit.Async')
 
 local keymap = {}
 
@@ -31,8 +32,6 @@ keymap.normalize = function(keys)
 end
 
 ---Return vim notation keymapping (simple conversion).
----@param s string
----@return string
 keymap.to_keymap = setmetatable({
   ['<CR>'] = { '\n', '\r', '\r\n' },
   ['<Tab>'] = { '\t' },
@@ -40,15 +39,17 @@ keymap.to_keymap = setmetatable({
   ['<Bar>'] = { '|' },
   ['<Space>'] = { ' ' },
 }, {
+  ---@param s string
+  ---@return string
   __call = function(self, s)
-    return string.gsub(s, '.', function(c)
+    return (string.gsub(s, '.', function(c)
       for key, chars in pairs(self) do
         if vim.tbl_contains(chars, c) then
           return key
         end
       end
       return c
-    end)
+    end))
   end,
 })
 
@@ -124,15 +125,18 @@ keymap.listen = function(mode, lhs, callback)
 
   local bufnr = existing.buffer and vim.api.nvim_get_current_buf() or -1
   local fallback = keymap.fallback(bufnr, mode, existing)
-  keymap.set_map(bufnr, mode, lhs, function()
+  keymap.set_map(bufnr, mode, lhs, Async.async(function()
+    vim.pretty_print('mapping', lhs)
     local ignore = false
     ignore = ignore or (mode == 'c' and vim.fn.getcmdtype() == '=')
     if ignore then
+      vim.pretty_print('ignore', lhs)
       fallback()
     else
+      vim.pretty_print('call callback', lhs)
       callback(lhs, misc.once(fallback))
     end
-  end, {
+  end), {
     expr = false,
     noremap = true,
     silent = true,
@@ -207,6 +211,7 @@ keymap.get_map = function(mode, lhs)
         lhs = map.lhs,
         rhs = map.rhs or '',
         expr = map.expr == 1,
+        desc = map.desc,
         callback = map.callback,
         noremap = map.noremap == 1,
         script = map.script == 1,
@@ -224,6 +229,7 @@ keymap.get_map = function(mode, lhs)
         lhs = map.lhs,
         rhs = map.rhs or '',
         expr = map.expr == 1,
+        desc = map.desc,
         callback = map.callback,
         noremap = map.noremap == 1,
         script = map.script == 1,
@@ -239,6 +245,7 @@ keymap.get_map = function(mode, lhs)
     lhs = lhs,
     rhs = lhs,
     expr = false,
+    desc = nil,
     callback = nil,
     noremap = true,
     script = false,

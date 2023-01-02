@@ -1,4 +1,5 @@
-local feedkeys = require('cmp.utils.feedkeys')
+local Keymap = require('cmp.kit.Vim.Keymap')
+local AsyncTask = require('cmp.kit.Async.AsyncTask')
 
 local async = {}
 
@@ -142,8 +143,14 @@ end
 
 ---Wait and callback for consuming next keymap.
 async.debounce_next_tick_by_keymap = function(callback)
+  local queue = nil
   return function()
-    feedkeys.call('', '', callback)
+    if queue then
+      return
+    end
+    queue = Keymap.send('', 'n'):next(callback):next(function()
+      queue = nil
+    end)
   end
 end
 

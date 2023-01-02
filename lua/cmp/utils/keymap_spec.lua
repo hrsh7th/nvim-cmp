@@ -1,6 +1,7 @@
 local spec = require('cmp.utils.spec')
 local api = require('cmp.utils.api')
-local feedkeys = require('cmp.utils.feedkeys')
+local Keymap = require('cmp.kit.Vim.Keymap')
+local Async = require('cmp.kit.Async')
 
 local keymap = require('cmp.utils.keymap')
 
@@ -39,18 +40,17 @@ describe('keymap', function()
 
     local run_fallback = function(keys, fallback)
       local state = {}
-      feedkeys.call(keys, '', function()
+      Keymap.spec(Async.async(function()
+        Keymap.send(keys, ''):await()
         fallback()
-      end)
-      feedkeys.call('', '', function()
+        Keymap.send('', ''):await()
         if api.is_cmdline_mode() then
           state.buffer = { api.get_current_line() }
         else
           state.buffer = vim.api.nvim_buf_get_lines(0, 0, -1, false)
         end
         state.cursor = api.get_cursor()
-      end)
-      feedkeys.call('', 'x')
+      end))
       return state
     end
 
@@ -180,7 +180,7 @@ describe('keymap', function()
       keymap.listen('i', '<CR>', function(_, fallback)
         fallback()
       end)
-      feedkeys.call(keymap.t('i<CR>'), 'tx')
+      Keymap.send(keymap.t('i<CR>'), 'x')
       assert.are.same({ '', 'recursive' }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
     end)
   end)

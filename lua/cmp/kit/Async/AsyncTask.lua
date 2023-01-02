@@ -174,6 +174,15 @@ function AsyncTask:await(schedule)
   return res
 end
 
+---Return current state of task.
+---@return { status: cmp.kit.Async.AsyncTask.Status, value: any }
+function AsyncTask:state()
+  return {
+    status = self.status,
+    value = self.value,
+  }
+end
+
 ---Register next step.
 ---@param on_fulfilled fun(value: any): any
 function AsyncTask:next(on_fulfilled)

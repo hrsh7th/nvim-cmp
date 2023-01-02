@@ -1,10 +1,11 @@
 local spec = require('cmp.utils.spec')
-local feedkeys = require('cmp.utils.feedkeys')
 local types = require('cmp.types')
 local core = require('cmp.core')
 local source = require('cmp.source')
 local keymap = require('cmp.utils.keymap')
 local api = require('cmp.utils.api')
+local Keymap = require('cmp.kit.Vim.Keymap')
+local Async = require('cmp.kit.Async')
 
 describe('cmp.core', function()
   describe('confirm', function()
@@ -18,7 +19,7 @@ describe('cmp.core', function()
 
       local c = core.new()
       local s = source.new('spec', {
-        get_position_encoding_kind = function()
+        get_position_encoding_kind = function(_)
           return option.position_encoding_kind or types.lsp.PositionEncodingKind.UTF16
         end,
         complete = function(_, _, callback)
@@ -26,26 +27,22 @@ describe('cmp.core', function()
         end,
       })
       c:register_source(s)
-      feedkeys.call(request, 'n', function()
+      local state = {}
+      Keymap.spec(Async.async(function()
+        Keymap.send(request, 'n'):await()
         c:complete(c:get_context({ reason = types.cmp.ContextReason.Manual }))
         vim.wait(5000, function()
           return #c.sources[s.id].entries > 0
         end)
-      end)
-      feedkeys.call(filter, 'n', function()
-        c:confirm(c.sources[s.id].entries[1], {}, function() end)
-      end)
-      local state = {}
-      feedkeys.call('', 'x', function()
-        feedkeys.call('', 'n', function()
-          if api.is_cmdline_mode() then
-            state.buffer = { api.get_current_line() }
-          else
-            state.buffer = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-          end
-          state.cursor = api.get_cursor()
-        end)
-      end)
+        Keymap.send(filter, 'n'):await()
+        c:confirm(c.sources[s.id].entries[1], {}, function() end):await()
+        if api.is_cmdline_mode() then
+          state.buffer = { api.get_current_line() }
+        else
+          state.buffer = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+        end
+        state.cursor = api.get_cursor()
+      end))
       return state
     end
 

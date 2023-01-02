@@ -3,18 +3,15 @@ local async = require('cmp.utils.async')
 local event = require('cmp.utils.event')
 local keymap = require('cmp.utils.keymap')
 local docs_view = require('cmp.view.docs_view')
-local custom_entries_view = require('cmp.view.custom_entries_view')
-local wildmenu_entries_view = require('cmp.view.wildmenu_entries_view')
-local native_entries_view = require('cmp.view.native_entries_view')
+local entries_view = require('cmp.view.entries_view')
 local ghost_text_view = require('cmp.view.ghost_text_view')
+local AsyncTask = require('cmp.kit.Async.AsyncTask')
 
 ---@class cmp.View
 ---@field public event cmp.Event
 ---@field private resolve_dedup cmp.AsyncDedup
----@field private native_entries_view cmp.NativeEntriesView
----@field private custom_entries_view cmp.CustomEntriesView
----@field private wildmenu_entries_view cmp.CustomEntriesView
 ---@field private change_dedup cmp.AsyncDedup
+---@field private entries_view cmp.EntriesView
 ---@field private docs_view cmp.DocsView
 ---@field private ghost_text_view cmp.GhostTextView
 local view = {}
@@ -23,25 +20,22 @@ local view = {}
 view.new = function()
   local self = setmetatable({}, { __index = view })
   self.resolve_dedup = async.dedup()
-  self.custom_entries_view = custom_entries_view.new()
-  self.native_entries_view = native_entries_view.new()
-  self.wildmenu_entries_view = wildmenu_entries_view.new()
+  self.entries_view = entries_view.new()
   self.docs_view = docs_view.new()
   self.ghost_text_view = ghost_text_view.new()
   self.event = event.new()
-
   return self
 end
 
 ---Return the view components are available or not.
 ---@return boolean
 view.ready = function(self)
-  return self:_get_entries_view():ready()
+  return self.entries_view:ready()
 end
 
 ---OnChange handler.
 view.on_change = function(self)
-  self:_get_entries_view():on_change()
+  self.entries_view:on_change()
 end
 
 ---Open menu
@@ -107,9 +101,9 @@ view.open = function(self, ctx, sources)
 
     -- open
     if #entries > 0 then
-      self:_get_entries_view():open(offset, entries)
+      self.entries_view:open(offset, entries)
       self.event:emit('menu_opened', {
-        window = self:_get_entries_view(),
+        window = self.entries_view,
       })
       break
     end
@@ -121,102 +115,88 @@ view.open = function(self, ctx, sources)
   end
 end
 
----Close menu
-view.close = function(self)
-  if self:visible() then
-    self.event:emit('complete_done', {
-      entry = self:_get_entries_view():get_selected_entry(),
-    })
-  end
-  self:_get_entries_view():close()
-  self.docs_view:close()
-  self.ghost_text_view:hide()
-  self.event:emit('menu_closed', {
-    window = self:_get_entries_view(),
-  })
-end
-
----Abort menu
-view.abort = function(self)
-  self:_get_entries_view():abort()
-  self.docs_view:close()
-  self.ghost_text_view:hide()
-  self.event:emit('menu_closed', {
-    window = self:_get_entries_view(),
-  })
-end
-
----Return the view is visible or not.
----@return boolean
-view.visible = function(self)
-  return self:_get_entries_view():visible()
-end
-
 ---Scroll documentation window if possible.
 ---@param delta integer
 view.scroll_docs = function(self, delta)
   self.docs_view:scroll(delta)
 end
 
----Select prev menu item.
----@param option cmp.SelectOption
-view.select_next_item = function(self, option)
-  self:_get_entries_view():select_next_item(option)
+---Return the view is visible or not.
+---@return boolean
+view.visible = function(self)
+  return not not self.entries_view:visible()
+end
+
+---Close menu
+view.close = function(self)
+  if self:visible() then
+    self.event:emit('complete_done', {
+      entry = self.entries_view:get_selected_entry(),
+    })
+  end
+  self.entries_view:close()
+  self.docs_view:close()
+  self.ghost_text_view:hide()
+  self.event:emit('menu_closed', {
+    window = self.entries_view,
+  })
+end
+
+---Abort menu
+---@return cmp.kit.Async.AsyncTask
+view.abort = function(self)
+  return AsyncTask.resolve():next(function()
+    return self.entries_view:abort()
+  end):next(function()
+    self.docs_view:close()
+    self.ghost_text_view:hide()
+    self.event:emit('menu_closed', {
+      window = self.entries_view,
+    })
+  end)
 end
 
 ---Select prev menu item.
 ---@param option cmp.SelectOption
+---@return cmp.kit.Async.AsyncTask
+view.select_next_item = function(self, option)
+  return self.entries_view:select_next_item(option)
+end
+
+---Select prev menu item.
+---@param option cmp.SelectOption
+---@return cmp.kit.Async.AsyncTask
 view.select_prev_item = function(self, option)
-  self:_get_entries_view():select_prev_item(option)
+  return self.entries_view:select_prev_item(option)
 end
 
 ---Get offset.
 view.get_offset = function(self)
-  return self:_get_entries_view():get_offset()
+  return self.entries_view:get_offset()
 end
 
 ---Get entries.
 ---@return cmp.Entry[]
 view.get_entries = function(self)
-  return self:_get_entries_view():get_entries()
+  return self.entries_view:get_entries()
 end
 
 ---Get first entry
----@param self cmp.Entry|nil
+---@return cmp.Entry|nil
 view.get_first_entry = function(self)
-  return self:_get_entries_view():get_first_entry()
+  return self.entries_view:get_first_entry()
 end
 
 ---Get current selected entry
 ---@return cmp.Entry|nil
 view.get_selected_entry = function(self)
-  return self:_get_entries_view():get_selected_entry()
+  return self.entries_view:get_selected_entry()
 end
 
 ---Get current active entry
 ---@return cmp.Entry|nil
 view.get_active_entry = function(self)
-  return self:_get_entries_view():get_active_entry()
-end
-
----Return current configured entries_view
----@return cmp.CustomEntriesView|cmp.NativeEntriesView
-view._get_entries_view = function(self)
-  self.native_entries_view.event:clear()
-  self.custom_entries_view.event:clear()
-  self.wildmenu_entries_view.event:clear()
-
-  local c = config.get()
-  local v = self.custom_entries_view
-  if (c.view and c.view.entries and (c.view.entries.name or c.view.entries)) == 'wildmenu' then
-    v = self.wildmenu_entries_view
-  elseif (c.view and c.view.entries and (c.view.entries.name or c.view.entries)) == 'native' then
-    v = self.native_entries_view
-  end
-  v.event:on('change', function()
-    self:on_entry_change()
-  end)
-  return v
+  return self.entries_view:get_active_entry()
 end
 
 ---On entry change
@@ -235,7 +215,7 @@ view.on_entry_change = async.throttle(function(self)
       if not self:visible() then
         return
       end
-      self.docs_view:open(e, self:_get_entries_view():info())
+      self.docs_view:open(e, self.entries_view:info())
     end)))
   else
     self.docs_view:close()

@@ -1,28 +1,30 @@
 local event = require('cmp.utils.event')
 local autocmd = require('cmp.utils.autocmd')
-local feedkeys = require('cmp.utils.feedkeys')
 local window = require('cmp.utils.window')
 local config = require('cmp.config')
 local types = require('cmp.types')
 local keymap = require('cmp.utils.keymap')
 local misc = require('cmp.utils.misc')
 local api = require('cmp.utils.api')
+local Keymap = require('cmp.kit.Vim.Keymap')
+local AsyncTask = require('cmp.kit.Async.AsyncTask')
 
 local DEFAULT_HEIGHT = 10 -- @see https://github.com/vim/vim/blob/master/src/popupmenu.c#L45
 
----@class cmp.CustomEntriesView
+---@class cmp.EntriesView
 ---@field private entries_win cmp.Window
+---@field private prefix? string
 ---@field private offset integer
 ---@field private active boolean
 ---@field private entries cmp.Entry[]
 ---@field private column_width any
 ---@field public event cmp.Event
-local custom_entries_view = {}
+local entries_view = {}
 
-custom_entries_view.ns = vim.api.nvim_create_namespace('cmp.view.custom_entries_view')
+entries_view.ns = vim.api.nvim_create_namespace('cmp.view.entries_view')
 
-custom_entries_view.new = function()
-  local self = setmetatable({}, { __index = custom_entries_view })
+entries_view.new = function()
+  local self = setmetatable({}, { __index = entries_view })
 
   self.entries_win = window.new()
   self.entries_win:option('conceallevel', 2)
@@ -31,7 +33,7 @@ custom_entries_view.new = function()
   self.entries_win:option('foldenable', false)
   self.entries_win:option('wrap', false)
   -- This is done so that strdisplaywidth calculations for lines in the
-  -- custom_entries_view window exactly match with what is really displayed,
+  -- entries_view window exactly match with what is really displayed,
   -- see comment in cmp.Entry.get_view. Setting tabstop to 1 makes all tabs be
   -- always rendered one column wide, which removes the unpredictability coming
   -- from variable width of the tab character.
@@ -52,7 +54,7 @@ custom_entries_view.new = function()
     end)
   )
 
-  vim.api.nvim_set_decoration_provider(custom_entries_view.ns, {
+  vim.api.nvim_set_decoration_provider(entries_view.ns, {
     on_win = function(_, win, buf, top, bot)
       if win ~= self.entries_win.win or buf ~= self.entries_win:get_buffer() then
         return
@@ -69,7 +71,7 @@ custom_entries_view.new = function()
             if field == types.cmp.ItemField.Abbr then
               a = o
             end
-            vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, o, {
+            vim.api.nvim_buf_set_extmark(buf, entries_view.ns, i, o, {
               end_line = i,
               end_col = o + v[field].bytes,
               hl_group = v[field].hl_group,
@@ -80,7 +82,7 @@ custom_entries_view.new = function()
           end
 
           for _, m in ipairs(e.matches or {}) do
-            vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, a + m.word_match_start - 1, {
+            vim.api.nvim_buf_set_extmark(buf, entries_view.ns, i, a + m.word_match_start - 1, {
               end_line = i,
               end_col = a + m.word_match_end,
               hl_group = m.fuzzy and 'CmpItemAbbrMatchFuzzy' or 'CmpItemAbbrMatch',
@@ -96,15 +98,15 @@ custom_entries_view.new = function()
   return self
 end
 
-custom_entries_view.ready = function()
+entries_view.ready = function()
   return vim.fn.pumvisible() == 0
 end
 
-custom_entries_view.on_change = function(self)
+entries_view.on_change = function(self)
   self.active = false
 end
 
-custom_entries_view.is_direction_top_down = function(self)
+entries_view.is_direction_top_down = function(self)
   local c = config.get()
   if (c.view and c.view.entries and c.view.entries.selection_order) == 'top_down' then
     return true
@@ -115,7 +117,7 @@ custom_entries_view.is_direction_top_down = function(self)
   end
 end
 
-custom_entries_view.open = function(self, offset, entries)
+entries_view.open = function(self, offset, entries)
   local completion = config.get().window.completion
   self.offset = offset
   self.entries = {}
@@ -224,25 +226,29 @@ custom_entries_view.open = function(self, offset, entries)
   end
 end
 
-custom_entries_view.close = function(self)
+entries_view.close = function(self)
   self.prefix = nil
   self.offset = -1
   self.active = false
+  self.bottom_up = false
   self.entries = {}
   self.entries_win:close()
-  self.bottom_up = false
 end
 
-custom_entries_view.abort = function(self)
-  if self.prefix then
-    self:_insert(self.prefix)
-  end
-  feedkeys.call('', 'n', function()
-    self:close()
-  end)
+---@return cmp.kit.Async.AsyncTask
+entries_view.abort = function(self)
+  return AsyncTask.resolve()
+      :next(function()
+        if self.prefix then
+          return self:_insert(self.prefix)
+        end
+      end)
+      :next(function()
+        self:close()
+      end)
 end
 
-custom_entries_view.draw = function(self)
+entries_view.draw = function(self)
   local info = vim.fn.getwininfo(self.entries_win.win)[1]
   local topline = info.topline - 1
   local botline = info.topline + info.height - 1
@@ -273,15 +279,16 @@ custom_entries_view.draw = function(self)
   end
 end
 
-custom_entries_view.visible = function(self)
+entries_view.visible = function(self)
   return self.entries_win:visible()
 end
 
-custom_entries_view.info = function(self)
+entries_view.info = function(self)
   return self.entries_win:info()
 end
 
-custom_entries_view.select_next_item = function(self, option)
+---@return cmp.kit.Async.AsyncTask
+entries_view.select_next_item = function(self, option)
   if self:visible() then
     local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
     local is_top_down = self:is_direction_top_down()
@@ -310,12 +317,13 @@ custom_entries_view.select_next_item = function(self, option)
         end
       end
     end
-
-    self:_select(cursor, option)
+    return self:_select(cursor, option)
   end
+  return AsyncTask.resolve()
 end
 
-custom_entries_view.select_prev_item = function(self, option)
+---@return cmp.kit.Async.AsyncTask
+entries_view.select_prev_item = function(self, option)
   if self:visible() then
     local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
     local is_top_down = self:is_direction_top_down()
@@ -344,44 +352,45 @@ custom_entries_view.select_prev_item = function(self, option)
         end
       end
     end
-
-    self:_select(cursor, option)
+    return self:_select(cursor, option)
   end
+  return AsyncTask.resolve()
 end
 
-custom_entries_view.get_offset = function(self)
+entries_view.get_offset = function(self)
   if self:visible() then
     return self.offset
   end
   return nil
 end
 
-custom_entries_view.get_entries = function(self)
+entries_view.get_entries = function(self)
   if self:visible() then
     return self.entries
   end
   return {}
 end
 
-custom_entries_view.get_first_entry = function(self)
+entries_view.get_first_entry = function(self)
   if self:visible() then
     return (self:is_direction_top_down() and self.entries[1]) or self.entries[#self.entries]
   end
 end
 
-custom_entries_view.get_selected_entry = function(self)
+entries_view.get_selected_entry = function(self)
   if self:visible() and self.entries_win:option('cursorline') then
     return self.entries[vim.api.nvim_win_get_cursor(self.entries_win.win)[1]]
   end
 end
 
-custom_entries_view.get_active_entry = function(self)
+entries_view.get_active_entry = function(self)
   if self:visible() and self.active then
     return self:get_selected_entry()
   end
 end
 
-custom_entries_view._select = function(self, cursor, option)
+---@return cmp.kit.Async.AsyncTask
+entries_view._select = function(self, cursor, option)
   local is_insert = (option.behavior or types.cmp.SelectBehavior.Insert) == types.cmp.SelectBehavior.Insert
   if is_insert and not self.active then
     self.prefix = string.sub(api.get_current_line(), self.offset, api.get_cursor()[2]) or ''
@@ -395,48 +404,32 @@ custom_entries_view._select = function(self, cursor, option)
     0,
   })
 
-  if is_insert then
-    self:_insert(self.entries[cursor] and self.entries[cursor]:get_vim_item(self.offset).word or self.prefix)
-  end
-
-  self.entries_win:update()
-  self:draw()
-  self.event:emit('change')
+  return AsyncTask.resolve():next(function()
+    if is_insert then
+      return self:_insert(self.entries[cursor] and self.entries[cursor]:get_vim_item(self.offset).word or self.prefix)
+    end
+  end):next(function()
+    self.entries_win:update()
+    self:draw()
+    self.event:emit('change')
+  end)
 end
 
-custom_entries_view._insert = setmetatable({
-  pending = false,
-}, {
-  __call = function(this, self, word)
-    word = word or ''
-    if api.is_cmdline_mode() then
-      local cursor = api.get_cursor()
-      vim.api.nvim_feedkeys(keymap.backspace(string.sub(api.get_current_line(), self.offset, cursor[2])) .. word, 'int', true)
-    else
-      if this.pending then
-        return
-      end
-      this.pending = true
+---@return cmp.kit.Async.AsyncTask
+entries_view._insert = function(self, word)
+  word = word or ''
+  if api.is_cmdline_mode() then
+    local cursor = api.get_cursor()
+    return Keymap.send(keymap.backspace(string.sub(api.get_current_line(), self.offset, cursor[2])) .. word, 'ni')
+  else
+    local cursor = api.get_cursor()
+    local keys = {}
+    table.insert(keys, keymap.indentkeys())
+    table.insert(keys, keymap.backspace(string.sub(api.get_current_line(), self.offset, cursor[2])))
+    table.insert(keys, word)
+    table.insert(keys, keymap.indentkeys(vim.bo.indentkeys))
+    return Keymap.send(table.concat(keys, ''), 'ni')
+  end
+end
 
-      local release = require('cmp').suspend()
-      feedkeys.call('', '', function()
-        local cursor = api.get_cursor()
-        local keys = {}
-        table.insert(keys, keymap.indentkeys())
-        table.insert(keys, keymap.backspace(string.sub(api.get_current_line(), self.offset, cursor[2])))
-        table.insert(keys, word)
-        table.insert(keys, keymap.indentkeys(vim.bo.indentkeys))
-        feedkeys.call(
-          table.concat(keys, ''),
-          'int',
-          vim.schedule_wrap(function()
-            this.pending = false
-            release()
-          end)
-        )
-      end)
-    end
-  end,
-})
-
-return custom_entries_view
+return entries_view

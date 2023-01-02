@@ -1,6 +1,6 @@
 local types = require('cmp.types')
 local misc = require('cmp.utils.misc')
-local feedkeys = require('cmp.utils.feedkeys')
+local Keymap = require('cmp.kit.Vim.Keymap')
 local keymap = require('cmp.utils.keymap')
 
 local function merge_keymaps(base, override)
@@ -66,7 +66,7 @@ mapping.preset.cmdline = function(override)
         if cmp.visible() then
           cmp.select_next_item()
         else
-          feedkeys.call(keymap.t('<C-z>'), 'n')
+          Keymap.send(keymap.t('<C-z>'), 'n')
         end
       end,
     },
@@ -76,7 +76,7 @@ mapping.preset.cmdline = function(override)
         if cmp.visible() then
           cmp.select_prev_item()
         else
-          feedkeys.call(keymap.t('<C-z>'), 'n')
+          Keymap.send(keymap.t('<C-z>'), 'n')
         end
       end,
     },
@@ -154,22 +154,24 @@ end
 
 ---Select next completion item.
 mapping.select_next_item = function(option)
+  local cmp = require('cmp')
   return function(fallback)
-    if not require('cmp').select_next_item(option) then
-      local release = require('cmp').core:suspend()
+    if cmp.visible() then
+      cmp.select_next_item(option):await()
+    else
       fallback()
-      vim.schedule(release)
     end
   end
 end
 
 ---Select prev completion item.
 mapping.select_prev_item = function(option)
+  local cmp = require('cmp')
   return function(fallback)
-    if not require('cmp').select_prev_item(option) then
-      local release = require('cmp').core:suspend()
+    if cmp.visible() then
+      cmp.select_prev_item(option):await()
+    else
       fallback()
-      vim.schedule(release)
     end
   end
 end
@@ -177,7 +179,7 @@ end
 ---Confirm selection
 mapping.confirm = function(option)
   return function(fallback)
-    if not require('cmp').confirm(option) then
+    if not require('cmp').confirm(option):await() then
       fallback()
     end
   end
