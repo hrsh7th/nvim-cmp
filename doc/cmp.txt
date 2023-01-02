@@ -632,8 +632,9 @@ window.completion.side_padding~
 
                                      *cmp-config.window.completion.scrollbar*
 window.completion.scrollbar~
-  `boolean`
-  Wether the scrollbar should be enabled if there are more items that fit
+  `boolean | cmp.ScrollbarOption`
+  Wether the scrollbar should be enabled if there are more items that fit.
+  If set to `true`, is is the same as `{ position = 'edge', thumb_char = ' ' }`.
 
                                      *cmp-config.window.documentation.max_width*
 window.documentation.max_width~
