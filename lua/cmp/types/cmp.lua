@@ -58,6 +58,7 @@ cmp.ItemField = {
 ---@field public config? cmp.ConfigSchema
 
 ---@class cmp.ScrollbarOption
+---@field public position 'edge' | 'inside'
 ---@field public thumb_char string
 
 ---@class cmp.Setup

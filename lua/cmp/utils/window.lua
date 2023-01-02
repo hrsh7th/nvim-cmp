@@ -142,7 +142,7 @@ window.update = function(self)
         width = 1,
         height = self.style.height,
         row = info.row,
-        col = info.col + info.width - info.scrollbar_offset, -- info.col was already contained the scrollbar offset.
+        col = info.col + info.width - info.scrollbar_offset + info.scrollbar_pos, -- info.col was already contained the scrollbar offset.
         zindex = (self.style.zindex and (self.style.zindex + 1) or 1),
       }
       if self.sbar_win and vim.api.nvim_win_is_valid(self.sbar_win) then
@@ -164,7 +164,7 @@ window.update = function(self)
       width = 1,
       height = math.max(1, thumb_height),
       row = info.row + thumb_offset + (info.border_info.visible and info.border_info.top or 0),
-      col = info.col + info.width - 1, -- info.col was already added scrollbar offset.
+      col = info.col + info.width + info.scrollbar_pos - 1, -- info.col was already added scrollbar offset.
       zindex = (self.style.zindex and (self.style.zindex + 2) or 2),
     }
     if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
@@ -237,6 +237,7 @@ window.info = function(self)
     border_info = border_info,
     scrollable = false,
     scrollbar_offset = 0,
+    scrollbar_pos = scrollbar.position == 'inside' and -1 or 0,
   }
 
   if self:get_content_height() > info.inner_height and scrollbar then
