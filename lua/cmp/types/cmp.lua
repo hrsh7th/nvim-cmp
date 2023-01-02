@@ -57,6 +57,9 @@ cmp.ItemField = {
 ---@field public reason? cmp.ContextReason
 ---@field public config? cmp.ConfigSchema
 
+---@class cmp.ScrollbarOption
+---@field public thumb_char string
+
 ---@class cmp.Setup
 ---@field public __call fun(c: cmp.ConfigSchema)
 ---@field public buffer fun(c: cmp.ConfigSchema)
@@ -117,7 +120,7 @@ cmp.ItemField = {
 ---@field public max_width integer|nil
 ---@field public max_height integer|nil
 ---@field public scrolloff integer|nil
----@field public scrollbar boolean|true
+---@field public scrollbar boolean|cmp.ScrollbarOption
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior

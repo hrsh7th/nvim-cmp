@@ -170,9 +170,16 @@ window.update = function(self)
     if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
       vim.api.nvim_win_set_config(self.thumb_win, style)
     else
+      local thumb_buf = buffer.ensure(self.name .. 'thumb_buf')
       style.noautocmd = true
-      self.thumb_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'thumb_buf'), false, style)
+      self.thumb_win = vim.api.nvim_open_win(thumb_buf, false, style)
       vim.api.nvim_win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:PmenuThumb,NormalFloat:PmenuThumb')
+
+      local thumb = {}
+      for _ = 1, thumb_height do
+        table.insert(thumb, config.get().window.completion.scrollbar.thumb_char or ' ')
+      end
+      vim.api.nvim_buf_set_lines(thumb_buf, 0, thumb_height, false, thumb)
     end
   else
     if self.sbar_win and vim.api.nvim_win_is_valid(self.sbar_win) then
