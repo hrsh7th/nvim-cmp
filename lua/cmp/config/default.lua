@@ -96,7 +96,10 @@ return function()
         scrolloff = 0,
         col_offset = 0,
         side_padding = 1,
-        scrollbar = true,
+        scrollbar = {
+          position = 'edge',
+          thumb_char = ' ',
+        },
       },
       documentation = {
         max_height = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),
