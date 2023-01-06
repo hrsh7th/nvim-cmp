@@ -108,7 +108,7 @@ compare.locality = setmetatable({
   locality_map = {},
   update = function(self)
     local config = require('cmp').get_config()
-    if not vim.tbl_contains(config.sorting.comparators, compare.scopes) then
+    if not vim.tbl_contains(config.sorting.comparators, compare.locality) then
       return
     end
 
