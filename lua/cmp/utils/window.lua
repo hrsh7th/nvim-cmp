@@ -37,7 +37,8 @@ window.new = function()
 end
 
 ---Set window option.
----NOTE: If the window already visible, immediately applied to it.
+---NOTE: If the window already visible, immediately applied to it. The OptionSet
+-- event is not triggered
 ---@param key string
 ---@param value any
 window.option = function(self, key, value)
@@ -51,12 +52,16 @@ window.option = function(self, key, value)
 
   self.opt[key] = value
   if self:visible() then
+    local eventignore = vim.opt.eventignore:get()
+    vim.opt.eventignore:append("OptionSet")
     vim.api.nvim_win_set_option(self.win, key, value)
+    vim.opt.eventignore = eventignore
   end
 end
 
 ---Set buffer option.
----NOTE: If the buffer already visible, immediately applied to it.
+---NOTE: If the buffer already visible, immediately applied to it. The OptionSet
+-- event is not triggered.
 ---@param key string
 ---@param value any
 window.buffer_option = function(self, key, value)
@@ -71,7 +76,10 @@ window.buffer_option = function(self, key, value)
   self.buffer_opt[key] = value
   local existing_buf = buffer.get(self.name)
   if existing_buf then
+    local eventignore = vim.opt.eventignore:get()
+    vim.opt.eventignore:append("OptionSet")
     vim.api.nvim_buf_set_option(existing_buf, key, value)
+    vim.opt.eventignore = eventignore
   end
 end
 
