@@ -108,7 +108,7 @@ compare.locality = setmetatable({
   locality_map = {},
   update = function(self)
     local config = require('cmp').get_config()
-    if not vim.tbl_contains(config.sorting.comparators, compare.scopes) then
+    if not vim.tbl_contains(config.sorting.comparators, compare.locality) then
       return
     end
 
@@ -132,7 +132,7 @@ compare.locality = setmetatable({
           local s, e = regexp:match_str(buffer)
           if s and e then
             local w = string.sub(buffer, s + 1, e)
-            local d = math.abs(i - cursor_row) - (is_above and 0.1 or 0)
+            local d = math.abs(i - cursor_row) - (is_above and 1 or 0)
             locality_map[w] = math.min(locality_map[w] or math.huge, d)
             buffer = string.sub(buffer, e + 1)
           else
