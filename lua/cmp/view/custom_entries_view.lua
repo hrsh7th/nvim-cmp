@@ -147,6 +147,7 @@ custom_entries_view.open = function(self, offset, entries)
   width = width + self.column_width.abbr + (self.column_width.kind > 0 and 1 or 0)
   width = width + self.column_width.kind + (self.column_width.menu > 0 and 1 or 0)
   width = width + self.column_width.menu + 1
+  width = width + (completion.scrollbar.position == 'inside' and 1 or 0)
 
   local height = vim.api.nvim_get_option('pumheight')
   height = height ~= 0 and height or #self.entries
