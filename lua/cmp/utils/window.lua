@@ -53,7 +53,7 @@ window.option = function(self, key, value)
   self.opt[key] = value
   if self:visible() then
     local eventignore = vim.opt.eventignore:get()
-    vim.opt.eventignore:append("OptionSet")
+    vim.opt.eventignore:append('OptionSet')
     vim.api.nvim_win_set_option(self.win, key, value)
     vim.opt.eventignore = eventignore
   end
@@ -77,7 +77,7 @@ window.buffer_option = function(self, key, value)
   local existing_buf = buffer.get(self.name)
   if existing_buf then
     local eventignore = vim.opt.eventignore:get()
-    vim.opt.eventignore:append("OptionSet")
+    vim.opt.eventignore:append('OptionSet')
     vim.api.nvim_buf_set_option(existing_buf, key, value)
     vim.opt.eventignore = eventignore
   end
