@@ -66,6 +66,8 @@ docs_view.open = function(self, e, view)
     return self:close()
   end
 
+  width = width + (config.get().window.completion.scrollbar.position == 'inside' and 1 or 0)
+
   -- Calculate window position.
   local right_col = view.col + view.width
   local left_col = view.col - width - border_info.horiz
