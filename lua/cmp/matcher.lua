@@ -238,7 +238,7 @@ matcher.fuzzy = function(input, word, matches)
     end
     word_offset = word_offset + 1
   end
-  if input_index > #input then
+  if matched and input_index > #input then
     table.insert(matches, {
       input_match_start = input_match_start,
       input_match_end = input_match_end,
