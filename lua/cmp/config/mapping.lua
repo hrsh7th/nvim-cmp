@@ -43,10 +43,24 @@ mapping.preset.insert = function(override)
       i = mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Select }),
     },
     ['<C-n>'] = {
-      i = mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Insert }),
+      i = function()
+        local cmp = require('cmp')
+        if cmp.visible() then
+          cmp.select_next_item({ behavior = types.cmp.SelectBehavior.Insert })
+        else
+          cmp.complete()
+        end
+      end,
     },
     ['<C-p>'] = {
-      i = mapping.select_prev_item({ behavior = types.cmp.SelectBehavior.Insert }),
+      i = function()
+        local cmp = require('cmp')
+        if cmp.visible() then
+          cmp.select_prev_item({ behavior = types.cmp.SelectBehavior.Insert })
+        else
+          cmp.complete()
+        end
+      end,
     },
     ['<C-y>'] = {
       i = mapping.confirm({ select = false }),
