@@ -18,15 +18,8 @@ dependencies = {
 }
 
 source = {
-  url = 'http://github.com/hrsh7th/nvim-cmp/archive/v' .. MODREV .. '.zip',
-  dir = 'nvim-cmp-' .. MODREV,
+  url = 'git://github.com/hrsh7th/nvim-cmp',
 }
-
-if MODREV == 'scm' then
-  source = {
-    url = 'git://github.com/hrsh7th/nvim-cmp',
-  }
-end
 
 build = {
   type = 'builtin',
