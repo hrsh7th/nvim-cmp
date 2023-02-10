@@ -74,6 +74,16 @@ end
 ---Mapping preset cmdline-mode configuration.
 mapping.preset.cmdline = function(override)
   return merge_keymaps(override or {}, {
+    ['<C-z>'] = {
+      c = function()
+        local cmp = require('cmp')
+        if cmp.visible() then
+          cmp.select_next_item()
+        else
+          cmp.complete()
+        end
+      end,
+    },
     ['<Tab>'] = {
       c = function()
         local cmp = require('cmp')
@@ -115,7 +125,10 @@ mapping.preset.cmdline = function(override)
       end,
     },
     ['<C-e>'] = {
-      c = mapping.close(),
+      c = mapping.abort(),
+    },
+    ['<C-y>'] = {
+      c = mapping.confirm({ select = false }),
     },
   })
 end
