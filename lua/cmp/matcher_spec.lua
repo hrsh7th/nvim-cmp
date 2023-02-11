@@ -33,6 +33,9 @@ describe('matcher', function()
 
     assert.is.truthy(matcher.match('true', 'v:true', { synonyms = { 'true' } }) == matcher.match('true', 'true'))
     assert.is.truthy(matcher.match('g', 'get', { synonyms = { 'get' } }) > matcher.match('g', 'dein#get', { 'dein#get' }))
+
+    assert.is.truthy(matcher.match('Unit', 'net.UnixListener', { disallow_partial_fuzzy_matching = true }) == 0)
+    assert.is.truthy(matcher.match('Unit', 'net.UnixListener', { disallow_partial_fuzzy_matching = false }) >= 1)
   end)
 
   it('disallow_fuzzy_matching', function()

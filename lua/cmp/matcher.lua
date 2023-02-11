@@ -78,7 +78,7 @@ end
 ---Match entry
 ---@param input string
 ---@param word string
----@param option { synonyms: string[], disallow_fuzzy_matching: boolean, disallow_partial_matching: boolean, disallow_prefix_unmatching: boolean }
+---@param option { synonyms: string[], disallow_fuzzy_matching: boolean, disallow_partial_fuzzy_matching: boolean, disallow_partial_matching: boolean, disallow_prefix_unmatching: boolean }
 ---@return integer
 matcher.match = function(input, word, option)
   option = option or {}
@@ -179,8 +179,10 @@ matcher.match = function(input, word, option)
   -- Check remaining input as fuzzy
   if matches[#matches].input_match_end < #input then
     if not option.disallow_fuzzy_matching then
-      if prefix and matcher.fuzzy(input, word, matches) then
-        return score, matches
+      if not option.disallow_partial_fuzzy_matching or prefix then
+        if  matcher.fuzzy(input, word, matches) then
+          return score, matches
+        end
       end
     end
     return 0, {}

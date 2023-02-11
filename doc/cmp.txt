@@ -451,7 +451,7 @@ confirmation.get_commit_characters~
   You can append or exclude commitCharacters via this configuration option
   function. The commitCharacters are defined by the LSP spec.
 
-                                                  *cmp-config.formatting.expandable_indicator*
+                                    *cmp-config.formatting.expandable_indicator*
 formatting.expandable_indicator~
   `cmp.expandable_indicator`
   Boolean to show the `~` expandable indicator in cmp's floating window.
@@ -474,6 +474,10 @@ matching.disallow_fuzzy_matching~
   `boolean`
   Whether to allow fuzzy matching.
 
+                           *cmp-config.matching.disallow_partial_fuzzy_matching*
+matching.disallow_partial_fuzzy_matching~
+  `boolean`
+  Whether to allow fuzzy matching without prefix matching.
                                  *cmp-config.matching.disallow_partial_matching*
 matching.disallow_partial_matching~
   `boolean`

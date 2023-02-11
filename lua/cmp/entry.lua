@@ -365,11 +365,13 @@ entry.match = function(self, input, matching_config)
     input,
     self.resolved_completion_item and '1' or '0',
     matching_config.disallow_fuzzy_matching and '1' or '0',
+    matching_config.disallow_partial_fuzzy_matching and '1' or '0',
     matching_config.disallow_partial_matching and '1' or '0',
     matching_config.disallow_prefix_unmatching and '1' or '0',
   }, function()
     local option = {
       disallow_fuzzy_matching = matching_config.disallow_fuzzy_matching,
+      disallow_partial_fuzzy_matching = matching_config.disallow_partial_fuzzy_matching,
       disallow_partial_matching = matching_config.disallow_partial_matching,
       disallow_prefix_unmatching = matching_config.disallow_prefix_unmatching,
       synonyms = {
