@@ -1,6 +1,5 @@
 local types = require('cmp.types')
 local misc = require('cmp.utils.misc')
-local feedkeys = require('cmp.utils.feedkeys')
 local keymap = require('cmp.utils.keymap')
 
 local function merge_keymaps(base, override)
@@ -90,7 +89,7 @@ mapping.preset.cmdline = function(override)
         if cmp.visible() then
           cmp.select_next_item()
         else
-          feedkeys.call(keymap.t('<C-z>'), 'n')
+          cmp.complete()
         end
       end,
     },
@@ -100,7 +99,7 @@ mapping.preset.cmdline = function(override)
         if cmp.visible() then
           cmp.select_prev_item()
         else
-          feedkeys.call(keymap.t('<C-z>'), 'n')
+          cmp.complete()
         end
       end,
     },
