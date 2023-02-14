@@ -128,7 +128,17 @@ matcher.match = function(input, word, option)
   end
 
   if #matches == 0 then
-    return 0, {}
+    matches = {
+      {
+        index = 1,
+        input_match_start = 1,
+        input_match_end = 1,
+        word_match_start = 1,
+        word_match_end = 1,
+        strict_ratio = 0,
+        fuzzy = false,
+      }
+    }
   end
 
   matcher.debug(word, matches)
