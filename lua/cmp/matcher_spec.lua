@@ -47,7 +47,7 @@ describe('matcher', function()
     assert.is.truthy(score >= 1)
     assert.equals(matches[1].word_match_start, 5)
 
-    score, matches = matcher.match('tail', 'HCDetails', {
+    score = matcher.match('tail', 'HCDetails', {
       disallow_fuzzy_matching = false,
       disallow_partial_matching = false,
       disallow_prefix_unmatching = false,
