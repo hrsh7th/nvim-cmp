@@ -56,8 +56,6 @@ Plug 'hrsh7th/vim-vsnip'
 
 call plug#end()
 
-set completeopt=menu,menuone,noselect
-
 lua <<EOF
   -- Set up nvim-cmp.
   local cmp = require'cmp'
