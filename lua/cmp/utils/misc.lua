@@ -226,13 +226,13 @@ misc.redraw = setmetatable({
   doing = false,
   force = false,
   -- We use `<Up><Down>` to redraw the screen. (Previously, We use <C-r><ESC>. it will remove the unmatches search history.)
-  incsearch_redraw_keys = '<Up><Down>',
+  incsearch_redraw_keys = ' <BS>',
 }, {
   __call = function(self, force)
     local termcode = vim.api.nvim_replace_termcodes(self.incsearch_redraw_keys, true, true, true)
     if vim.tbl_contains({ '/', '?' }, vim.fn.getcmdtype()) then
       if vim.o.incsearch then
-        return vim.api.nvim_feedkeys(termcode, 'in', true)
+        return vim.api.nvim_feedkeys(termcode, 'ni', true)
       end
     end
 
