@@ -123,23 +123,12 @@ misc.id = setmetatable({
   end,
 })
 
----Check the value is nil or not.
----@generic T|nil|vim.NIL
----@param v T
----@return T|nil
-misc.safe = function(v)
-  if v == nil or v == vim.NIL then
-    return nil
-  end
-  return v
-end
-
 ---Treat 1/0 as bool value
 ---@param v boolean|1|0
 ---@param def boolean
 ---@return boolean
 misc.bool = function(v, def)
-  if misc.safe(v) == nil then
+  if v == nil then
     return def
   end
   return v == true or v == 1
@@ -153,7 +142,7 @@ misc.set = function(t, keys, v)
   local c = t
   for i = 1, #keys - 1 do
     local key = keys[i]
-    c[key] = misc.safe(c[key]) or {}
+    c[key] = c[key] or {}
     c = c[key]
   end
   c[keys[#keys]] = v

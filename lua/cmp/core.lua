@@ -389,10 +389,10 @@ core.confirm = function(self, e, option, callback)
   feedkeys.call('', 'n', function()
     -- Apply additionalTextEdits.
     local ctx = context.new()
-    if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) == 0 then
+    if #(e:get_completion_item().additionalTextEdits or {}) == 0 then
       e:resolve(function()
         local new = context.new()
-        local text_edits = misc.safe(e:get_completion_item().additionalTextEdits) or {}
+        local text_edits = e:get_completion_item().additionalTextEdits or {}
         if #text_edits == 0 then
           return
         end
@@ -423,9 +423,9 @@ core.confirm = function(self, e, option, callback)
   feedkeys.call('', 'n', function()
     local ctx = context.new()
     local completion_item = misc.copy(e:get_completion_item())
-    if not misc.safe(completion_item.textEdit) then
+    if not completion_item.textEdit then
       completion_item.textEdit = {}
-      completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.word or completion_item.label
+      completion_item.textEdit.newText = completion_item.insertText or completion_item.word or completion_item.label
     end
     local behavior = option.behavior or config.get().confirmation.default_behavior
     if behavior == types.cmp.ConfirmBehavior.Replace then
