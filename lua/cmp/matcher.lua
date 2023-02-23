@@ -198,7 +198,7 @@ end
 
 --- fuzzy
 matcher.fuzzy = function(input, word, matches)
-  local input_index = matches[1] and (matches[1].input_match_end + 1) or 1
+  local input_index = matches[#matches] and (matches[#matches].input_match_end + 1) or 1
 
   -- Lately specified middle of text.
   for i = 1, #matches - 1 do

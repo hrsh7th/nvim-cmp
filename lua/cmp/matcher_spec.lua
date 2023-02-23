@@ -37,6 +37,9 @@ describe('matcher', function()
     assert.is.truthy(matcher.match('Unit', 'net.UnixListener', { disallow_partial_fuzzy_matching = true }) == 0)
     assert.is.truthy(matcher.match('Unit', 'net.UnixListener', { disallow_partial_fuzzy_matching = false }) >= 1)
 
+    assert.is.truthy(matcher.match('emg', 'error_msg') >= 1)
+    assert.is.truthy(matcher.match('sasr', 'saved_splitright') >= 1)
+
     local score, matches
     score, matches = matcher.match('tail', 'HCDetails', {
       disallow_fuzzy_matching = false,
