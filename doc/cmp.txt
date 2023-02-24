@@ -474,6 +474,11 @@ matching.disallow_fuzzy_matching~
   `boolean`
   Whether to allow fuzzy matching.
 
+                               *cmp-config.matching.disallow_fullfuzzy_matching*
+matching.disallow_fullfuzzy_matching~
+  `boolean`
+  Whether to allow full-fuzzy matching.
+
                            *cmp-config.matching.disallow_partial_fuzzy_matching*
 matching.disallow_partial_fuzzy_matching~
   `boolean`
