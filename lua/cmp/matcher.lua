@@ -78,7 +78,7 @@ end
 ---Match entry
 ---@param input string
 ---@param word string
----@param option { synonyms: string[], disallow_fuzzy_matching: boolean, disallow_partial_fuzzy_matching: boolean, disallow_partial_matching: boolean, disallow_prefix_unmatching: boolean }
+---@param option { synonyms: string[], disallow_fullfuzzy_matching: boolean, disallow_fuzzy_matching: boolean, disallow_partial_fuzzy_matching: boolean, disallow_partial_matching: boolean, disallow_prefix_unmatching: boolean }
 ---@return integer
 matcher.match = function(input, word, option)
   option = option or {}
@@ -129,7 +129,7 @@ matcher.match = function(input, word, option)
 
   if #matches == 0 then
     if not option.disallow_fuzzy_matching and not option.disallow_prefix_unmatching and not option.disallow_partial_fuzzy_matching then
-      if matcher.fuzzy(input, word, matches) then
+      if matcher.fuzzy(input, word, matches, option) then
         return 1, matches
       end
     end
@@ -185,7 +185,7 @@ matcher.match = function(input, word, option)
   if matches[#matches].input_match_end < #input then
     if not option.disallow_fuzzy_matching then
       if not option.disallow_partial_fuzzy_matching or prefix then
-        if matcher.fuzzy(input, word, matches) then
+        if matcher.fuzzy(input, word, matches, option) then
           return score, matches
         end
       end
@@ -197,7 +197,7 @@ matcher.match = function(input, word, option)
 end
 
 --- fuzzy
-matcher.fuzzy = function(input, word, matches)
+matcher.fuzzy = function(input, word, matches, option)
   local input_index = matches[#matches] and (matches[#matches].input_match_end + 1) or 1
 
   -- Lately specified middle of text.
@@ -218,10 +218,9 @@ matcher.fuzzy = function(input, word, matches)
   end
 
   -- Remaining text fuzzy match.
-  local last_input_index = input_index
   local matched = false
   local word_offset = 0
-  local word_index = matches[1] and (matches[1].word_match_end + 1) or 1
+  local word_index = matches[#matches] and (matches[#matches].word_match_end + 1) or 1
   local input_match_start = -1
   local input_match_end = -1
   local word_match_start = -1
@@ -238,12 +237,26 @@ matcher.fuzzy = function(input, word, matches)
       input_index = input_index + 1
       strict_count = strict_count + (c1 == c2 and 1 or 0)
       match_count = match_count + 1
-    elseif matched then
-      input_index = last_input_index
-      input_match_end = input_index - 1
+    else
+      if option.disallow_fullfuzzy_matching then
+        break
+      else
+        if matched then
+          table.insert(matches, {
+            input_match_start = input_match_start,
+            input_match_end = input_index - 1,
+            word_match_start = word_match_start,
+            word_match_end = word_index + word_offset - 1,
+            strict_ratio = strict_count / match_count,
+            fuzzy = true,
+          })
+        end
+      end
+      matched = false
     end
     word_offset = word_offset + 1
   end
+
   if input_index > #input then
     table.insert(matches, {
       input_match_start = input_match_start,

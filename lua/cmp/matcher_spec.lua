@@ -64,6 +64,11 @@ describe('matcher', function()
     assert.is.truthy(matcher.match('fmodify', 'fnamemodify', { disallow_fuzzy_matching = false }) >= 1)
   end)
 
+  it('disallow_fullfuzzy_matching', function()
+    assert.is.truthy(matcher.match('svd', 'saved_splitright', { disallow_fullfuzzy_matching = true }) == 0)
+    assert.is.truthy(matcher.match('svd', 'saved_splitright', { disallow_fullfuzzy_matching = false }) >= 1)
+  end)
+
   it('disallow_partial_matching', function()
     assert.is.truthy(matcher.match('fb', 'foo_bar', { disallow_partial_matching = true }) == 0)
     assert.is.truthy(matcher.match('fb', 'foo_bar', { disallow_partial_matching = false }) >= 1)
