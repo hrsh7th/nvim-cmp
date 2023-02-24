@@ -28,3 +28,5 @@ integration: install-stylua
 	luacheck lua
 	vusted lua
 
+docgen:
+	nvim --headless --noplugin -u scripts/minimal_init.vim -c "luafile ./scripts/docgen.lua" -c 'qa'

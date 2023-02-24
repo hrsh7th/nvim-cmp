@@ -1,0 +1,86 @@
+================================================================================
+                                                                      *cmp.nvim*
+
+cmp.nvim is a completion plugin engine.
+
+Testimonials:
+
+> It is my favorite completion plugin to date.
+    - TJ DeVries
+
+cmp.config()                                                    *cmp.config()*
+    Export default config presets.
+
+
+
+cmp.mapping()                                                  *cmp.mapping()*
+    Export mapping
+
+
+
+cmp.register_source({name})                            *cmp.register_source()*
+    Register completion sources
+
+
+    Parameters: ~
+        {name} (string)
+
+    Return: ~
+        number
+
+
+cmp.unregister_source({id})                          *cmp.unregister_source()*
+    Unregister completion source
+
+
+    Parameters: ~
+        {id} (number)
+
+
+cmp.complete()                                                *cmp.complete()*
+    Invoke completion manually
+
+
+
+cmp.visible()                                                  *cmp.visible()*
+    Return view is visible or not.
+
+
+
+cmp.close()                                                      *cmp.close()*
+    Close current completion
+
+
+
+cmp.abort()                                                      *cmp.abort()*
+    Abort current completion
+
+
+
+cmp.select_next_item()                                *cmp.select_next_item()*
+    Select next item if possible
+
+
+
+cmp.select_prev_item()                                *cmp.select_prev_item()*
+    Select prev item if possible
+
+
+
+cmp.scroll_docs()                                          *cmp.scroll_docs()*
+    Scrolling documentation window if possible
+
+
+
+cmp.confirm()                                                  *cmp.confirm()*
+    Confirm completion
+
+
+
+cmp.status()                                                    *cmp.status()*
+    Show status
+
+
+
+
+ vim:tw=78:ts=8:ft=help:norl:
