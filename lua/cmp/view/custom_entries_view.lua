@@ -412,7 +412,7 @@ custom_entries_view._insert = setmetatable({
     if api.is_cmdline_mode() then
       local cursor = api.get_cursor()
       -- setcmdline() added in v0.8.0
-      if vim.fn.has('nvim-0.8') then
+      if vim.fn.has('nvim-0.8') == 1 then
         local current_line = api.get_current_line()
         local before_line = current_line:sub(1, self.offset - 1)
         local after_line = current_line:sub(cursor[2] + 1)
