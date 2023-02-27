@@ -268,7 +268,7 @@ entry.get_vim_item = function(self, suggest_offset)
 
     -- remove duplicated string.
     if self:get_offset() ~= self.context.cursor.col then
-      for i = 1, #word - 1 do
+      for i = 1, #word do
         if str.has_prefix(self.context.cursor_after_line, string.sub(word, i, #word)) then
           word = string.sub(word, 1, i - 1)
           break
