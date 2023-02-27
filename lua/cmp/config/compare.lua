@@ -1,6 +1,5 @@
 local types = require('cmp.types')
 local cache = require('cmp.utils.cache')
-local misc = require('cmp.utils.misc')
 
 local compare = {}
 
