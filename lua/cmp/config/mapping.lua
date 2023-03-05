@@ -133,7 +133,7 @@ mapping.preset.cmdline = function(override)
 end
 
 ---Invoke completion
----@param option cmp.CompleteParams
+---@param option? cmp.CompleteParams
 mapping.complete = function(option)
   return function(fallback)
     if not require('cmp').complete(option) then
