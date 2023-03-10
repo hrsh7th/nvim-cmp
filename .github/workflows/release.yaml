@@ -9,15 +9,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: LuaRocks Upload
-        uses: nvim-neorocks/luarocks-tag-release@v2.0.0
+        uses: nvim-neorocks/luarocks-tag-release@v3
         env:
           LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}
         with:
           detailed_description: |
             A completion engine plugin for neovim written in Lua.
             Completion sources are installed from external repositories and "sourced".
-          copy_directories:
-            autoload
-            plugin
-            doc
 
