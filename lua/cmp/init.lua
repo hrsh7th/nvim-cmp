@@ -149,6 +149,19 @@ cmp.select_next_item = cmp.sync(function(option)
   return false
 end)
 
+---Select the nth item in the completion list
+---@param n integer
+cmp.select_nth = cmp.sync(function(n, option)
+  option = option or {}
+  if cmp.core.view:visible() then
+    local release = cmp.core:suspend()
+    cmp.core.view:select_nth(n, option)
+    vim.schedule(release)
+    return true
+  end
+  return false
+end)
+
 ---Select prev item if possible
 cmp.select_prev_item = cmp.sync(function(option)
   option = option or {}

@@ -164,6 +164,10 @@ view.select_next_item = function(self, option)
   self:_get_entries_view():select_next_item(option)
 end
 
+view.select_nth = function (self, n, option)
+  self:_get_entries_view():_select(n, option)
+end
+
 ---Select prev menu item.
 ---@param option cmp.SelectOption
 view.select_prev_item = function(self, option)
