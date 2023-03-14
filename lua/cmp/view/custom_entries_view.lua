@@ -64,6 +64,9 @@ custom_entries_view.new = function()
         if e then
           local v = e:get_view(self.offset, buf)
           local o = config.get().window.completion.side_padding
+          if config.get().formatting.number_options then
+            o = o + 2
+          end
           local a = 0
           for _, field in ipairs(fields) do
             if field == types.cmp.ItemField.Abbr then
@@ -147,6 +150,9 @@ custom_entries_view.open = function(self, offset, entries)
   width = width + self.column_width.abbr + (self.column_width.kind > 0 and 1 or 0)
   width = width + self.column_width.kind + (self.column_width.menu > 0 and 1 or 0)
   width = width + self.column_width.menu + 1
+  if config.get().formatting.number_options then
+    width = width + 3
+  end
 
   local height = vim.api.nvim_get_option('pumheight')
   height = height ~= 0 and height or #self.entries
@@ -249,12 +255,25 @@ custom_entries_view.draw = function(self)
   local texts = {}
   local fields = config.get().formatting.fields
   local entries_buf = self.entries_win:get_buffer()
+  local index = 0
+  if not config.get().formatting.number_options then
+    index = 10 -- this disables adding the text to the things
+  end
   for i = topline, botline - 1 do
     local e = self.entries[i + 1]
     if e then
       local view = e:get_view(self.offset, entries_buf)
       local text = {}
       table.insert(text, string.rep(' ', config.get().window.completion.side_padding))
+
+      -- add the number if it's configured
+      if index < 10 then
+        table.insert(text, string.format('%s ', index))
+        index = index + 1
+      else
+        table.insert(text, '  ')
+      end
+
       for _, field in ipairs(fields) do
         table.insert(text, view[field].text)
         table.insert(text, string.rep(' ', 1 + self.column_width[field] - view[field].width))
