@@ -164,8 +164,13 @@ view.select_next_item = function(self, option)
   self:_get_entries_view():select_next_item(option)
 end
 
-view.select_nth = function (self, n, option)
-  self:_get_entries_view():_select(n, option)
+view.select_nth = function (self, n, options)
+  local entries_view = self:_get_entries_view()
+  if entries_view:is_direction_top_down() then
+    entries_view:_select(n, options)
+  else
+    entries_view:_select(entries_view:info().height + 1 - n, options)
+  end
 end
 
 ---Select prev menu item.

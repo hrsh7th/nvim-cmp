@@ -256,9 +256,13 @@ custom_entries_view.draw = function(self)
   local fields = config.get().formatting.fields
   local entries_buf = self.entries_win:get_buffer()
   local index = 0
-  if not config.get().formatting.number_options then
-    index = 10 -- this disables adding the text to the things
+  local delta = 1
+
+  if not self:is_direction_top_down() then
+    index = info.height - 1
+    delta = -1
   end
+
   for i = topline, botline - 1 do
     local e = self.entries[i + 1]
     if e then
@@ -266,13 +270,12 @@ custom_entries_view.draw = function(self)
       local text = {}
       table.insert(text, string.rep(' ', config.get().window.completion.side_padding))
 
-      -- add the number if it's configured
-      if index < 10 then
+      if config.get().formatting.number_options and index < 10 then
         table.insert(text, string.format('%s ', index))
-        index = index + 1
       else
         table.insert(text, '  ')
       end
+      index = index + delta
 
       for _, field in ipairs(fields) do
         table.insert(text, view[field].text)
