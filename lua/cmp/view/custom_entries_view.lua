@@ -99,6 +99,10 @@ custom_entries_view.new = function()
   return self
 end
 
+custom_entries_view.get_window = function(self)
+  return self.entries_win
+end
+
 custom_entries_view.ready = function()
   return vim.fn.pumvisible() == 0
 end
