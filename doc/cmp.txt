@@ -821,6 +821,17 @@ How to disable the preselect feature? ~
     preselect = cmp.PreselectMode.None
   }
 <
+How to disable only specific language-server's completion?~
+
+  You can disable `completionProvider` in lspconfig configuration.
+>lua
+  lspconfig[%SERVER_NAME%].setup {
+    on_attach = function(client)
+      client.server_capabilities.completionProvider = false
+    end
+  }
+<
+
 
 How to disable commitCharacters?~
 
