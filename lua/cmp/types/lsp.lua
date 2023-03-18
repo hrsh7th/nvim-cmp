@@ -225,6 +225,7 @@ lsp.CompletionItemKind = vim.tbl_add_reverse_lookup(lsp.CompletionItemKind)
 ---@class lsp.MarkupContent
 ---@field public kind lsp.MarkupKind
 ---@field public value string
+---@field public ft string
 
 ---@class lsp.Position
 ---@field public line integer

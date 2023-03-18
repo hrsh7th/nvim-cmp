@@ -17,7 +17,6 @@ docs_view.new = function()
   self.window:option('scrolloff', 0)
   self.window:option('showbreak', 'NONE')
   self.window:option('wrap', true)
-  self.window:buffer_option('filetype', 'cmp_docs')
   return self
 end
 
@@ -38,20 +37,20 @@ docs_view.open = function(self, e, view)
   local right_space = vim.o.columns - (view.col + view.width) - 1
   local left_space = view.col - 1
   local max_width = math.min(documentation.max_width, math.max(left_space, right_space))
-
   -- Update buffer content if needed.
   if not self.entry or e.id ~= self.entry.id then
     local documents = e:get_documentation()
-    if #documents == 0 then
+    if #documents.content == 0 then
       return self:close()
     end
 
     self.entry = e
     vim.api.nvim_buf_call(self.window:get_buffer(), function()
       vim.cmd([[syntax clear]])
+      self.window:buffer_option('filetype', documents.ft)
       vim.api.nvim_buf_set_lines(self.window:get_buffer(), 0, -1, false, {})
     end)
-    vim.lsp.util.stylize_markdown(self.window:get_buffer(), documents, {
+    vim.lsp.util.stylize_markdown(self.window:get_buffer(), documents.content, {
       max_width = max_width - border_info.horiz,
       max_height = documentation.max_height,
     })

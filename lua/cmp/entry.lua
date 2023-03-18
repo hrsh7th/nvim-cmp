@@ -420,7 +420,7 @@ entry.get_completion_item = function(self)
 end
 
 ---Create documentation
----@return string
+---@return {content: string, ft: string}
 entry.get_documentation = function(self)
   local item = self:get_completion_item()
 
@@ -439,7 +439,11 @@ entry.get_documentation = function(self)
     })
   end
 
+  local ft = "cmp_ros"
   local documentation = item.documentation
+  if documentation ~= nil and documentation.ft ~= nil then
+    ft = documentation.ft
+  end
   if type(documentation) == 'string' and documentation ~= '' then
     local value = str.trim(documentation)
     if value ~= '' then
@@ -458,7 +462,7 @@ entry.get_documentation = function(self)
     end
   end
 
-  return vim.lsp.util.convert_input_to_markdown_lines(documents)
+  return {content = vim.lsp.util.convert_input_to_markdown_lines(documents), ft = ft}
 end
 
 ---Get completion item kind
