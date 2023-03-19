@@ -149,8 +149,9 @@ cmp.select_next_item = cmp.sync(function(option)
   return false
 end)
 
----Select the nth item in the completion list
+---Select the nth item in the completion list (1 based counting)
 ---@param n integer
+---@param option cmp.SelectOption
 cmp.select_nth = cmp.sync(function(n, option)
   option = option or {}
   if cmp.core.view:visible() then

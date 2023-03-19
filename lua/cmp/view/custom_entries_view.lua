@@ -64,22 +64,23 @@ custom_entries_view.new = function()
         if e then
           local v = e:get_view(self.offset, buf)
           local o = config.get().window.completion.side_padding
-          if config.get().formatting.number_options then
-            o = o + 2
-          end
           local a = 0
           for _, field in ipairs(fields) do
-            if field == types.cmp.ItemField.Abbr then
-              a = o
+            if field == types.cmp.ItemField.Num then
+              o = o + ('%s'):format(config.get().formatting.number_options.end_index):len() + 1
+            else
+              if field == types.cmp.ItemField.Abbr then
+                a = o
+              end
+              vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, o, {
+                end_line = i,
+                end_col = o + v[field].bytes,
+                hl_group = v[field].hl_group,
+                hl_mode = 'combine',
+                ephemeral = true,
+              })
+              o = o + v[field].bytes + (self.column_width[field] - v[field].width) + 1
             end
-            vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, o, {
-              end_line = i,
-              end_col = o + v[field].bytes,
-              hl_group = v[field].hl_group,
-              hl_mode = 'combine',
-              ephemeral = true,
-            })
-            o = o + v[field].bytes + (self.column_width[field] - v[field].width) + 1
           end
 
           for _, m in ipairs(e.matches or {}) do
@@ -95,7 +96,6 @@ custom_entries_view.new = function()
       end
     end,
   })
-
   return self
 end
 
@@ -126,7 +126,11 @@ custom_entries_view.open = function(self, offset, entries)
   local completion = config.get().window.completion
   self.offset = offset
   self.entries = {}
-  self.column_width = { abbr = 0, kind = 0, menu = 0 }
+  self.column_width = { abbr = 0, kind = 0, menu = 0, num = 0 }
+
+  if vim.tbl_contains(config.get().formatting.fields, 'num') then
+    self.column_width.num = string.format('%s', config.get().formatting.number_options.end_index):len() + 2
+  end
 
   local entries_buf = self.entries_win:get_buffer()
   local lines = {}
@@ -154,9 +158,7 @@ custom_entries_view.open = function(self, offset, entries)
   width = width + self.column_width.abbr + (self.column_width.kind > 0 and 1 or 0)
   width = width + self.column_width.kind + (self.column_width.menu > 0 and 1 or 0)
   width = width + self.column_width.menu + 1
-  if config.get().formatting.number_options then
-    width = width + 3
-  end
+  width = width + self.column_width.num
 
   local height = vim.api.nvim_get_option('pumheight')
   height = height ~= 0 and height or #self.entries
@@ -258,13 +260,18 @@ custom_entries_view.draw = function(self)
   local botline = info.topline + info.height - 1
   local texts = {}
   local fields = config.get().formatting.fields
+  local num_opts = config.get().formatting.number_options
+  local num_width = string.format('%s', num_opts.end_index):len()
   local entries_buf = self.entries_win:get_buffer()
   local index = 0
   local delta = 1
 
-  if not self:is_direction_top_down() then
-    index = info.height - 1
-    delta = -1
+  -- number options
+  if num_opts.enabled then
+    if not self:is_direction_top_down() then
+      index = info.height - 1
+      delta = -1
+    end
   end
 
   for i = topline, botline - 1 do
@@ -274,19 +281,24 @@ custom_entries_view.draw = function(self)
       local text = {}
       table.insert(text, string.rep(' ', config.get().window.completion.side_padding))
 
-      if config.get().formatting.number_options and index < 10 then
-        table.insert(text, string.format('%s ', index))
-      else
-        table.insert(text, '  ')
-      end
-      index = index + delta
-
       for _, field in ipairs(fields) do
-        table.insert(text, view[field].text)
-        table.insert(text, string.rep(' ', 1 + self.column_width[field] - view[field].width))
+        if field == 'num' then
+          if index + num_opts.start_index <= num_opts.end_index then
+            local n = string.format('%s', index + num_opts.start_index)
+            table.insert(text, n)
+            table.insert(text, string.rep(' ', 1 + num_width - n:len()))
+          else
+            table.insert(text, string.rep(' ', num_width + 1))
+          end
+        else
+          table.insert(text, view[field].text)
+          table.insert(text, string.rep(' ', 1 + self.column_width[field] - view[field].width))
+        end
       end
+
       table.insert(text, string.rep(' ', config.get().window.completion.side_padding))
       table.insert(texts, table.concat(text, ''))
+      index = index + delta
     end
   end
   vim.api.nvim_buf_set_lines(entries_buf, topline, botline, false, texts)
@@ -446,7 +458,8 @@ custom_entries_view._insert = setmetatable({
         vim.fn.setcmdline(before_line .. word .. after_line, pos)
         vim.api.nvim_feedkeys(keymap.t('<Cmd>redraw<CR>'), 'ni', false)
       else
-        vim.api.nvim_feedkeys(keymap.backspace(string.sub(api.get_current_line(), self.offset, cursor[2])) .. word, 'int', true)
+        vim.api.nvim_feedkeys(keymap.backspace(string.sub(api.get_current_line(), self.offset, cursor[2])) .. word, 'int',
+        true)
       end
     else
       if this.pending then

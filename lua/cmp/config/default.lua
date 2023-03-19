@@ -43,7 +43,10 @@ return function()
     formatting = {
       expandable_indicator = true,
       fields = { 'abbr', 'kind', 'menu' },
-      number_options = false,
+      number_options = {
+        start_index = 0,
+        end_index = 9,
+      },
       format = function(_, vim_item)
         return vim_item
       end,

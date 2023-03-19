@@ -164,14 +164,16 @@ view.select_next_item = function(self, option)
   self:_get_entries_view():select_next_item(option)
 end
 
----Select the nth menu item showing on screen
-view.select_nth = function (self, n, options)
+---Select the nth menu item showing on screen (1 based)
+---@param n integer
+---@param option cmp.SelectOption
+view.select_nth = function (self, n, option)
   local entries_view = self:_get_entries_view()
   local win_info = vim.fn.getwininfo(entries_view:get_window().win)[1]
   if entries_view:is_direction_top_down() then
-    entries_view:_select(n + win_info.topline - 1, options)
+    entries_view:_select(n + win_info.topline - 1, option)
   else
-    entries_view:_select(win_info.botline + 1 - n, options)
+    entries_view:_select(win_info.botline + 1 - n, option)
   end
 end
 
