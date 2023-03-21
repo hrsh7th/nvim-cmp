@@ -439,7 +439,7 @@ entry.get_documentation = function(self)
     })
   end
 
-  local ft = "cmp_ros"
+  local ft = "cmp_docs"
   local documentation = item.documentation
   if documentation ~= nil and documentation.ft ~= nil then
     ft = documentation.ft
