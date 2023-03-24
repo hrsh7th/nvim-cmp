@@ -266,12 +266,9 @@ custom_entries_view.draw = function(self)
   local index = 0
   local delta = 1
 
-  -- number options
-  if num_opts.enabled then
-    if not self:is_direction_top_down() then
-      index = info.height - 1
-      delta = -1
-    end
+  if not self:is_direction_top_down() then
+    index = info.height - 1
+    delta = -1
   end
 
   for i = topline, botline - 1 do
