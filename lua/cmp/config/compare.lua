@@ -203,7 +203,11 @@ compare.scopes = setmetatable({
         for _, definition in pairs(definitions) do
           if s <= definition.node:start() and definition.node:end_() <= e then
             if scope:id() == locals.containing_scope(definition.node, buf):id() then
-              local text = vim.treesitter.query.get_node_text(definition.node, buf) or ''
+              -- Use the new `vim.treesitter.get_node_text()` to avoid deprecation warning
+              -- or use `vim.treesitter.query.get_node_text()` for backwards compatibility.
+              local get_node_text = vim.treesitter.get_node_text and vim.treesitter.get_node_text or vim.treesitter.query.get_node_text
+
+              local text = get_node_text(definition.node, buf) or ''
               if not self.scopes_map[text] then
                 self.scopes_map[text] = depth
               end
