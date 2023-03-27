@@ -185,12 +185,13 @@ end)
 cmp.confirm = cmp.sync(function(option, callback)
   option = option or {}
   option.select = option.select or false
+  option.selectIfUnique = option.selectIfUnique or false
   option.behavior = option.behavior or cmp.get_config().confirmation.default_behavior or cmp.ConfirmBehavior.Insert
   callback = callback or function() end
 
   if cmp.core.view:visible() then
     local e = cmp.core.view:get_selected_entry()
-    if not e and option.select then
+    if not e and (option.select or (option.selectIfUnique and (#(cmp.core.view:get_entries()) == 1))) then
       e = cmp.core.view:get_first_entry()
     end
     if e then
