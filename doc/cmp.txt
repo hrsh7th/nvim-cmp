@@ -123,7 +123,8 @@ A recommended configuration can be found below.
         { name = 'path' }
       }, {
         { name = 'cmdline' }
-      })
+      }),
+      matching = { disallow_symbol_nonprefix_matching = false }
     })
 
     -- Setup lspconfig.
@@ -559,6 +560,11 @@ matching.disallow_partial_matching~
 matching.disallow_prefix_unmatching~
   `boolean`
   Whether to allow prefix unmatching.
+
+                                cmp-config.matching.disallow_symbol_nonprefix_matching
+matching.disallow_symbol_nonprefix_matching
+  `boolean`
+  Whether to allow symbols in matches if the match is not a prefix match.
 
                                             *cmp-config.sorting.priority_weight*
 sorting.priority_weight~

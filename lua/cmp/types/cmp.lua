@@ -137,6 +137,7 @@ cmp.ItemField = {
 ---@field public disallow_partial_fuzzy_matching boolean
 ---@field public disallow_partial_matching boolean
 ---@field public disallow_prefix_unmatching boolean
+---@field public disallow_symbol_nonprefix_matching boolean
 
 ---@class cmp.SortingConfig
 ---@field public priority_weight integer

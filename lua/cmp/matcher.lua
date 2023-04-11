@@ -73,12 +73,15 @@ end
 --     `,` -> print,
 --                 ~
 --      * Typically, the middle match with symbol characters only is false positive. should be ignored.
+--        This doesn't work for command line completions like ":b foo_" which we like to match
+--        "lib/foo_bar.txt". The option disallow_symbol_nonprefix_matching controls this and defaults
+--        to preventing matches like these. The documentation recommends it for command line completion.
 --
 --
 ---Match entry
 ---@param input string
 ---@param word string
----@param option { synonyms: string[], disallow_fullfuzzy_matching: boolean, disallow_fuzzy_matching: boolean, disallow_partial_fuzzy_matching: boolean, disallow_partial_matching: boolean, disallow_prefix_unmatching: boolean }
+---@param option { synonyms: string[], disallow_fullfuzzy_matching: boolean, disallow_fuzzy_matching: boolean, disallow_partial_fuzzy_matching: boolean, disallow_partial_matching: boolean, disallow_prefix_unmatching: boolean, disallow_symbol_nonprefix_matching: boolean }
 ---@return integer, table
 matcher.match = function(input, word, option)
   option = option or {}
@@ -160,7 +163,9 @@ matcher.match = function(input, word, option)
   end
 
   if no_symbol_match and not prefix then
-    return 0, {}
+    if option.disallow_symbol_nonprefix_matching then
+      return 0, {}
+    end
   end
 
   -- Compute prefix match score

@@ -116,7 +116,8 @@ lua <<EOF
       { name = 'path' }
     }, {
       { name = 'cmdline' }
-    })
+    }),
+    matching = { disallow_symbol_nonprefix_matching = false }
   })
 
   -- Set up lspconfig.

@@ -360,12 +360,13 @@ end
 ---@param matching_config cmp.MatchingConfig
 ---@return { score: integer, matches: table[] }
 entry.match = function(self, input, matching_config)
-  return self.match_cache:ensure(input .. ':' .. (self.resolved_completion_item and '1' or '0' .. ':') .. (matching_config.disallow_fuzzy_matching and '1' or '0') .. ':' .. (matching_config.disallow_partial_fuzzy_matching and '1' or '0') .. ':' .. (matching_config.disallow_partial_matching and '1' or '0') .. ':' .. (matching_config.disallow_prefix_unmatching and '1' or '0'), function()
+  return self.match_cache:ensure(input .. ':' .. (self.resolved_completion_item and '1' or '0' .. ':') .. (matching_config.disallow_fuzzy_matching and '1' or '0') .. ':' .. (matching_config.disallow_partial_fuzzy_matching and '1' or '0') .. ':' .. (matching_config.disallow_partial_matching and '1' or '0') .. ':' .. (matching_config.disallow_prefix_unmatching and '1' or '0') .. ':' .. (matching_config.disallow_symbol_nonprefix_matching and '1' or '0'), function()
     local option = {
       disallow_fuzzy_matching = matching_config.disallow_fuzzy_matching,
       disallow_partial_fuzzy_matching = matching_config.disallow_partial_fuzzy_matching,
       disallow_partial_matching = matching_config.disallow_partial_matching,
       disallow_prefix_unmatching = matching_config.disallow_prefix_unmatching,
+      disallow_symbol_nonprefix_matching = matching_config.disallow_symbol_nonprefix_matching,
       synonyms = {
         self:get_word(),
         self:get_completion_item().label,
