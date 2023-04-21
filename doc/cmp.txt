@@ -629,10 +629,11 @@ window.completion.scrolloff~
   Specify the window's scrolloff option.
   See |'scrolloff'|.
 
-                                       *cmp-config.window.completion.col_offset*
+                       *cmp-config.window.{completion,documentation}.col_offset*
 window.completion.col_offset~
   `number`
   Offsets the completion window relative to the cursor.
+  Offsets the documentation window relative to the completion window.
 
                                      *cmp-config.window.completion.side_padding*
 window.completion.side_padding~

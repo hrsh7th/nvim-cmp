@@ -118,6 +118,7 @@ cmp.ItemField = {
 ---@field public max_height integer|nil
 ---@field public scrolloff integer|nil
 ---@field public scrollbar boolean|true
+---@field public col_offset integer|nil
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior

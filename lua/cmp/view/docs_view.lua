@@ -58,10 +58,11 @@ docs_view.open = function(self, e, view)
   end
 
   -- Calculate window size.
-  local width, height = vim.lsp.util._make_floating_popup_size(vim.api.nvim_buf_get_lines(self.window:get_buffer(), 0, -1, false), {
-    max_width = max_width - border_info.horiz,
-    max_height = documentation.max_height - border_info.vert,
-  })
+  local width, height = vim.lsp.util._make_floating_popup_size(
+    vim.api.nvim_buf_get_lines(self.window:get_buffer(), 0, -1, false), {
+      max_width = max_width - border_info.horiz,
+      max_height = documentation.max_height - border_info.vert,
+    })
   if width <= 0 or height <= 0 then
     return self:close()
   end
@@ -95,7 +96,7 @@ docs_view.open = function(self, e, view)
     width = width,
     height = height,
     row = view.row,
-    col = col,
+    col = col + documentation.col_offset,
     border = documentation.border,
     zindex = documentation.zindex or 50,
   }
@@ -103,7 +104,7 @@ docs_view.open = function(self, e, view)
 
   -- Correct left-col for scrollbar existence.
   if left then
-    style.col = style.col - self.window:info().scrollbar_offset
+    style.col = col - self.window:info().scrollbar_offset - documentation.col_offset
     self.window:open(style)
   end
 end
