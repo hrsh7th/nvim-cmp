@@ -674,7 +674,45 @@ You can use the following configuration helpers:
 
 cmp.config.compare~
 
-  TBD
+                                                     *cmp.config.compare.offset*
+cmp.config.compare.offset~
+  Sorts completion items based on their offset in the text buffer. Items closer to the cursor position will have higher priority.
+
+                                                      *cmp.config.compare.exact*
+cmp.config.compare.exact~
+  Sorts completion items based on whether they exactly match the typed prefix. Items with an exact match will have higher priority.
+
+                                                      *cmp.config.compare.score*
+cmp.config.compare.score~
+  Sorts completion items based on their fuzzy match score. Items with a higher score (better match) will have higher priority.
+
+                                              *cmp.config.compare.recently_used*
+cmp.config.compare.recently_used~
+  Sorts completion items based on when they were last used. Items used more recently will have higher priority.
+
+                                                       *cmp.config.compare.kind*
+cmp.config.compare.kind~
+  Sorts completion items based on their kind (e.g., "Variable", "Function", "Class"). Items with higher priority kinds (as defined by the user) will have higher priority.
+
+                                                  *cmp.config.compare.sort_text*
+cmp.config.compare.sort_text~
+  Sorts completion items based on the `sortText` field provided by the LSP server. Items with a better `sortText` comparison result will have higher priority.
+
+                                                     *cmp.config.compare.length*
+cmp.config.compare.length~
+  Sorts completion items based on the length of their labels. Shorter items will have higher priority.
+
+                                                      *cmp.config.compare.order*
+cmp.config.compare.order~
+  Sorts completion items based on the order they were added to the completion list. Items added earlier will have higher priority.
+
+                                                   *cmp.config.compare.locality*
+cmp.config.compare.locality~
+  Sorts completion items based on how close they are to the current cursor position. Items closer to the cursor will have higher priority.
+
+                                                     *cmp.config.compare.scopes*
+cmp.config.compare.scopes~
+  Sorts completion items based on the scope of their definitions. Items defined in a closer scope will have higher priority.
 
 cmp.config.context~
 
