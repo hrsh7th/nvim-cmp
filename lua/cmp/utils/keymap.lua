@@ -20,7 +20,7 @@ keymap.normalize = function(keys)
   local normalize_buf = buffer.ensure('cmp.util.keymap.normalize')
   vim.api.nvim_buf_set_keymap(normalize_buf, 't', keys, '<Plug>(cmp.utils.keymap.normalize)', {})
   for _, map in ipairs(vim.api.nvim_buf_get_keymap(normalize_buf, 't')) do
-    if keymap.equals(map.rhs, '<Plug>(cmp.utils.keymap.normalize)') then
+    if keymap.t(map.rhs) == keymap.t('<Plug>(cmp.utils.keymap.normalize)') then
       vim.api.nvim_buf_del_keymap(normalize_buf, 't', keys)
       return map.lhs
     end
@@ -110,7 +110,7 @@ end
 ---@param b string
 ---@return boolean
 keymap.equals = function(a, b)
-  return keymap.t(a) == keymap.t(b)
+  return keymap.normalize(a) == keymap.normalize(b)
 end
 
 ---Register keypress handler.
