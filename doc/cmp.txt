@@ -932,6 +932,7 @@ nvim-cmp does not work as expected.~
   There are some known issues. Please check the following.
 
   - nvim-cmp does not work with `set paste` option.
+  - Command line mode key mapping is unified regardless of `:`, `/`, `?`. Therefore, it is impossible to apply the mapping only to `:`.
 
 How to customize the menu appearance?~
 
