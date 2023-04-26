@@ -18,6 +18,7 @@ Config                                                              |cmp-config|
 Config Helper                                                |cmp-config-helper|
 Develop                                                            |cmp-develop|
 FAQ                                                                    |cmp-faq|
+
 ==============================================================================
 Abstract                                                          *cmp-abstract*
 
@@ -217,6 +218,14 @@ NOTE: `<Cmd>lua require('cmp').complete()<CR>` can be used to call these functio
   Accepts the currently selected completion item.
   If you didn't select any item and the option table contains `select = true`,
   nvim-cmp will automatically select the first item.
+
+  You can control, how the completion item is injected into
+  the file through the `behavior` option:
+
+  `behavior=cmd.ConfirmBehavior.Insert`: inserts the selected item and
+    moves adjacent text to the right (default).
+  `bheavior=cmd.ConfirmBehavior.Replace`: replaces adjecent text with
+    the selected item.
 
 *cmp.event:on* (%EVENT_NAME%, callback)
   Subscribe to nvim-cmp's event. Events are listed below.
@@ -918,7 +927,12 @@ How to integrate with copilot.vim?~
     }
   }
 <
+nvim-cmp does not work as expected.~
 
+  There are some known issues. Please check the following.
+
+  - nvim-cmp does not work with `set paste` option.
+  - Command line mode key mapping is unified regardless of `:`, `/`, `?`. Therefore, it is impossible to apply the mapping only to `:`.
 
 How to customize the menu appearance?~
 
