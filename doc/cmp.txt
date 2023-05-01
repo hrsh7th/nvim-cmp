@@ -18,6 +18,7 @@ Config                                                              |cmp-config|
 Config Helper                                                |cmp-config-helper|
 Develop                                                            |cmp-develop|
 FAQ                                                                    |cmp-faq|
+
 ==============================================================================
 Abstract                                                          *cmp-abstract*
 
@@ -217,6 +218,14 @@ NOTE: `<Cmd>lua require('cmp').complete()<CR>` can be used to call these functio
   Accepts the currently selected completion item.
   If you didn't select any item and the option table contains `select = true`,
   nvim-cmp will automatically select the first item.
+
+  You can control, how the completion item is injected into
+  the file through the `behavior` option:
+
+  `behavior=cmd.ConfirmBehavior.Insert`: inserts the selected item and
+    moves adjacent text to the right (default).
+  `bheavior=cmd.ConfirmBehavior.Replace`: replaces adjecent text with
+    the selected item.
 
 *cmp.event:on* (%EVENT_NAME%, callback)
   Subscribe to nvim-cmp's event. Events are listed below.
@@ -451,7 +460,7 @@ confirmation.get_commit_characters~
   You can append or exclude commitCharacters via this configuration option
   function. The commitCharacters are defined by the LSP spec.
 
-                                                  *cmp-config.formatting.expandable_indicator*
+                                    *cmp-config.formatting.expandable_indicator*
 formatting.expandable_indicator~
   `cmp.expandable_indicator`
   Boolean to show the `~` expandable indicator in cmp's floating window.
@@ -474,6 +483,15 @@ matching.disallow_fuzzy_matching~
   `boolean`
   Whether to allow fuzzy matching.
 
+                               *cmp-config.matching.disallow_fullfuzzy_matching*
+matching.disallow_fullfuzzy_matching~
+  `boolean`
+  Whether to allow full-fuzzy matching.
+
+                           *cmp-config.matching.disallow_partial_fuzzy_matching*
+matching.disallow_partial_fuzzy_matching~
+  `boolean`
+  Whether to allow fuzzy matching without prefix matching.
                                  *cmp-config.matching.disallow_partial_matching*
 matching.disallow_partial_matching~
   `boolean`
@@ -633,7 +651,7 @@ window.completion.side_padding~
                                      *cmp-config.window.completion.scrollbar*
 window.completion.scrollbar~
   `boolean`
-  Wether the scrollbar should be enabled if there are more items that fit
+  Whether the scrollbar should be enabled if there are more items that fit
 
                                      *cmp-config.window.documentation.max_width*
 window.documentation.max_width~
@@ -812,6 +830,17 @@ How to disable the preselect feature? ~
     preselect = cmp.PreselectMode.None
   }
 <
+How to disable only specific language-server's completion?~
+
+  You can disable `completionProvider` in lspconfig configuration.
+>lua
+  lspconfig[%SERVER_NAME%].setup {
+    on_attach = function(client)
+      client.server_capabilities.completionProvider = false
+    end
+  }
+<
+
 
 How to disable commitCharacters?~
 
@@ -898,7 +927,12 @@ How to integrate with copilot.vim?~
     }
   }
 <
+nvim-cmp does not work as expected.~
 
+  There are some known issues. Please check the following.
+
+  - nvim-cmp does not work with `set paste` option.
+  - Command line mode key mapping is unified regardless of `:`, `/`, `?`. Therefore, it is impossible to apply the mapping only to `:`.
 
 How to customize the menu appearance?~
 

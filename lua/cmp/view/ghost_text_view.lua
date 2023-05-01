@@ -78,6 +78,10 @@ ghost_text_view.show = function(self, e)
   if not api.is_insert_mode() then
     return
   end
+  local c = config.get().experimental.ghost_text
+  if not c then
+    return
+  end
   local changed = e ~= self.entry
   self.win = vim.api.nvim_get_current_win()
   self.entry = e

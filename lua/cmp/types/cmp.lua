@@ -125,6 +125,8 @@ cmp.ItemField = {
 
 ---@class cmp.MatchingConfig
 ---@field public disallow_fuzzy_matching boolean
+---@field public disallow_fullfuzzy_matching boolean
+---@field public disallow_partial_fuzzy_matching boolean
 ---@field public disallow_partial_matching boolean
 ---@field public disallow_prefix_unmatching boolean
 

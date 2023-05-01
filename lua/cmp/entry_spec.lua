@@ -302,4 +302,37 @@ describe('entry', function()
     assert.are.equal(e:get_vim_item(e:get_offset()).word, '__init__(self) -> None:')
     assert.are.equal(e:get_filter_text(), '__init__')
   end)
+
+  it('[#1533] keyword pattern that include whitespace', function()
+    local state = spec.state(' ', 3, 2)
+    local state_source = state.source()
+
+    state_source.get_keyword_pattern = function(_)
+      return '.'
+    end
+
+    state.input(' ')
+    local e = entry.new(state.manual(), state_source, {
+      filterText = "constructor() {\n     ... st = 'test';\n  ",
+      kind = 1,
+      label = "constructor() {\n     ... st = 'test';\n  }",
+      textEdit = {
+        newText = "constructor() {\n    this.test = 'test';\n  }",
+        range = {
+          ['end'] = {
+            character = 2,
+            col = 3,
+            line = 2,
+            row = 3,
+          },
+          start = {
+            character = 0,
+            line = 2,
+          },
+        },
+      },
+    })
+    assert.are.equal(e:get_offset(), 3)
+    assert.are.equal(e:get_vim_item(e:get_offset()).word, 'constructor() {')
+  end)
 end)
