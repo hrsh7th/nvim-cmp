@@ -208,18 +208,18 @@ custom_entries_view.open = function(self, offset, entries)
   -- always set cursor when starting. It will be adjusted on the call to _select
   vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
   if preselect_index > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
-    self:_select(preselect_index, { behavior = types.cmp.SelectBehavior.Select })
+    self:_select(preselect_index, { behavior = types.cmp.SelectBehavior.Select, active = false })
   elseif not string.match(config.get().completion.completeopt, 'noselect') then
     if self:is_direction_top_down() then
-      self:_select(1, { behavior = types.cmp.SelectBehavior.Select })
+      self:_select(1, { behavior = types.cmp.SelectBehavior.Select, active = false })
     else
-      self:_select(#self.entries, { behavior = types.cmp.SelectBehavior.Select })
+      self:_select(#self.entries, { behavior = types.cmp.SelectBehavior.Select, active = false })
     end
   else
     if self:is_direction_top_down() then
-      self:_select(0, { behavior = types.cmp.SelectBehavior.Select })
+      self:_select(0, { behavior = types.cmp.SelectBehavior.Select, active = false })
     else
-      self:_select(#self.entries + 1, { behavior = types.cmp.SelectBehavior.Select })
+      self:_select(#self.entries + 1, { behavior = types.cmp.SelectBehavior.Select, active = false })
     end
   end
 end
@@ -311,7 +311,10 @@ custom_entries_view.select_next_item = function(self, option)
       end
     end
 
-    self:_select(cursor, option)
+    self:_select(cursor, {
+      behavior = option.behavior or types.cmp.SelectBehavior.Insert,
+      active = true,
+    })
   end
 end
 
@@ -345,7 +348,10 @@ custom_entries_view.select_prev_item = function(self, option)
       end
     end
 
-    self:_select(cursor, option)
+    self:_select(cursor, {
+      behavior = option.behavior or types.cmp.SelectBehavior.Insert,
+      active = true,
+    })
   end
 end
 
@@ -382,12 +388,13 @@ custom_entries_view.get_active_entry = function(self)
 end
 
 custom_entries_view._select = function(self, cursor, option)
+  self.active = 0 < cursor and cursor <= #self.entries and option.active
+
   local is_insert = (option.behavior or types.cmp.SelectBehavior.Insert) == types.cmp.SelectBehavior.Insert
   if is_insert and not self.active then
     self.prefix = string.sub(api.get_current_line(), self.offset, api.get_cursor()[2]) or ''
   end
 
-  self.active = cursor > 0 and cursor <= #self.entries and is_insert
   self.entries_win:option('cursorline', cursor > 0 and cursor <= #self.entries)
 
   vim.api.nvim_win_set_cursor(self.entries_win.win, {
