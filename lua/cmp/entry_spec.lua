@@ -319,18 +319,18 @@ describe('entry', function()
       textEdit = {
         newText = "constructor() {\n    this.test = 'test';\n  }",
         range = {
-          ["end"] = {
+          ['end'] = {
             character = 2,
             col = 3,
             line = 2,
-            row = 3
+            row = 3,
           },
           start = {
             character = 0,
-            line = 2
-          }
-        }
-      }
+            line = 2,
+          },
+        },
+      },
     })
     assert.are.equal(e:get_offset(), 3)
     assert.are.equal(e:get_vim_item(e:get_offset()).word, 'constructor() {')
