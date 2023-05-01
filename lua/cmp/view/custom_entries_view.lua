@@ -423,7 +423,7 @@ custom_entries_view._insert = setmetatable({
         local current_line = api.get_current_line()
         local before_line = current_line:sub(1, self.offset - 1)
         local after_line = current_line:sub(cursor[2] + 1)
-        local pos = vim.fn.strdisplaywidth(before_line .. word) + 1
+        local pos = #before_line + #word + 1
         vim.fn.setcmdline(before_line .. word .. after_line, pos)
         vim.api.nvim_feedkeys(keymap.t('<Cmd>redraw<CR>'), 'ni', false)
       else
