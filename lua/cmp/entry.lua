@@ -62,11 +62,12 @@ entry.get_offset = function(self)
       if range then
         offset = self.context.cache:ensure('entry:' .. 'get_offset:' .. tostring(range.start.character), function()
           for idx = range.start.character + 1, self.source_offset do
-            if not char.is_white(string.byte(self.context.cursor_line, idx)) then
+            local byte = string.byte(self.context.cursor_line, idx)
+            if byte ~= nil and not char.is_white(byte) then
               return idx
             end
           end
-          return offset
+          return offset + 1
         end)
       end
     else
