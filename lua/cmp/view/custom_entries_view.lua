@@ -118,14 +118,17 @@ end
 custom_entries_view.open = function(self, offset, entries)
   local completion = config.get().window.completion
   self.offset = offset
+  local prev_selected_item = self:get_selected_entry()
+
   self.entries = {}
   self.column_width = { abbr = 0, kind = 0, menu = 0 }
 
   local entries_buf = self.entries_win:get_buffer()
   local lines = {}
   local dedup = {}
+
   local preselect_index = 0
-  for _, e in ipairs(entries) do
+  for index, e in ipairs(entries) do
     local view = e:get_view(offset, entries_buf)
     if view.dup == 1 or not dedup[e.completion_item.label] then
       dedup[e.completion_item.label] = true
@@ -134,7 +137,10 @@ custom_entries_view.open = function(self, offset, entries)
       self.column_width.menu = math.max(self.column_width.menu, view.menu.width)
       table.insert(self.entries, e)
       table.insert(lines, ' ')
-      if preselect_index == 0 and e.completion_item.preselect then
+
+      if prev_selected_item and e.completion_item.label == prev_selected_item.completion_item.label then
+        preselect_index = index
+      elseif preselect_index == 0 and e.completion_item.preselect then
         preselect_index = #self.entries
       end
     end
@@ -207,7 +213,9 @@ custom_entries_view.open = function(self, offset, entries)
   })
   -- always set cursor when starting. It will be adjusted on the call to _select
   vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
-  if preselect_index > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
+  if preselect_index > 0 and prev_selected_item then
+    self:_select(preselect_index, { behavior = types.cmp.SelectBehavior.Select })
+  elseif preselect_index > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
     self:_select(preselect_index, { behavior = types.cmp.SelectBehavior.Select })
   elseif not string.match(config.get().completion.completeopt, 'noselect') then
     if self:is_direction_top_down() then
