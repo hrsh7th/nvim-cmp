@@ -388,15 +388,13 @@ custom_entries_view.get_active_entry = function(self)
 end
 
 custom_entries_view._select = function(self, cursor, option)
-  self.active = 0 < cursor and cursor <= #self.entries and option.active
-
   local is_insert = (option.behavior or types.cmp.SelectBehavior.Insert) == types.cmp.SelectBehavior.Insert
   if is_insert and not self.active then
     self.prefix = string.sub(api.get_current_line(), self.offset, api.get_cursor()[2]) or ''
   end
+  self.active = (0 < cursor and cursor <= #self.entries and option.active == true)
 
   self.entries_win:option('cursorline', cursor > 0 and cursor <= #self.entries)
-
   vim.api.nvim_win_set_cursor(self.entries_win.win, {
     math.max(math.min(cursor, #self.entries), 1),
     0,
