@@ -33,8 +33,7 @@ describe('cmp.core', function()
         end)
       end)
       feedkeys.call(filter, 'n', function()
-        c:confirm(c.sources[s.id].entries[1], {}, function()
-        end)
+        c:confirm(c.sources[s.id].entries[1], {}, function() end)
       end)
       local state = {}
       feedkeys.call('', 'x', function()
@@ -93,22 +92,22 @@ describe('cmp.core', function()
 
       it('#1552', function()
         local state = confirm(keymap.t('ios.'), '', {
-          filterText = "IsPermission",
+          filterText = 'IsPermission',
           insertTextFormat = 2,
-          label = "IsPermission",
+          label = 'IsPermission',
           textEdit = {
-            newText = "IsPermission($0)",
+            newText = 'IsPermission($0)',
             range = {
-              ["end"] = {
+              ['end'] = {
                 character = 3,
-                line = 0
+                line = 0,
               },
               start = {
                 character = 3,
-                line = 0
-              }
-            }
-          }
+                line = 0,
+              },
+            },
+          },
         })
         assert.are.same(state.buffer, { 'os.IsPermission()' })
         assert.are.same(state.cursor, { 1, 16 })
