@@ -67,7 +67,7 @@ entry.get_offset = function(self)
               return idx
             end
           end
-          return offset + 1
+          return offset
         end)
       end
     else
