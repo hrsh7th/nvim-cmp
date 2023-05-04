@@ -58,6 +58,9 @@ docs_view.open = function(self, e, view)
     })
   end
 
+  -- Set buffer as not modified, so it can be removed without errors
+  vim.api.nvim_buf_set_option(self.window:get_buffer(), 'modified', false)
+
   -- Calculate window size.
   local width, height = vim.lsp.util._make_floating_popup_size(vim.api.nvim_buf_get_lines(self.window:get_buffer(), 0, -1, false), {
     max_width = max_width - border_info.horiz,
