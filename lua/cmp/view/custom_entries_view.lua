@@ -37,6 +37,7 @@ custom_entries_view.new = function()
   -- from variable width of the tab character.
   self.entries_win:buffer_option('tabstop', 1)
   self.entries_win:buffer_option('filetype', 'cmp_menu')
+  self.entries_win:buffer_option('buftype', 'nofile')
   self.event = event.new()
   self.offset = -1
   self.active = false

@@ -18,6 +18,7 @@ docs_view.new = function()
   self.window:option('showbreak', 'NONE')
   self.window:option('wrap', true)
   self.window:buffer_option('filetype', 'cmp_docs')
+  self.window:buffer_option('buftype', 'nofile')
   return self
 end
 
