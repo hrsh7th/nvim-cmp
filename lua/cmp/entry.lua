@@ -61,13 +61,14 @@ entry.get_offset = function(self)
       local range = self:get_insert_range()
       if range then
         offset = self.context.cache:ensure('entry:' .. 'get_offset:' .. tostring(range.start.character), function()
-          for idx = range.start.character + 1, self.source_offset do
+          local start = math.min(range.start.character + 1, offset)
+          for idx = start, self.source_offset do
             local byte = string.byte(self.context.cursor_line, idx)
-            if byte ~= nil and not char.is_white(byte) then
+            if byte == nil or not char.is_white(byte) then
               return idx
             end
           end
-          return offset
+          return offset + 1
         end)
       end
     else

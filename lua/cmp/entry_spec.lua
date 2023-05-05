@@ -335,4 +335,33 @@ describe('entry', function()
     assert.are.equal(e:get_offset(), 3)
     assert.are.equal(e:get_vim_item(e:get_offset()).word, 'constructor() {')
   end)
+
+  it('[#1533] clang regression test', function()
+    local state = spec.state('jsonReader', 3, 11)
+    local state_source = state.source()
+
+    state.input('.')
+    local e = entry.new(state.manual(), state_source, {
+      filterText = 'getPath()',
+      kind = 1,
+      label = 'getPath()',
+      textEdit = {
+        newText = 'getPath()',
+        range = {
+          ['end'] = {
+            character = 11,
+            col = 12,
+            line = 2,
+            row = 3,
+          },
+          start = {
+            character = 11,
+            line = 2,
+          },
+        },
+      },
+    })
+    assert.are.equal(e:get_offset(), 12)
+    assert.are.equal(e:get_vim_item(e:get_offset()).word, 'getPath()')
+  end)
 end)
