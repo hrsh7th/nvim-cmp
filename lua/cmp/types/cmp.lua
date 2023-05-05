@@ -57,12 +57,13 @@ cmp.ItemField = {
 ---@field public reason? cmp.ContextReason
 ---@field public config? cmp.ConfigSchema
 
----@class cmp.Setup
----@field public __call fun(c: cmp.ConfigSchema)
+---@class cmp.SetupProperty
 ---@field public buffer fun(c: cmp.ConfigSchema)
 ---@field public global fun(c: cmp.ConfigSchema)
 ---@field public cmdline fun(type: string|string[], c: cmp.ConfigSchema)
 ---@field public filetype fun(type: string|string[], c: cmp.ConfigSchema)
+
+---@alias cmp.Setup cmp.SetupProperty | fun(c: cmp.ConfigSchema)
 
 ---@class cmp.SourceApiParams: cmp.SourceConfig
 
