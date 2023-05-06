@@ -444,7 +444,8 @@ core.confirm = function(self, e, option, callback)
     if api.is_insert_mode() then
       if false then
         --To use complex expansion debug.
-        vim.pretty_print({ -- luacheck: ignore
+        vim.print({ -- luacheck: ignore
+          item = e:get_completion_item(),
           diff_before = diff_before,
           diff_after = diff_after,
           new_text = new_text,

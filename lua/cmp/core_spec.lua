@@ -90,6 +90,29 @@ describe('cmp.core', function()
         assert.are.same(state.cursor, { 3, 3 })
       end)
 
+      it('#1552', function()
+        local state = confirm(keymap.t('ios.'), '', {
+          filterText = 'IsPermission',
+          insertTextFormat = 2,
+          label = 'IsPermission',
+          textEdit = {
+            newText = 'IsPermission($0)',
+            range = {
+              ['end'] = {
+                character = 3,
+                line = 0,
+              },
+              start = {
+                character = 3,
+                line = 0,
+              },
+            },
+          },
+        })
+        assert.are.same(state.buffer, { 'os.IsPermission()' })
+        assert.are.same(state.cursor, { 1, 16 })
+      end)
+
       it('insertText & snippet', function()
         local state = confirm('iA', 'IU', {
           label = 'AIUEO',
@@ -156,7 +179,7 @@ describe('cmp.core', function()
           }, {
             position_encoding_kind = case.encoding,
           })
-          vim.pretty_print({ state = state, case = case })
+          vim.print({ state = state, case = case })
           assert.are.same(state.buffer, { ('%s:%s%s%s%s%s:%s'):format(char, char, char, char, char, char, char) })
           assert.are.same(state.cursor, { 1, #('%s:%s%s%s%s%s'):format(char, char, char, char, char, char) })
         end)

@@ -224,7 +224,7 @@ NOTE: `<Cmd>lua require('cmp').complete()<CR>` can be used to call these functio
 
   `behavior=cmd.ConfirmBehavior.Insert`: inserts the selected item and
     moves adjacent text to the right (default).
-  `bheavior=cmd.ConfirmBehavior.Replace`: replaces adjecent text with
+  `behavior=cmd.ConfirmBehavior.Replace`: replaces adjecent text with
     the selected item.
 
 *cmp.event:on* (%EVENT_NAME%, callback)

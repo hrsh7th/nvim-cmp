@@ -37,6 +37,7 @@ custom_entries_view.new = function()
   -- from variable width of the tab character.
   self.entries_win:buffer_option('tabstop', 1)
   self.entries_win:buffer_option('filetype', 'cmp_menu')
+  self.entries_win:buffer_option('buftype', 'nofile')
   self.event = event.new()
   self.offset = -1
   self.active = false
@@ -220,18 +221,18 @@ custom_entries_view.open = function(self, offset, entries)
   -- always set cursor when starting. It will be adjusted on the call to _select
   vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
   if preselect_index > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
-    self:_select(preselect_index, { behavior = types.cmp.SelectBehavior.Select })
+    self:_select(preselect_index, { behavior = types.cmp.SelectBehavior.Select, active = false })
   elseif not string.match(config.get().completion.completeopt, 'noselect') then
     if self:is_direction_top_down() then
-      self:_select(1, { behavior = types.cmp.SelectBehavior.Select })
+      self:_select(1, { behavior = types.cmp.SelectBehavior.Select, active = false })
     else
-      self:_select(#self.entries, { behavior = types.cmp.SelectBehavior.Select })
+      self:_select(#self.entries, { behavior = types.cmp.SelectBehavior.Select, active = false })
     end
   else
     if self:is_direction_top_down() then
-      self:_select(0, { behavior = types.cmp.SelectBehavior.Select })
+      self:_select(0, { behavior = types.cmp.SelectBehavior.Select, active = false })
     else
-      self:_select(#self.entries + 1, { behavior = types.cmp.SelectBehavior.Select })
+      self:_select(#self.entries + 1, { behavior = types.cmp.SelectBehavior.Select, active = false })
     end
   end
 end
@@ -346,7 +347,10 @@ custom_entries_view.select_next_item = function(self, option)
       end
     end
 
-    self:_select(cursor, option)
+    self:_select(cursor, {
+      behavior = option.behavior or types.cmp.SelectBehavior.Insert,
+      active = true,
+    })
   end
 end
 
@@ -380,7 +384,10 @@ custom_entries_view.select_prev_item = function(self, option)
       end
     end
 
-    self:_select(cursor, option)
+    self:_select(cursor, {
+      behavior = option.behavior or types.cmp.SelectBehavior.Insert,
+      active = true,
+    })
   end
 end
 
@@ -421,10 +428,9 @@ custom_entries_view._select = function(self, cursor, option)
   if is_insert and not self.active then
     self.prefix = string.sub(api.get_current_line(), self.offset, api.get_cursor()[2]) or ''
   end
+  self.active = (0 < cursor and cursor <= #self.entries and option.active == true)
 
-  self.active = cursor > 0 and cursor <= #self.entries and is_insert
   self.entries_win:option('cursorline', cursor > 0 and cursor <= #self.entries)
-
   vim.api.nvim_win_set_cursor(self.entries_win.win, {
     math.max(math.min(cursor, #self.entries), 1),
     0,
@@ -451,7 +457,7 @@ custom_entries_view._insert = setmetatable({
         local current_line = api.get_current_line()
         local before_line = current_line:sub(1, self.offset - 1)
         local after_line = current_line:sub(cursor[2] + 1)
-        local pos = vim.fn.strdisplaywidth(before_line .. word) + 1
+        local pos = #before_line + #word + 1
         vim.fn.setcmdline(before_line .. word .. after_line, pos)
         vim.api.nvim_feedkeys(keymap.t('<Cmd>redraw<CR>'), 'ni', false)
       else
