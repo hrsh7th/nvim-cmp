@@ -90,7 +90,7 @@ misc.merge = function(tbl1, tbl2)
     for k, v in pairs(tbl1) do
       if tbl2[k] == nil then
         if v ~= misc.none then
-          new_tbl[k] = v
+          new_tbl[k] = misc.merge(v, {})
         else
           new_tbl[k] = nil
         end
