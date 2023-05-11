@@ -35,9 +35,13 @@ ghost_text_view.new = function()
 
       local text = self.text_gen(self, line, col)
       if #text > 0 then
+        local hl_group = 'Comment'
+        if (type(c) == "table" and c.hl_group) then
+          hl_group = c.hl_group
+        end
         vim.api.nvim_buf_set_extmark(0, ghost_text_view.ns, row - 1, col, {
           right_gravity = false,
-          virt_text = { { text, c.hl_group or 'Comment' } },
+          virt_text = { { text, hl_group } },
           virt_text_pos = 'overlay',
           hl_mode = 'combine',
           ephemeral = true,
