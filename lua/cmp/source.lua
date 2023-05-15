@@ -18,6 +18,7 @@ local char = require('cmp.utils.char')
 ---@field public incomplete boolean
 ---@field public is_triggered_by_symbol boolean
 ---@field public entries cmp.Entry[]
+---@field public filtered {entries: cmp.Entry[], ctx: cmp.Context}
 ---@field public offset integer
 ---@field public request_offset integer
 ---@field public context cmp.Context
@@ -53,6 +54,7 @@ source.reset = function(self)
   self.is_triggered_by_symbol = false
   self.incomplete = false
   self.entries = {}
+  self.filtered = {}
   self.offset = -1
   self.request_offset = -1
   self.completion_context = nil
@@ -88,6 +90,22 @@ source.get_entries = function(self, ctx)
     return {}
   end
 
+  if self.filtered.ctx and self.filtered.ctx.id == ctx.id then
+    return self.filtered.entries
+  end
+
+  local target_entries = (function()
+    local key = { 'get_entries', self.revision }
+    for i = ctx.cursor.col, self.offset, -1 do
+      key[3] = string.sub(ctx.cursor_before_line, 1, i)
+      local prev_entries = self.cache:get(key)
+      if prev_entries then
+        return prev_entries
+      end
+    end
+    return self.entries
+  end)()
+
   local entry_filter = self:get_entry_filter()
 
   local inputs = {}
@@ -95,7 +113,7 @@ source.get_entries = function(self, ctx)
   local entries = {}
   local max_item_count = self:get_source_config().max_item_count or 200
   local matching_config = self:get_matching_config()
-  for _, e in ipairs(self.entries) do
+  for _, e in ipairs(target_entries) do
     local o = e:get_offset()
     if not inputs[o] then
       inputs[o] = string.sub(ctx.cursor_before_line, o)
@@ -116,6 +134,14 @@ source.get_entries = function(self, ctx)
       end
     end
   end
+
+  -- only save to cache, when there are no additional entries that could match the filter
+  -- This also prevents too much memory usage
+  if #entries < max_item_count then
+    self.cache:set({ 'get_entries', tostring(self.revision), ctx.cursor_before_line }, entries)
+  end
+
+  self.filtered = { entries = entries, ctx = ctx }
   return entries
 end
 
