@@ -88,24 +88,14 @@ source.get_entries = function(self, ctx)
     return {}
   end
 
-  local target_entries = (function()
-    local key = { 'get_entries', self.revision }
-    for i = ctx.cursor.col, self.offset, -1 do
-      key[3] = string.sub(ctx.cursor_before_line, 1, i)
-      local prev_entries = self.cache:get(key)
-      if prev_entries then
-        return prev_entries
-      end
-    end
-    return self.entries
-  end)()
-
   local entry_filter = self:get_entry_filter()
 
   local inputs = {}
+  ---@type cmp.Entry[]
   local entries = {}
+  local max_item_count = self:get_source_config().max_item_count or 200
   local matching_config = self:get_matching_config()
-  for _, e in ipairs(target_entries) do
+  for _, e in ipairs(self.entries) do
     local o = e:get_offset()
     if not inputs[o] then
       inputs[o] = string.sub(ctx.cursor_before_line, o)
@@ -119,21 +109,14 @@ source.get_entries = function(self, ctx)
       e.exact = e:get_filter_text() == inputs[o] or e:get_word() == inputs[o]
 
       if entry_filter(e, ctx) then
-        table.insert(entries, e)
+        entries[#entries + 1] = e
+        if max_item_count and #entries >= max_item_count then
+          break
+        end
       end
     end
   end
-  self.cache:set({ 'get_entries', tostring(self.revision), ctx.cursor_before_line }, entries)
-
-  local max_item_count = self:get_source_config().max_item_count or 200
-  local limited_entries = {}
-  for _, e in ipairs(entries) do
-    table.insert(limited_entries, e)
-    if max_item_count and #limited_entries >= max_item_count then
-      break
-    end
-  end
-  return limited_entries
+  return entries
 end
 
 ---Get default insert range (UTF8 byte index).
