@@ -133,6 +133,7 @@ source.get_entries = function(self, ctx)
         end
       end
     end
+    async.yield()
   end
 
   -- only save to cache, when there are no additional entries that could match the filter
@@ -274,7 +275,7 @@ end
 ---@param ctx cmp.Context
 ---@param callback function
 ---@return boolean? Return true if not trigger completion.
-source.complete = function(self, ctx, callback)
+source.complete = async.wrap(function(self, ctx, callback)
   local offset = ctx:get_offset(self:get_keyword_pattern())
 
   -- NOTE: This implementation is nvim-cmp specific.
@@ -337,7 +338,10 @@ source.complete = function(self, ctx, callback)
       context = ctx,
       completion_context = completion_context,
     }),
-    self.complete_dedup(vim.schedule_wrap(function(response)
+    self.complete_dedup(async.wrap(function(response)
+      if self.context ~= ctx then
+        return
+      end
       ---@type lsp.CompletionResponse
       response = response or {}
 
@@ -359,6 +363,9 @@ source.complete = function(self, ctx, callback)
         end
         self.revision = self.revision + 1
         if #self:get_entries(ctx) == 0 then
+          if self.context ~= ctx then
+            return
+          end
           self.offset = old_offset
           self.entries = old_entries
           self.revision = self.revision + 1
@@ -375,7 +382,7 @@ source.complete = function(self, ctx, callback)
     end))
   )
   return true
-end
+end)
 
 ---Resolve CompletionItem
 ---@param item lsp.CompletionItem

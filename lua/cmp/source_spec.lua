@@ -20,7 +20,7 @@ describe('source', function()
           callback({ { label = 'spec' } })
         end,
       })
-      assert.is.truthy(not s:complete(state.input('a'), function() end))
+      assert.is.truthy(not s:complete(state.input('a'), function() end):await())
     end)
 
     it('enough', function()
@@ -36,7 +36,7 @@ describe('source', function()
           callback({ { label = 'spec' } })
         end,
       })
-      assert.is.truthy(s:complete(state.input('aiu'), function() end))
+      assert.is.truthy(s:complete(state.input('aiu'), function() end):await())
     end)
 
     it('enough -> not enough', function()
@@ -52,8 +52,8 @@ describe('source', function()
           callback({ { label = 'spec' } })
         end,
       })
-      assert.is.truthy(s:complete(state.input('aiu'), function() end))
-      assert.is.truthy(not s:complete(state.backspace(), function() end))
+      assert.is.truthy(s:complete(state.input('aiu'), function() end):await())
+      assert.is.truthy(not s:complete(state.backspace(), function() end):await())
     end)
 
     it('continue', function()
@@ -69,8 +69,8 @@ describe('source', function()
           callback({ { label = 'spec' } })
         end,
       })
-      assert.is.truthy(s:complete(state.input('aiu'), function() end))
-      assert.is.truthy(not s:complete(state.input('eo'), function() end))
+      assert.is.truthy(s:complete(state.input('aiu'), function() end):await())
+      assert.is.truthy(not s:complete(state.input('eo'), function() end):await())
     end)
   end)
 
@@ -88,19 +88,19 @@ describe('source', function()
       vim.wait(100, function()
         return s.status == source.SourceStatus.COMPLETED
       end, 100, false)
-      assert.is.truthy(s:complete(state.input('s'), function() end))
+      assert.is.truthy(s:complete(state.input('s'), function() end):await())
       vim.wait(100, function()
         return s.status == source.SourceStatus.COMPLETED
       end, 100, false)
-      assert.is.truthy(s:complete(state.input('p'), function() end))
+      assert.is.truthy(s:complete(state.input('p'), function() end):await())
       vim.wait(100, function()
         return s.status == source.SourceStatus.COMPLETED
       end, 100, false)
-      assert.is.truthy(s:complete(state.input('e'), function() end))
+      assert.is.truthy(s:complete(state.input('e'), function() end):await())
       vim.wait(100, function()
         return s.status == source.SourceStatus.COMPLETED
       end, 100, false)
-      assert.is.truthy(s:complete(state.input('c'), function() end))
+      assert.is.truthy(s:complete(state.input('c'), function() end):await())
       vim.wait(100, function()
         return s.status == source.SourceStatus.COMPLETED
       end, 100, false)

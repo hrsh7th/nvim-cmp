@@ -9,6 +9,7 @@ local async = {}
 ---@field public stop function
 ---@field public __call function
 
+---@type uv_timer_t[]
 local timers = {}
 
 vim.api.nvim_create_autocmd('VimLeavePre', {
@@ -27,7 +28,8 @@ vim.api.nvim_create_autocmd('VimLeavePre', {
 ---@return cmp.AsyncThrottle
 async.throttle = function(fn, timeout)
   local time = nil
-  local timer = vim.loop.new_timer()
+  local timer = assert(vim.loop.new_timer())
+  local _async = nil ---@type Async?
   timers[#timers + 1] = timer
   return setmetatable({
     running = false,
@@ -37,9 +39,15 @@ async.throttle = function(fn, timeout)
         return not self.running
       end)
     end,
-    stop = function()
-      time = nil
+    stop = function(reset_time)
+      if reset_time ~= false then
+        time = nil
+      end
       timer:stop()
+      if _async then
+        _async:cancel()
+        _async = nil
+      end
     end,
   }, {
     __call = function(self, ...)
@@ -50,12 +58,20 @@ async.throttle = function(fn, timeout)
       end
 
       self.running = true
-      timer:stop()
+      self.stop(false)
       timer:start(math.max(1, self.timeout - (vim.loop.now() - time)), 0, function()
         vim.schedule(function()
           time = nil
-          fn(unpack(args))
-          self.running = false
+          local ret = fn(unpack(args))
+          if async.is_async(ret) then
+            ---@cast ret Async
+            _async = ret
+            _async:await(function()
+              self.running = false
+            end)
+          else
+            self.running = false
+          end
         end)
       end)
     end,
@@ -145,6 +161,102 @@ async.debounce_next_tick_by_keymap = function(callback)
   return function()
     feedkeys.call('', '', callback)
   end
+end
+
+--- @alias AsyncCallback fun(result?:any, error?:string)
+
+--- @class Async
+--- @field running boolean
+--- @field result? any
+--- @field error? string
+--- @field callbacks AsyncCallback[]
+--- @field thread thread
+local Async = {}
+Async.__index = Async
+
+function Async.new(fn)
+  local self = setmetatable({}, Async)
+  self.callbacks = {}
+  self.running = true
+  self.thread = coroutine.create(fn)
+  vim.schedule(function()
+    self:_step()
+  end)
+  return self
+end
+
+---@param result? any
+---@param error? string
+function Async:_done(result, error)
+  self.running = false
+  self.result = result
+  self.error = error
+  for _, callback in ipairs(self.callbacks) do
+    callback(result, error)
+  end
+end
+
+function Async:_step()
+  if not self.running then
+    return
+  end
+  local start = vim.loop.hrtime()
+  while true do
+    local ok, res = coroutine.resume(self.thread)
+    if not ok then
+      return self:_done(nil, res)
+    elseif coroutine.status(self.thread) == 'dead' then
+      return self:_done(res)
+    end
+    if vim.loop.hrtime() - start > 1e6 then
+      break
+    end
+  end
+  vim.schedule(function()
+    self:_step()
+  end)
+end
+
+function Async:cancel()
+  self.running = false
+end
+
+function Async:await(cb)
+  if cb then
+    if self.running then
+      table.insert(self.callbacks, cb)
+    else
+      cb(self.result, self.error)
+    end
+  else
+    while self.running do
+      vim.wait(10)
+    end
+    return self.error and error(self.error) or self.result
+  end
+end
+
+--- @return boolean
+function async.is_async(obj)
+  return obj and type(obj) == 'table' and getmetatable(obj) == Async
+end
+
+--- @return fun(...): Async
+function async.wrap(fn)
+  return function(...)
+    local args = { ... }
+    return Async.new(function()
+      return fn(unpack(args))
+    end)
+  end
+end
+
+-- This will yield when called from a coroutine
+function async.yield()
+  if not coroutine.isyieldable() then
+    return
+  end
+  coroutine.yield()
 end
 
 return async

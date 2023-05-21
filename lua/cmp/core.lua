@@ -261,7 +261,7 @@ end
 
 ---Invoke completion
 ---@param ctx cmp.Context
-core.complete = function(self, ctx)
+core.complete = async.wrap(function(self, ctx)
   if not api.is_suitable_mode() then
     return
   end
@@ -293,10 +293,10 @@ core.complete = function(self, ctx)
     self.filter.timeout = self.view:visible() and config.get().performance.throttle or 1
     self:filter()
   end
-end
+end)
 
 ---Update completion menu
-core.filter = async.throttle(function(self)
+local async_filter = async.wrap(function(self)
   self.filter.timeout = config.get().performance.throttle
 
   -- Check invalid condition.
@@ -336,7 +336,8 @@ core.filter = async.throttle(function(self)
   end) == 0 then
     config.set_onetime({})
   end
-end, config.get().performance.throttle)
+end)
+core.filter = async.throttle(async_filter, config.get().performance.throttle)
 
 ---Confirm completion.
 ---@param e cmp.Entry
