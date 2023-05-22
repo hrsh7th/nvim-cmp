@@ -163,6 +163,32 @@ async.debounce_next_tick_by_keymap = function(callback)
   end
 end
 
+local Scheduler = {}
+Scheduler._queue = {}
+Scheduler._executor = assert(vim.loop.new_check())
+
+function Scheduler.step()
+  local start = vim.loop.hrtime()
+  while #Scheduler._queue > 0 and vim.loop.hrtime() - start < 1e6 do
+    local a = table.remove(Scheduler._queue, 1)
+    a:_step()
+    if a.running then
+      table.insert(Scheduler._queue, a)
+    end
+  end
+  if #Scheduler._queue == 0 then
+    return Scheduler._executor:stop()
+  end
+end
+
+---@param a Async
+function Scheduler.add(a)
+  table.insert(Scheduler._queue, a)
+  if not Scheduler._executor:is_active() then
+    Scheduler._executor:start(vim.schedule_wrap(Scheduler.step))
+  end
+end
+
 --- @alias AsyncCallback fun(result?:any, error?:string)
 
 --- @class Async
@@ -179,9 +205,7 @@ function Async.new(fn)
   self.callbacks = {}
   self.running = true
   self.thread = coroutine.create(fn)
-  vim.schedule(function()
-    self:_step()
-  end)
+  Scheduler.add(self)
   return self
 end
 
@@ -197,24 +221,12 @@ function Async:_done(result, error)
 end
 
 function Async:_step()
-  if not self.running then
-    return
+  local ok, res = coroutine.resume(self.thread)
+  if not ok then
+    return self:_done(nil, res)
+  elseif coroutine.status(self.thread) == 'dead' then
+    return self:_done(res)
   end
-  local start = vim.loop.hrtime()
-  while true do
-    local ok, res = coroutine.resume(self.thread)
-    if not ok then
-      return self:_done(nil, res)
-    elseif coroutine.status(self.thread) == 'dead' then
-      return self:_done(res)
-    end
-    if vim.loop.hrtime() - start > 1e6 then
-      break
-    end
-  end
-  vim.schedule(function()
-    self:_step()
-  end)
 end
 
 function Async:cancel()
