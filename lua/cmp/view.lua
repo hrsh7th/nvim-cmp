@@ -104,6 +104,8 @@ view.open = function(self, ctx, sources)
         end
       end
     end)
+    local max_item_count = config.get().view.max_items or 100
+    entries = vim.list_slice(entries, 1, max_item_count)
 
     -- open
     if #entries > 0 then

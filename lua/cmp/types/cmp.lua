@@ -162,6 +162,7 @@ cmp.ItemField = {
 
 ---@class cmp.ViewConfig
 ---@field public entries cmp.EntriesConfig
+---@field public max_items integer
 
 ---@alias cmp.EntriesConfig cmp.CustomEntriesConfig|cmp.NativeEntriesConfig|cmp.WildmenuEntriesConfig|string
 

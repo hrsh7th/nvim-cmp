@@ -111,7 +111,6 @@ source.get_entries = function(self, ctx)
   local inputs = {}
   ---@type cmp.Entry[]
   local entries = {}
-  local max_item_count = self:get_source_config().max_item_count or 200
   local matching_config = self:get_matching_config()
   for _, e in ipairs(target_entries) do
     local o = e:get_offset()
@@ -128,17 +127,14 @@ source.get_entries = function(self, ctx)
 
       if entry_filter(e, ctx) then
         entries[#entries + 1] = e
-        if max_item_count and #entries >= max_item_count then
-          break
-        end
       end
     end
     async.yield()
   end
 
-  -- only save to cache, when there are no additional entries that could match the filter
-  -- This also prevents too much memory usage
-  if #entries < max_item_count then
+  -- only save to cache, when there are not too many entries
+  -- This prevents too much memory usage
+  if #entries < 200 then
     self.cache:set({ 'get_entries', tostring(self.revision), ctx.cursor_before_line }, entries)
   end
 

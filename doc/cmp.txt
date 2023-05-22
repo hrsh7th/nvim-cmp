@@ -620,6 +620,11 @@ view~
   The view class used to customize nvim-cmp's appearance.
   Currently available configuration options are:
 
+                                                     *cmp-config.view.max_items*
+view.max_items
+  `integer`
+  Maximum number of items to show in the entries list.
+
                            *cmp-config.window.{completion,documentation}.border*
 window.{completion,documentation}.border~
   `string | string[] | nil`
