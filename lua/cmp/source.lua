@@ -130,6 +130,9 @@ source.get_entries = function(self, ctx)
       end
     end
     async.yield()
+    if ctx.aborted then
+      async.abort()
+    end
   end
 
   -- only save to cache, when there are not too many entries

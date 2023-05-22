@@ -56,6 +56,7 @@ end
 ---@param option? cmp.ContextOption
 ---@return cmp.Context
 core.get_context = function(self, option)
+  self.context:abort()
   local prev = self.context:clone()
   prev.prev_context = nil
   prev.cache = nil

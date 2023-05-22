@@ -224,6 +224,8 @@ function Async:_step()
   local ok, res = coroutine.resume(self.thread)
   if not ok then
     return self:_done(nil, res)
+  elseif res == 'abort' then
+    return self:_done(nil, 'abort')
   elseif coroutine.status(self.thread) == 'dead' then
     return self:_done(res)
   end
@@ -264,11 +266,15 @@ function async.wrap(fn)
 end
 
 -- This will yield when called from a coroutine
-function async.yield()
+function async.yield(...)
   if not coroutine.isyieldable() then
-    return
+    return ...
   end
-  coroutine.yield()
+  return coroutine.yield(...)
+end
+
+function async.abort()
+  return async.yield('abort')
 end
 
 return async
