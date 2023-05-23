@@ -376,7 +376,10 @@ entry.match = function(self, input, matching_config)
     }
 
     local score, matches, filter_text, _
+    local checked = {} ---@type string[]
+
     filter_text = self:get_filter_text()
+    checked[filter_text] = true
     score, matches = matcher.match(input, filter_text, option)
 
     -- Support the language server that doesn't respect VSCode's behaviors.
@@ -390,16 +393,21 @@ entry.match = function(self, input, matching_config)
           accept = accept or string.find(self:get_completion_item().textEdit.newText, prefix, 1, true)
           if accept then
             filter_text = prefix .. self:get_filter_text()
-            score, matches = matcher.match(input, filter_text, option)
+            if not checked[filter_text] then
+              checked[filter_text] = true
+              score, matches = matcher.match(input, filter_text, option)
+            end
           end
         end
       end
     end
 
-    local vim_item = self:get_vim_item(self:get_offset())
-    if filter_text ~= vim_item.abbr then
+    if score == 0 then
+      local vim_item = self:get_vim_item(self:get_offset())
       filter_text = vim_item.abbr or vim_item.word
-      _, matches = matcher.match(input, filter_text, option)
+      if not checked[filter_text] then
+        _, matches = matcher.match(input, filter_text, option)
+      end
     end
 
     return { score = score, matches = matches }
