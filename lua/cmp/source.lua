@@ -274,7 +274,7 @@ end
 ---@param ctx cmp.Context
 ---@param callback function
 ---@return boolean? Return true if not trigger completion.
-source.complete = async.wrap(function(self, ctx, callback)
+source.complete = function(self, ctx, callback)
   local offset = ctx:get_offset(self:get_keyword_pattern())
 
   -- NOTE: This implementation is nvim-cmp specific.
@@ -378,7 +378,7 @@ source.complete = async.wrap(function(self, ctx, callback)
     end)
   )
   return true
-end)
+end
 
 ---Resolve CompletionItem
 ---@param item lsp.CompletionItem
