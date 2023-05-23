@@ -262,7 +262,7 @@ end
 
 ---Invoke completion
 ---@param ctx cmp.Context
-core.complete = async.wrap(function(self, ctx)
+core.complete = function(self, ctx)
   if not api.is_suitable_mode() then
     return
   end
@@ -294,7 +294,7 @@ core.complete = async.wrap(function(self, ctx)
     self.filter.timeout = self.view:visible() and config.get().performance.throttle or 1
     self:filter()
   end
-end)
+end
 
 ---Update completion menu
 local async_filter = async.wrap(function(self)
