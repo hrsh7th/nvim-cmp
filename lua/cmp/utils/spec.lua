@@ -70,7 +70,7 @@ spec.state = function(text, row, col)
       vim.fn.feedkeys('x', 'nx')
       vim.fn.feedkeys('h', 'nx')
       ctx = context.new(ctx, { reason = types.cmp.ContextReason.Auto })
-      s:complete(ctx, function() end):await()
+      s:complete(ctx, function() end)
       return ctx
     end,
     input = function(char)
@@ -78,12 +78,12 @@ spec.state = function(text, row, col)
       vim.fn.feedkeys(string.rep('l', #char), 'nx')
       ctx.prev_context = nil
       ctx = context.new(ctx, { reason = types.cmp.ContextReason.Auto })
-      s:complete(ctx, function() end):await()
+      s:complete(ctx, function() end)
       return ctx
     end,
     manual = function()
       ctx = context.new(ctx, { reason = types.cmp.ContextReason.Manual })
-      s:complete(ctx, function() end):await()
+      s:complete(ctx, function() end)
       return ctx
     end,
   }
