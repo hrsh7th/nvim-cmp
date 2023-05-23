@@ -337,7 +337,7 @@ source.complete = async.wrap(function(self, ctx, callback)
       context = ctx,
       completion_context = completion_context,
     }),
-    self.complete_dedup(async.wrap(function(response)
+    self.complete_dedup(function(response)
       if self.context ~= ctx then
         return
       end
@@ -361,10 +361,7 @@ source.complete = async.wrap(function(self, ctx, callback)
           end
         end
         self.revision = self.revision + 1
-        if #self:get_entries(ctx) == 0 then
-          if self.context ~= ctx then
-            return
-          end
+        if #self.entries == 0 then
           self.offset = old_offset
           self.entries = old_entries
           self.revision = self.revision + 1
@@ -378,7 +375,7 @@ source.complete = async.wrap(function(self, ctx, callback)
         self.status = prev_status
       end
       callback()
-    end))
+    end)
   )
   return true
 end)
