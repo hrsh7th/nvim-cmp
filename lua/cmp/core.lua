@@ -324,17 +324,13 @@ local async_filter = async.wrap(function(self)
   local ctx = self:get_context()
 
   -- Display completion results.
-  self.view:open(ctx, sources)
+  local did_open = self.view:open(ctx, sources)
+  local fetching = #self:get_sources(function(s)
+    return s.status == source.SourceStatus.FETCHING
+  end)
 
   -- Check onetime config.
-  if #self:get_sources(function(s)
-    if s.status == source.SourceStatus.FETCHING then
-      return true
-    elseif #s:get_entries(ctx) > 0 then
-      return true
-    end
-    return false
-  end) == 0 then
+  if not did_open and fetching == 0 then
     config.set_onetime({})
   end
 end)

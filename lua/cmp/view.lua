@@ -47,6 +47,7 @@ end
 ---Open menu
 ---@param ctx cmp.Context
 ---@param sources cmp.Source[]
+---@return boolean did_open
 view.open = function(self, ctx, sources)
   local source_group_map = {}
   for _, s in ipairs(sources) do
@@ -121,6 +122,7 @@ view.open = function(self, ctx, sources)
   if #entries == 0 then
     self:close()
   end
+  return #entries > 0
 end
 
 ---Close menu
