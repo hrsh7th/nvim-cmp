@@ -17,7 +17,7 @@ ghost_text_view.new = function()
     on_win = function(_, win)
       return win == self.win
     end,
-    on_line = function(_)
+    on_line = function(_, _, _, on_row)
       local c = config.get().experimental.ghost_text
       if not c then
         return
@@ -28,17 +28,17 @@ ghost_text_view.new = function()
       end
 
       local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-      local line = vim.api.nvim_get_current_line()
-      if string.sub(line, col + 1) ~= '' then
+      if on_row ~= row - 1 then
         return
       end
 
+      local line = vim.api.nvim_get_current_line()
       local text = self.text_gen(self, line, col)
       if #text > 0 then
         vim.api.nvim_buf_set_extmark(0, ghost_text_view.ns, row - 1, col, {
           right_gravity = false,
           virt_text = { { text, type(c) == 'table' and c.hl_group or 'Comment' } },
-          virt_text_pos = 'overlay',
+          virt_text_pos = 'inline',
           hl_mode = 'combine',
           ephemeral = true,
         })
