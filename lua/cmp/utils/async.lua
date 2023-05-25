@@ -238,18 +238,21 @@ function Async:cancel()
 end
 
 function Async:await(cb)
-  if cb then
-    if self.running then
-      table.insert(self.callbacks, cb)
-    else
-      cb(self.result, self.error)
-    end
-  else
-    while self.running do
-      vim.wait(10)
-    end
-    return self.error and error(self.error) or self.result
+  if not cb then
+    error('callback is required')
   end
+  if self.running then
+    table.insert(self.callbacks, cb)
+  else
+    cb(self.result, self.error)
+  end
+end
+
+function Async:sync()
+  while self.running do
+    vim.wait(10)
+  end
+  return self.error and error(self.error) or self.result
 end
 
 --- @return boolean
