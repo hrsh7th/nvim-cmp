@@ -47,6 +47,7 @@ end
 ---Open menu
 ---@param ctx cmp.Context
 ---@param sources cmp.Source[]
+---@return boolean did_open
 view.open = function(self, ctx, sources)
   local source_group_map = {}
   for _, s in ipairs(sources) do
@@ -104,6 +105,8 @@ view.open = function(self, ctx, sources)
         end
       end
     end)
+    local max_item_count = config.get().performance.max_view_entries or 200
+    entries = vim.list_slice(entries, 1, max_item_count)
 
     -- open
     if #entries > 0 then
@@ -119,6 +122,7 @@ view.open = function(self, ctx, sources)
   if #entries == 0 then
     self:close()
   end
+  return #entries > 0
 end
 
 ---Close menu

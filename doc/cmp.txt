@@ -413,10 +413,21 @@ performance.throttle~
   This is used to delay filtering and displaying completions.
 
                                         *cmp-config.performance.fetching_timeout*
-  performance.fetching_timeout~
+performance.fetching_timeout~
     `number`
     Sets the timeout of candidate fetching process.
     The nvim-cmp will wait to display the most prioritized source.
+
+                                            *cmp-config.performance.async_budget*
+performance.async_budget~
+    `number`
+    Maximum time (in ms) an async function is allowed to run during
+    one step of the event loop.
+
+                                        *cmp-config.performance.max_view_entries*
+performance.max_view_entries~
+    `number`
+    Maximum number of items to show in the entries list.
 
                                                           *cmp-config.preselect*
 preselect~
