@@ -18,7 +18,6 @@ local char = require('cmp.utils.char')
 ---@field public incomplete boolean
 ---@field public is_triggered_by_symbol boolean
 ---@field public entries cmp.Entry[]
----@field public filtered {entries: cmp.Entry[], ctx: cmp.Context}
 ---@field public offset integer
 ---@field public request_offset integer
 ---@field public context cmp.Context
@@ -54,7 +53,6 @@ source.reset = function(self)
   self.is_triggered_by_symbol = false
   self.incomplete = false
   self.entries = {}
-  self.filtered = {}
   self.offset = -1
   self.request_offset = -1
   self.completion_context = nil
@@ -90,21 +88,20 @@ source.get_entries = function(self, ctx)
     return {}
   end
 
-  if self.filtered.ctx and self.filtered.ctx.id == ctx.id then
-    return self.filtered.entries
-  end
+  local target_entries = self.entries
 
-  local target_entries = (function()
-    local key = { 'get_entries', self.revision }
-    for i = ctx.cursor.col, self.offset, -1 do
-      key[3] = string.sub(ctx.cursor_before_line, 1, i)
-      local prev_entries = self.cache:get(key)
-      if prev_entries then
-        return prev_entries
-      end
+  local prev = self.cache:get({ 'get_entries', self.revision })
+
+  if prev and ctx.cursor.row == prev.ctx.cursor.row then
+    if ctx.cursor.col == prev.ctx.cursor.col then
+      return prev.entries
     end
-    return self.entries
-  end)()
+    -- only use prev entries when cursor is moved forward.
+    -- and the pattern offset is the same.
+    if ctx.cursor.col >= prev.ctx.cursor.col and ctx.offset == prev.ctx.offset then
+      target_entries = prev.entries
+    end
+  end
 
   local entry_filter = self:get_entry_filter()
 
@@ -135,13 +132,8 @@ source.get_entries = function(self, ctx)
     end
   end
 
-  -- only save to cache, when there are not too many entries
-  -- This prevents too much memory usage
-  if #entries < 200 then
-    self.cache:set({ 'get_entries', tostring(self.revision), ctx.cursor_before_line }, entries)
-  end
+  self.cache:set({ 'get_entries', self.revision }, { entries = entries, ctx = ctx })
 
-  self.filtered = { entries = entries, ctx = ctx }
   return entries
 end
 
