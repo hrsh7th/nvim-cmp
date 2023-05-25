@@ -1,4 +1,5 @@
 local feedkeys = require('cmp.utils.feedkeys')
+local config = require('cmp.config')
 
 local async = {}
 
@@ -168,8 +169,9 @@ Scheduler._queue = {}
 Scheduler._executor = assert(vim.loop.new_check())
 
 function Scheduler.step()
+  local budget = config.get().performance.async_budget * 1e6
   local start = vim.loop.hrtime()
-  while #Scheduler._queue > 0 and vim.loop.hrtime() - start < 1e6 do
+  while #Scheduler._queue > 0 and vim.loop.hrtime() - start < budget do
     local a = table.remove(Scheduler._queue, 1)
     a:_step()
     if a.running then

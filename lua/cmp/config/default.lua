@@ -19,6 +19,7 @@ return function()
       debounce = 60,
       throttle = 30,
       fetching_timeout = 500,
+      async_budget = 1,
     },
 
     preselect = types.cmp.PreselectMode.Item,
