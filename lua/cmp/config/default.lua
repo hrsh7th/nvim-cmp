@@ -93,7 +93,7 @@ return function()
         name = 'custom',
         selection_order = 'top_down',
       },
-      max_items = 100,
+      max_items = 200,
     },
 
     window = {

@@ -105,7 +105,7 @@ view.open = function(self, ctx, sources)
         end
       end
     end)
-    local max_item_count = config.get().view.max_items or 100
+    local max_item_count = config.get().view.max_items or 200
     entries = vim.list_slice(entries, 1, max_item_count)
 
     -- open
