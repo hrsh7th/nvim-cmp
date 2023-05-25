@@ -273,6 +273,7 @@ end
 -- This will yield when called from a coroutine
 function async.yield(...)
   if not coroutine.isyieldable() then
+    error('Trying to yield from a non-yieldable context')
     return ...
   end
   return coroutine.yield(...)
