@@ -67,8 +67,11 @@ async.throttle = function(fn, timeout)
           if async.is_async(ret) then
             ---@cast ret Async
             _async = ret
-            _async:await(function()
+            _async:await(function(_, error)
               self.running = false
+              if error and error ~= 'abort' then
+                vim.notify(error, vim.log.levels.ERROR)
+              end
             end)
           else
             self.running = false
@@ -237,6 +240,7 @@ function Async:cancel()
   self.running = false
 end
 
+---@param cb AsyncCallback
 function Async:await(cb)
   if not cb then
     error('callback is required')
