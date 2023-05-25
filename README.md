@@ -3,7 +3,7 @@
 A completion engine plugin for neovim written in Lua.
 Completion sources are installed from external repositories and "sourced".
 
-<video src="https://user-images.githubusercontent.com/629908/139000570-3ac39587-a88b-43c6-b35e-207489719359.mp4" width="100%"></video>
+https://github.com/hrsh7th/nvim-cmp/assets/22756295/afa70011-9121-4e42-aedd-0153b630eeab
 
 Readme!
 ====================
