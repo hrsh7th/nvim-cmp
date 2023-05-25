@@ -9,6 +9,8 @@ local ghost_text_view = {}
 
 ghost_text_view.ns = vim.api.nvim_create_namespace('cmp:GHOST_TEXT')
 
+local has_inline = vim.fn.has('nvim-0.10') == 1
+
 ghost_text_view.new = function()
   local self = setmetatable({}, { __index = ghost_text_view })
   self.win = nil
@@ -33,12 +35,18 @@ ghost_text_view.new = function()
       end
 
       local line = vim.api.nvim_get_current_line()
+      if not has_inline then
+        if string.sub(line, col + 1) ~= '' then
+          return
+        end
+      end
+
       local text = self.text_gen(self, line, col)
       if #text > 0 then
         vim.api.nvim_buf_set_extmark(0, ghost_text_view.ns, row - 1, col, {
           right_gravity = false,
           virt_text = { { text, type(c) == 'table' and c.hl_group or 'Comment' } },
-          virt_text_pos = 'inline',
+          virt_text_pos = has_inline and 'inline' or 'overlay',
           hl_mode = 'combine',
           ephemeral = true,
         })
