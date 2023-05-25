@@ -100,6 +100,7 @@ cmp.ItemField = {
 ---@field public throttle integer
 ---@field public fetching_timeout integer
 ---@field public async_budget integer Maximum time (in ms) an async function is allowed to run during one step of the event loop.
+---@field public max_view_entries integer
 
 ---@class cmp.WindowConfig
 ---@field completion cmp.WindowConfig
@@ -163,7 +164,6 @@ cmp.ItemField = {
 
 ---@class cmp.ViewConfig
 ---@field public entries cmp.EntriesConfig
----@field public max_items integer
 
 ---@alias cmp.EntriesConfig cmp.CustomEntriesConfig|cmp.NativeEntriesConfig|cmp.WildmenuEntriesConfig|string
 

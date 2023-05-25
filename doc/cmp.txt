@@ -418,11 +418,16 @@ performance.fetching_timeout~
     Sets the timeout of candidate fetching process.
     The nvim-cmp will wait to display the most prioritized source.
 
-                                        *cmp-config.performance.async_budget*
+                                            *cmp-config.performance.async_budget*
 performance.async_budget~
     `number`
     Maximum time (in ms) an async function is allowed to run during
     one step of the event loop.
+
+                                        *cmp-config.performance.max_view_entries*
+performance.max_view_entries~
+    `number`
+    Maximum number of items to show in the entries list.
 
                                                           *cmp-config.preselect*
 preselect~
@@ -625,11 +630,6 @@ view~
   `{ entries: cmp.EntriesConfig|string }`
   The view class used to customize nvim-cmp's appearance.
   Currently available configuration options are:
-
-                                                     *cmp-config.view.max_items*
-view.max_items
-  `integer`
-  Maximum number of items to show in the entries list.
 
                            *cmp-config.window.{completion,documentation}.border*
 window.{completion,documentation}.border~

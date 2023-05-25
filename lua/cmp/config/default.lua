@@ -20,6 +20,7 @@ return function()
       throttle = 30,
       fetching_timeout = 500,
       async_budget = 1,
+      max_view_entries = 200,
     },
 
     preselect = types.cmp.PreselectMode.Item,
@@ -93,7 +94,6 @@ return function()
         name = 'custom',
         selection_order = 'top_down',
       },
-      max_items = 200,
     },
 
     window = {
