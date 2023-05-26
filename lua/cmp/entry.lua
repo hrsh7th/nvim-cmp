@@ -376,7 +376,7 @@ entry.match = function(self, input, matching_config)
     }
 
     local score, matches, filter_text, _
-    local checked = {} ---@type string[]
+    local checked = {} ---@type table<string, boolean>
 
     filter_text = self:get_filter_text()
     checked[filter_text] = true
@@ -402,7 +402,7 @@ entry.match = function(self, input, matching_config)
       end
     end
 
-    if score == 0 then
+    if score ~= 0 then
       local vim_item = self:get_vim_item(self:get_offset())
       filter_text = vim_item.abbr or vim_item.word
       if not checked[filter_text] then
