@@ -423,7 +423,11 @@ core.confirm = function(self, e, option, callback)
     local completion_item = misc.copy(e:get_completion_item())
     if not completion_item.textEdit then
       completion_item.textEdit = {}
-      completion_item.textEdit.newText = completion_item.insertText or completion_item.word or completion_item.label
+      local insertText = completion_item.insertText
+      if misc.empty(insertText) then
+        insertText = nil
+      end
+      completion_item.textEdit.newText = insertText or completion_item.word or completion_item.label
     end
     local behavior = option.behavior or config.get().confirmation.default_behavior
     if behavior == types.cmp.ConfirmBehavior.Replace then
