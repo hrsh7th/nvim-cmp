@@ -329,7 +329,7 @@ source.complete = function(self, ctx, callback)
       context = ctx,
       completion_context = completion_context,
     }),
-    self.complete_dedup(function(response)
+    self.complete_dedup(vim.schedule_wrap(function(response)
       if self.context ~= ctx then
         return
       end
@@ -367,7 +367,7 @@ source.complete = function(self, ctx, callback)
         self.status = prev_status
       end
       callback()
-    end)
+    end))
   )
   return true
 end
