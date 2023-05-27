@@ -18,6 +18,7 @@ vim.api.nvim_set_hl(0, 'CmpItemAbbrMatch', { link = 'CmpItemAbbrMatchDefault', d
 vim.api.nvim_set_hl(0, 'CmpItemAbbrMatchFuzzy', { link = 'CmpItemAbbrMatchFuzzyDefault', default = true })
 vim.api.nvim_set_hl(0, 'CmpItemKind', { link = 'CmpItemKindDefault', default = true })
 vim.api.nvim_set_hl(0, 'CmpItemMenu', { link = 'CmpItemMenuDefault', default = true })
+vim.api.nvim_set_hl(0, 'CmpGhostText', { link = 'Comment', default = true })
 for kind in pairs(types.lsp.CompletionItemKind) do
   if type(kind) == 'string' then
     local name = ('CmpItemKind%s'):format(kind)

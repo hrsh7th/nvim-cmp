@@ -371,6 +371,9 @@ NOTE: `kind` is a symbol after each completion option.
 *CmpItemMenu*
   The menu field's highlight group.
 
+*CmpGhostText*
+  Highlight group for ghost text. Defaults to `Comment`
+
 ==============================================================================
 FileType                                                          *cmp-filetype*
 
