@@ -677,8 +677,9 @@ window.documentation.max_height~
 
                                             *cmp-config.experimental.ghost_text*
 experimental.ghost_text~
-  `boolean | { hl_group = string }`
-  Whether to enable the ghost_text feature.
+  `boolean | { hl_group = string, inline = boolean }`
+  Whether to enable the ghost_text feature. Defaults to inline when running
+  on Neovim >= 0.10.0
 
 ==============================================================================
 Config Helper                                                *cmp-config-helper*

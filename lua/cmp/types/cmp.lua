@@ -150,6 +150,7 @@ cmp.ItemField = {
 
 ---@class cmp.GhostTextConfig
 ---@field hl_group string
+---@field inline? boolean Defaults to true
 
 ---@class cmp.SourceConfig
 ---@field public name string

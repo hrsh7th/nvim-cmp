@@ -5,6 +5,8 @@ local types = require('cmp.types')
 local api = require('cmp.utils.api')
 
 ---@class cmp.GhostTextView
+---@field win? number
+---@field entry? cmp.Entry
 local ghost_text_view = {}
 
 ghost_text_view.ns = vim.api.nvim_create_namespace('cmp:GHOST_TEXT')
@@ -25,6 +27,15 @@ ghost_text_view.new = function()
         return
       end
 
+      local opts = vim.tbl_deep_extend('force', {
+        hl_group = 'CmpGhostText',
+        inline = true,
+      }, type(c) == 'table' and c or {})
+
+      if not has_inline then
+        opts.inline = false
+      end
+
       if not self.entry then
         return
       end
@@ -35,18 +46,16 @@ ghost_text_view.new = function()
       end
 
       local line = vim.api.nvim_get_current_line()
-      if not has_inline then
-        if string.sub(line, col + 1) ~= '' then
-          return
-        end
+      if not opts.inline and string.sub(line, col + 1) ~= '' then
+        return
       end
 
       local text = self.text_gen(self, line, col)
       if #text > 0 then
         vim.api.nvim_buf_set_extmark(0, ghost_text_view.ns, row - 1, col, {
           right_gravity = false,
-          virt_text = { { text, type(c) == 'table' and c.hl_group or 'Comment' } },
-          virt_text_pos = has_inline and 'inline' or 'overlay',
+          virt_text = { { text, opts.hl_group } },
+          virt_text_pos = opts.inline and 'inline' or 'overlay',
           hl_mode = 'combine',
           ephemeral = true,
         })
