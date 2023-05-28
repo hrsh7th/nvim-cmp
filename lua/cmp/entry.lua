@@ -383,11 +383,12 @@ entry.match = function(self, input, matching_config)
     score, matches = matcher.match(input, filter_text, option)
 
     -- Support the language server that doesn't respect VSCode's behaviors.
+    local prefix = ''
     if score == 0 then
       if self:get_completion_item().textEdit and not misc.empty(self:get_completion_item().textEdit.newText) then
         local diff = self.source_offset - self:get_offset()
         if diff > 0 then
-          local prefix = string.sub(self.context.cursor_line, self:get_offset(), self:get_offset() + diff)
+          prefix = string.sub(self.context.cursor_line, self:get_offset(), self:get_offset() + diff)
           local accept = nil
           accept = accept or string.match(prefix, '^[^%a]+$')
           accept = accept or string.find(self:get_completion_item().textEdit.newText, prefix, 1, true)
@@ -402,11 +403,13 @@ entry.match = function(self, input, matching_config)
       end
     end
 
-    if score ~= 0 then
-      local vim_item = self:get_vim_item(self:get_offset())
+    -- Fix highlight if filterText is not the same to vim_item.abbr.
+    if score > 0 then
+      local vim_item = self:get_vim_item(self.source_offset)
       filter_text = vim_item.abbr or vim_item.word
       if not checked[filter_text] then
-        _, matches = matcher.match(input, filter_text, option)
+        local diff = self.source_offset - self:get_offset()
+        _, matches = matcher.match(input:sub(1 + diff), filter_text, option)
       end
     end
 
