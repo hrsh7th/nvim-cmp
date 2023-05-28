@@ -140,7 +140,7 @@ cmp.ItemField = {
 
 ---@class cmp.SortingConfig
 ---@field public priority_weight integer
----@field public comparators function[]
+---@field public comparators cmp.Comparator[]
 
 ---@class cmp.FormattingConfig
 ---@field public fields cmp.ItemField[]
