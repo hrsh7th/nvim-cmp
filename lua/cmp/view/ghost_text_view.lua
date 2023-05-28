@@ -9,8 +9,8 @@ local ghost_text_view = {}
 
 ghost_text_view.ns = vim.api.nvim_create_namespace('cmp:GHOST_TEXT')
 
-local has_inline, msg = (function()
-  return pcall(function()
+local has_inline = (function()
+  return (pcall(function()
     local id = vim.api.nvim_buf_set_extmark(0, ghost_text_view.ns, 0, 0, {
       virt_text = { { ' ', 'Comment' } },
       virt_text_pos = 'inline',
@@ -18,7 +18,7 @@ local has_inline, msg = (function()
       ephemeral = true,
     })
     vim.api.nvim_buf_del_extmark(0, ghost_text_view.ns, id)
-  end)
+  end))
 end)()
 
 ghost_text_view.new = function()

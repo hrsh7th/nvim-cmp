@@ -90,15 +90,14 @@ source.get_entries = function(self, ctx)
 
   local target_entries = self.entries
 
-  local prev = self.cache:get({ 'get_entries', self.revision })
-
-  if prev and ctx.cursor.row == prev.ctx.cursor.row then
+  local prev = self.cache:get({ 'get_entries', tostring(self.revision) })
+  if prev and ctx.cursor.row == prev.ctx.cursor.row and self.offset == prev.offset then
     if ctx.cursor.col == prev.ctx.cursor.col then
       return prev.entries
     end
     -- only use prev entries when cursor is moved forward.
     -- and the pattern offset is the same.
-    if ctx.cursor.col >= prev.ctx.cursor.col and ctx.offset == prev.ctx.offset then
+    if prev.ctx.cursor.col <= ctx.cursor.col then
       target_entries = prev.entries
     end
   end
@@ -132,7 +131,7 @@ source.get_entries = function(self, ctx)
     end
   end
 
-  self.cache:set({ 'get_entries', self.revision }, { entries = entries, ctx = ctx })
+  self.cache:set({ 'get_entries', tostring(self.revision) }, { entries = entries, ctx = ctx, offset = self.offset })
 
   return entries
 end
