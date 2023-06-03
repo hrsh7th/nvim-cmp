@@ -60,24 +60,23 @@ async.throttle = function(fn, timeout)
 
       self.running = true
       self.stop(false)
-      timer:start(math.max(1, self.timeout - (vim.loop.now() - time)), 0, function()
-        vim.schedule(function()
-          time = nil
-          local ret = fn(unpack(args))
-          if async.is_async(ret) then
-            ---@cast ret Async
-            _async = ret
-            _async:await(function(_, error)
-              self.running = false
-              if error and error ~= 'abort' then
-                vim.notify(error, vim.log.levels.ERROR)
-              end
-            end)
-          else
+
+      vim.defer_fn(function()
+        time = nil
+        local ret = fn(unpack(args))
+        if async.is_async(ret) then
+          ---@cast ret Async
+          _async = ret
+          _async:await(function(_, error)
             self.running = false
-          end
-        end)
-      end)
+            if error and error ~= 'abort' then
+              vim.notify(error, vim.log.levels.ERROR)
+            end
+          end)
+        else
+          self.running = false
+        end
+      end, math.max(1, self.timeout - (vim.loop.now() - time)))
     end,
   })
 end
