@@ -29,9 +29,7 @@ vim.api.nvim_create_autocmd('VimLeavePre', {
 ---@return cmp.AsyncThrottle
 async.throttle = function(fn, timeout)
   local time = nil
-  local timer = assert(vim.loop.new_timer())
   local _async = nil ---@type Async?
-  timers[#timers + 1] = timer
   return setmetatable({
     running = false,
     timeout = timeout,
@@ -44,7 +42,6 @@ async.throttle = function(fn, timeout)
       if reset_time ~= false then
         time = nil
       end
-      timer:stop()
       if _async then
         _async:cancel()
         _async = nil
