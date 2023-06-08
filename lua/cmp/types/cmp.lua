@@ -72,11 +72,15 @@ cmp.ItemField = {
 ---@field public context cmp.Context
 ---@field public completion_context lsp.CompletionContext
 
----@class cmp.Mapping
----@field public i nil|function(fallback: function): void
----@field public c nil|function(fallback: function): void
----@field public x nil|function(fallback: function): void
----@field public s nil|function(fallback: function): void
+---@alias  cmp.MappingFunction fun(fallback: function): nil
+
+---@class cmp.MappingClass
+---@field public i nil|cmp.MappingFunction
+---@field public c nil|cmp.MappingFunction
+---@field public x nil|cmp.MappingFunction
+---@field public s nil|cmp.MappingFunction
+
+---@alias cmp.Mapping cmp.MappingFunction | cmp.MappingClass
 
 ---@class cmp.ConfigSchema
 ---@field private revision integer
