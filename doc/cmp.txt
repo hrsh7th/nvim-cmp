@@ -570,6 +570,12 @@ sources[n].priority~
   `number`
   The source-specific priority value.
 
+                                          *cmp-config.sources[n].max_item_count*
+sources[n].max_item_count~
+  `number`
+  The source-specific maximum item count option
+  Note: This is applied before sorting, so items that aren't well-matched may be selected.
+
                                              *cmp-config.sources[n].group_index*
 sources[n].group_index~
   `number`
