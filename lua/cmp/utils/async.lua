@@ -42,7 +42,7 @@ async.throttle = function(fn, timeout)
       end
       vim.wait(timeout_ or 1000, function()
         return not self.running
-      end)
+      end, 10)
     end,
     stop = function(reset_time)
       if reset_time ~= false then
@@ -73,6 +73,7 @@ async.throttle = function(fn, timeout)
             ---@cast ret Async
             _async = ret
             _async:await(function(_, error)
+              _async = nil
               self.running = false
               if error and error ~= 'abort' then
                 vim.notify(error, vim.log.levels.ERROR)
