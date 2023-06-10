@@ -150,7 +150,7 @@ cmp.ItemField = {
 ---@field public expand fun(args: cmp.SnippetExpansionParams)
 
 ---@class cmp.ExperimentalConfig
----@field public ghost_text cmp.GhostTextConfig|false
+---@field public ghost_text cmp.GhostTextConfig|boolean
 
 ---@class cmp.GhostTextConfig
 ---@field hl_group string
