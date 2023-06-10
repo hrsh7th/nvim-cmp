@@ -192,14 +192,14 @@ end
 
 -- Find the suffix for the specified line
 local function find_line_suffix(line)
-    local i = #line
-    while i > 0 do
-        if line:sub(i, i):find('%s') then
-            return line:sub(i + 1)
-        end
-        i = i - 1
+  local i = #line
+  while i > 0 do
+    if line:sub(i, i):find('%s') then
+      return line:sub(i + 1)
     end
-    return line
+    i = i - 1
+  end
+  return line
 end
 
 ---Check autoindent
