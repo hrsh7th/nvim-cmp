@@ -190,6 +190,18 @@ core.on_moved = function(self)
   self:filter()
 end
 
+-- Find the suffix for the specified line
+local function find_line_suffix(line)
+    local i = #line
+    while i > 0 do
+        if line:sub(i, i):find('%s') then
+            return line:sub(i + 1)
+        end
+        i = i - 1
+    end
+    return line
+end
+
 ---Check autoindent
 ---@param trigger_event cmp.TriggerEvent
 ---@param callback function
@@ -203,7 +215,7 @@ core.autoindent = function(self, trigger_event, callback)
 
   -- Check prefix
   local cursor_before_line = api.get_cursor_before_line()
-  local prefix = pattern.matchstr('[^[:blank:]]\\+$', cursor_before_line) or ''
+  local prefix = find_line_suffix(cursor_before_line) or ''
   if #prefix == 0 then
     return callback()
   end
