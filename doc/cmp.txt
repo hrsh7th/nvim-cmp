@@ -172,9 +172,31 @@ NOTE: `<Cmd>lua require('cmp').complete()<CR>` can be used to call these functio
 
 *cmp.select_next_item* (option: { behavior = cmp.SelectBehavior, count = 1 })
   Select the next item. Set count with large number to select pagedown.
+  `behavior` can be one of:
+  - `cmp.SelectBehavior.Insert`: Inserts the text at cursor.
+  - `cmp.SelectBehavior.Select`: Only selects the text, potentially adds ghost_text at
+    cursor.
+>lua
+  cmp.setup {
+    mapping = {
+      ["<C-j>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+    }
+  }
+<
 
 *cmp.select_prev_item* (option: { behavior = cmp.SelectBehavior, count = 1 })
   Select the previous item. Set count with large number to select pageup.
+  `behavior` can be one of:
+  - `cmp.SelectBehavior.Insert`: Inserts the text at cursor.
+  - `cmp.SelectBehavior.Select`: Only selects the text, potentially adds ghost_text at
+    cursor.
+>lua
+  cmp.setup {
+    mapping = {
+      ["<C-k>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
+    }
+  }
+<
 
 *cmp.scroll_docs* (delta: number)
   Scroll the documentation window if visible.
