@@ -111,7 +111,7 @@ cmp.ItemField = {
 ---@field documentation cmp.WindowConfig|nil
 
 ---@class cmp.CompletionConfig
----@field public autocomplete cmp.TriggerEvent[]
+---@field public autocomplete cmp.TriggerEvent[]|false
 ---@field public completeopt string
 ---@field public get_trigger_characters fun(trigger_characters: string[]): string[]
 ---@field public keyword_length integer
