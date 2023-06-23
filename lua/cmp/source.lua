@@ -57,8 +57,7 @@ source.reset = function(self)
   self.request_offset = -1
   self.completion_context = nil
   self.status = source.SourceStatus.WAITING
-  self.complete_dedup(function()
-  end)
+  self.complete_dedup(function() end)
 end
 
 ---Return source config
