@@ -103,6 +103,7 @@ cmp.ItemField = {
 ---@field public debounce integer
 ---@field public throttle integer
 ---@field public fetching_timeout integer
+---@field public confirm_resolve_timeout integer
 ---@field public async_budget integer Maximum time (in ms) an async function is allowed to run during one step of the event loop.
 ---@field public max_view_entries integer
 

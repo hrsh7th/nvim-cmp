@@ -440,6 +440,11 @@ performance.fetching_timeout~
     Sets the timeout of candidate fetching process.
     The nvim-cmp will wait to display the most prioritized source.
 
+                                        *cmp-config.performance.confirm_resolve_timeout*
+performance.confirm_resolve_timeout~
+    `number`
+    Sets the timeout for resolving item before confirmation.
+
                                             *cmp-config.performance.async_budget*
 performance.async_budget~
     `number`

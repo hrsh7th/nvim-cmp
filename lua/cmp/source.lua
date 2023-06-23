@@ -57,7 +57,8 @@ source.reset = function(self)
   self.request_offset = -1
   self.completion_context = nil
   self.status = source.SourceStatus.WAITING
-  self.complete_dedup(function() end)
+  self.complete_dedup(function()
+  end)
 end
 
 ---Return source config
@@ -90,12 +91,14 @@ source.get_entries = function(self, ctx)
 
   local target_entries = self.entries
 
-  local prev = self.cache:get({ 'get_entries', tostring(self.revision) })
-  if prev and ctx.cursor.row == prev.ctx.cursor.row and self.offset == prev.offset then
-    -- only use prev entries when cursor is moved forward.
-    -- and the pattern offset is the same.
-    if prev.ctx.cursor.col <= ctx.cursor.col then
-      target_entries = prev.entries
+  if not self.incomplete then
+    local prev = self.cache:get({ 'get_entries', tostring(self.revision) })
+    if prev and ctx.cursor.row == prev.ctx.cursor.row and self.offset == prev.offset then
+      -- only use prev entries when cursor is moved forward.
+      -- and the pattern offset is the same.
+      if prev.ctx.cursor.col <= ctx.cursor.col then
+        target_entries = prev.entries
+      end
     end
   end
 
@@ -128,7 +131,9 @@ source.get_entries = function(self, ctx)
     end
   end
 
-  self.cache:set({ 'get_entries', tostring(self.revision) }, { entries = entries, ctx = ctx, offset = self.offset })
+  if not self.incomplete then
+    self.cache:set({ 'get_entries', tostring(self.revision) }, { entries = entries, ctx = ctx, offset = self.offset })
+  end
 
   if self:get_source_config().max_item_count then
     local limited_entries = {}

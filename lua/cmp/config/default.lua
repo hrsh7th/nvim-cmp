@@ -19,6 +19,7 @@ return function()
       debounce = 60,
       throttle = 30,
       fetching_timeout = 500,
+      confirm_resolve_timeout = 80,
       async_budget = 1,
       max_view_entries = 200,
     },

@@ -1,7 +1,6 @@
 local debug = require('cmp.utils.debug')
 local str = require('cmp.utils.str')
 local char = require('cmp.utils.char')
-local pattern = require('cmp.utils.pattern')
 local feedkeys = require('cmp.utils.feedkeys')
 local async = require('cmp.utils.async')
 local keymap = require('cmp.utils.keymap')
@@ -362,6 +361,10 @@ core.confirm = function(self, e, option, callback)
   e.confirmed = true
 
   debug.log('entry.confirm', e:get_completion_item())
+
+  async.sync(function(done)
+    e:resolve(done)
+  end, config.get().performance.confirm_resolve_timeout)
 
   local release = self:suspend()
 
