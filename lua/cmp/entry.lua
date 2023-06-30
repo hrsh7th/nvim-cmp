@@ -68,7 +68,7 @@ entry.get_offset = function(self)
               return idx
             end
           end
-          return offset + 1
+          return offset
         end)
       end
     else
@@ -376,7 +376,10 @@ entry.match = function(self, input, matching_config)
     }
 
     local score, matches, filter_text, _
+    local checked = {} ---@type table<string, boolean>
+
     filter_text = self:get_filter_text()
+    checked[filter_text] = true
     score, matches = matcher.match(input, filter_text, option)
 
     -- Support the language server that doesn't respect VSCode's behaviors.
@@ -390,16 +393,23 @@ entry.match = function(self, input, matching_config)
           accept = accept or string.find(self:get_completion_item().textEdit.newText, prefix, 1, true)
           if accept then
             filter_text = prefix .. self:get_filter_text()
-            score, matches = matcher.match(input, filter_text, option)
+            if not checked[filter_text] then
+              checked[filter_text] = true
+              score, matches = matcher.match(input, filter_text, option)
+            end
           end
         end
       end
     end
 
-    local vim_item = self:get_vim_item(self:get_offset())
-    if filter_text ~= vim_item.abbr then
+    -- Fix highlight if filterText is not the same to vim_item.abbr.
+    if score > 0 then
+      local vim_item = self:get_vim_item(self.source_offset)
       filter_text = vim_item.abbr or vim_item.word
-      _, matches = matcher.match(input, filter_text, option)
+      if not checked[filter_text] then
+        local diff = self.source_offset - self:get_offset()
+        _, matches = matcher.match(input:sub(1 + diff), filter_text, option)
+      end
     end
 
     return { score = score, matches = matches }

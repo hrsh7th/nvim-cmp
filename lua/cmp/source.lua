@@ -18,7 +18,6 @@ local char = require('cmp.utils.char')
 ---@field public incomplete boolean
 ---@field public is_triggered_by_symbol boolean
 ---@field public entries cmp.Entry[]
----@field public filtered {entries: cmp.Entry[], ctx: cmp.Context}
 ---@field public offset integer
 ---@field public request_offset integer
 ---@field public context cmp.Context
@@ -54,7 +53,6 @@ source.reset = function(self)
   self.is_triggered_by_symbol = false
   self.incomplete = false
   self.entries = {}
-  self.filtered = {}
   self.offset = -1
   self.request_offset = -1
   self.completion_context = nil
@@ -90,28 +88,24 @@ source.get_entries = function(self, ctx)
     return {}
   end
 
-  if self.filtered.ctx and self.filtered.ctx.id == ctx.id then
-    return self.filtered.entries
-  end
+  local target_entries = self.entries
 
-  local target_entries = (function()
-    local key = { 'get_entries', self.revision }
-    for i = ctx.cursor.col, self.offset, -1 do
-      key[3] = string.sub(ctx.cursor_before_line, 1, i)
-      local prev_entries = self.cache:get(key)
-      if prev_entries then
-        return prev_entries
+  if not self.incomplete then
+    local prev = self.cache:get({ 'get_entries', tostring(self.revision) })
+    if prev and ctx.cursor.row == prev.ctx.cursor.row and self.offset == prev.offset then
+      -- only use prev entries when cursor is moved forward.
+      -- and the pattern offset is the same.
+      if prev.ctx.cursor.col <= ctx.cursor.col then
+        target_entries = prev.entries
       end
     end
-    return self.entries
-  end)()
+  end
 
   local entry_filter = self:get_entry_filter()
 
   local inputs = {}
   ---@type cmp.Entry[]
   local entries = {}
-  local max_item_count = self:get_source_config().max_item_count or 200
   local matching_config = self:get_matching_config()
   for _, e in ipairs(target_entries) do
     local o = e:get_offset()
@@ -128,20 +122,26 @@ source.get_entries = function(self, ctx)
 
       if entry_filter(e, ctx) then
         entries[#entries + 1] = e
-        if max_item_count and #entries >= max_item_count then
-          break
-        end
       end
+    end
+    async.yield()
+    if ctx.aborted then
+      async.abort()
     end
   end
 
-  -- only save to cache, when there are no additional entries that could match the filter
-  -- This also prevents too much memory usage
-  if #entries < max_item_count then
-    self.cache:set({ 'get_entries', tostring(self.revision), ctx.cursor_before_line }, entries)
+  if not self.incomplete then
+    self.cache:set({ 'get_entries', tostring(self.revision) }, { entries = entries, ctx = ctx, offset = self.offset })
   end
 
-  self.filtered = { entries = entries, ctx = ctx }
+  if self:get_source_config().max_item_count then
+    local limited_entries = {}
+    for i = 1, math.min(#entries, self:get_source_config().max_item_count) do
+      limited_entries[i] = entries[i]
+    end
+    entries = limited_entries
+  end
+
   return entries
 end
 
@@ -338,6 +338,9 @@ source.complete = function(self, ctx, callback)
       completion_context = completion_context,
     }),
     self.complete_dedup(vim.schedule_wrap(function(response)
+      if self.context ~= ctx then
+        return
+      end
       ---@type lsp.CompletionResponse
       response = response or {}
 
@@ -358,7 +361,7 @@ source.complete = function(self, ctx, callback)
           end
         end
         self.revision = self.revision + 1
-        if #self:get_entries(ctx) == 0 then
+        if #self.entries == 0 then
           self.offset = old_offset
           self.entries = old_entries
           self.revision = self.revision + 1
