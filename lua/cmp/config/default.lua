@@ -41,6 +41,7 @@ return function()
       completeopt = 'menu,menuone,noselect',
       keyword_pattern = [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]],
       keyword_length = 1,
+      docs_initially_visible = true,
     },
 
     formatting = {

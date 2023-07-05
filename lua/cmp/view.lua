@@ -10,6 +10,7 @@ local ghost_text_view = require('cmp.view.ghost_text_view')
 
 ---@class cmp.View
 ---@field public event cmp.Event
+---@field public docs_visible boolean
 ---@field private resolve_dedup cmp.AsyncDedup
 ---@field private native_entries_view cmp.NativeEntriesView
 ---@field private custom_entries_view cmp.CustomEntriesView
@@ -29,6 +30,7 @@ view.new = function()
   self.docs_view = docs_view.new()
   self.ghost_text_view = ghost_text_view.new()
   self.event = event.new()
+  self.docs_visible = config.get().completion.docs_initially_visible
 
   return self
 end
@@ -156,6 +158,22 @@ view.visible = function(self)
   return self:_get_entries_view():visible()
 end
 
+---Toggle the documentation window.
+view.toggle_docs = function(self)
+  local e = self:get_selected_entry()
+  if not e or self.docs_view:visible() then
+    self.docs_view:close()
+  else
+    e:resolve(vim.schedule_wrap(self.resolve_dedup(function()
+      if not self:visible() then
+        return
+      end
+      self.docs_view:open(e, self:_get_entries_view():info())
+    end)))
+  end
+  self.docs_visible = not self.docs_visible
+end
+
 ---Scroll documentation window if possible.
 ---@param delta integer
 view.scroll_docs = function(self, delta)
@@ -239,7 +257,9 @@ view.on_entry_change = async.throttle(function(self)
       if not self:visible() then
         return
       end
-      self.docs_view:open(e, self:_get_entries_view():info())
+      if self.docs_visible then
+        self.docs_view:open(e, self:_get_entries_view():info())
+      end
     end)))
   else
     self.docs_view:close()
