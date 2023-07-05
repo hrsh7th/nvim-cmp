@@ -15,7 +15,7 @@ local has_inline = (function()
       virt_text = { { ' ', 'Comment' } },
       virt_text_pos = 'inline',
       hl_mode = 'combine',
-      ephemeral = true,
+      ephemeral = false,
     })
     vim.api.nvim_buf_del_extmark(0, ghost_text_view.ns, id)
   end))
