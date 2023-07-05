@@ -39,6 +39,13 @@ cmp.ItemField = {
   Menu = 'menu',
 }
 
+---@alias cmp.DocVisibility 'OnEntryChange' | 'Toggle' | 'Disabled'
+cmp.DocVisibility = {
+  OnEntryChange = 'OnEntryChange',
+  Toggle = 'Toggle',
+  Disabled = 'Disabled',
+}
+
 ---@class cmp.ContextOption
 ---@field public reason cmp.ContextReason|nil
 
@@ -117,6 +124,7 @@ cmp.ItemField = {
 ---@field public get_trigger_characters fun(trigger_characters: string[]): string[]
 ---@field public keyword_length integer
 ---@field public keyword_pattern string
+---@field public doc_visibility cmp.DocVisibility
 
 ---@class cmp.WindowConfig
 ---@field public border string|string[]

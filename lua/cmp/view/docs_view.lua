@@ -27,7 +27,8 @@ end
 ---@param view cmp.WindowStyle
 docs_view.open = function(self, e, view)
   local documentation = config.get().window.documentation
-  if not documentation then
+  local vis = config.get().completion.doc_visibility
+  if not documentation or vis == 'Disabled' then
     return
   end
 

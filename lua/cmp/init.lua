@@ -181,6 +181,16 @@ cmp.scroll_docs = cmp.sync(function(delta)
   end
 end)
 
+---Toggle the documentation window.
+cmp.toggle_docs = cmp.sync(function()
+  if cmp.core.view:visible() then
+    cmp.core.view:toggle_docs()
+    return true
+  else
+    return false
+  end
+end)
+
 ---Confirm completion
 cmp.confirm = cmp.sync(function(option, callback)
   option = option or {}

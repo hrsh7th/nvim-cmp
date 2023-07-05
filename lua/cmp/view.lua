@@ -156,6 +156,21 @@ view.visible = function(self)
   return self:_get_entries_view():visible()
 end
 
+---Toggle the documentation window.
+view.toggle_docs = function(self)
+  local e = self:get_selected_entry()
+  if not e or self.docs_view:visible() then
+    self.docs_view:close()
+  else
+    e:resolve(vim.schedule_wrap(self.resolve_dedup(function()
+      if not self:visible() then
+        return
+      end
+      self.docs_view:open(e, self:_get_entries_view():info())
+    end)))
+  end
+end
+
 ---Scroll documentation window if possible.
 ---@param delta integer
 view.scroll_docs = function(self, delta)
@@ -239,7 +254,9 @@ view.on_entry_change = async.throttle(function(self)
       if not self:visible() then
         return
       end
-      self.docs_view:open(e, self:_get_entries_view():info())
+      if config.get().completion.doc_visibility == 'OnEntryChange' then
+        self.docs_view:open(e, self:_get_entries_view():info())
+      end
     end)))
   else
     self.docs_view:close()
