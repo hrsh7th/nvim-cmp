@@ -178,10 +178,19 @@ mapping.scroll_docs = function(delta)
   end
 end
 
--- Toggle the documentation window.
-mapping.toggle_docs = function()
+--- Opens the documentation window.
+mapping.open_docs = function()
   return function(fallback)
-    if not require('cmp').toggle_docs() then
+    if not require('cmp').open_docs() then
+      fallback()
+    end
+  end
+end
+
+--- Close the documentation window.
+mapping.close_docs = function()
+  return function(fallback)
+    if not require('cmp').close_docs() then
       fallback()
     end
   end

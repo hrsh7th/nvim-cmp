@@ -117,7 +117,6 @@ cmp.ItemField = {
 ---@field public get_trigger_characters fun(trigger_characters: string[]): string[]
 ---@field public keyword_length integer
 ---@field public keyword_pattern string
----@field public docs_initially_visible boolean
 
 ---@class cmp.WindowConfig
 ---@field public border string|string[]
