@@ -243,7 +243,7 @@ entry.get_vim_item = function(self, suggest_offset)
     if #(completion_item.additionalTextEdits or {}) > 0 then
       is_expandable = true
     elseif completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-      is_expandable = self:get_insert_text() ~= word
+      is_expandable = true
     elseif completion_item.kind == types.lsp.CompletionItemKind.Snippet then
       is_expandable = true
     end
