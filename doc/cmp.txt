@@ -720,7 +720,42 @@ You can use the following configuration helpers:
 
 cmp.config.compare~
 
-  TBD
+  *cmp.config.compare.length
+    The completion option would be ordered by length of string,
+    the shorter the string the upper it will be.
+
+  *cmp.config.compare.exact
+    If an exact option is found, it will be at the top.
+    
+  *cmp.config.compare.recently_used
+    Order the options by how recently the completion option was used
+
+  *cmp.config.compare.locality
+    Local variables will be placed before variables imported from other files.
+    Same goes for any other code object.
+  
+  *cmp.config.compare.score
+    TBD
+  
+  *cmp.config.compare.kind
+    Each completion is of a specific type: variable, text, snippet, etc
+    Snippets always located on top.
+    Each other type gets a number (set by the one configuring the type) and compared with others.
+    Text kind is int 100.
+  
+  *cmp.config.compare.sort_text
+    Sort by alphabetical order.
+  
+  *cmp.config.compare.offset
+    TBD
+  
+  *cmp.config.compare.order
+    TBD
+
+  
+  
+  
+
 
 cmp.config.context~
 
