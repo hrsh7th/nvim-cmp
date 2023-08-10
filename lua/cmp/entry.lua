@@ -562,4 +562,15 @@ entry.convert_range_encoding = function(self, range)
   end)
 end
 
+---Return true if the entry is invalid.
+entry.is_invalid = function(self)
+  local is_invalid = false
+  is_invalid = is_invalid or misc.empty(self.completion_item.label)
+  if self.completion_item.textEdit then
+    local range = self.completion_item.textEdit.range or self.completion_item.textEdit.insert
+    is_invalid = is_invalid or range.start.line ~= range['end'].line
+  end
+  return is_invalid
+end
+
 return entry
