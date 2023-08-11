@@ -669,7 +669,7 @@ sources[n].entry_filter~
 
                                                                *cmp-config.view*
 view~
-  `{ entries: cmp.EntriesConfig|string }`
+  `{ entries: cmp.EntriesViewConfig|string }`
   The view class used to customize nvim-cmp's appearance.
   Currently available configuration options are:
 
