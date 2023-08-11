@@ -95,6 +95,9 @@ return function()
         name = 'custom',
         selection_order = 'top_down',
       },
+      docs = {
+        auto_open = true,
+      }
     },
 
     window = {

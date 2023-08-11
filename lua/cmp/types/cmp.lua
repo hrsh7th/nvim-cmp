@@ -168,19 +168,23 @@ cmp.ItemField = {
 ---@field public entry_filter nil|function(entry: cmp.Entry, ctx: cmp.Context): boolean
 
 ---@class cmp.ViewConfig
----@field public entries cmp.EntriesConfig
+---@field public entries cmp.EntriesViewConfig
+---@field public docs cmp.DocsViewConfig
 
----@alias cmp.EntriesConfig cmp.CustomEntriesConfig|cmp.NativeEntriesConfig|cmp.WildmenuEntriesConfig|string
+---@alias cmp.EntriesViewConfig cmp.CustomEntriesViewConfig|cmp.NativeEntriesViewConfig|cmp.WildmenuEntriesViewConfig|string
 
----@class cmp.CustomEntriesConfig
+---@class cmp.CustomEntriesViewConfig
 ---@field name 'custom'
 ---@field selection_order 'top_down'|'near_cursor'
 
----@class cmp.NativeEntriesConfig
+---@class cmp.NativeEntriesViewConfig
 ---@field name 'native'
 
----@class cmp.WildmenuEntriesConfig
+---@class cmp.WildmenuEntriesViewConfig
 ---@field name 'wildmenu'
 ---@field separator string|nil
+
+---@class cmp.DocsViewConfig
+---@field public auto_open boolean
 
 return cmp

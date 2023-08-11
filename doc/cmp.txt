@@ -155,6 +155,9 @@ NOTE: `<Cmd>lua require('cmp').complete()<CR>` can be used to call these functio
 *cmp.visible* ()
   Return a boolean showing whether the completion menu is visible or not.
 
+*cmp.visible_docs* ()
+  Return a boolean showing whether the docs window is visible or not.
+
 *cmp.get_entries* ()
   Return all current entries.
 
@@ -197,6 +200,11 @@ NOTE: `<Cmd>lua require('cmp').complete()<CR>` can be used to call these functio
     }
   }
 <
+*cmp.open_docs* ()
+  Open docs view.
+
+*cmp.close_docs* ()
+  Close docs view.
 
 *cmp.scroll_docs* (delta: number)
   Scroll the documentation window if visible.
@@ -334,6 +342,12 @@ There are also builtin mapping helper functions you can use:
 
   *cmp.mapping.select_prev_item* (option: { behavior = cmp.SelectBehavior, count = 1 })
     Same as |cmp.select_prev_item|.
+
+  *cmp.mapping.open_docs* ()
+    Same as |cmp.open_docs|.
+
+  *cmp.mapping.close_docs* ()
+    Same as |cmp.close_docs|.
 
   *cmp.mapping.scroll_docs* (delta: number)
     Same as |cmp.scroll_docs|.
@@ -658,6 +672,12 @@ view~
   `{ entries: cmp.EntriesConfig|string }`
   The view class used to customize nvim-cmp's appearance.
   Currently available configuration options are:
+
+                                                *cmp-config.view.docs.auto_open*
+view.docs.auto_open~
+  `boolean`
+
+  Specify whether to show the docs_view when selecting an item.
 
                            *cmp-config.window.{completion,documentation}.border*
 window.{completion,documentation}.border~
