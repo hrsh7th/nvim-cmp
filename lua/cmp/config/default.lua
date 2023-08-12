@@ -97,7 +97,7 @@ return function()
       },
       docs = {
         auto_open = true,
-      }
+      },
     },
 
     window = {
