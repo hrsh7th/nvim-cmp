@@ -10,6 +10,7 @@ local ghost_text_view = require('cmp.view.ghost_text_view')
 
 ---@class cmp.View
 ---@field public event cmp.Event
+---@field private is_docs_view_pinned boolean
 ---@field private resolve_dedup cmp.AsyncDedup
 ---@field private native_entries_view cmp.NativeEntriesView
 ---@field private custom_entries_view cmp.CustomEntriesView
@@ -23,6 +24,7 @@ local view = {}
 view.new = function()
   local self = setmetatable({}, { __index = view })
   self.resolve_dedup = async.dedup()
+  self.is_docs_view_pinned = false
   self.custom_entries_view = custom_entries_view.new()
   self.native_entries_view = native_entries_view.new()
   self.wildmenu_entries_view = wildmenu_entries_view.new()
@@ -128,6 +130,7 @@ end
 ---Close menu
 view.close = function(self)
   if self:visible() then
+    self.is_docs_view_pinned = false
     self.event:emit('complete_done', {
       entry = self:_get_entries_view():get_selected_entry(),
     })
@@ -142,6 +145,9 @@ end
 
 ---Abort menu
 view.abort = function(self)
+  if self:visible() then
+    self.is_docs_view_pinned = false
+  end
   self:_get_entries_view():abort()
   self.docs_view:close()
   self.ghost_text_view:hide()
@@ -154,6 +160,28 @@ end
 ---@return boolean
 view.visible = function(self)
   return self:_get_entries_view():visible()
+end
+
+---Opens the documentation window.
+view.open_docs = function(self)
+  self.is_docs_view_pinned = true
+  local e = self:get_selected_entry()
+  if e then
+    e:resolve(vim.schedule_wrap(self.resolve_dedup(function()
+      if not self:visible() then
+        return
+      end
+      self.docs_view:open(e, self:_get_entries_view():info())
+    end)))
+  end
+end
+
+---Closes the documentation window.
+view.close_docs = function(self)
+  self.is_docs_view_pinned = false
+  if self:get_selected_entry() then
+    self.docs_view:close()
+  end
 end
 
 ---Scroll documentation window if possible.
@@ -239,7 +267,9 @@ view.on_entry_change = async.throttle(function(self)
       if not self:visible() then
         return
       end
-      self.docs_view:open(e, self:_get_entries_view():info())
+      if self.is_docs_view_pinned or config.get().view.docs.auto_open then
+        self.docs_view:open(e, self:_get_entries_view():info())
+      end
     end)))
   else
     self.docs_view:close()
