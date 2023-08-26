@@ -14,7 +14,6 @@ local compare = {}
 ---@alias cmp.ComparatorFunction fun(entry1: cmp.Entry, entry2: cmp.Entry): boolean | nil
 ---@alias cmp.Comparator cmp.ComparatorFunction | cmp.ComparatorFunctor
 
-
 ---offset: Entries with smaller offset will be ranked higher.
 ---@type cmp.ComparatorFunction
 compare.offset = function(entry1, entry2)
@@ -72,8 +71,8 @@ compare.recently_used = setmetatable({
 ---Exceptions are that Text(1) will be ranked the lowest, and snippets be the highest.
 ---@type cmp.ComparatorFunction
 compare.kind = function(entry1, entry2)
-  local kind1 = entry1:get_kind()  --- @type lsp.CompletionItemKind | number
-  local kind2 = entry2:get_kind()  --- @type lsp.CompletionItemKind | number
+  local kind1 = entry1:get_kind() --- @type lsp.CompletionItemKind | number
+  local kind2 = entry2:get_kind() --- @type lsp.CompletionItemKind | number
   kind1 = kind1 == types.lsp.CompletionItemKind.Text and 100 or kind1
   kind2 = kind2 == types.lsp.CompletionItemKind.Text and 100 or kind2
   if kind1 ~= kind2 then
