@@ -83,21 +83,21 @@ cmp.ItemField = {
 ---@alias cmp.Mapping cmp.MappingFunction | cmp.MappingClass
 
 ---@class cmp.ConfigSchema
----@field private revision integer
----@field public enabled boolean | fun(): boolean
----@field public performance cmp.PerformanceConfig
----@field public preselect cmp.PreselectMode
----@field public completion cmp.CompletionConfig
----@field public window cmp.WindowConfig|nil
----@field public confirmation cmp.ConfirmationConfig
----@field public matching cmp.MatchingConfig
----@field public sorting cmp.SortingConfig
----@field public formatting cmp.FormattingConfig
----@field public snippet cmp.SnippetConfig
----@field public mapping table<string, cmp.Mapping>
----@field public sources cmp.SourceConfig[]
----@field public view cmp.ViewConfig
----@field public experimental cmp.ExperimentalConfig
+---@field private revision? integer
+---@field public enabled? boolean | fun(): boolean
+---@field public performance? cmp.PerformanceConfig
+---@field public preselect? cmp.PreselectMode
+---@field public completion? cmp.CompletionConfig
+---@field public window? cmp.WindowConfig|nil
+---@field public confirmation? cmp.ConfirmationConfig
+---@field public matching? cmp.MatchingConfig
+---@field public sorting? cmp.SortingConfig
+---@field public formatting? cmp.FormattingConfig
+---@field public snippet? cmp.SnippetConfig
+---@field public mapping? table<string, cmp.Mapping>
+---@field public sources? cmp.SourceConfig[]
+---@field public view? cmp.ViewConfig
+---@field public experimental? cmp.ExperimentalConfig
 
 ---@class cmp.PerformanceConfig
 ---@field public debounce integer
