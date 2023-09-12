@@ -94,6 +94,7 @@ return function()
       entries = {
         name = 'custom',
         selection_order = 'top_down',
+        vertical_positioning = 'below',
       },
       docs = {
         auto_open = true,
