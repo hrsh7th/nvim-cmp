@@ -16,6 +16,7 @@ local DEFAULT_HEIGHT = 10 -- @see https://github.com/vim/vim/blob/master/src/pop
 ---@field private active boolean
 ---@field private entries cmp.Entry[]
 ---@field private column_width any
+---@field private bottom_up boolean
 ---@field public event cmp.Event
 local custom_entries_view = {}
 

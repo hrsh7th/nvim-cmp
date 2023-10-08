@@ -171,7 +171,8 @@ view.open_docs = function(self)
       if not self:visible() then
         return
       end
-      self.docs_view:open(e, self:_get_entries_view():info())
+      local bottom_up = self.custom_entries_view.bottom_up
+      self.docs_view:open(e, self:_get_entries_view():info(), bottom_up)
     end)))
   end
 end
@@ -268,7 +269,8 @@ view.on_entry_change = async.throttle(function(self)
         return
       end
       if self.is_docs_view_pinned or config.get().view.docs.auto_open then
-        self.docs_view:open(e, self:_get_entries_view():info())
+        local bottom_up = self.custom_entries_view.bottom_up
+        self.docs_view:open(e, self:_get_entries_view():info(), bottom_up)
       end
     end)))
   else

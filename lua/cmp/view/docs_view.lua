@@ -25,7 +25,8 @@ end
 ---Open documentation window
 ---@param e cmp.Entry
 ---@param view cmp.WindowStyle
-docs_view.open = function(self, e, view)
+---@param bottom_up boolean|nil
+docs_view.open = function(self, e, view, bottom_up)
   local documentation = config.get().window.documentation
   if not documentation then
     return
@@ -90,6 +91,8 @@ docs_view.open = function(self, e, view)
     return self:close()
   end
 
+  local row = bottom_up and math.max(view.row - (height + border_info.vert - view.height), 1) or view.row
+
   -- Render window.
   self.window:option('winblend', vim.o.pumblend)
   self.window:option('winhighlight', documentation.winhighlight)
@@ -98,7 +101,7 @@ docs_view.open = function(self, e, view)
     style = 'minimal',
     width = width,
     height = height,
-    row = view.row,
+    row = row,
     col = col,
     border = documentation.border,
     zindex = documentation.zindex or 50,
