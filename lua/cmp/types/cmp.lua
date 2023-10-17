@@ -180,6 +180,7 @@ cmp.ItemField = {
 
 ---@class cmp.NativeEntriesViewConfig
 ---@field name 'native'
+---@field follow_cursor boolean
 
 ---@class cmp.WildmenuEntriesViewConfig
 ---@field name 'wildmenu'

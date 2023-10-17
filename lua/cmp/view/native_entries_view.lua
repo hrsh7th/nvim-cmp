@@ -69,7 +69,7 @@ native_entries_view.open = function(self, offset, entries)
       end
     end
   end
-  self.offset = offset
+  self.offset = config.get().view.entries.follow_cursor and vim.api.nvim_win_get_cursor(0)[2] or offset
   self.items = items
   self.entries = dedup_entries
   self.preselect_index = preselect_index
