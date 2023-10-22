@@ -114,9 +114,6 @@ entry.get_word = function(self)
     local word
     if self:get_completion_item().textEdit and not misc.empty(self:get_completion_item().textEdit.newText) then
       word = str.trim(self:get_completion_item().textEdit.newText)
-      if self:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-        word = vim.lsp.util.parse_snippet(word)
-      end
       local overwrite = self:get_overwrite()
       if 0 < overwrite[2] or self:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
         word = str.get_word(word, string.byte(self.context.cursor_after_line, 1), overwrite[1] or 0)
@@ -124,7 +121,7 @@ entry.get_word = function(self)
     elseif not misc.empty(self:get_completion_item().insertText) then
       word = str.trim(self:get_completion_item().insertText)
       if self:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-        word = str.get_word(vim.lsp.util.parse_snippet(word))
+        word = str.get_word(word)
       end
     else
       word = str.trim(self:get_completion_item().label)
@@ -432,7 +429,7 @@ entry.get_completion_item = function(self)
 end
 
 ---Create documentation
----@return string
+---@return string[]
 entry.get_documentation = function(self)
   local item = self:get_completion_item()
 
