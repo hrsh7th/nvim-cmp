@@ -1,7 +1,6 @@
 local config = require('cmp.config')
 local misc = require('cmp.utils.misc')
 local str = require('cmp.utils.str')
-local types = require('cmp.types')
 local api = require('cmp.utils.api')
 
 ---@class cmp.GhostTextView
@@ -71,9 +70,6 @@ end
 ---  of character differences instead of just byte difference.
 ghost_text_view.text_gen = function(self, line, cursor_col)
   local word = self.entry:get_insert_text()
-  if self.entry.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-    word = vim.lsp.util.parse_snippet(word)
-  end
   word = str.oneline(word)
   local word_clen = vim.str_utfindex(word)
   local cword = string.sub(line, self.entry:get_offset(), cursor_col)
