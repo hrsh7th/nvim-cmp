@@ -189,16 +189,14 @@ core.on_moved = function(self)
   self:filter()
 end
 
--- Find the suffix for the specified line
+---Returns the suffix of the specified `line`.
+---
+---Contains `%s`: returns everything after the last `%s` in `line`
+---Else:          returns `line` unmodified
+---@param line string
+---@return string suffix
 local function find_line_suffix(line)
-  local i = #line
-  while i > 0 do
-    if line:sub(i, i):find('%s') then
-      return line:sub(i + 1)
-    end
-    i = i - 1
-  end
-  return line
+  return line:match('%S*$') --[[@as string]]
 end
 
 ---Check autoindent

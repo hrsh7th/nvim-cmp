@@ -353,11 +353,13 @@ source.complete = function(self, ctx, callback)
 
         self.status = source.SourceStatus.COMPLETED
         self.entries = {}
-        for i, item in ipairs(response.items or response) do
+        for _, item in ipairs(response.items or response) do
           if (item or {}).label then
             local e = entry.new(ctx, self, item, response.itemDefaults)
-            self.entries[i] = e
-            self.offset = math.min(self.offset, e:get_offset())
+            if not e:is_invalid() then
+              table.insert(self.entries, e)
+              self.offset = math.min(self.offset, e:get_offset())
+            end
           end
         end
         self.revision = self.revision + 1
