@@ -133,8 +133,8 @@ end
 ---Update
 window.update = function(self)
   local info = self:info()
-  local scrollbar_highlight = config.get().window.completion.scrollbarhighlight
-  local scrollbar_thumb_highlight = config.get().window.completion.scrollbarthumbhighlight
+  local scrollbar_highlight = config.get().window.completion.scrollbar_highlight
+  local scrollbar_thumb_highlight = config.get().window.completion.scrollbar_thumb_highlight
   if info.scrollable then
     -- Draw the background of the scrollbar
 
