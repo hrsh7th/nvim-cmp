@@ -133,6 +133,8 @@ end
 ---Update
 window.update = function(self)
   local info = self:info()
+  local scrollbar_highlight = config.get().window.completion.scrollbarhighlight
+  local scrollbar_thumb_highlight = config.get().window.completion.scrollbarthumbhighlight
   if info.scrollable then
     -- Draw the background of the scrollbar
 
@@ -151,7 +153,7 @@ window.update = function(self)
       else
         style.noautocmd = true
         self.sbar_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'sbar_buf'), false, style)
-        opt.win_set_option(self.sbar_win, 'winhighlight', 'EndOfBuffer:PmenuSbar,NormalFloat:PmenuSbar')
+        opt.win_set_option(self.sbar_win, 'winhighlight', scrollbar_highlight)
       end
     end
 
@@ -173,7 +175,7 @@ window.update = function(self)
     else
       style.noautocmd = true
       self.thumb_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'thumb_buf'), false, style)
-      opt.win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:PmenuThumb,NormalFloat:PmenuThumb')
+      opt.win_set_option(self.thumb_win, 'winhighlight', scrollbar_thumb_highlight)
     end
   else
     if self.sbar_win and vim.api.nvim_win_is_valid(self.sbar_win) then

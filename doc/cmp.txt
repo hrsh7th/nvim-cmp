@@ -718,6 +718,18 @@ window.completion.scrollbar~
   `boolean`
   Whether the scrollbar should be enabled if there are more items that fit
 
+                              *cmp-config.window.completion.scrollbar_highlight*
+window.completion.scrollbar_highlight~
+  `string`
+  Specify the scrollbar's winhighlight option.
+  See |nvim_open_win|.
+
+                        *cmp-config.window.completion.scrollbar_thumb_highlight*
+window.completion.scrollbar_thumb_highlight~
+  `string`
+  Specify the scrollbar thumb's winhighlight option.
+  See |nvim_open_win|.
+
                                      *cmp-config.window.documentation.max_width*
 window.documentation.max_width~
   `number`

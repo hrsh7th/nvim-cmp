@@ -126,6 +126,8 @@ cmp.ItemField = {
 ---@field public max_height integer|nil
 ---@field public scrolloff integer|nil
 ---@field public scrollbar boolean|true
+---@field public scrollbar_highlight string
+---@field public scrollbar_thumb_highlight string
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior
