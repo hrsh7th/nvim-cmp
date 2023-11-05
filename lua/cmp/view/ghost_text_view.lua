@@ -50,6 +50,7 @@ end
 local function gen_ts_nodes(begin_text,begin_hl,row,col,line)
    local nodes = { { begin_text, begin_hl } }
    col = col + 1
+   row = row - 1
    local start_pos = col
    for i = col, #line, 1 do
       local char = line:sub(i, i)
