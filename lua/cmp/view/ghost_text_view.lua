@@ -20,6 +20,75 @@ local has_inline = (function()
   end))
 end)()
 
+local ignored_chars = {
+   [" "] = true,
+   [":"] = true,
+   [","] = true,
+   [";"] = true,
+   ["["] = true,
+   ["]"] = true,
+   ["{"] = true,
+   ["}"] = true,
+   ["("] = true,
+   [")"] = true,
+   ["."] = true,
+}
+
+local function ts_get_hl(r, start_pos)
+   local hl = "Normal"
+   local result = vim.inspect_pos(0, r, start_pos).treesitter
+   if #result ~= 0 then
+      hl = result[#result].hl_group_link
+      if vim.tbl_isempty(vim.api.nvim_get_hl(0, { name = hl })) then
+         -- lets hope the 2nd last one is valid
+         hl = result[#result - 1].hl_group_link
+      end
+   end
+   return hl
+end
+
+local function gen_ts_nodes(begin_text,begin_hl,row,col,line)
+   local nodes = { { begin_text, begin_hl } }
+   col = col + 1
+   local start_pos = col
+   for i = col, #line, 1 do
+      local char = line:sub(i, i)
+      if ignored_chars[char] then
+         local text
+         if i ~= start_pos then
+            text = line:sub(start_pos, i - 1)
+         else
+            -- else we matched 2 ignored_chars
+            text = line:sub(start_pos, i)
+            -- we could use a cache here to for operators to reduce the inspect_pos calls
+            -- but i am not sure how to do that reliably since for example by has # as a comment but lua has it as the size operator
+            -- also this means #nodes gets in the line below gets fully highlighted as an operator
+            nodes[#nodes + 1] = { text,"Normal" }
+            start_pos = i + 1
+            goto continue
+         end
+         local hl = ts_get_hl(row, start_pos - 1)
+         nodes[#nodes + 1] = { text, hl }
+         start_pos = i + 1
+         nodes[#nodes + 1] = { char, "Normal" }
+      end
+      if i == #line then
+         local text = line:sub(start_pos)
+         local hl
+         if ignored_chars[text] then
+            hl = {text,"Normal"}
+         else
+            hl = ts_get_hl(row, start_pos - 1)
+         end
+
+         nodes[#nodes + 1] = { text, hl }
+      end
+      ::continue::
+   end
+   return nodes
+end
+
+
 ghost_text_view.new = function()
   local self = setmetatable({}, { __index = ghost_text_view })
   self.win = nil
@@ -44,13 +113,22 @@ ghost_text_view.new = function()
       end
 
       local line = vim.api.nvim_get_current_line()
+      local text = self.text_gen(self, line, col)
       if not has_inline then
-        if string.sub(line, col + 1) ~= '' then
-          return
-        end
+         local nodes = gen_ts_nodes(
+                text, type(c) == 'table' and c.hl_group or 'Comment',
+               row,col,line
+            )
+        vim.api.nvim_buf_set_extmark(0, ghost_text_view.ns, row - 1, col, {
+          right_gravity = false,
+          virt_text = nodes,
+          virt_text_pos = 'overlay',
+          hl_mode = 'combine',
+          ephemeral = true,
+        })
+        return
       end
 
-      local text = self.text_gen(self, line, col)
       if #text > 0 then
         vim.api.nvim_buf_set_extmark(0, ghost_text_view.ns, row - 1, col, {
           right_gravity = false,
