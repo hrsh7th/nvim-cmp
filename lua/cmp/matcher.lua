@@ -1,4 +1,5 @@
 local char = require('cmp.utils.char')
+local pattern = require('cmp.utils.pattern')
 
 local matcher = {}
 
@@ -81,7 +82,7 @@ end
 ---Match entry
 ---@param input string
 ---@param word string
----@param option { synonyms: string[], disallow_fullfuzzy_matching: boolean, disallow_fuzzy_matching: boolean, disallow_partial_fuzzy_matching: boolean, disallow_partial_matching: boolean, disallow_prefix_unmatching: boolean, disallow_symbol_nonprefix_matching: boolean }
+---@param option { synonyms: string[], disallow_fullfuzzy_matching: boolean, disallow_fuzzy_matching: boolean, disallow_partial_fuzzy_matching: boolean, disallow_partial_matching: boolean, disallow_prefix_unmatching: boolean, disallow_symbol_nonprefix_matching: boolean, keyword_pattern: string|nil }
 ---@return integer, table
 matcher.match = function(input, word, option)
   option = option or {}
@@ -103,6 +104,15 @@ matcher.match = function(input, word, option)
     end
   end
 
+  local is_symbol
+  if option.keyword_pattern ~= nil then
+    is_symbol = function(byte)
+      return pattern.matchstr(option.keyword_pattern, string.char(byte)) == nil
+    end
+  else
+    is_symbol = char.is_symbol
+  end
+
   -- Gather matched regions
   local matches = {}
   local input_start_index = 1
@@ -111,7 +121,7 @@ matcher.match = function(input, word, option)
   local word_bound_index = 1
   local no_symbol_match = false
   while input_end_index <= #input and word_index <= #word do
-    local m = matcher.find_match_region(input, input_start_index, input_end_index, word, word_index)
+    local m = matcher.find_match_region(input, input_start_index, input_end_index, word, word_index, is_symbol)
     if m and input_end_index <= m.input_match_end then
       m.index = word_bound_index
       input_start_index = m.input_match_start + 1
@@ -277,7 +287,7 @@ matcher.fuzzy = function(input, word, matches, option)
 end
 
 --- find_match_region
-matcher.find_match_region = function(input, input_start_index, input_end_index, word, word_index)
+matcher.find_match_region = function(input, input_start_index, input_end_index, word, word_index, is_symbol)
   -- determine input position ( woroff -> word_offset )
   while input_start_index < input_end_index do
     if char.match(string.byte(input, input_end_index), string.byte(word, word_index)) then
@@ -309,7 +319,7 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
       strict_count = strict_count + (c1 == c2 and 1 or 0)
       match_count = match_count + 1
       word_offset = word_offset + 1
-      no_symbol_match = no_symbol_match or char.is_symbol(c1)
+      no_symbol_match = no_symbol_match or is_symbol(c1)
     else
       -- Match end (partial region)
       if input_match_start ~= -1 then

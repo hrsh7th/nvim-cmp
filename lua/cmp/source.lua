@@ -120,7 +120,7 @@ source.get_entries = function(self, ctx)
       inputs[o] = string.sub(ctx.cursor_before_line, o)
     end
 
-    local match = e:match(inputs[o], matching_config)
+    local match = e:match(inputs[o], matching_config, self:get_keyword_pattern())
     e.score = match.score
     e.exact = false
     if e.score >= 1 then

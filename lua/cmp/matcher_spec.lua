@@ -22,6 +22,21 @@ describe('matcher', function()
     assert.is.truthy(matcher.match('fmodify', 'fnamemodify', config.matching) >= 1)
     assert.is.truthy(matcher.match('candlesingle', 'candle#accept#single', config.matching) >= 1)
 
+    local options = {
+      keyword_pattern = [[ \w\+ ]],
+    }
+    assert.is.truthy(matcher.match('ab', 'a_b_c', options) > matcher.match('ac', 'a_b_c', options))
+    assert.is.truthy(matcher.match('a_b', 'a_b_c', options) > matcher.match('ab', 'a_b_c', options))
+    assert.is.truthy(matcher.match('a_b/c', 'a_b/c', options) > matcher.match('a/c', 'a_b/c', options))
+
+    assert.is.truthy(matcher.match('bora', 'border-radius') >= 1)
+    assert.is.truthy(matcher.match('woroff', 'word_offset') >= 1)
+    assert.is.truthy(matcher.match('call', 'call') > matcher.match('call', 'condition_all'))
+    assert.is.truthy(matcher.match('Buffer', 'Buffer') > matcher.match('Buffer', 'buffer'))
+    assert.is.truthy(matcher.match('luacon', 'lua_context') > matcher.match('luacon', 'LuaContext'))
+    assert.is.truthy(matcher.match('fmodify', 'fnamemodify') >= 1)
+    assert.is.truthy(matcher.match('candlesingle', 'candle#accept#single') >= 1)
+
     assert.is.truthy(matcher.match('vi', 'void#', config.matching) >= 1)
     assert.is.truthy(matcher.match('vo', 'void#', config.matching) >= 1)
     assert.is.truthy(matcher.match('var_', 'var_dump', config.matching) >= 1)
