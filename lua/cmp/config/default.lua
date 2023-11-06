@@ -108,6 +108,8 @@ return function()
         col_offset = 0,
         side_padding = 1,
         scrollbar = true,
+        scrollbar_highlight = 'EndOfBuffer:PmenuSbar,NormalFloat:PmenuSbar',
+        scrollbar_thumb_highlight = 'EndOfBuffer:PmenuThumb,NormalFloat:PmenuThumb',
       },
       documentation = {
         max_height = math.floor(WIDE_HEIGHT * (WIDE_HEIGHT / vim.o.lines)),

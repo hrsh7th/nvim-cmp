@@ -10,6 +10,8 @@ window.bordered = function(opts)
     col_offset = opts.col_offset or 0,
     side_padding = opts.side_padding or 1,
     scrollbar = opts.scrollbar == nil and true or opts.scrollbar,
+    scrollbar_highlight = opts.scrollbar_highlight or 'EndOfBuffer:PmenuSbar,NormalFloat:PmenuSbar',
+    scrollbar_thumb_highlight = opts.scrollbar_thumb_highlight or 'EndOfBuffer:PmenuThumb,NormalFloat:PmenuThumb',
   }
 end
 
