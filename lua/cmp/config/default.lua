@@ -114,6 +114,7 @@ return function()
         max_width = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
         border = { '', '', '', ' ', '', '', '', ' ' },
         winhighlight = 'FloatBorder:NormalFloat',
+        col_offset = 0,
       },
     },
   }
