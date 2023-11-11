@@ -84,7 +84,7 @@ local function get_hl(r, pos)
    end
    local ts_hls = result.treesitter
    if #ts_hls ~= 0 then
-      for i = #ts_hls,0,-1 do
+      for i = #ts_hls,1,-1 do
          if not hl_iscleared(ts_hls[i].hl_group_link) then
             return ts_hls[i].hl_group_link
          end
