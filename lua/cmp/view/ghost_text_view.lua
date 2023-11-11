@@ -22,70 +22,120 @@ end)()
 
 local ignored_chars = {
    [" "] = true,
-   [":"] = true,
+
    [","] = true,
+   ["."] = true,
+
+   [":"] = true,
    [";"] = true,
+
+
    ["["] = true,
    ["]"] = true,
+
    ["{"] = true,
    ["}"] = true,
+
    ["("] = true,
    [")"] = true,
-   ["."] = true,
+
+   [">"] = true,
+   ["="] = true,
+   ["<"] = true,
+
+   ["$"] = true,
+   ["&"] = true,
+   ["#"] = true,
+
+   ["^"] = true,
+   ["%"] = true,
+   ["+"] = true,
+   ["-"] = true,
+   ["*"] = true,
+   ["/"] = true,
+   ["\\"] = true,
+   ["\""] = true,
+   ["\'"] = true,
 }
 
-local function ts_get_hl(r, start_pos)
-   local hl = "Normal"
-   local result = vim.inspect_pos(0, r, start_pos).treesitter
-   if #result ~= 0 then
-      hl = result[#result].hl_group_link
-      if vim.tbl_isempty(vim.api.nvim_get_hl(0, { name = hl })) then
-         -- lets hope the 2nd last one is valid
-         hl = result[#result - 1].hl_group_link
-      end
-   end
-   return hl
+local function hl_iscleared(hl_name)
+   return  vim.tbl_isempty(vim.api.nvim_get_hl(0, { name = hl_name }))
 end
 
-local function gen_ts_nodes(begin_text,begin_hl,row,col,line)
-   local nodes = { { begin_text, begin_hl } }
+local function get_hl(r, pos)
+   pos = pos - 1
+   local result = vim.inspect_pos(0, r, pos)
+   local lsp_hls = result.semantic_tokens
+   if #lsp_hls ~= 0 then
+      local hl
+      local priority = 0
+      for _,lsp_hl in pairs(lsp_hls)  do
+         local opts = lsp_hl.opts
+         if priority < opts.priority and
+            not hl_iscleared(opts.hl_group_link)
+         then
+            hl = opts.hl_group_link
+            priority = opts.priority
+         end
+      end
+      if hl then
+         return hl
+      end
+   end
+   local ts_hls = result.treesitter
+   if #ts_hls ~= 0 then
+      for i = #ts_hls,0,-1 do
+         if not hl_iscleared(ts_hls[i].hl_group_link) then
+            return ts_hls[i].hl_group_link
+         end
+      end
+   end
+   local syntax_hls = result.syntax
+   if #syntax_hls ~= 0 then
+      -- FIXME: checking if a highlight group in sytnax_hls is cleared crashes neovim with error 139
+      -- couldn't track the exact highlight group
+      return syntax_hls[#syntax_hls].hl_group_link
+   end
+   return "Normal"
+end
+
+local cached_line
+local cached_nodes
+local cached_line_row
+local function gen_hl_nodes(begin_text,begin_hl,row,col,line)
    col = col + 1
    row = row - 1
-   local start_pos = col
+   if cached_line_row == row and cached_line == line:sub(col) then
+      cached_nodes[1] = { begin_text, begin_hl }
+      return cached_nodes
+   end
+   local nodes = { { begin_text, begin_hl } }
+   local node_start = col
    for i = col, #line, 1 do
       local char = line:sub(i, i)
       if ignored_chars[char] then
-         local text
-         if i ~= start_pos then
-            text = line:sub(start_pos, i - 1)
-         else
-            -- else we matched 2 ignored_chars
-            text = line:sub(start_pos, i)
-            -- we could use a cache here to for operators to reduce the inspect_pos calls
-            -- but i am not sure how to do that reliably since for example by has # as a comment but lua has it as the size operator
-            -- also this means #nodes gets in the line below gets fully highlighted as an operator
-            nodes[#nodes + 1] = { text,"Normal" }
-            start_pos = i + 1
+         if node_start == i then
+            local text = line:sub(node_start, i)
+            local hl = char == ' ' and 'Normal' or get_hl(row,i)
+            table.insert(nodes,{ text,hl })
+            node_start = i + 1
             goto continue
          end
-         local hl = ts_get_hl(row, start_pos - 1)
-         nodes[#nodes + 1] = { text, hl }
-         start_pos = i + 1
-         nodes[#nodes + 1] = { char, "Normal" }
+         local text = line:sub(node_start, i - 1)
+         table.insert(nodes,{ text, get_hl(row, node_start)})
+         node_start = i + 1
+         local hl = char == ' ' and 'Normal' or get_hl(row,i)
+         table.insert(nodes,{ char,hl })
       end
       if i == #line then
-         local text = line:sub(start_pos)
-         local hl
-         if ignored_chars[text] then
-            hl = {text,"Normal"}
-         else
-            hl = ts_get_hl(row, start_pos - 1)
-         end
-
-         nodes[#nodes + 1] = { text, hl }
+         local text = line:sub(node_start)
+         table.insert(nodes,{ text, get_hl(row, node_start)})
       end
       ::continue::
    end
+   cached_nodes = nodes
+   cached_line_row = row
+   cached_line = line:sub(col)
    return nodes
 end
 
@@ -114,21 +164,28 @@ ghost_text_view.new = function()
       end
 
       local line = vim.api.nvim_get_current_line()
-      local text = self.text_gen(self, line, col)
       if not has_inline then
-         local nodes = gen_ts_nodes(
-                text, type(c) == 'table' and c.hl_group or 'Comment',
-               row,col,line
-            )
-        vim.api.nvim_buf_set_extmark(0, ghost_text_view.ns, row - 1, col, {
-          right_gravity = false,
-          virt_text = nodes,
-          virt_text_pos = 'overlay',
-          hl_mode = 'combine',
-          ephemeral = true,
-        })
-        return
+        if type(c) == 'table' and c.inline_emulation then
+          local text = self.text_gen(self, line, col)
+          local nodes = gen_hl_nodes(
+            text,c.hl_group or 'Comment',
+            row,col,line
+          )
+          vim.api.nvim_buf_set_extmark(0, ghost_text_view.ns, row - 1, col, {
+            right_gravity = false,
+            virt_text = nodes,
+            virt_text_pos = 'overlay',
+            hl_mode = 'combine',
+            ephemeral = true,
+          })
+          return
+        else
+          if string.sub(line, col + 1) ~= '' then
+            return
+          end
+        end
       end
+     local text = self.text_gen(self, line, col)
 
       if #text > 0 then
         vim.api.nvim_buf_set_extmark(0, ghost_text_view.ns, row - 1, col, {
