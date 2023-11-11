@@ -164,28 +164,27 @@ ghost_text_view.new = function()
       end
 
       local line = vim.api.nvim_get_current_line()
+      if type(c) == 'table' and c.inline_emulation then
+        local text = self.text_gen(self, line, col)
+        local nodes = gen_hl_nodes(
+          text,c.hl_group or 'Comment',
+          row,col,line
+        )
+        vim.api.nvim_buf_set_extmark(0, ghost_text_view.ns, row - 1, col, {
+          right_gravity = false,
+          virt_text = nodes,
+          virt_text_pos = 'overlay',
+          hl_mode = 'combine',
+          ephemeral = true,
+        })
+        return
+      end
       if not has_inline then
-        if type(c) == 'table' and c.inline_emulation then
-          local text = self.text_gen(self, line, col)
-          local nodes = gen_hl_nodes(
-            text,c.hl_group or 'Comment',
-            row,col,line
-          )
-          vim.api.nvim_buf_set_extmark(0, ghost_text_view.ns, row - 1, col, {
-            right_gravity = false,
-            virt_text = nodes,
-            virt_text_pos = 'overlay',
-            hl_mode = 'combine',
-            ephemeral = true,
-          })
-          return
-        else
           if string.sub(line, col + 1) ~= '' then
             return
           end
-        end
       end
-     local text = self.text_gen(self, line, col)
+      local text = self.text_gen(self, line, col)
 
       if #text > 0 then
         vim.api.nvim_buf_set_extmark(0, ghost_text_view.ns, row - 1, col, {
