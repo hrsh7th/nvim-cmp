@@ -133,6 +133,7 @@ window.open = function(self, style)
     end
   end
   self:update()
+  self:hide()
 end
 
 window.hide = function(self)
