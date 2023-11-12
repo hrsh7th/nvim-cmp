@@ -166,8 +166,12 @@ window.show = function(self)
   vim.wo[self.win].winblend = 0
   -- should restore the bar and thumb win positions/size
   self:update()
-  vim.wo[self.sbar_win].winblend = 0
-  vim.wo[self.thumb_win].winblend = 0
+   if self.sbar_win then
+      vim.wo[self.sbar_win].winblend = 0
+   end
+   if self.thumb_win then
+      vim.wo[self.thumb_win].winblend = 0
+   end
 end
 
 ---Update
