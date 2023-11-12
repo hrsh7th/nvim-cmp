@@ -36,8 +36,12 @@ window.new = function()
   self.style = {}
   self.opt = {}
   self.buffer_opt = {}
-  self.hidden = false
-  table.insert(windows, self)
+  self.hidden = true
+  if windows[self.name] and not api.is_cmdline_mode() then
+    self.hidden = windows[self.name].hidden
+  else
+    windows[self.name] = self
+  end
   return self
 end
 
@@ -133,10 +137,15 @@ window.open = function(self, style)
     end
   end
   self:update()
-  self:hide()
+  if windows[self.name] and (windows[self.name].hidden ~= false) then
+    self:hide()
+  end
 end
 
 window.hide = function(self)
+  if api.is_cmdline_mode() then
+    return
+  end
   self.hidden = true
   local wins = { self.win, self.sbar_win, self.thumb_win }
   for _, win in pairs(wins) do
@@ -161,17 +170,33 @@ end
 
 window.show = function(self)
   self.hidden = false
-  vim.api.nvim_win_set_config(self.win, self.style)
-  vim.api.nvim_win_set_buf(self.win, self:get_buffer())
-  vim.wo[self.win].winblend = 0
+  if self.win then
+    vim.api.nvim_win_set_config(self.win, self.style)
+    vim.api.nvim_win_set_buf(self.win, self:get_buffer())
+    vim.wo[self.win].winblend = 0
+  else
+    return
+  end
   -- should restore the bar and thumb win positions/size
   self:update()
-   if self.sbar_win then
-      vim.wo[self.sbar_win].winblend = 0
-   end
-   if self.thumb_win then
-      vim.wo[self.thumb_win].winblend = 0
-   end
+  if self.sbar_win then
+    vim.wo[self.sbar_win].winblend = 0
+  end
+  if self.thumb_win then
+    vim.wo[self.thumb_win].winblend = 0
+  end
+end
+
+window.hide_all = function(self)
+  for _, win in pairs(windows) do
+    win:hide()
+  end
+end
+
+window.show_all = function(self)
+  for _, win in pairs(windows) do
+    win:show()
+  end
 end
 
 ---Update
@@ -179,8 +204,9 @@ window.update = function(self)
   local info = self:info()
   if info.scrollable and not self.hidden then
     -- Draw the background of the scrollbar
-
+    -- make sure to rerender the bar after showing from hidden state
     if not info.border_info.visible then
+      print('bbaa')
       local style = {
         relative = 'editor',
         style = 'minimal',
@@ -192,6 +218,7 @@ window.update = function(self)
       }
       if self.sbar_win and vim.api.nvim_win_is_valid(self.sbar_win) then
         vim.api.nvim_win_set_config(self.sbar_win, style)
+        opt.win_set_option(self.sbar_win, 'winhighlight', 'EndOfBuffer:PmenuSbar,NormalFloat:PmenuSbar')
       else
         style.noautocmd = true
         self.sbar_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'sbar_buf'), false, style)
@@ -214,6 +241,7 @@ window.update = function(self)
     }
     if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
       vim.api.nvim_win_set_config(self.thumb_win, style)
+      opt.win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:PmenuThumb,NormalFloat:PmenuThumb')
     else
       style.noautocmd = true
       self.thumb_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'thumb_buf'), false, style)
@@ -254,12 +282,6 @@ window.close = function(self)
       self.thumb_win = nil
     end
   end
-  for i, win in pairs(windows) do
-    if win.name == self.win then
-      table.remove(windows, i)
-    end
-  end
-  vim.print(#windows)
 end
 
 ---Return the window is visible or not.
