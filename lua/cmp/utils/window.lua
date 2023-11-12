@@ -204,9 +204,8 @@ window.update = function(self)
   local info = self:info()
   if info.scrollable and not self.hidden then
     -- Draw the background of the scrollbar
-    -- make sure to rerender the bar after showing from hidden state
+     
     if not info.border_info.visible then
-      print('bbaa')
       local style = {
         relative = 'editor',
         style = 'minimal',
