@@ -21,7 +21,9 @@ local config = require('cmp.config')
 ---@field public style cmp.WindowStyle
 ---@field public opt table<string, any>
 ---@field public buffer_opt table<string, any>
+---@field public hidden boolean|nil
 local window = {}
+local windows = {}
 
 ---new
 ---@return cmp.Window
@@ -34,6 +36,8 @@ window.new = function()
   self.style = {}
   self.opt = {}
   self.buffer_opt = {}
+  self.hidden = false
+  table.insert(windows, self)
   return self
 end
 
@@ -94,6 +98,7 @@ window.set_style = function(self, style)
   self.style.height = math.ceil(self.style.height)
 end
 
+local emptybuf = vim.api.nvim_create_buf(false, true)
 ---Return buffer id.
 ---@return integer
 window.get_buffer = function(self)
@@ -130,10 +135,44 @@ window.open = function(self, style)
   self:update()
 end
 
+window.hide = function(self)
+  self.hidden = true
+  local wins = { self.win, self.sbar_win, self.thumb_win }
+  for _, win in pairs(wins) do
+    if win then
+      -- ignore BufWinEnter because it messes with treesitter context
+      vim.o.eventignore = 'all'
+      vim.api.nvim_win_set_buf(win, emptybuf)
+      vim.api.nvim_win_set_config(win, {
+        relative = 'cursor',
+        border = 'none',
+        row = 0,
+        col = -999,
+        height = 1,
+        width = 1,
+        zindex = 1,
+      })
+      vim.wo[win].winblend = 100
+      vim.o.eventignore = ''
+    end
+  end
+end
+
+window.show = function(self)
+  self.hidden = false
+  vim.api.nvim_win_set_config(self.win, self.style)
+  vim.api.nvim_win_set_buf(self.win, self:get_buffer())
+  vim.wo[self.win].winblend = 0
+  -- should restore the bar and thumb win positions/size
+  self:update()
+  vim.wo[self.sbar_win].winblend = 0
+  vim.wo[self.thumb_win].winblend = 0
+end
+
 ---Update
 window.update = function(self)
   local info = self:info()
-  if info.scrollable then
+  if info.scrollable and not self.hidden then
     -- Draw the background of the scrollbar
 
     if not info.border_info.visible then
@@ -210,6 +249,12 @@ window.close = function(self)
       self.thumb_win = nil
     end
   end
+  for i, win in pairs(windows) do
+    if win.name == self.win then
+      table.remove(windows, i)
+    end
+  end
+  vim.print(#windows)
 end
 
 ---Return the window is visible or not.

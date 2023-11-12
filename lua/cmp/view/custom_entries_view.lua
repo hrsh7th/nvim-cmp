@@ -395,7 +395,11 @@ custom_entries_view._select = function(self, cursor, option)
   end
   self.active = (0 < cursor and cursor <= #self.entries and option.active == true)
 
-  self.entries_win:option('cursorline', cursor > 0 and cursor <= #self.entries)
+  local cursorline = cursor > 0 and cursor <= #self.entries
+  if self.entries_win.hidden and cursorline then
+    self.entries_win:show()
+  end
+  self.entries_win:option('cursorline', cursorline)
   vim.api.nvim_win_set_cursor(self.entries_win.win, {
     math.max(math.min(cursor, #self.entries), 1),
     0,
