@@ -58,6 +58,7 @@ local ignored_chars = {
    ["\'"] = true,
 }
 
+
 local function hl_iscleared(hl_name)
    return  vim.tbl_isempty(vim.api.nvim_get_hl(0, { name = hl_name }))
 end
@@ -92,9 +93,11 @@ local function get_hl(r, pos)
    end
    local syntax_hls = result.syntax
    if #syntax_hls ~= 0 then
-      -- FIXME: checking if a highlight group in sytnax_hls is cleared crashes neovim with error 139
-      -- couldn't track the exact highlight group
-      return syntax_hls[#syntax_hls].hl_group_link
+      for i = #syntax_hls, 1, -1 do
+         if not hl_iscleared(syntax_hls[i].hl_group_link) then
+            return syntax_hls[i].hl_group_link
+         end
+      end
    end
    return "Normal"
 end
@@ -102,7 +105,11 @@ end
 local cached_line
 local cached_nodes
 local cached_line_row
-local function gen_hl_nodes(begin_text,begin_hl,row,col,line)
+local function gen_hl_nodes(begin_text, begin_hl, row, col, line, from_cache)
+   if from_cache then
+      cached_nodes[1] = { begin_text, begin_hl }
+      return cached_nodes
+   end
    col = col + 1
    row = row - 1
    if cached_line_row == row and cached_line == line:sub(col) then
@@ -138,6 +145,17 @@ local function gen_hl_nodes(begin_text,begin_hl,row,col,line)
    cached_line = line:sub(col)
    return nodes
 end
+
+vim.api.nvim_create_autocmd('InsertCharPre', {
+   pattern = "*",
+   callback = function()
+      local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+      local line = vim.api.nvim_get_current_line()
+      gen_hl_nodes(
+         '', 'Normal',
+         row, col, line, false)
+   end
+})
 
 
 ghost_text_view.new = function()
