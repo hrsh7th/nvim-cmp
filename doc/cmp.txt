@@ -730,7 +730,7 @@ window.documentation.max_height~
 
                                             *cmp-config.experimental.ghost_text*
 experimental.ghost_text~
-  `boolean | { hl_group = string inline_emulation = boolean}`
+  `boolean | { hl_group: string, inline_emulation: boolean}`
   Whether to enable the ghost_text feature.
   inline_emulation is emulating inline ghost text for older neovim versions
 
