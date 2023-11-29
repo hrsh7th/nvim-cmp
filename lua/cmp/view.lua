@@ -88,11 +88,9 @@ view.open = function(self, ctx, sources)
       if s.offset <= ctx.cursor.col then
         if not has_triggered_by_symbol_source or s.is_triggered_by_symbol then
           -- prepare max_item_counts map for filtering after sort.
-          if max_item_counts[s.name] == nil then
-            local max_item_count = s:get_source_config().max_item_count
-            if max_item_count ~= nil then
-              max_item_counts[s.name] = max_item_count
-            end
+          local max_item_count = s:get_source_config().max_item_count
+          if max_item_count ~= nil then
+            max_item_counts[s.name] = max_item_count
           end
 
           -- source order priority bonus.
