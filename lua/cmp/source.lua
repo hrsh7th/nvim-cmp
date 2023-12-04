@@ -88,21 +88,23 @@ source.get_entries = function(self, ctx)
     return {}
   end
 
-  local target_entries = (function()
-    local key = { 'get_entries', self.revision }
-    for i = ctx.cursor.col, self.offset, -1 do
-      key[3] = string.sub(ctx.cursor_before_line, 1, i)
-      local prev_entries = self.cache:get(key)
-      if prev_entries then
-        return prev_entries
+  local target_entries = self.entries
+
+  if not self.incomplete then
+    local prev = self.cache:get({ 'get_entries', tostring(self.revision) })
+    if prev and ctx.cursor.row == prev.ctx.cursor.row and self.offset == prev.offset then
+      -- only use prev entries when cursor is moved forward.
+      -- and the pattern offset is the same.
+      if prev.ctx.cursor.col <= ctx.cursor.col then
+        target_entries = prev.entries
       end
     end
-    return self.entries
-  end)()
+  end
 
   local entry_filter = self:get_entry_filter()
 
   local inputs = {}
+  ---@type cmp.Entry[]
   local entries = {}
   local matching_config = self:get_matching_config()
   for _, e in ipairs(target_entries) do
@@ -119,21 +121,28 @@ source.get_entries = function(self, ctx)
       e.exact = e:get_filter_text() == inputs[o] or e:get_word() == inputs[o]
 
       if entry_filter(e, ctx) then
-        table.insert(entries, e)
+        entries[#entries + 1] = e
       end
     end
-  end
-  self.cache:set({ 'get_entries', tostring(self.revision), ctx.cursor_before_line }, entries)
-
-  local max_item_count = self:get_source_config().max_item_count or 200
-  local limited_entries = {}
-  for _, e in ipairs(entries) do
-    table.insert(limited_entries, e)
-    if max_item_count and #limited_entries >= max_item_count then
-      break
+    async.yield()
+    if ctx.aborted then
+      async.abort()
     end
   end
-  return limited_entries
+
+  if not self.incomplete then
+    self.cache:set({ 'get_entries', tostring(self.revision) }, { entries = entries, ctx = ctx, offset = self.offset })
+  end
+
+  if self:get_source_config().max_item_count then
+    local limited_entries = {}
+    for i = 1, math.min(#entries, self:get_source_config().max_item_count) do
+      limited_entries[i] = entries[i]
+    end
+    entries = limited_entries
+  end
+
+  return entries
 end
 
 ---Get default insert range (UTF8 byte index).
@@ -329,6 +338,9 @@ source.complete = function(self, ctx, callback)
       completion_context = completion_context,
     }),
     self.complete_dedup(vim.schedule_wrap(function(response)
+      if self.context ~= ctx then
+        return
+      end
       ---@type lsp.CompletionResponse
       response = response or {}
 
@@ -341,15 +353,17 @@ source.complete = function(self, ctx, callback)
 
         self.status = source.SourceStatus.COMPLETED
         self.entries = {}
-        for i, item in ipairs(response.items or response) do
-          if (misc.safe(item) or {}).label then
+        for _, item in ipairs(response.items or response) do
+          if (item or {}).label then
             local e = entry.new(ctx, self, item, response.itemDefaults)
-            self.entries[i] = e
-            self.offset = math.min(self.offset, e:get_offset())
+            if not e:is_invalid() then
+              table.insert(self.entries, e)
+              self.offset = math.min(self.offset, e:get_offset())
+            end
           end
         end
         self.revision = self.revision + 1
-        if #self:get_entries(ctx) == 0 then
+        if #self.entries == 0 then
           self.offset = old_offset
           self.entries = old_entries
           self.revision = self.revision + 1

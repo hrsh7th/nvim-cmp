@@ -74,42 +74,38 @@ misc.none = vim.NIL
 
 ---Merge two tables recursively
 ---@generic T
----@param v1 T
----@param v2 T
+---@param tbl1 T
+---@param tbl2 T
 ---@return T
-misc.merge = function(v1, v2)
-  local merge1 = type(v1) == 'table' and (not vim.tbl_islist(v1) or vim.tbl_isempty(v1))
-  local merge2 = type(v2) == 'table' and (not vim.tbl_islist(v2) or vim.tbl_isempty(v2))
-  if merge1 and merge2 then
+misc.merge = function(tbl1, tbl2)
+  local is_dict1 = type(tbl1) == 'table' and (not vim.tbl_islist(tbl1) or vim.tbl_isempty(tbl1))
+  local is_dict2 = type(tbl2) == 'table' and (not vim.tbl_islist(tbl2) or vim.tbl_isempty(tbl2))
+  if is_dict1 and is_dict2 then
     local new_tbl = {}
-    for k, v in pairs(v2) do
-      new_tbl[k] = misc.merge(v1[k], v)
+    for k, v in pairs(tbl2) do
+      if tbl1[k] ~= misc.none then
+        new_tbl[k] = misc.merge(tbl1[k], v)
+      end
     end
-    for k, v in pairs(v1) do
-      if v2[k] == nil and v ~= misc.none then
-        new_tbl[k] = v
+    for k, v in pairs(tbl1) do
+      if tbl2[k] == nil then
+        if v ~= misc.none then
+          new_tbl[k] = misc.merge(v, {})
+        else
+          new_tbl[k] = nil
+        end
       end
     end
     return new_tbl
   end
-  if v1 == misc.none then
-    return nil
-  end
-  if v1 == nil then
-    if v2 == misc.none then
-      return nil
-    else
-      return v2
-    end
-  end
-  if v1 == true then
-    if merge2 then
-      return v2
-    end
-    return {}
-  end
 
-  return v1
+  if tbl1 == misc.none then
+    return nil
+  elseif tbl1 == nil then
+    return misc.merge(tbl2, {})
+  else
+    return tbl1
+  end
 end
 
 ---Generate id for group name
@@ -123,23 +119,12 @@ misc.id = setmetatable({
   end,
 })
 
----Check the value is nil or not.
----@generic T|nil|vim.NIL
----@param v T
----@return T|nil
-misc.safe = function(v)
-  if v == nil or v == vim.NIL then
-    return nil
-  end
-  return v
-end
-
 ---Treat 1/0 as bool value
 ---@param v boolean|1|0
 ---@param def boolean
 ---@return boolean
 misc.bool = function(v, def)
-  if misc.safe(v) == nil then
+  if v == nil then
     return def
   end
   return v == true or v == 1
@@ -153,7 +138,7 @@ misc.set = function(t, keys, v)
   local c = t
   for i = 1, #keys - 1 do
     local key = keys[i]
-    c[key] = misc.safe(c[key]) or {}
+    c[key] = c[key] or {}
     c = c[key]
   end
   c[keys[#keys]] = v
@@ -226,13 +211,13 @@ misc.redraw = setmetatable({
   doing = false,
   force = false,
   -- We use `<Up><Down>` to redraw the screen. (Previously, We use <C-r><ESC>. it will remove the unmatches search history.)
-  incsearch_redraw_keys = '<Up><Down>',
+  incsearch_redraw_keys = ' <BS>',
 }, {
   __call = function(self, force)
     local termcode = vim.api.nvim_replace_termcodes(self.incsearch_redraw_keys, true, true, true)
     if vim.tbl_contains({ '/', '?' }, vim.fn.getcmdtype()) then
       if vim.o.incsearch then
-        return vim.api.nvim_feedkeys(termcode, 'in', true)
+        return vim.api.nvim_feedkeys(termcode, 'ni', true)
       end
     end
 

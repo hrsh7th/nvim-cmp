@@ -19,6 +19,9 @@ return function()
       debounce = 60,
       throttle = 30,
       fetching_timeout = 500,
+      confirm_resolve_timeout = 80,
+      async_budget = 1,
+      max_view_entries = 200,
     },
 
     preselect = types.cmp.PreselectMode.Item,
@@ -50,6 +53,8 @@ return function()
 
     matching = {
       disallow_fuzzy_matching = false,
+      disallow_fullfuzzy_matching = false,
+      disallow_partial_fuzzy_matching = true,
       disallow_partial_matching = false,
       disallow_prefix_unmatching = false,
     },
@@ -86,7 +91,13 @@ return function()
     },
 
     view = {
-      entries = { name = 'custom', selection_order = 'top_down' },
+      entries = {
+        name = 'custom',
+        selection_order = 'top_down',
+      },
+      docs = {
+        auto_open = true,
+      },
     },
 
     window = {

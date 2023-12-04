@@ -16,6 +16,7 @@ local api = require('cmp.utils.api')
 ---@field public cursor_line string
 ---@field public cursor_after_line string
 ---@field public cursor_before_line string
+---@field public aborted boolean
 local context = {}
 
 ---Create new empty context
@@ -55,7 +56,12 @@ context.new = function(prev_context, option)
   self.cursor.character = misc.to_utfindex(self.cursor_line, self.cursor.col)
   self.cursor_before_line = string.sub(self.cursor_line, 1, self.cursor.col - 1)
   self.cursor_after_line = string.sub(self.cursor_line, self.cursor.col)
+  self.aborted = false
   return self
+end
+
+context.abort = function(self)
+  self.aborted = true
 end
 
 ---Return context creation reason.
@@ -68,7 +74,7 @@ end
 ---@return integer
 context.get_offset = function(self, keyword_pattern)
   return self.cache:ensure({ 'get_offset', keyword_pattern, self.cursor_before_line }, function()
-    return pattern.offset(keyword_pattern .. '\\m$', self.cursor_before_line) or self.cursor.col
+    return pattern.offset([[\%(]] .. keyword_pattern .. [[\)\m$]], self.cursor_before_line) or self.cursor.col
   end)
 end
 

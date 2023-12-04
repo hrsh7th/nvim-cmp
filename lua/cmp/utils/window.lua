@@ -1,4 +1,5 @@
 local misc = require('cmp.utils.misc')
+local opt = require('cmp.utils.options')
 local buffer = require('cmp.utils.buffer')
 local api = require('cmp.utils.api')
 local config = require('cmp.config')
@@ -37,8 +38,7 @@ window.new = function()
 end
 
 ---Set window option.
----NOTE: If the window already visible, immediately applied to it. The OptionSet
--- event is not triggered
+---NOTE: If the window already visible, immediately applied to it.
 ---@param key string
 ---@param value any
 window.option = function(self, key, value)
@@ -52,16 +52,12 @@ window.option = function(self, key, value)
 
   self.opt[key] = value
   if self:visible() then
-    local eventignore = vim.opt.eventignore:get()
-    vim.opt.eventignore:append("OptionSet")
-    vim.api.nvim_win_set_option(self.win, key, value)
-    vim.opt.eventignore = eventignore
+    opt.win_set_option(self.win, key, value)
   end
 end
 
 ---Set buffer option.
----NOTE: If the buffer already visible, immediately applied to it. The OptionSet
--- event is not triggered.
+---NOTE: If the buffer already visible, immediately applied to it.
 ---@param key string
 ---@param value any
 window.buffer_option = function(self, key, value)
@@ -76,10 +72,7 @@ window.buffer_option = function(self, key, value)
   self.buffer_opt[key] = value
   local existing_buf = buffer.get(self.name)
   if existing_buf then
-    local eventignore = vim.opt.eventignore:get()
-    vim.opt.eventignore:append("OptionSet")
-    vim.api.nvim_buf_set_option(existing_buf, key, value)
-    vim.opt.eventignore = eventignore
+    opt.buf_set_option(existing_buf, key, value)
   end
 end
 
@@ -107,7 +100,7 @@ window.get_buffer = function(self)
   local buf, created_new = buffer.ensure(self.name)
   if created_new then
     for k, v in pairs(self.buffer_opt) do
-      vim.api.nvim_buf_set_option(buf, k, v)
+      opt.buf_set_option(buf, k, v)
     end
   end
   return buf
@@ -131,7 +124,7 @@ window.open = function(self, style)
     s.noautocmd = true
     self.win = vim.api.nvim_open_win(self:get_buffer(), false, s)
     for k, v in pairs(self.opt) do
-      vim.api.nvim_win_set_option(self.win, k, v)
+      opt.win_set_option(self.win, k, v)
     end
   end
   self:update()
@@ -158,7 +151,7 @@ window.update = function(self)
       else
         style.noautocmd = true
         self.sbar_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'sbar_buf'), false, style)
-        vim.api.nvim_win_set_option(self.sbar_win, 'winhighlight', 'EndOfBuffer:PmenuSbar,NormalFloat:PmenuSbar')
+        opt.win_set_option(self.sbar_win, 'winhighlight', 'EndOfBuffer:PmenuSbar,NormalFloat:PmenuSbar')
       end
     end
 
@@ -180,7 +173,7 @@ window.update = function(self)
     else
       style.noautocmd = true
       self.thumb_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'thumb_buf'), false, style)
-      vim.api.nvim_win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:PmenuThumb,NormalFloat:PmenuThumb')
+      opt.win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:PmenuThumb,NormalFloat:PmenuThumb')
     end
   else
     if self.sbar_win and vim.api.nvim_win_is_valid(self.sbar_win) then

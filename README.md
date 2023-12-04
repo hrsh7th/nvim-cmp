@@ -3,7 +3,7 @@
 A completion engine plugin for neovim written in Lua.
 Completion sources are installed from external repositories and "sourced".
 
-<video src="https://user-images.githubusercontent.com/629908/139000570-3ac39587-a88b-43c6-b35e-207489719359.mp4" width="100%"></video>
+https://github.com/hrsh7th/nvim-cmp/assets/22756295/afa70011-9121-4e42-aedd-0153b630eeab
 
 Readme!
 ====================
@@ -11,6 +11,7 @@ Readme!
 1. There is a GitHub issue that documents [breaking changes](https://github.com/hrsh7th/nvim-cmp/issues/231) for nvim-cmp. Subscribe to the issue to be notified of upcoming breaking changes.
 2. This is my hobby project. You can support me via GitHub sponsors.
 3. Bug reports are welcome, but don't expect a fix unless you provide minimal configuration and steps to reproduce your issue.
+4. The `cmp.mapping.preset.*` is pre-defined configuration that aims to mimic neovim's native like behavior. It can be changed without announcement. Please manage key-mapping by yourself.
 
 Concept
 ====================
@@ -55,8 +56,6 @@ Plug 'hrsh7th/vim-vsnip'
 
 call plug#end()
 
-set completeopt=menu,menuone,noselect
-
 lua <<EOF
   -- Set up nvim-cmp.
   local cmp = require'cmp'
@@ -96,7 +95,7 @@ lua <<EOF
   -- Set configuration for specific filetype.
   cmp.setup.filetype('gitcommit', {
     sources = cmp.config.sources({
-      { name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it.
+      { name = 'git' }, -- You can specify the `git` source if [you were installed it](https://github.com/petertriho/cmp-git).
     }, {
       { name = 'buffer' },
     })

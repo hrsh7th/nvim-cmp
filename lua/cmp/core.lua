@@ -1,7 +1,6 @@
 local debug = require('cmp.utils.debug')
 local str = require('cmp.utils.str')
 local char = require('cmp.utils.char')
-local pattern = require('cmp.utils.pattern')
 local feedkeys = require('cmp.utils.feedkeys')
 local async = require('cmp.utils.async')
 local keymap = require('cmp.utils.keymap')
@@ -56,6 +55,7 @@ end
 ---@param option? cmp.ContextOption
 ---@return cmp.Context
 core.get_context = function(self, option)
+  self.context:abort()
   local prev = self.context:clone()
   prev.prev_context = nil
   prev.cache = nil
@@ -189,6 +189,16 @@ core.on_moved = function(self)
   self:filter()
 end
 
+---Returns the suffix of the specified `line`.
+---
+---Contains `%s`: returns everything after the last `%s` in `line`
+---Else:          returns `line` unmodified
+---@param line string
+---@return string suffix
+local function find_line_suffix(line)
+  return line:match('%S*$') --[[@as string]]
+end
+
 ---Check autoindent
 ---@param trigger_event cmp.TriggerEvent
 ---@param callback function
@@ -202,7 +212,7 @@ core.autoindent = function(self, trigger_event, callback)
 
   -- Check prefix
   local cursor_before_line = api.get_cursor_before_line()
-  local prefix = pattern.matchstr('[^[:blank:]]\\+$', cursor_before_line) or ''
+  local prefix = find_line_suffix(cursor_before_line) or ''
   if #prefix == 0 then
     return callback()
   end
@@ -296,7 +306,7 @@ core.complete = function(self, ctx)
 end
 
 ---Update completion menu
-core.filter = async.throttle(function(self)
+local async_filter = async.wrap(function(self)
   self.filter.timeout = config.get().performance.throttle
 
   -- Check invalid condition.
@@ -323,20 +333,17 @@ core.filter = async.throttle(function(self)
   local ctx = self:get_context()
 
   -- Display completion results.
-  self.view:open(ctx, sources)
+  local did_open = self.view:open(ctx, sources)
+  local fetching = #self:get_sources(function(s)
+    return s.status == source.SourceStatus.FETCHING
+  end)
 
   -- Check onetime config.
-  if #self:get_sources(function(s)
-    if s.status == source.SourceStatus.FETCHING then
-      return true
-    elseif #s:get_entries(ctx) > 0 then
-      return true
-    end
-    return false
-  end) == 0 then
+  if not did_open and fetching == 0 then
     config.set_onetime({})
   end
-end, config.get().performance.throttle)
+end)
+core.filter = async.throttle(async_filter, config.get().performance.throttle)
 
 ---Confirm completion.
 ---@param e cmp.Entry
@@ -352,6 +359,10 @@ core.confirm = function(self, e, option, callback)
   e.confirmed = true
 
   debug.log('entry.confirm', e:get_completion_item())
+
+  async.sync(function(done)
+    e:resolve(done)
+  end, config.get().performance.confirm_resolve_timeout)
 
   local release = self:suspend()
 
@@ -389,10 +400,10 @@ core.confirm = function(self, e, option, callback)
   feedkeys.call('', 'n', function()
     -- Apply additionalTextEdits.
     local ctx = context.new()
-    if #(misc.safe(e:get_completion_item().additionalTextEdits) or {}) == 0 then
+    if #(e:get_completion_item().additionalTextEdits or {}) == 0 then
       e:resolve(function()
         local new = context.new()
-        local text_edits = misc.safe(e:get_completion_item().additionalTextEdits) or {}
+        local text_edits = e:get_completion_item().additionalTextEdits or {}
         if #text_edits == 0 then
           return
         end
@@ -423,9 +434,13 @@ core.confirm = function(self, e, option, callback)
   feedkeys.call('', 'n', function()
     local ctx = context.new()
     local completion_item = misc.copy(e:get_completion_item())
-    if not misc.safe(completion_item.textEdit) then
+    if not completion_item.textEdit then
       completion_item.textEdit = {}
-      completion_item.textEdit.newText = misc.safe(completion_item.insertText) or completion_item.word or completion_item.label
+      local insertText = completion_item.insertText
+      if misc.empty(insertText) then
+        insertText = nil
+      end
+      completion_item.textEdit.newText = insertText or completion_item.word or completion_item.label
     end
     local behavior = option.behavior or config.get().confirmation.default_behavior
     if behavior == types.cmp.ConfirmBehavior.Replace then
@@ -444,7 +459,8 @@ core.confirm = function(self, e, option, callback)
     if api.is_insert_mode() then
       if false then
         --To use complex expansion debug.
-        vim.pretty_print({ -- luacheck: ignore
+        vim.print({ -- luacheck: ignore
+          item = e:get_completion_item(),
           diff_before = diff_before,
           diff_after = diff_after,
           new_text = new_text,

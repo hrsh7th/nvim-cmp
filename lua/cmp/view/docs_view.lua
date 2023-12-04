@@ -18,6 +18,7 @@ docs_view.new = function()
   self.window:option('showbreak', 'NONE')
   self.window:option('wrap', true)
   self.window:buffer_option('filetype', 'cmp_docs')
+  self.window:buffer_option('buftype', 'nofile')
   return self
 end
 
@@ -56,6 +57,9 @@ docs_view.open = function(self, e, view)
       max_height = documentation.max_height,
     })
   end
+
+  -- Set buffer as not modified, so it can be removed without errors
+  vim.api.nvim_buf_set_option(self.window:get_buffer(), 'modified', false)
 
   -- Calculate window size.
   local width, height = vim.lsp.util._make_floating_popup_size(vim.api.nvim_buf_get_lines(self.window:get_buffer(), 0, -1, false), {
