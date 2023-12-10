@@ -82,15 +82,23 @@ view.open = function(self, ctx, sources)
 
     -- create filtered entries.
     local offset = ctx.cursor.col
+    local group_entries = {}
+    local max_item_counts = {}
     for i, s in ipairs(source_group) do
       if s.offset <= ctx.cursor.col then
         if not has_triggered_by_symbol_source or s.is_triggered_by_symbol then
+          -- prepare max_item_counts map for filtering after sort.
+          local max_item_count = s:get_source_config().max_item_count
+          if max_item_count ~= nil then
+            max_item_counts[s.name] = max_item_count
+          end
+
           -- source order priority bonus.
           local priority = s:get_source_config().priority or ((#source_group - (i - 1)) * config.get().sorting.priority_weight)
 
           for _, e in ipairs(s:get_entries(ctx)) do
             e.score = e.score + priority
-            table.insert(entries, e)
+            table.insert(group_entries, e)
             offset = math.min(offset, e:get_offset())
           end
         end
@@ -99,7 +107,7 @@ view.open = function(self, ctx, sources)
 
     -- sort.
     local comparetors = config.get().sorting.comparators
-    table.sort(entries, function(e1, e2)
+    table.sort(group_entries, function(e1, e2)
       for _, fn in ipairs(comparetors) do
         local diff = fn(e1, e2)
         if diff ~= nil then
@@ -107,8 +115,21 @@ view.open = function(self, ctx, sources)
         end
       end
     end)
-    local max_item_count = config.get().performance.max_view_entries or 200
-    entries = vim.list_slice(entries, 1, max_item_count)
+
+    -- filter by max_item_count.
+    for _, e in ipairs(group_entries) do
+      if max_item_counts[e.source.name] ~= nil then
+        if max_item_counts[e.source.name] >= 0 then
+          max_item_counts[e.source.name] = max_item_counts[e.source.name] - 1
+          table.insert(entries, e)
+        end
+      else
+        table.insert(entries, e)
+      end
+    end
+
+    local max_view_entries = config.get().performance.max_view_entries or 200
+    entries = vim.list_slice(entries, 1, max_view_entries)
 
     -- open
     if #entries > 0 then
