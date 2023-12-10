@@ -83,21 +83,21 @@ cmp.ItemField = {
 ---@alias cmp.Mapping cmp.MappingFunction | cmp.MappingClass
 
 ---@class cmp.ConfigSchema
----@field private revision integer
----@field public enabled boolean | fun(): boolean
----@field public performance cmp.PerformanceConfig
----@field public preselect cmp.PreselectMode
----@field public completion cmp.CompletionConfig
----@field public window cmp.WindowConfig|nil
----@field public confirmation cmp.ConfirmationConfig
----@field public matching cmp.MatchingConfig
----@field public sorting cmp.SortingConfig
----@field public formatting cmp.FormattingConfig
----@field public snippet cmp.SnippetConfig
----@field public mapping table<string, cmp.Mapping>
----@field public sources cmp.SourceConfig[]
----@field public view cmp.ViewConfig
----@field public experimental cmp.ExperimentalConfig
+---@field private revision? integer
+---@field public enabled? boolean | fun(): boolean
+---@field public performance? cmp.PerformanceConfig
+---@field public preselect? cmp.PreselectMode
+---@field public completion? cmp.CompletionConfig
+---@field public window? cmp.WindowConfig|nil
+---@field public confirmation? cmp.ConfirmationConfig
+---@field public matching? cmp.MatchingConfig
+---@field public sorting? cmp.SortingConfig
+---@field public formatting? cmp.FormattingConfig
+---@field public snippet? cmp.SnippetConfig
+---@field public mapping? table<string, cmp.Mapping>
+---@field public sources? cmp.SourceConfig[]
+---@field public view? cmp.ViewConfig
+---@field public experimental? cmp.ExperimentalConfig
 
 ---@class cmp.PerformanceConfig
 ---@field public debounce integer
@@ -108,24 +108,24 @@ cmp.ItemField = {
 ---@field public max_view_entries integer
 
 ---@class cmp.WindowConfig
----@field completion cmp.WindowConfig
----@field documentation cmp.WindowConfig|nil
+---@field completion? cmp.WindowConfig
+---@field documentation? cmp.WindowConfig|nil
 
 ---@class cmp.CompletionConfig
----@field public autocomplete cmp.TriggerEvent[]|false
----@field public completeopt string
----@field public get_trigger_characters fun(trigger_characters: string[]): string[]
----@field public keyword_length integer
----@field public keyword_pattern string
+---@field public autocomplete? cmp.TriggerEvent[]|false
+---@field public completeopt? string
+---@field public get_trigger_characters? fun(trigger_characters: string[]): string[]
+---@field public keyword_length? integer
+---@field public keyword_pattern? string
 
 ---@class cmp.WindowConfig
----@field public border string|string[]
----@field public winhighlight string
----@field public zindex integer|nil
----@field public max_width integer|nil
----@field public max_height integer|nil
----@field public scrolloff integer|nil
----@field public scrollbar boolean|true
+---@field public border? string|string[]
+---@field public winhighlight? string
+---@field public zindex? integer|nil
+---@field public max_width? integer|nil
+---@field public max_height? integer|nil
+---@field public scrolloff? integer|nil
+---@field public scrollbar? boolean|true
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior
@@ -168,8 +168,8 @@ cmp.ItemField = {
 ---@field public entry_filter nil|function(entry: cmp.Entry, ctx: cmp.Context): boolean
 
 ---@class cmp.ViewConfig
----@field public entries cmp.EntriesViewConfig
----@field public docs cmp.DocsViewConfig
+---@field public entries? cmp.EntriesViewConfig
+---@field public docs? cmp.DocsViewConfig
 
 ---@alias cmp.EntriesViewConfig cmp.CustomEntriesViewConfig|cmp.NativeEntriesViewConfig|cmp.WildmenuEntriesViewConfig|string
 
