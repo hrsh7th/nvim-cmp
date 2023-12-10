@@ -98,7 +98,6 @@ view.open = function(self, ctx, sources)
 
           for _, e in ipairs(s:get_entries(ctx)) do
             e.score = e.score + priority
-            e.source_name = s.name -- store source name for filtering after sort.
             table.insert(group_entries, e)
             offset = math.min(offset, e:get_offset())
           end
@@ -119,9 +118,9 @@ view.open = function(self, ctx, sources)
 
     -- filter by max_item_count.
     for _, e in ipairs(group_entries) do
-      if max_item_counts[e.source_name] ~= nil then
-        if max_item_counts[e.source_name] >= 0 then
-          max_item_counts[e.source_name] = max_item_counts[e.source_name] - 1
+      if max_item_counts[e.source.name] ~= nil then
+        if max_item_counts[e.source.name] >= 0 then
+          max_item_counts[e.source.name] = max_item_counts[e.source.name] - 1
           table.insert(entries, e)
         end
       else
