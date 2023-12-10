@@ -711,7 +711,7 @@ window.completion.col_offset~
                                      *cmp-config.window.completion.side_padding*
 window.completion.side_padding~
   `number`
-  The ammount of padding to add on the completion window's sides
+  The amount of padding to add on the completion window's sides
 
                                      *cmp-config.window.completion.scrollbar*
 window.completion.scrollbar~
@@ -824,14 +824,14 @@ Here is an example on how to create a custom source:
   end
 
   ---Return LSP's PositionEncodingKind.
-  ---@NOTE: If this method is ommited, the default value will be `utf-16`.
+  ---@NOTE: If this method is omitted, the default value will be `utf-16`.
   ---@return lsp.PositionEncodingKind
   function source:get_position_encoding_kind()
     return 'utf-16'
   end
 
   ---Return the keyword pattern for triggering completion (optional).
-  ---If this is ommited, nvim-cmp will use a default keyword pattern. See |cmp-config.completion.keyword_pattern|.
+  ---If this is omitted, nvim-cmp will use a default keyword pattern. See |cmp-config.completion.keyword_pattern|.
   ---@return string
   function source:get_keyword_pattern()
     return [[\k\+]]
@@ -935,7 +935,7 @@ How to disable automatic display of docs view?~
   }
 <
 
-  additionaly, if you want to open/close docs view via your key mapping, you
+  additionally, if you want to open/close docs view via your key mapping, you
   can define keymapping as the following.
 >lua
   cmp.setup {
