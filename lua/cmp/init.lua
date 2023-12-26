@@ -361,7 +361,6 @@ autocmd.subscribe('CursorMovedI', function()
   end
 end)
 
-
 cmp.event:on('complete_done', function(evt)
   if evt.entry then
     cmp.config.compare.recently_used:add_entry(evt.entry)
