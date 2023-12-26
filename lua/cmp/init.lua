@@ -329,8 +329,6 @@ local on_insert_enter = function()
     cmp.core:on_change('InsertEnter')
   end
 end
-autocmd.subscribe({ 'CmdlineEnter' }, async.debounce_next_tick(on_insert_enter))
-autocmd.subscribe({ 'InsertEnter' }, async.debounce_next_tick_by_keymap(on_insert_enter))
 
 -- async.throttle is needed for performance. The mapping `:<C-u>...<CR>` will fire `CmdlineChanged` for each character.
 local on_text_changed = function()
@@ -338,23 +336,31 @@ local on_text_changed = function()
     cmp.core:on_change('TextChanged')
   end
 end
+
+-- If make this asynchronous, the completion menu will not close when the command output is displayed.
+local on_insert_leave = function()
+  cmp.core:reset()
+  cmp.core.view:close()
+end
+
+autocmd.subscribe('InsertEnter', async.debounce_next_tick_by_keymap(on_insert_enter))
 autocmd.subscribe({ 'TextChangedI', 'TextChangedP' }, on_text_changed)
-autocmd.subscribe('CmdlineChanged', async.debounce_next_tick(on_text_changed))
+autocmd.subscribe('InsertLeave', on_insert_leave)
+
+if not config.is_native_menu() then
+  autocmd.subscribe('CmdlineEnter', async.debounce_next_tick(on_insert_enter))
+  autocmd.subscribe('CmdlineChanged', async.debounce_next_tick(on_text_changed))
+  autocmd.subscribe('CmdlineLeave', on_insert_leave)
+end
 
 autocmd.subscribe('CursorMovedI', function()
   if config.enabled() then
     cmp.core:on_moved()
   else
-    cmp.core:reset()
-    cmp.core.view:close()
+    on_insert_leave()
   end
 end)
 
--- If make this asynchronous, the completion menu will not close when the command output is displayed.
-autocmd.subscribe({ 'InsertLeave', 'CmdlineLeave' }, function()
-  cmp.core:reset()
-  cmp.core.view:close()
-end)
 
 cmp.event:on('complete_done', function(evt)
   if evt.entry then
