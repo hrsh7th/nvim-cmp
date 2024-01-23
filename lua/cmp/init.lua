@@ -338,7 +338,7 @@ local on_text_changed = function()
     cmp.core:on_change('TextChanged')
   end
 end
-autocmd.subscribe({ 'TextChangedI', 'TextChangedP' }, on_text_changed)
+autocmd.subscribe({ 'TextChangedI', 'TextChangedP', 'TextChangedT' }, on_text_changed)
 autocmd.subscribe('CmdlineChanged', async.debounce_next_tick(on_text_changed))
 
 autocmd.subscribe('CursorMovedI', function()
@@ -351,7 +351,7 @@ autocmd.subscribe('CursorMovedI', function()
 end)
 
 -- If make this asynchronous, the completion menu will not close when the command output is displayed.
-autocmd.subscribe({ 'InsertLeave', 'CmdlineLeave' }, function()
+autocmd.subscribe({ 'InsertLeave', 'CmdlineLeave', 'TermLeave' }, function()
   cmp.core:reset()
   cmp.core.view:close()
 end)

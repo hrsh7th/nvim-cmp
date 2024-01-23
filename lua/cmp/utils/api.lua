@@ -13,6 +13,8 @@ api.get_mode = function()
     return 's' -- select
   elseif mode == 'c' and vim.fn.getcmdtype() ~= '=' then
     return 'c' -- cmdline
+  elseif mode == 't' then
+    return 't' -- terminal
   end
 end
 
@@ -32,14 +34,21 @@ api.is_visual_mode = function()
   return api.get_mode() == 'x'
 end
 
+api.is_terminal_mode = function()
+  return api.get_mode() == 't'
+end
+
 api.is_suitable_mode = function()
   local mode = api.get_mode()
-  return mode == 'i' or mode == 'c'
+  return mode == 't' or mode == 'c' or mode == 'i'
 end
 
 api.get_current_line = function()
   if api.is_cmdline_mode() then
     return vim.fn.getcmdline()
+  end
+  if api.is_terminal_mode() then
+    return vim.api.nvim_get_current_line() --:sub(4)
   end
   return vim.api.nvim_get_current_line()
 end
@@ -64,6 +73,16 @@ end
 
 api.get_cursor_before_line = function()
   local cursor = api.get_cursor()
+  if api.is_terminal_mode() then
+    local line = vim.api.nvim_get_current_line()
+    local prompt = 7 -- TODO: this needs to be dynamic or configurable
+    line = line:sub(prompt)
+    cursor[2] = cursor[2] - prompt
+    local start = line:match('%s*([^%s])*') or 1
+    line = line:sub(start)
+    cursor[2] = cursor[2] - #line
+    return line:sub(1, cursor[2])
+  end
   return string.sub(api.get_current_line(), 1, cursor[2])
 end
 
