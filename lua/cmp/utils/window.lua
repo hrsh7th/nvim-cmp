@@ -21,7 +21,9 @@ local config = require('cmp.config')
 ---@field public style cmp.WindowStyle
 ---@field public opt table<string, any>
 ---@field public buffer_opt table<string, any>
+---@field public hidden boolean|nil
 local window = {}
+local windows = {}
 
 ---new
 ---@return cmp.Window
@@ -34,6 +36,12 @@ window.new = function()
   self.style = {}
   self.opt = {}
   self.buffer_opt = {}
+  self.hidden = true
+  if windows[self.name] and not api.is_cmdline_mode() then
+    self.hidden = windows[self.name].hidden
+  else
+    windows[self.name] = self
+  end
   return self
 end
 
@@ -94,6 +102,7 @@ window.set_style = function(self, style)
   self.style.height = math.ceil(self.style.height)
 end
 
+local emptybuf = vim.api.nvim_create_buf(false, true)
 ---Return buffer id.
 ---@return integer
 window.get_buffer = function(self)
@@ -128,14 +137,74 @@ window.open = function(self, style)
     end
   end
   self:update()
+  if windows[self.name] and (windows[self.name].hidden ~= false) then
+    self:hide()
+  end
+end
+
+window.hide = function(self)
+  if api.is_cmdline_mode() then
+    return
+  end
+  self.hidden = true
+  local wins = { self.win, self.sbar_win, self.thumb_win }
+  for _, win in pairs(wins) do
+    if win then
+      -- ignore BufWinEnter because it messes with treesitter context
+      vim.o.eventignore = 'all'
+      vim.api.nvim_win_set_buf(win, emptybuf)
+      vim.api.nvim_win_set_config(win, {
+        relative = 'cursor',
+        border = 'none',
+        row = 0,
+        col = -999,
+        height = 1,
+        width = 1,
+        zindex = 1,
+      })
+      vim.wo[win].winblend = 100
+      vim.o.eventignore = ''
+    end
+  end
+end
+
+window.show = function(self)
+  self.hidden = false
+  if self.win then
+    vim.api.nvim_win_set_config(self.win, self.style)
+    vim.api.nvim_win_set_buf(self.win, self:get_buffer())
+    vim.wo[self.win].winblend = 0
+  else
+    return
+  end
+  -- should restore the bar and thumb win positions/size
+  self:update()
+  if self.sbar_win then
+    vim.wo[self.sbar_win].winblend = 0
+  end
+  if self.thumb_win then
+    vim.wo[self.thumb_win].winblend = 0
+  end
+end
+
+window.hide_all = function(self)
+  for _, win in pairs(windows) do
+    win:hide()
+  end
+end
+
+window.show_all = function(self)
+  for _, win in pairs(windows) do
+    win:show()
+  end
 end
 
 ---Update
 window.update = function(self)
   local info = self:info()
-  if info.scrollable then
+  if info.scrollable and not self.hidden then
     -- Draw the background of the scrollbar
-
+     
     if not info.border_info.visible then
       local style = {
         relative = 'editor',
@@ -148,6 +217,7 @@ window.update = function(self)
       }
       if self.sbar_win and vim.api.nvim_win_is_valid(self.sbar_win) then
         vim.api.nvim_win_set_config(self.sbar_win, style)
+        opt.win_set_option(self.sbar_win, 'winhighlight', 'EndOfBuffer:PmenuSbar,NormalFloat:PmenuSbar')
       else
         style.noautocmd = true
         self.sbar_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'sbar_buf'), false, style)
@@ -170,6 +240,7 @@ window.update = function(self)
     }
     if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
       vim.api.nvim_win_set_config(self.thumb_win, style)
+      opt.win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:PmenuThumb,NormalFloat:PmenuThumb')
     else
       style.noautocmd = true
       self.thumb_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'thumb_buf'), false, style)
