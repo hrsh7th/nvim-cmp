@@ -119,7 +119,7 @@ view.open = function(self, ctx, sources)
     -- filter by max_item_count.
     for _, e in ipairs(group_entries) do
       if max_item_counts[e.source.name] ~= nil then
-        if max_item_counts[e.source.name] >= 0 then
+        if max_item_counts[e.source.name] > 0 then
           max_item_counts[e.source.name] = max_item_counts[e.source.name] - 1
           table.insert(entries, e)
         end
