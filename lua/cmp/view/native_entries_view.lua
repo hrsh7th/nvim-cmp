@@ -157,7 +157,7 @@ native_entries_view.get_entries = function(self)
 end
 
 native_entries_view.get_first_entry = function(self)
-  if self:visible() then
+  if self:visible() or self.entries_win.hidden then
     return self.entries[1]
   end
 end

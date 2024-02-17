@@ -207,7 +207,7 @@ custom_entries_view.open = function(self, offset, entries)
     zindex = completion.zindex or 1001,
   })
   -- always set cursor when starting. It will be adjusted on the call to _select
-  vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
+  self.entries_win:set_cursor({ 1, 0 })
   if preselect_index > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
     self:_select(preselect_index, { behavior = types.cmp.SelectBehavior.Select, active = false })
   elseif not string.match(config.get().completion.completeopt, 'noselect') then
@@ -244,7 +244,7 @@ custom_entries_view.abort = function(self)
 end
 
 custom_entries_view.draw = function(self)
-  local info = vim.fn.getwininfo(self.entries_win.win)[1]
+  local info = self.entries_win:getwininfo()
   local topline = info.topline - 1
   local botline = info.topline + info.height - 1
   local texts = {}
@@ -283,8 +283,8 @@ custom_entries_view.info = function(self)
 end
 
 custom_entries_view.select_next_item = function(self, option)
-  if self:visible() then
-    local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
+  if self:visible() or self.entries_win.hidden then
+    local cursor = self.entries_win:get_cursor()[1]
     local is_top_down = self:is_direction_top_down()
     local last = #self.entries
 
@@ -320,8 +320,8 @@ custom_entries_view.select_next_item = function(self, option)
 end
 
 custom_entries_view.select_prev_item = function(self, option)
-  if self:visible() then
-    local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
+  if self:visible() or  self.entries_win.hidden then
+    local cursor = self.entries_win:get_cursor()[1]
     local is_top_down = self:is_direction_top_down()
     local last = #self.entries
 
@@ -357,33 +357,32 @@ custom_entries_view.select_prev_item = function(self, option)
 end
 
 custom_entries_view.get_offset = function(self)
-  if self:visible() then
+  if self:visible() or self.entries_win.hidden then
     return self.offset
   end
   return nil
 end
 
 custom_entries_view.get_entries = function(self)
-  if self:visible() then
+  if self:visible() or self.entries_win.hidden then
     return self.entries
   end
   return {}
 end
 
 custom_entries_view.get_first_entry = function(self)
-  if self:visible() then
+  if self:visible() or self.entries_win.hidden then
     return (self:is_direction_top_down() and self.entries[1]) or self.entries[#self.entries]
   end
 end
 
 custom_entries_view.get_selected_entry = function(self)
-  if self:visible() and self.entries_win:option('cursorline') then
-    return self.entries[vim.api.nvim_win_get_cursor(self.entries_win.win)[1]]
+  if (self:visible() or self.entries_win.hidden) and self.entries_win:option('cursorline') then
+    return self.entries[self.entries_win:get_cursor()[1]]
   end
 end
-
 custom_entries_view.get_active_entry = function(self)
-  if self:visible() and self.active then
+  if (self:visible() or self.entries_win.hidden) and self.active then
     return self:get_selected_entry()
   end
 end
@@ -394,13 +393,9 @@ custom_entries_view._select = function(self, cursor, option)
     self.prefix = string.sub(api.get_current_line(), self.offset, api.get_cursor()[2]) or ''
   end
   self.active = (0 < cursor and cursor <= #self.entries and option.active == true)
-
   local cursorline = cursor > 0 and cursor <= #self.entries
-  if self.entries_win.hidden and cursorline then
-    self.entries_win:show()
-  end
   self.entries_win:option('cursorline', cursorline)
-  vim.api.nvim_win_set_cursor(self.entries_win.win, {
+  self.entries_win:set_cursor({
     math.max(math.min(cursor, #self.entries), 1),
     0,
   })

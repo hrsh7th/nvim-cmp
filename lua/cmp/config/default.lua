@@ -115,6 +115,8 @@ return function()
         border = { '', '', '', ' ', '', '', '', ' ' },
         winhighlight = 'FloatBorder:NormalFloat',
       },
+            auto_hide = false,
+            show_on_cursor_update = false,
     },
   }
   return config

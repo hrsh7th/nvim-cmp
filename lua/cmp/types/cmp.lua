@@ -110,6 +110,8 @@ cmp.ItemField = {
 ---@class cmp.WindowConfig
 ---@field completion cmp.WindowConfig
 ---@field documentation cmp.WindowConfig|nil
+---@field auto_hide boolean|nil
+---@field show_on_cursor_update boolean|nil
 
 ---@class cmp.CompletionConfig
 ---@field public autocomplete cmp.TriggerEvent[]|false

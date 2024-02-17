@@ -18,6 +18,7 @@ local ghost_text_view = require('cmp.view.ghost_text_view')
 ---@field private change_dedup cmp.AsyncDedup
 ---@field private docs_view cmp.DocsView
 ---@field private ghost_text_view cmp.GhostTextView
+---@field private active boolean
 local view = {}
 
 ---Create menu
@@ -51,6 +52,7 @@ end
 ---@param sources cmp.Source[]
 ---@return boolean did_open
 view.open = function(self, ctx, sources)
+  self.active = true
   local source_group_map = {}
   for _, s in ipairs(sources) do
     local group_index = s:get_source_config().group_index or 0
@@ -135,6 +137,7 @@ view.close = function(self)
       entry = self:_get_entries_view():get_selected_entry(),
     })
   end
+    self.active = false
   self:_get_entries_view():close()
   self.docs_view:close()
   self.ghost_text_view:hide()
@@ -148,6 +151,7 @@ view.abort = function(self)
   if self:visible() then
     self.is_docs_view_pinned = false
   end
+  self.active = false
   self:_get_entries_view():abort()
   self.docs_view:close()
   self.ghost_text_view:hide()
@@ -159,7 +163,7 @@ end
 ---Return the view is visible or not.
 ---@return boolean
 view.visible = function(self)
-  return self:_get_entries_view():visible()
+  return self.active
 end
 
 ---Opens the documentation window.

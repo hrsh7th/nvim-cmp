@@ -26,9 +26,13 @@ ghost_text_view.new = function()
   self.entry = nil
   vim.api.nvim_set_decoration_provider(ghost_text_view.ns, {
     on_win = function(_, win)
-      return win == self.win
-    end,
-    on_line = function(_, _, _, on_row)
+      if self.extmark_id then
+        vim.api.nvim_buf_del_extmark(self.extmark_buf, ghost_text_view.ns, self.extmark_id)
+        self.extmark_id = nil
+      end
+      if win ~= self.win then
+        return
+      end
       local c = config.get().experimental.ghost_text
       if not c then
         return
@@ -39,10 +43,6 @@ ghost_text_view.new = function()
       end
 
       local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-      if on_row ~= row - 1 then
-        return
-      end
-
       local line = vim.api.nvim_get_current_line()
       if not has_inline then
         if string.sub(line, col + 1) ~= '' then
@@ -52,12 +52,13 @@ ghost_text_view.new = function()
 
       local text = self.text_gen(self, line, col)
       if #text > 0 then
-        vim.api.nvim_buf_set_extmark(0, ghost_text_view.ns, row - 1, col, {
-          right_gravity = false,
+        self.extmark_buf = vim.api.nvim_get_current_buf()
+        self.extmark_id = vim.api.nvim_buf_set_extmark(self.extmark_buf, ghost_text_view.ns, row - 1, col, {
+          right_gravity = true,
           virt_text = { { text, type(c) == 'table' and c.hl_group or 'Comment' } },
           virt_text_pos = has_inline and 'inline' or 'overlay',
           hl_mode = 'combine',
-          ephemeral = true,
+          ephemeral = false,
         })
       end
     end,
@@ -85,7 +86,6 @@ ghost_text_view.text_gen = function(self, line, cursor_col)
   end
   return text
 end
-
 ---Show ghost text
 ---@param e cmp.Entry
 ghost_text_view.show = function(self, e)
@@ -103,7 +103,6 @@ ghost_text_view.show = function(self, e)
     misc.redraw(true) -- force invoke decoration provider.
   end
 end
-
 ghost_text_view.hide = function(self)
   if self.win and self.entry then
     self.win = nil

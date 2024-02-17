@@ -21,7 +21,6 @@ docs_view.new = function()
   self.window:buffer_option('buftype', 'nofile')
   return self
 end
-
 ---Open documentation window
 ---@param e cmp.Entry
 ---@param view cmp.WindowStyle
@@ -30,7 +29,7 @@ docs_view.open = function(self, e, view)
   if not documentation then
     return
   end
-
+    
   if not e or not view then
     return self:close()
   end

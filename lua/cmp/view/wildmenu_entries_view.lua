@@ -217,7 +217,7 @@ wildmenu_entries_view.get_entries = function(self)
 end
 
 wildmenu_entries_view.get_first_entry = function(self)
-  if self:visible() then
+  if self:visible() or self.entries_win.hidden then
     return self.entries[1]
   end
 end
@@ -248,7 +248,7 @@ wildmenu_entries_view._select = function(self, selected_index, option)
     end
     vim.api.nvim_win_call(self.entries_win.win, function()
       local view = e:get_view(self.offset, self.entries_win:get_buffer())
-      vim.api.nvim_win_set_cursor(0, { 1, self.offsets[selected_index] + (is_next and view.abbr.bytes or 0) })
+      self.entries_win:set_cursor({ 1, self.offsets[selected_index] + (is_next and view.abbr.bytes or 0) })
       vim.cmd([[redraw!]]) -- Force refresh for vim.api.nvim_set_decoration_provider
     end)
   end
