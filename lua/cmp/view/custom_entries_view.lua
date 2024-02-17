@@ -320,7 +320,7 @@ custom_entries_view.select_next_item = function(self, option)
 end
 
 custom_entries_view.select_prev_item = function(self, option)
-  if self:visible() or  self.entries_win.hidden then
+  if self:visible() or self.entries_win.hidden then
     local cursor = self.entries_win:get_cursor()[1]
     local is_top_down = self:is_direction_top_down()
     local last = #self.entries

@@ -137,7 +137,7 @@ view.close = function(self)
       entry = self:_get_entries_view():get_selected_entry(),
     })
   end
-    self.active = false
+  self.active = false
   self:_get_entries_view():close()
   self.docs_view:close()
   self.ghost_text_view:hide()
