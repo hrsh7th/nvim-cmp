@@ -28,7 +28,8 @@ ghost_text_view.new = function()
   vim.api.nvim_set_decoration_provider(ghost_text_view.ns, {
     on_win = function(_, win)
       if self.extmark_id then
-        vim.api.nvim_buf_del_extmark(0, ghost_text_view.ns, self.extmark_id)
+        vim.api.nvim_buf_del_extmark(self.extmark_buf, ghost_text_view.ns, self.extmark_id)
+        self.extmark_id = nil
       end
 
       if win ~= self.win then
@@ -55,7 +56,8 @@ ghost_text_view.new = function()
 
       local text = self.text_gen(self, line, col)
       if #text > 0 then
-        self.extmark_id = vim.api.nvim_buf_set_extmark(0, ghost_text_view.ns, row - 1, col, {
+        self.extmark_buf = vim.api.nvim_get_current_buf()
+        self.extmark_id = vim.api.nvim_buf_set_extmark(self.extmark_buf, ghost_text_view.ns, row - 1, col, {
           right_gravity = true,
           virt_text = { { text, type(c) == 'table' and c.hl_group or 'Comment' } },
           virt_text_pos = has_inline and 'inline' or 'overlay',
