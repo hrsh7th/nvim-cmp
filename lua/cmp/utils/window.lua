@@ -44,7 +44,6 @@ end
 ---@param pos table<number,number>
 window.set_cursor = function(self, pos)
   if self.hidden then
-    log(self.cursor_pos, pos)
     if self.cursor_pos[1] ~= pos[1] and config.get().window.show_on_cursor_update then
       self.cursor_pos = pos
       self:show()
@@ -218,7 +217,6 @@ window.update = function(self)
       }
       if self.sbar_win and vim.api.nvim_win_is_valid(self.sbar_win) then
         vim.api.nvim_win_set_config(self.sbar_win, style)
-        opt.win_set_option(self.sbar_win, 'winhighlight', 'EndOfBuffer:PmenuSbar,NormalFloat:PmenuSbar')
       else
         style.noautocmd = true
         self.sbar_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'sbar_buf'), false, style)
@@ -241,7 +239,6 @@ window.update = function(self)
     }
     if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
       vim.api.nvim_win_set_config(self.thumb_win, style)
-      opt.win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:PmenuThumb,NormalFloat:PmenuThumb')
     else
       style.noautocmd = true
       self.thumb_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'thumb_buf'), false, style)
