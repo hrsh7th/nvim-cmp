@@ -107,10 +107,6 @@ cmp.ItemField = {
 ---@field public async_budget integer Maximum time (in ms) an async function is allowed to run during one step of the event loop.
 ---@field public max_view_entries integer
 
----@class cmp.WindowConfig
----@field completion? cmp.WindowConfig
----@field documentation? cmp.WindowConfig|nil
-
 ---@class cmp.CompletionConfig
 ---@field public autocomplete? cmp.TriggerEvent[]|false
 ---@field public completeopt? string
@@ -119,13 +115,23 @@ cmp.ItemField = {
 ---@field public keyword_pattern? string
 
 ---@class cmp.WindowConfig
+---@field public completion? cmp.CompletionWindowOptions
+---@field public documentation? cmp.DocumentationWindowOptions|nil
+
+---@class cmp.WindowOptions
 ---@field public border? string|string[]
 ---@field public winhighlight? string
 ---@field public zindex? integer|nil
----@field public max_width? integer|nil
----@field public max_height? integer|nil
+
+---@class cmp.CompletionWindowOptions: cmp.WindowOptions
 ---@field public scrolloff? integer|nil
+---@field public col_offset? integer|nil
+---@field public side_padding? integer|nil
 ---@field public scrollbar? boolean|true
+
+---@class cmp.DocumentationWindowOptions: cmp.WindowOptions
+---@field public max_height? integer|nil
+---@field public max_width? integer|nil
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior

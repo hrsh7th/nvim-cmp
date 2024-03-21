@@ -118,6 +118,8 @@ end
 
 custom_entries_view.open = function(self, offset, entries)
   local completion = config.get().window.completion
+  assert(completion, 'config.get() must resolve window.completion with defaults')
+
   self.offset = offset
   self.entries = {}
   self.column_width = { abbr = 0, kind = 0, menu = 0 }
