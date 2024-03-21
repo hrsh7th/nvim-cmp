@@ -29,7 +29,9 @@ return function()
     mapping = {},
 
     snippet = {
-      expand = function(_)
+      expand = vim.snippet and function(args)
+        vim.snippet.expand(args.body)
+      end or function(_)
         error('snippet engine is not configured.')
       end,
     },
