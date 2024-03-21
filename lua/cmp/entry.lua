@@ -421,7 +421,7 @@ entry.get_completion_item = function(self)
     if self.resolved_completion_item then
       local completion_item = misc.copy(self.completion_item)
       for k, v in pairs(self.resolved_completion_item) do
-        completion_item[k] = v or completion_item[k]
+        completion_item[k] = completion_item[k] or v
       end
       return completion_item
     end
