@@ -69,6 +69,16 @@ misc.empty = function(v)
   return false
 end
 
+---Search value in table
+misc.contains = function(tbl, v)
+  for _, value in ipairs(tbl) do
+    if value == v then
+      return true
+    end
+  end
+  return false
+end
+
 ---The symbol to remove key in misc.merge.
 misc.none = vim.NIL
 

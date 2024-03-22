@@ -1,3 +1,5 @@
+local misc = require('cmp.utils.misc')
+
 local P = {}
 
 ---Take characters until the target characters (The escape sequence is '\' + char)
@@ -17,14 +19,14 @@ P.take_until = function(targets, specials)
         table.insert(raw, '\\')
         new_pos = new_pos + 1
         c = string.sub(input, new_pos, new_pos)
-        if not vim.list_contains(targets, c) and not vim.list_contains(specials, c) then
+        if not misc.contains(targets, c) and not misc.contains(specials, c) then
           table.insert(esc, '\\')
         end
         table.insert(raw, c)
         table.insert(esc, c)
         new_pos = new_pos + 1
       else
-        if vim.list_contains(targets, c) then
+        if misc.contains(targets, c) then
           break
         end
         table.insert(raw, c)
