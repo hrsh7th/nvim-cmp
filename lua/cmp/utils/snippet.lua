@@ -248,121 +248,55 @@ S.format = P.any(
       capture_index = values[3],
     }, Node)
   end),
-  P.map(
-    P.seq(
-      S.dollar,
-      S.open,
-      S.int,
-      S.colon,
-      S.slash,
-      P.any(
-        P.token('upcase'),
-        P.token('downcase'),
-        P.token('capitalize'),
-        P.token('camelcase'),
-        P.token('pascalcase')
-      ),
-      S.close
-    ),
-    function(values)
-      return setmetatable({
-        type = Node.Type.FORMAT,
-        capture_index = values[3],
-        modifier = values[6],
-      }, Node)
-    end
-  ),
-  P.map(
-    P.seq(
-      S.dollar,
-      S.open,
-      S.int,
-      S.colon,
-      P.seq(
-        S.question,
-        P.opt(P.take_until({ ':' }, { '\\' })),
-        S.colon,
-        P.opt(P.take_until({ '}' }, { '\\' }))
-      ),
-      S.close
-    ),
-    function(values)
-      return setmetatable({
-        type = Node.Type.FORMAT,
-        capture_index = values[3],
-        if_text = values[5][2] and values[5][2].esc or '',
-        else_text = values[5][4] and values[5][4].esc or '',
-      }, Node)
-    end
-  ),
-  P.map(
-    P.seq(
-      S.dollar,
-      S.open,
-      S.int,
-      S.colon,
-      P.seq(S.plus, P.opt(P.take_until({ '}' }, { '\\' }))),
-      S.close
-    ),
-    function(values)
-      return setmetatable({
-        type = Node.Type.FORMAT,
-        capture_index = values[3],
-        if_text = values[5][2] and values[5][2].esc or '',
-        else_text = '',
-      }, Node)
-    end
-  ),
-  P.map(
-    P.seq(
-      S.dollar,
-      S.open,
-      S.int,
-      S.colon,
-      S.minus,
-      P.opt(P.take_until({ '}' }, { '\\' })),
-      S.close
-    ),
-    function(values)
-      return setmetatable({
-        type = Node.Type.FORMAT,
-        capture_index = values[3],
-        if_text = '',
-        else_text = values[6] and values[6].esc or '',
-      }, Node)
-    end
-  ),
-  P.map(
-    P.seq(S.dollar, S.open, S.int, S.colon, P.opt(P.take_until({ '}' }, { '\\' })), S.close),
-    function(values)
-      return setmetatable({
-        type = Node.Type.FORMAT,
-        capture_index = values[3],
-        if_text = '',
-        else_text = values[5] and values[5].esc or '',
-      }, Node)
-    end
-  )
+  P.map(P.seq(S.dollar, S.open, S.int, S.colon, S.slash, P.any(P.token('upcase'), P.token('downcase'), P.token('capitalize'), P.token('camelcase'), P.token('pascalcase')), S.close), function(values)
+    return setmetatable({
+      type = Node.Type.FORMAT,
+      capture_index = values[3],
+      modifier = values[6],
+    }, Node)
+  end),
+  P.map(P.seq(S.dollar, S.open, S.int, S.colon, P.seq(S.question, P.opt(P.take_until({ ':' }, { '\\' })), S.colon, P.opt(P.take_until({ '}' }, { '\\' }))), S.close), function(values)
+    return setmetatable({
+      type = Node.Type.FORMAT,
+      capture_index = values[3],
+      if_text = values[5][2] and values[5][2].esc or '',
+      else_text = values[5][4] and values[5][4].esc or '',
+    }, Node)
+  end),
+  P.map(P.seq(S.dollar, S.open, S.int, S.colon, P.seq(S.plus, P.opt(P.take_until({ '}' }, { '\\' }))), S.close), function(values)
+    return setmetatable({
+      type = Node.Type.FORMAT,
+      capture_index = values[3],
+      if_text = values[5][2] and values[5][2].esc or '',
+      else_text = '',
+    }, Node)
+  end),
+  P.map(P.seq(S.dollar, S.open, S.int, S.colon, S.minus, P.opt(P.take_until({ '}' }, { '\\' })), S.close), function(values)
+    return setmetatable({
+      type = Node.Type.FORMAT,
+      capture_index = values[3],
+      if_text = '',
+      else_text = values[6] and values[6].esc or '',
+    }, Node)
+  end),
+  P.map(P.seq(S.dollar, S.open, S.int, S.colon, P.opt(P.take_until({ '}' }, { '\\' })), S.close), function(values)
+    return setmetatable({
+      type = Node.Type.FORMAT,
+      capture_index = values[3],
+      if_text = '',
+      else_text = values[5] and values[5].esc or '',
+    }, Node)
+  end)
 )
 
-S.transform = P.map(
-  P.seq(
-    S.slash,
-    P.take_until({ '/' }, { '\\' }),
-    S.slash,
-    P.many(P.any(S.format, S.text({ '$', '/' }, { '\\' }))),
-    S.slash,
-    P.opt(P.pattern('[ig]+'))
-  ),
-  function(values)
-    return setmetatable({
-      type = Node.Type.TRANSFORM,
-      pattern = values[2].raw,
-      format = values[4],
-      option = values[6],
-    }, Node)
-  end
-)
+S.transform = P.map(P.seq(S.slash, P.take_until({ '/' }, { '\\' }), S.slash, P.many(P.any(S.format, S.text({ '$', '/' }, { '\\' }))), S.slash, P.opt(P.pattern('[ig]+'))), function(values)
+  return setmetatable({
+    type = Node.Type.TRANSFORM,
+    pattern = values[2].raw,
+    format = values[4],
+    option = values[6],
+  }, Node)
+end)
 
 S.tabstop = P.any(
   P.map(P.seq(S.dollar, S.int), function(values)
@@ -386,32 +320,20 @@ S.tabstop = P.any(
   end)
 )
 
-S.placeholder = P.any(
-  P.map(
-    P.seq(
-      S.dollar,
-      S.open,
-      S.int,
-      S.colon,
-      P.opt(P.many(P.any(S.toplevel, S.text({ '$', '}' }, { '\\' })))),
-      S.close
-    ),
-    function(values)
-      return setmetatable({
-        type = Node.Type.PLACEHOLDER,
-        tabstop = values[3],
-        -- insert empty text if opt did not match.
-        children = values[5] or {
-          setmetatable({
-            type = Node.Type.TEXT,
-            raw = '',
-            esc = '',
-          }, Node),
-        },
-      }, Node)
-    end
-  )
-)
+S.placeholder = P.any(P.map(P.seq(S.dollar, S.open, S.int, S.colon, P.opt(P.many(P.any(S.toplevel, S.text({ '$', '}' }, { '\\' })))), S.close), function(values)
+  return setmetatable({
+    type = Node.Type.PLACEHOLDER,
+    tabstop = values[3],
+    -- insert empty text if opt did not match.
+    children = values[5] or {
+      setmetatable({
+        type = Node.Type.TEXT,
+        raw = '',
+        esc = '',
+      }, Node),
+    },
+  }, Node)
+end))
 
 S.choice = P.map(
   P.seq(
@@ -454,23 +376,13 @@ S.variable = P.any(
       transform = values[4],
     }, Node)
   end),
-  P.map(
-    P.seq(
-      S.dollar,
-      S.open,
-      S.var,
-      S.colon,
-      P.many(P.any(S.toplevel, S.text({ '$', '}' }, { '\\' }))),
-      S.close
-    ),
-    function(values)
-      return setmetatable({
-        type = Node.Type.VARIABLE,
-        name = values[3],
-        children = values[5],
-      }, Node)
-    end
-  )
+  P.map(P.seq(S.dollar, S.open, S.var, S.colon, P.many(P.any(S.toplevel, S.text({ '$', '}' }, { '\\' }))), S.close), function(values)
+    return setmetatable({
+      type = Node.Type.VARIABLE,
+      name = values[3],
+      children = values[5],
+    }, Node)
+  end)
 )
 
 S.snippet = P.map(P.many(P.any(S.toplevel, S.text({ '$' }, { '}', '\\' }))), function(values)
