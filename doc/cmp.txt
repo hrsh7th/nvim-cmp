@@ -728,12 +728,14 @@ window.completion.scrollbar~
                                      *cmp-config.window.documentation.max_width*
 window.documentation.max_width~
   `number`
-  The documentation window's max width.
+  The documentation window's max width, can be set to 0 to use all available
+  space.
 
                                     *cmp-config.window.documentation.max_height*
 window.documentation.max_height~
   `number`
-  The documentation window's max height.
+  The documentation window's max height, can be set to 0 to use all available
+  space.
 
                                             *cmp-config.experimental.ghost_text*
 experimental.ghost_text~
