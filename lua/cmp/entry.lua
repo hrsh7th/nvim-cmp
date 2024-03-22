@@ -2,6 +2,7 @@ local cache = require('cmp.utils.cache')
 local char = require('cmp.utils.char')
 local misc = require('cmp.utils.misc')
 local str = require('cmp.utils.str')
+local snippet = require('cmp.utils.snippet')
 local config = require('cmp.config')
 local types = require('cmp.types')
 local matcher = require('cmp.matcher')
@@ -114,6 +115,9 @@ entry.get_word = function(self)
     local word
     if self:get_completion_item().textEdit and not misc.empty(self:get_completion_item().textEdit.newText) then
       word = str.trim(self:get_completion_item().textEdit.newText)
+      if self:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
+        word = tostring(snippet.parse(word))
+      end
       local overwrite = self:get_overwrite()
       if 0 < overwrite[2] or self:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
         word = str.get_word(word, string.byte(self.context.cursor_after_line, 1), overwrite[1] or 0)
@@ -121,7 +125,7 @@ entry.get_word = function(self)
     elseif not misc.empty(self:get_completion_item().insertText) then
       word = str.trim(self:get_completion_item().insertText)
       if self:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-        word = str.get_word(word)
+        word = str.get_word(tostring(snippet.parse(word)))
       end
     else
       word = str.trim(self:get_completion_item().label)
