@@ -20,6 +20,7 @@ local matcher = require('cmp.matcher')
 ---@field public source_insert_range lsp.Range
 ---@field public source_replace_range lsp.Range
 ---@field public completion_item lsp.CompletionItem
+---@field public item_defaults? lsp.internal.CompletionItemDefaults
 ---@field public resolved_completion_item lsp.CompletionItem|nil
 ---@field public resolved_callbacks fun()[]
 ---@field public resolving boolean
@@ -46,6 +47,7 @@ entry.new = function(ctx, source, completion_item, item_defaults)
   self.source_insert_range = source:get_default_insert_range()
   self.source_replace_range = source:get_default_replace_range()
   self.completion_item = self:fill_defaults(completion_item, item_defaults)
+  self.item_defaults = item_defaults
   self.resolved_completion_item = nil
   self.resolved_callbacks = {}
   self.resolving = false
@@ -423,11 +425,10 @@ end
 entry.get_completion_item = function(self)
   return self.cache:ensure('get_completion_item', function()
     if self.resolved_completion_item then
-      local completion_item = misc.copy(self.completion_item)
-      for k, v in pairs(self.resolved_completion_item) do
-        completion_item[k] = completion_item[k] or v
-      end
-      return completion_item
+      -- @see https://github.com/microsoft/vscode/blob/85eea4a9b2ccc99615e970bf2181edbc1781d0f9/src/vs/workbench/api/browser/mainThreadLanguageFeatures.ts#L588
+      -- @see https://github.com/microsoft/vscode/blob/85eea4a9b2ccc99615e970bf2181edbc1781d0f9/src/vs/base/common/objects.ts#L89
+      -- @see https://github.com/microsoft/vscode/blob/a00f2e64f4fa9a1f774875562e1e9697d7138ed3/src/vs/editor/contrib/suggest/browser/suggest.ts#L147
+      return misc.merge(self:fill_defaults(self.resolved_completion_item, self.item_defaults), self.completion_item)
     end
     return self.completion_item
   end)
