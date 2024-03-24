@@ -295,7 +295,7 @@ source.complete = function(self, ctx, callback)
         completion_context = {
           triggerKind = types.lsp.CompletionTriggerKind.TriggerForIncompleteCompletions,
         }
-      elseif not vim.tbl_contains({ self.request_offset, self.offset }, offset) then
+      else
         completion_context = {
           triggerKind = types.lsp.CompletionTriggerKind.Invoked,
         }
