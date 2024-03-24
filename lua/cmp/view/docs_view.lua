@@ -100,7 +100,7 @@ docs_view.open = function(self, e, view)
   end
 
   -- Render window.
-  self.window:option('winblend', vim.o.pumblend)
+  self.window:option('winblend', documentation.winblend)
   self.window:option('winhighlight', documentation.winhighlight)
   local style = {
     relative = 'editor',

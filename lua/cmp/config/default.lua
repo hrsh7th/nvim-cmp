@@ -107,6 +107,7 @@ return function()
       completion = {
         border = { '', '', '', '', '', '', '', '' },
         winhighlight = 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None',
+        winblend = vim.o.pumblend,
         scrolloff = 0,
         col_offset = 0,
         side_padding = 1,
@@ -117,6 +118,7 @@ return function()
         max_width = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
         border = { '', '', '', ' ', '', '', '', ' ' },
         winhighlight = 'FloatBorder:NormalFloat',
+        winblend = vim.o.pumblend,
       },
     },
   }
