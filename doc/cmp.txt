@@ -698,6 +698,12 @@ window.{completion,documentation}.winhighlight~
   Specify the window's winhighlight option.
   See |nvim_open_win|.
 
+                     *cmp-config.window.{completion,documentation}.winblend*
+window.{completion,documentation}.winblend~
+  `string | cmp.WinhighlightConfig`
+  Specify the window's winblend option.
+  See |nvim_open_win|.
+
                            *cmp-config.window.{completion,documentation}.zindex*
 window.{completion,documentation}.zindex~
   `number`

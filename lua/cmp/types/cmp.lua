@@ -121,6 +121,7 @@ cmp.ItemField = {
 ---@class cmp.WindowOptions
 ---@field public border? string|string[]
 ---@field public winhighlight? string
+---@field public winblend? number
 ---@field public zindex? integer|nil
 
 ---@class cmp.CompletionWindowOptions: cmp.WindowOptions
