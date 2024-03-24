@@ -428,7 +428,11 @@ entry.get_completion_item = function(self)
       -- @see https://github.com/microsoft/vscode/blob/85eea4a9b2ccc99615e970bf2181edbc1781d0f9/src/vs/workbench/api/browser/mainThreadLanguageFeatures.ts#L588
       -- @see https://github.com/microsoft/vscode/blob/85eea4a9b2ccc99615e970bf2181edbc1781d0f9/src/vs/base/common/objects.ts#L89
       -- @see https://github.com/microsoft/vscode/blob/a00f2e64f4fa9a1f774875562e1e9697d7138ed3/src/vs/editor/contrib/suggest/browser/suggest.ts#L147
-      return misc.merge(self:fill_defaults(self.resolved_completion_item, self.item_defaults), self.completion_item)
+      local completion_item = misc.copy(self.completion_item)
+      for k, v in pairs(self.resolved_completion_item) do
+        completion_item[k] = v or completion_item[k]
+      end
+      return completion_item
     end
     return self.completion_item
   end)
@@ -503,7 +507,7 @@ entry.resolve = function(self, callback)
       if not completion_item then
         return
       end
-      self.resolved_completion_item = completion_item or self.completion_item
+      self.resolved_completion_item = self:fill_defaults(completion_item, self.item_defaults)
       self.cache:clear()
       for _, c in ipairs(self.resolved_callbacks) do
         c()
