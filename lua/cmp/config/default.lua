@@ -97,6 +97,7 @@ return function()
       entries = {
         name = 'custom',
         selection_order = 'top_down',
+        follow_cursor = false,
       },
       docs = {
         auto_open = true,
