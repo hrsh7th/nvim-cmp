@@ -29,7 +29,9 @@ return function()
     mapping = {},
 
     snippet = {
-      expand = function(_)
+      expand = vim.snippet and function(args)
+        vim.snippet.expand(args.body)
+      end or function(_)
         error('snippet engine is not configured.')
       end,
     },
@@ -57,6 +59,7 @@ return function()
       disallow_partial_fuzzy_matching = true,
       disallow_partial_matching = false,
       disallow_prefix_unmatching = false,
+      disallow_symbol_nonprefix_matching = true,
     },
 
     sorting = {
@@ -105,6 +108,7 @@ return function()
       completion = {
         border = { '', '', '', '', '', '', '', '' },
         winhighlight = 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None',
+        winblend = vim.o.pumblend,
         scrolloff = 0,
         col_offset = 0,
         side_padding = 1,
@@ -115,6 +119,7 @@ return function()
         max_width = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
         border = { '', '', '', ' ', '', '', '', ' ' },
         winhighlight = 'FloatBorder:NormalFloat',
+        winblend = vim.o.pumblend,
       },
     },
   }

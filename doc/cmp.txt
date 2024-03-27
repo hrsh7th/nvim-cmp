@@ -85,6 +85,7 @@ A recommended configuration can be found below.
           -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
           -- require'snippy'.expand_snippet(args.body) -- For `snippy` users.
           -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+          -- vim.snippet.expand(args.body) -- For native neovim snippets (Neovim v0.10+)
         end,
       },
       window = {
@@ -123,7 +124,8 @@ A recommended configuration can be found below.
         { name = 'path' }
       }, {
         { name = 'cmdline' }
-      })
+      }),
+      matching = { disallow_symbol_nonprefix_matching = false }
     })
 
     -- Setup lspconfig.
@@ -560,6 +562,11 @@ matching.disallow_prefix_unmatching~
   `boolean`
   Whether to allow prefix unmatching.
 
+                                cmp-config.matching.disallow_symbol_nonprefix_matching
+matching.disallow_symbol_nonprefix_matching
+  `boolean`
+  Whether to allow symbols in matches if the match is not a prefix match.
+
                                             *cmp-config.sorting.priority_weight*
 sorting.priority_weight~
   `number`
@@ -691,6 +698,12 @@ window.{completion,documentation}.winhighlight~
   Specify the window's winhighlight option.
   See |nvim_open_win|.
 
+                     *cmp-config.window.{completion,documentation}.winblend*
+window.{completion,documentation}.winblend~
+  `string | cmp.WinhighlightConfig`
+  Specify the window's winblend option.
+  See |nvim_open_win|.
+
                            *cmp-config.window.{completion,documentation}.zindex*
 window.{completion,documentation}.zindex~
   `number`
@@ -711,7 +724,7 @@ window.completion.col_offset~
                                      *cmp-config.window.completion.side_padding*
 window.completion.side_padding~
   `number`
-  The ammount of padding to add on the completion window's sides
+  The amount of padding to add on the completion window's sides
 
                                      *cmp-config.window.completion.scrollbar*
 window.completion.scrollbar~
@@ -721,12 +734,14 @@ window.completion.scrollbar~
                                      *cmp-config.window.documentation.max_width*
 window.documentation.max_width~
   `number`
-  The documentation window's max width.
+  The documentation window's max width, can be set to 0 to use all available
+  space.
 
                                     *cmp-config.window.documentation.max_height*
 window.documentation.max_height~
   `number`
-  The documentation window's max height.
+  The documentation window's max height, can be set to 0 to use all available
+  space.
 
                                             *cmp-config.experimental.ghost_text*
 experimental.ghost_text~
@@ -824,14 +839,14 @@ Here is an example on how to create a custom source:
   end
 
   ---Return LSP's PositionEncodingKind.
-  ---@NOTE: If this method is ommited, the default value will be `utf-16`.
+  ---@NOTE: If this method is omitted, the default value will be `utf-16`.
   ---@return lsp.PositionEncodingKind
   function source:get_position_encoding_kind()
     return 'utf-16'
   end
 
   ---Return the keyword pattern for triggering completion (optional).
-  ---If this is ommited, nvim-cmp will use a default keyword pattern. See |cmp-config.completion.keyword_pattern|.
+  ---If this is omitted, nvim-cmp will use a default keyword pattern. See |cmp-config.completion.keyword_pattern|.
   ---@return string
   function source:get_keyword_pattern()
     return [[\k\+]]
@@ -935,7 +950,7 @@ How to disable automatic display of docs view?~
   }
 <
 
-  additionaly, if you want to open/close docs view via your key mapping, you
+  additionally, if you want to open/close docs view via your key mapping, you
   can define keymapping as the following.
 >lua
   cmp.setup {

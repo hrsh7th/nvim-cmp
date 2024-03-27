@@ -133,7 +133,7 @@ end
 ---Update
 window.update = function(self)
   local info = self:info()
-  if info.scrollable then
+  if info.scrollable and self.style.height > 0 then
     -- Draw the background of the scrollbar
 
     if not info.border_info.visible then

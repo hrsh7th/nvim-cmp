@@ -39,7 +39,10 @@ docs_view.open = function(self, e, view, bottom_up)
   local border_info = window.get_border_info({ style = documentation })
   local right_space = vim.o.columns - (view.col + view.width) - 1
   local left_space = view.col - 1
-  local max_width = math.min(documentation.max_width, math.max(left_space, right_space))
+  local max_width = math.max(left_space, right_space)
+  if documentation.max_width > 0 then
+    max_width = math.min(documentation.max_width, max_width)
+  end
 
   -- Update buffer content if needed.
   if not self.entry or e.id ~= self.entry.id then
@@ -53,20 +56,26 @@ docs_view.open = function(self, e, view, bottom_up)
       vim.cmd([[syntax clear]])
       vim.api.nvim_buf_set_lines(self.window:get_buffer(), 0, -1, false, {})
     end)
-    vim.lsp.util.stylize_markdown(self.window:get_buffer(), documents, {
+    local opts = {
       max_width = max_width - border_info.horiz,
-      max_height = documentation.max_height,
-    })
+    }
+    if documentation.max_height > 0 then
+      opts.max_height = documentation.max_height
+    end
+    vim.lsp.util.stylize_markdown(self.window:get_buffer(), documents, opts)
   end
 
   -- Set buffer as not modified, so it can be removed without errors
   vim.api.nvim_buf_set_option(self.window:get_buffer(), 'modified', false)
 
   -- Calculate window size.
-  local width, height = vim.lsp.util._make_floating_popup_size(vim.api.nvim_buf_get_lines(self.window:get_buffer(), 0, -1, false), {
+  local opts = {
     max_width = max_width - border_info.horiz,
-    max_height = documentation.max_height - border_info.vert,
-  })
+  }
+  if documentation.max_height > 0 then
+    opts.max_height = documentation.max_height - border_info.vert
+  end
+  local width, height = vim.lsp.util._make_floating_popup_size(vim.api.nvim_buf_get_lines(self.window:get_buffer(), 0, -1, false), opts)
   if width <= 0 or height <= 0 then
     return self:close()
   end
@@ -94,7 +103,7 @@ docs_view.open = function(self, e, view, bottom_up)
   local row = bottom_up and math.max(view.row - (height + border_info.vert - view.height), 1) or view.row
 
   -- Render window.
-  self.window:option('winblend', vim.o.pumblend)
+  self.window:option('winblend', documentation.winblend)
   self.window:option('winhighlight', documentation.winhighlight)
   local style = {
     relative = 'editor',
