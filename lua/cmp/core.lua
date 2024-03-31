@@ -371,6 +371,14 @@ core.confirm = function(self, e, option, callback)
 
   feedkeys.call(keymap.indentkeys(), 'n')
   feedkeys.call('', 'n', function()
+    -- Emulate `<C-y>` behavior to save `.` register.
+    local ctx = context.new()
+    local keys = {}
+    table.insert(keys, keymap.backspace(ctx.cursor_before_line:sub(e:get_offset())))
+    table.insert(keys, e:get_word())
+    feedkeys.call(table.concat(keys, ''), 'in')
+  end)
+  feedkeys.call('', 'n', function()
     -- Restore the line at the time of request.
     local ctx = context.new()
     if api.is_cmdline_mode() then
