@@ -257,7 +257,7 @@ NOTE: `<Cmd>lua require('cmp').complete()<CR>` can be used to call these functio
   `behavior=cmp.ConfirmBehavior.Insert`: inserts the selected item and
     moves adjacent text to the right (default).
   `behavior=cmp.ConfirmBehavior.Replace`: replaces adjacent text with
-    the selected item.    
+    the selected item.
 >lua
   cmp.setup {
     mapping = {
@@ -676,7 +676,8 @@ sources[n].entry_filter~
 
                                                                *cmp-config.view*
 view~
-  `{ entries: cmp.EntriesConfig|string }`
+  `{ docs: cmp.DocsViewConfig }`
+  `{ entries: cmp.EntriesViewConfig|string }`
   The view class used to customize nvim-cmp's appearance.
   Currently available configuration options are:
 
@@ -686,12 +687,21 @@ view.docs.auto_open~
 
   Specify whether to show the docs_view when selecting an item.
 
-                                                 *cmp-config.view.follow_cursor*
-view.follow_cursor*
+                                                *cmp-config.view.entries.selection_order*
+view.entries.selection_order~
+  `string`
+
+  Specify whether to select the option in the pmenu that is at
+  the top (`top_down`) or nearest to the cursor (`near_cursor`).
+  Useful if pmenu is above cursor and you want to change default
+  selection direction. Custom view only. `top_down` by default.
+
+                                                 *cmp-config.view.entries.follow_cursor*
+view.entries.follow_cursor~
   `boolean`
 
   Specify whether the pmenu should follow the current position of the cursor
-  as the user types. `false` by default.
+  as the user types. Custom view only. `false` by default.
 
                            *cmp-config.window.{completion,documentation}.border*
 window.{completion,documentation}.border~
