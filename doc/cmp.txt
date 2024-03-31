@@ -686,6 +686,13 @@ view.docs.auto_open~
 
   Specify whether to show the docs_view when selecting an item.
 
+                                                 *cmp-config.view.follow_cursor*
+view.follow_cursor*
+  `boolean`
+
+  Specify whether the pmenu should follow the current position of the cursor
+  as the user types. `false` by default.
+
                            *cmp-config.window.{completion,documentation}.border*
 window.{completion,documentation}.border~
   `string | string[] | nil`
