@@ -1,9 +1,12 @@
 local config = require('cmp.config')
 local misc = require('cmp.utils.misc')
+local snippet = require('cmp.utils.snippet')
 local str = require('cmp.utils.str')
 local api = require('cmp.utils.api')
 
 ---@class cmp.GhostTextView
+---@field win number|nil
+---@field entry cmp.Entry|nil
 local ghost_text_view = {}
 
 ghost_text_view.ns = vim.api.nvim_create_namespace('cmp:GHOST_TEXT')
@@ -74,7 +77,7 @@ end
 ---  This function calculates the bytes of the entry to display calculating the number
 ---  of character differences instead of just byte difference.
 ghost_text_view.text_gen = function(self, line, cursor_col)
-  local word = self.entry:get_insert_text()
+  local word = tostring(snippet.parse(self.entry:get_insert_text()))
   word = str.oneline(word)
   local word_clen = vim.str_utfindex(word)
   local cword = string.sub(line, self.entry:get_offset(), cursor_col)
