@@ -85,12 +85,14 @@ ghost_text_view.new = function()
           return
         end
       end
-
       local text = self.text_gen(self, line, col)
-      text = get_mutliline_ghost_text(text)
       local virtlines = {}
-      for _, v in ipairs(text) do
-        table.insert(virtlines, { { v, type(c) == 'table' and c.hl_group or 'Comment' } })
+      if type(text) == 'table' then
+        for _, v in ipairs(text) do
+          table.insert(virtlines, { { v, type(c) == 'table' and c.hl_group or 'Comment' } })
+        end
+      else
+        table.insert(virtlines, { { text, type(c) == 'table' and c.hl_group or 'Comment' } })
       end
       if #text > 0 then
         self.extmark_buf = vim.api.nvim_get_current_buf()
@@ -140,6 +142,9 @@ ghost_text_view.text_gen = function(self, line, cursor_col)
     text = string.sub(word, vim.str_byteindex(word, word_clen - nchars) + 1)
   else
     text = ''
+  end
+  if success then
+    text = get_mutliline_ghost_text(text)
   end
   return text
 end
