@@ -24,16 +24,44 @@ local has_inline = (function()
   end))
 end)()
 
+local function line_chars_before(pos)
+  -- cur-rows are 1-indexed, api-rows 0.
+  local line = vim.api.nvim_buf_get_lines(0, pos[1], pos[1] + 1, false)
+  return string.sub(line[1], 1, pos[2])
+end
+
+local function tab_width()
+  return vim.bo.shiftwidth ~= 0 and vim.bo.shiftwidth or vim.bo.tabstop
+end
+
+local function get_mutliline_ghost_text(body)
+  local ls = require('luasnip')
+  local pos = vim.api.nvim_win_get_cursor(0)
+  local indentstring = line_chars_before(pos):match('^%s*')
+  local sp = ls.parser.parse_snippet('', body, { trim_empty = false, dedent = false })
+  if vim.bo.expandtab then
+    sp:expand_tabs(tab_width(), #indentstring)
+  end
+  sp:indent(indentstring)
+  return sp:get_static_text()
+end
+
 ghost_text_view.new = function()
   local self = setmetatable({}, { __index = ghost_text_view })
   self.win = nil
   self.entry = nil
   self.extmark_id = nil
+  self.extmark_multi_id = nil
   vim.api.nvim_set_decoration_provider(ghost_text_view.ns, {
     on_win = function(_, win)
       if self.extmark_id then
         vim.api.nvim_buf_del_extmark(self.extmark_buf, ghost_text_view.ns, self.extmark_id)
         self.extmark_id = nil
+      end
+
+      if self.extmark_multi_id then
+        vim.api.nvim_buf_del_extmark(self.extmark_buf, ghost_text_view.ns, self.extmark_multi_id)
+        self.extmark_multi_id = nil
       end
 
       if win ~= self.win then
@@ -59,15 +87,30 @@ ghost_text_view.new = function()
       end
 
       local text = self.text_gen(self, line, col)
+      text = get_mutliline_ghost_text(text)
+      local virtlines = {}
+      for _, v in ipairs(text) do
+        table.insert(virtlines, { { v, type(c) == 'table' and c.hl_group or 'Comment' } })
+      end
       if #text > 0 then
         self.extmark_buf = vim.api.nvim_get_current_buf()
         self.extmark_id = vim.api.nvim_buf_set_extmark(self.extmark_buf, ghost_text_view.ns, row - 1, col, {
           right_gravity = true,
-          virt_text = { { text, type(c) == 'table' and c.hl_group or 'Comment' } },
+          virt_text = virtlines[1],
           virt_text_pos = has_inline and 'inline' or 'overlay',
           hl_mode = 'combine',
           ephemeral = false,
         })
+        if #text > 1 then
+          table.remove(virtlines, 1)
+          self.extmark_multi_id = vim.api.nvim_buf_set_extmark(self.extmark_buf, ghost_text_view.ns, row - 1, col, {
+            right_gravity = true,
+            virt_lines = virtlines,
+            virt_text_pos = has_inline and 'inline' or 'overlay',
+            hl_mode = 'combine',
+            ephemeral = false,
+          })
+        end
       end
     end,
   })
@@ -82,7 +125,10 @@ ghost_text_view.text_gen = function(self, line, cursor_col)
   if self.entry:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
     word = tostring(snippet.parse(word))
   end
-  word = str.oneline(word)
+  local success, _ = pcall(require, 'luasnip')
+  if not success then
+    word = str.oneline(word)
+  end
   local word_clen = vim.str_utfindex(word)
   local cword = string.sub(line, self.entry:get_offset(), cursor_col)
   local cword_clen = vim.str_utfindex(cword)
