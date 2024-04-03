@@ -134,14 +134,6 @@ source.get_entries = function(self, ctx)
     self.cache:set({ 'get_entries', tostring(self.revision) }, { entries = entries, ctx = ctx, offset = self.offset })
   end
 
-  if self:get_source_config().max_item_count then
-    local limited_entries = {}
-    for i = 1, math.min(#entries, self:get_source_config().max_item_count) do
-      limited_entries[i] = entries[i]
-    end
-    entries = limited_entries
-  end
-
   return entries
 end
 

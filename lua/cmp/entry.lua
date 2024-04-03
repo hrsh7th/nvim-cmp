@@ -2,6 +2,7 @@ local cache = require('cmp.utils.cache')
 local char = require('cmp.utils.char')
 local misc = require('cmp.utils.misc')
 local str = require('cmp.utils.str')
+local snippet = require('cmp.utils.snippet')
 local config = require('cmp.config')
 local types = require('cmp.types')
 local matcher = require('cmp.matcher')
@@ -19,6 +20,7 @@ local matcher = require('cmp.matcher')
 ---@field public source_insert_range lsp.Range
 ---@field public source_replace_range lsp.Range
 ---@field public completion_item lsp.CompletionItem
+---@field public item_defaults? lsp.internal.CompletionItemDefaults
 ---@field public resolved_completion_item lsp.CompletionItem|nil
 ---@field public resolved_callbacks fun()[]
 ---@field public resolving boolean
@@ -45,6 +47,7 @@ entry.new = function(ctx, source, completion_item, item_defaults)
   self.source_insert_range = source:get_default_insert_range()
   self.source_replace_range = source:get_default_replace_range()
   self.completion_item = self:fill_defaults(completion_item, item_defaults)
+  self.item_defaults = item_defaults
   self.resolved_completion_item = nil
   self.resolved_callbacks = {}
   self.resolving = false
@@ -114,6 +117,9 @@ entry.get_word = function(self)
     local word
     if self:get_completion_item().textEdit and not misc.empty(self:get_completion_item().textEdit.newText) then
       word = str.trim(self:get_completion_item().textEdit.newText)
+      if self:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
+        word = tostring(snippet.parse(word))
+      end
       local overwrite = self:get_overwrite()
       if 0 < overwrite[2] or self:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
         word = str.get_word(word, string.byte(self.context.cursor_after_line, 1), overwrite[1] or 0)
@@ -121,7 +127,7 @@ entry.get_word = function(self)
     elseif not misc.empty(self:get_completion_item().insertText) then
       word = str.trim(self:get_completion_item().insertText)
       if self:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-        word = str.get_word(word)
+        word = str.get_word(tostring(snippet.parse(word)))
       end
     else
       word = str.trim(self:get_completion_item().label)
@@ -360,12 +366,13 @@ end
 ---@param matching_config cmp.MatchingConfig
 ---@return { score: integer, matches: table[] }
 entry.match = function(self, input, matching_config)
-  return self.match_cache:ensure(input .. ':' .. (self.resolved_completion_item and '1' or '0' .. ':') .. (matching_config.disallow_fuzzy_matching and '1' or '0') .. ':' .. (matching_config.disallow_partial_fuzzy_matching and '1' or '0') .. ':' .. (matching_config.disallow_partial_matching and '1' or '0') .. ':' .. (matching_config.disallow_prefix_unmatching and '1' or '0'), function()
+  return self.match_cache:ensure(input .. ':' .. (self.resolved_completion_item and '1' or '0' .. ':') .. (matching_config.disallow_fuzzy_matching and '1' or '0') .. ':' .. (matching_config.disallow_partial_fuzzy_matching and '1' or '0') .. ':' .. (matching_config.disallow_partial_matching and '1' or '0') .. ':' .. (matching_config.disallow_prefix_unmatching and '1' or '0') .. ':' .. (matching_config.disallow_symbol_nonprefix_matching and '1' or '0'), function()
     local option = {
       disallow_fuzzy_matching = matching_config.disallow_fuzzy_matching,
       disallow_partial_fuzzy_matching = matching_config.disallow_partial_fuzzy_matching,
       disallow_partial_matching = matching_config.disallow_partial_matching,
       disallow_prefix_unmatching = matching_config.disallow_prefix_unmatching,
+      disallow_symbol_nonprefix_matching = matching_config.disallow_symbol_nonprefix_matching,
       synonyms = {
         self:get_word(),
         self:get_completion_item().label,
@@ -418,6 +425,9 @@ end
 entry.get_completion_item = function(self)
   return self.cache:ensure('get_completion_item', function()
     if self.resolved_completion_item then
+      -- @see https://github.com/microsoft/vscode/blob/85eea4a9b2ccc99615e970bf2181edbc1781d0f9/src/vs/workbench/api/browser/mainThreadLanguageFeatures.ts#L588
+      -- @see https://github.com/microsoft/vscode/blob/85eea4a9b2ccc99615e970bf2181edbc1781d0f9/src/vs/base/common/objects.ts#L89
+      -- @see https://github.com/microsoft/vscode/blob/a00f2e64f4fa9a1f774875562e1e9697d7138ed3/src/vs/editor/contrib/suggest/browser/suggest.ts#L147
       local completion_item = misc.copy(self.completion_item)
       for k, v in pairs(self.resolved_completion_item) do
         completion_item[k] = v or completion_item[k]
@@ -497,7 +507,7 @@ entry.resolve = function(self, callback)
       if not completion_item then
         return
       end
-      self.resolved_completion_item = completion_item or self.completion_item
+      self.resolved_completion_item = self:fill_defaults(completion_item, self.item_defaults)
       self.cache:clear()
       for _, c in ipairs(self.resolved_callbacks) do
         c()
