@@ -60,11 +60,17 @@ ghost_text_view.new = function()
 
       local text = self.text_gen(self, line, col)
       if #text > 0 then
+        local virt_lines = {}
+        for _, l in ipairs(vim.fn.split(text, '\n')) do
+          table.insert(virt_lines, { { l, type(c) == 'table' and c.hl_group or 'Comment' } })
+        end
+        local first_line = table.remove(virt_lines, 1)
         self.extmark_buf = vim.api.nvim_get_current_buf()
         self.extmark_id = vim.api.nvim_buf_set_extmark(self.extmark_buf, ghost_text_view.ns, row - 1, col, {
           right_gravity = true,
-          virt_text = { { text, type(c) == 'table' and c.hl_group or 'Comment' } },
+          virt_text = first_line,
           virt_text_pos = has_inline and 'inline' or 'overlay',
+          virt_lines = virt_lines,
           hl_mode = 'combine',
           ephemeral = false,
         })
@@ -82,7 +88,6 @@ ghost_text_view.text_gen = function(self, line, cursor_col)
   if self.entry:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
     word = tostring(snippet.parse(word))
   end
-  word = str.oneline(word)
   local word_clen = vim.str_utfindex(word)
   local cword = string.sub(line, self.entry:get_offset(), cursor_col)
   local cword_clen = vim.str_utfindex(cword)
