@@ -11,7 +11,7 @@ local compare = {}
 
 ---@class cmp.ComparatorFunctor
 ---@overload fun(entry1: cmp.Entry, entry2: cmp.Entry): boolean | nil
----@alias cmp.ComparatorFunction fun(entry1: cmp.Entry, entry2: cmp.Entry): boolean | nil
+---@alias cmp.ComparatorFunction fun(entry1: cmp.Entry, entry2: cmp.Entry, entries?: cmp.Entry[]): boolean | nil
 ---@alias cmp.Comparator cmp.ComparatorFunction | cmp.ComparatorFunctor
 
 ---offset: Entries with smaller offset will be ranked higher.
