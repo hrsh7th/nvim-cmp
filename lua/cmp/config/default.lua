@@ -29,7 +29,7 @@ return function()
     mapping = {},
 
     snippet = {
-      expand = vim.snippet and function(args)
+      expand = vim.fn.has('nvim-0.10') == 1 and function(args)
         vim.snippet.expand(args.body)
       end or function(_)
         error('snippet engine is not configured.')
