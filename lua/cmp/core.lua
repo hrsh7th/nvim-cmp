@@ -399,7 +399,7 @@ core.confirm = function(self, e, option, callback)
     else
       vim.cmd([[silent! undojoin]])
       -- This logic must be used nvim_buf_set_text.
-      -- If not used, the snippet engine's placeholder wil be broken.
+      -- If not used, the snippet engine's placeholder will be broken.
       vim.api.nvim_buf_set_text(0, e.context.cursor.row - 1, e.offset - 1, ctx.cursor.row - 1, ctx.cursor.col - 1, {
         e.context.cursor_before_line:sub(e.offset),
       })
