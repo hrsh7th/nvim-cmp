@@ -66,7 +66,7 @@ compare.recently_used = setmetatable({
   end,
 })
 
----kind: Entires with smaller ordinal value of 'kind' will be ranked higher.
+---kind: Entries with smaller ordinal value of 'kind' will be ranked higher.
 ---(see lsp.CompletionItemKind enum).
 ---Exceptions are that Text(1) will be ranked the lowest, and snippets be the highest.
 ---@type cmp.ComparatorFunction
@@ -106,7 +106,7 @@ compare.sort_text = function(entry1, entry2)
   return nil
 end
 
----length: Entires with shorter label length will be ranked higher.
+---length: Entries with shorter label length will be ranked higher.
 ---@type cmp.ComparatorFunction
 compare.length = function(entry1, entry2)
   local diff = #entry1.completion_item.label - #entry2.completion_item.label
