@@ -47,7 +47,7 @@ end
 ---@return { [1]: integer, [2]: integer }
 api.get_cursor = function()
   if api.is_cmdline_mode() then
-    return { math.min(vim.o.lines, vim.o.lines - (vim.api.nvim_get_option('cmdheight') - 1)), vim.fn.getcmdpos() - 1 }
+    return { math.min(vim.o.lines, vim.o.lines - (vim.api.nvim_get_option_value('cmdheight', {}) - 1)), vim.fn.getcmdpos() - 1 }
   end
   return vim.api.nvim_win_get_cursor(0)
 end
