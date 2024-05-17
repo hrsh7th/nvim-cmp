@@ -1,5 +1,7 @@
 local misc = {}
 
+local islist = vim.islist or vim.tbl_islist
+
 ---Create once callback
 ---@param callback function
 ---@return function
@@ -88,8 +90,8 @@ misc.none = vim.NIL
 ---@param tbl2 T
 ---@return T
 misc.merge = function(tbl1, tbl2)
-  local is_dict1 = type(tbl1) == 'table' and (not vim.tbl_islist(tbl1) or vim.tbl_isempty(tbl1))
-  local is_dict2 = type(tbl2) == 'table' and (not vim.tbl_islist(tbl2) or vim.tbl_isempty(tbl2))
+  local is_dict1 = type(tbl1) == 'table' and (not islist(tbl1) or vim.tbl_isempty(tbl1))
+  local is_dict2 = type(tbl2) == 'table' and (not islist(tbl2) or vim.tbl_isempty(tbl2))
   if is_dict1 and is_dict2 then
     local new_tbl = {}
     for k, v in pairs(tbl2) do
@@ -163,7 +165,7 @@ misc.copy = function(tbl)
     return tbl
   end
 
-  if vim.tbl_islist(tbl) then
+  if islist(tbl) then
     local copy = {}
     for i, value in ipairs(tbl) do
       copy[i] = misc.copy(value)
