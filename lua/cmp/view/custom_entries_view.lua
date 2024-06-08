@@ -12,6 +12,7 @@ local DEFAULT_HEIGHT = 10 -- @see https://github.com/vim/vim/blob/master/src/pop
 
 ---@class cmp.CustomEntriesView
 ---@field private entries_win cmp.Window
+---@field private ghost_text_view cmp.GhostTextView
 ---@field private offset integer
 ---@field private active boolean
 ---@field private entries cmp.Entry[]
@@ -21,7 +22,7 @@ local custom_entries_view = {}
 
 custom_entries_view.ns = vim.api.nvim_create_namespace('cmp.view.custom_entries_view')
 
-custom_entries_view.new = function()
+custom_entries_view.new = function(ghost_text_view)
   local self = setmetatable({}, { __index = custom_entries_view })
 
   self.entries_win = window.new()
@@ -43,6 +44,7 @@ custom_entries_view.new = function()
   self.active = false
   self.entries = {}
   self.bottom_up = false
+  self.ghost_text_view = ghost_text_view
 
   autocmd.subscribe(
     'CompleteChanged',
@@ -172,7 +174,10 @@ custom_entries_view.open = function(self, offset, entries)
   local border_info = window.get_border_info({ style = completion })
   local border_offset_row = border_info.top + border_info.bottom
   local border_offset_col = border_info.left + border_info.right
-  if math.floor(vim.o.lines * 0.5) <= row + border_offset_row and vim.o.lines - row - border_offset_row <= math.min(DEFAULT_HEIGHT, height) then
+
+  local entry = self:get_selected_entry()
+  local should_move_up = self.ghost_text_view:has_multi_line(entry)
+  if should_move_up or (math.floor(vim.o.lines * 0.5) <= row + border_offset_row and vim.o.lines - row - border_offset_row <= math.min(DEFAULT_HEIGHT, height)) then
     height = math.min(height, row - 1)
     row = row - height - border_offset_row - 1
     if row < 0 then
@@ -424,6 +429,39 @@ custom_entries_view._select = function(self, cursor, option)
     math.max(math.min(cursor, #self.entries), 1),
     0,
   })
+
+  local entry = self:get_selected_entry()
+  local should_move_up = false
+  if entry ~= nil then
+    should_move_up = self.ghost_text_view:has_multi_line(entry)
+  end
+
+  if not self.bottom_up and should_move_up then
+    self.bottom_up = true
+    local info = self.entries_win:info()
+    local border_info = info.border_info
+    local height = info.height
+    local row = info.row
+    height = math.min(height, row - 1)
+    local border_offset_row = border_info.top + border_info.bottom
+    row = row - height - border_offset_row - 1
+    if row < 0 then
+      height = height + row
+    end
+    local update_winconfig = {
+      relative = 'editor',
+      row = row,
+      height = height,
+      col = info.col,
+      width = info.width,
+    }
+    local n = #self.entries
+    for i = 1, math.floor(n / 2) do
+      self.entries[i], self.entries[n - i + 1] = self.entries[n - i + 1], self.entries[i]
+    end
+    self.entries_win:open(update_winconfig)
+    self:_select(#self.entries - cursor + 1, option)
+  end
 
   if is_insert then
     self:_insert(self.entries[cursor] and self.entries[cursor]:get_vim_item(self.offset).word or self.prefix)

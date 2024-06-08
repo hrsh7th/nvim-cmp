@@ -25,11 +25,11 @@ view.new = function()
   local self = setmetatable({}, { __index = view })
   self.resolve_dedup = async.dedup()
   self.is_docs_view_pinned = false
-  self.custom_entries_view = custom_entries_view.new()
   self.native_entries_view = native_entries_view.new()
   self.wildmenu_entries_view = wildmenu_entries_view.new()
   self.docs_view = docs_view.new()
   self.ghost_text_view = ghost_text_view.new()
+  self.custom_entries_view = custom_entries_view.new(ghost_text_view)
   self.event = event.new()
 
   return self
@@ -295,7 +295,6 @@ view.on_entry_change = async.throttle(function(self)
   else
     self.docs_view:close()
   end
-
   e = e or self:get_first_entry()
   if e then
     self.ghost_text_view:show(e)

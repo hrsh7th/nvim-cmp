@@ -7,6 +7,7 @@ local types = require('cmp.types')
 
 ---@class cmp.GhostTextView
 ---@field win number|nil
+---@field multi_line boolean
 ---@field entry cmp.Entry|nil
 local ghost_text_view = {}
 
@@ -70,6 +71,11 @@ ghost_text_view.new = function()
           hl_mode = 'combine',
           ephemeral = false,
         })
+        if #virt_lines > 0 then
+          self.multi_line = true
+        else
+          self.multi_line = false
+        end
       end
     end,
   })
@@ -79,10 +85,14 @@ end
 ---Generate the ghost text
 ---  This function calculates the bytes of the entry to display calculating the number
 ---  of character differences instead of just byte difference.
-ghost_text_view.text_gen = function(self, line, cursor_col)
+ghost_text_view.text_gen = function(self, line, cursor_col, entry)
+  entry = entry or self.entry
+  if entry == nil then
+    return { '' }
+  end
   local function trim_text(word)
     local word_clen = vim.str_utfindex(word)
-    local cword = string.sub(line, self.entry:get_offset(), cursor_col)
+    local cword = string.sub(line, entry:get_offset(), cursor_col)
     local cword_clen = vim.str_utfindex(cword)
     -- Number of characters from entry text (word) to be displayed as ghost thext
     local nchars = word_clen - cword_clen
@@ -95,12 +105,11 @@ ghost_text_view.text_gen = function(self, line, cursor_col)
     end
     return text
   end
-
-  local word = self.entry:get_insert_text()
+  local word = entry:get_insert_text()
   local c = config.get().experimental.ghost_text
 
   -- expand lsp snippet and make sure indent is correct
-  if self.entry:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
+  if entry:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
     local sp = snippet.parse(word)
     local static_text = to_static_text(sp)
     static_text[1] = trim_text(static_text[1])
@@ -133,7 +142,7 @@ ghost_text_view.show = function(self, e)
   if not c then
     return
   end
-  local changed = e ~= self.entry
+  local changed = e ~= entry
   self.win = vim.api.nvim_get_current_win()
   self.entry = e
   if changed then
@@ -149,10 +158,12 @@ ghost_text_view.hide = function(self)
   end
 end
 
-ghost_text_view.has_multi_line = function(self)
-  local extmarks = vim.api.nvim_buf_get_extmarks(0, self.ns, 0, -1, {
-    details = true,
-  })
-end
+ghost_text_view.has_multi_line = function(self, e)
+  local _, col = unpack(vim.api.nvim_win_get_cursor(0))
 
+  local line = vim.api.nvim_get_current_line()
+
+  local virt_lines = self.text_gen(self, line, col, e)
+  return #virt_lines > 1
+end
 return ghost_text_view
