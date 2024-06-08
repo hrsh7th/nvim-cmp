@@ -159,13 +159,16 @@ custom_entries_view.open = function(self, offset, entries)
   width = width + self.column_width.kind + (self.column_width.menu > 0 and 1 or 0)
   width = width + self.column_width.menu + 1
 
-  local height = vim.api.nvim_get_option('pumheight')
+  local height = vim.api.nvim_get_option_value('pumheight', {})
   height = height ~= 0 and height or #self.entries
   height = math.min(height, #self.entries)
 
+  local delta = 0
+  if not config.get().view.entries.follow_cursor then
+    local cursor_before_line = api.get_cursor_before_line()
+    delta = vim.fn.strdisplaywidth(cursor_before_line:sub(self.offset))
+  end
   local pos = api.get_screen_cursor()
-  local cursor_before_line = api.get_cursor_before_line()
-  local delta = vim.fn.strdisplaywidth(cursor_before_line:sub(self.offset))
   local row, col = pos[1], pos[2] - delta - 1
 
   local border_info = window.get_border_info({ style = completion })

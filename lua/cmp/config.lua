@@ -108,7 +108,7 @@ config.get = function()
     end)
   else
     local bufnr = vim.api.nvim_get_current_buf()
-    local filetype = vim.api.nvim_buf_get_option(bufnr, 'filetype')
+    local filetype = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
     local buffer_config = config.buffers[bufnr] or { revision = 1 }
     local filetype_config = config.filetypes[filetype] or { revision = 1 }
     return config.cache:ensure({

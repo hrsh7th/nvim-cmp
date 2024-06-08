@@ -1,9 +1,13 @@
 local config = require('cmp.config')
 local misc = require('cmp.utils.misc')
+local snippet = require('cmp.utils.snippet')
 local str = require('cmp.utils.str')
 local api = require('cmp.utils.api')
+local types = require('cmp.types')
 
 ---@class cmp.GhostTextView
+---@field win number|nil
+---@field entry cmp.Entry|nil
 local ghost_text_view = {}
 
 ghost_text_view.ns = vim.api.nvim_create_namespace('cmp:GHOST_TEXT')
@@ -56,11 +60,17 @@ ghost_text_view.new = function()
 
       local text = self.text_gen(self, line, col)
       if #text > 0 then
+        local virt_lines = {}
+        for _, l in ipairs(vim.fn.split(text, '\n')) do
+          table.insert(virt_lines, { { l, type(c) == 'table' and c.hl_group or 'Comment' } })
+        end
+        local first_line = table.remove(virt_lines, 1)
         self.extmark_buf = vim.api.nvim_get_current_buf()
         self.extmark_id = vim.api.nvim_buf_set_extmark(self.extmark_buf, ghost_text_view.ns, row - 1, col, {
           right_gravity = true,
-          virt_text = { { text, type(c) == 'table' and c.hl_group or 'Comment' } },
+          virt_text = first_line,
           virt_text_pos = has_inline and 'inline' or 'overlay',
+          virt_lines = virt_lines,
           hl_mode = 'combine',
           ephemeral = false,
         })
@@ -75,7 +85,9 @@ end
 ---  of character differences instead of just byte difference.
 ghost_text_view.text_gen = function(self, line, cursor_col)
   local word = self.entry:get_insert_text()
-  word = str.oneline(word)
+  if self.entry:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
+    word = tostring(snippet.parse(word))
+  end
   local word_clen = vim.str_utfindex(word)
   local cword = string.sub(line, self.entry:get_offset(), cursor_col)
   local cword_clen = vim.str_utfindex(cword)

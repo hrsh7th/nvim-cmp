@@ -108,6 +108,7 @@ cmp.close = cmp.sync(function()
   if cmp.core.view:visible() then
     local release = cmp.core:suspend()
     cmp.core.view:close()
+    cmp.core:reset()
     vim.schedule(release)
     return true
   else
@@ -120,6 +121,7 @@ cmp.abort = cmp.sync(function()
   if cmp.core.view:visible() then
     local release = cmp.core:suspend()
     cmp.core.view:abort()
+    cmp.core:reset()
     vim.schedule(release)
     return true
   else
