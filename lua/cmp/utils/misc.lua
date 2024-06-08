@@ -49,7 +49,7 @@ misc.rep = function(str_or_tbl, count)
   return rep
 end
 
----Return the valu is empty or not.
+---Return whether the value is empty or not.
 ---@param v any
 ---@return boolean
 misc.empty = function(v)
