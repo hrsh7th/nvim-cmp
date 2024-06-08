@@ -157,4 +157,20 @@ ghost_text_view.hide = function(self)
   end
 end
 
+ghost_text_view.has_multi_line = function(self, e)
+  if not api.is_insert_mode() then
+    return false
+  end
+  local c = config.get().experimental.ghost_text
+  if not c then
+    return false
+  end
+
+  local _, col = unpack(vim.api.nvim_win_get_cursor(0))
+  local line = vim.api.nvim_get_current_line()
+
+  local virt_lines = self.text_gen(self, line, col, e)
+  return #virt_lines > 1
+end
+
 return ghost_text_view
