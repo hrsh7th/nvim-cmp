@@ -9,7 +9,7 @@ return function()
   local config = {
     enabled = function()
       local disabled = false
-      disabled = disabled or (vim.api.nvim_buf_get_option(0, 'buftype') == 'prompt')
+      disabled = disabled or (vim.api.nvim_get_option_value('buftype', { buf = 0 }) == 'prompt')
       disabled = disabled or (vim.fn.reg_recording() ~= '')
       disabled = disabled or (vim.fn.reg_executing() ~= '')
       return not disabled
@@ -29,7 +29,7 @@ return function()
     mapping = {},
 
     snippet = {
-      expand = vim.snippet and function(args)
+      expand = vim.fn.has('nvim-0.10') == 1 and function(args)
         vim.snippet.expand(args.body)
       end or function(_)
         error('snippet engine is not configured.')
@@ -98,6 +98,7 @@ return function()
         name = 'custom',
         selection_order = 'top_down',
         vertical_positioning = 'below',
+        follow_cursor = false,
       },
       docs = {
         auto_open = true,
