@@ -452,12 +452,17 @@ custom_entries_view._select = function(self, cursor, option)
       col = info.col,
       width = info.width,
     }
-    local n = #self.entries
-    for i = 1, math.floor(n / 2) do
-      self.entries[i], self.entries[n - i + 1] = self.entries[n - i + 1], self.entries[i]
-    end
     self.entries_win:open(update_winconfig)
-    self:_select(#self.entries - cursor + 1, option)
+
+    if not self:is_direction_top_down() then
+      local n = #self.entries
+      for i = 1, math.floor(n / 2) do
+        self.entries[i], self.entries[n - i + 1] = self.entries[n - i + 1], self.entries[i]
+      end
+      self:_select(#self.entries - cursor + 1, option)
+    else
+      self:_select(cursor, option)
+    end
   end
 
   if is_insert then
