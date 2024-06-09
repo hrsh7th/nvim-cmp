@@ -450,12 +450,16 @@ custom_entries_view._select = function(self, cursor, option)
         height = height + row
       end
 
+      local completion = config.get().window.completion
       local new_position = {
+        style = 'minimal',
         relative = 'editor',
-        row = row,
+        row = math.max(0, row),
         height = height,
         col = info.col,
         width = info.width,
+        border = completion.border,
+        zindex = completion.zindex or 1001,
       }
       self.entries_win:open(new_position)
 
