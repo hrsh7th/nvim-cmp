@@ -170,4 +170,5 @@ ghost_text_view.has_multi_line = function(self, e)
   local virt_lines = self.text_gen(self, line, col, e)
   return #virt_lines > 1
 end
+
 return ghost_text_view

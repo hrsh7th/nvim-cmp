@@ -431,10 +431,7 @@ custom_entries_view._select = function(self, cursor, option)
   })
 
   local entry = self:get_selected_entry()
-  local should_move_up = false
-  if entry ~= nil then
-    should_move_up = self.ghost_text_view:has_multi_line(entry)
-  end
+  local should_move_up = self.ghost_text_view:has_multi_line(entry)
 
   if not self.bottom_up and should_move_up then
     self.bottom_up = true
