@@ -7,7 +7,6 @@ local types = require('cmp.types')
 
 ---@class cmp.GhostTextView
 ---@field win number|nil
----@field multi_line boolean
 ---@field entry cmp.Entry|nil
 local ghost_text_view = {}
 
@@ -71,11 +70,6 @@ ghost_text_view.new = function()
           hl_mode = 'combine',
           ephemeral = false,
         })
-        if #virt_lines > 0 then
-          self.multi_line = true
-        else
-          self.multi_line = false
-        end
       end
     end,
   })
