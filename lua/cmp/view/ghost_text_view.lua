@@ -111,7 +111,7 @@ ghost_text_view.text_gen = function(self, line, cursor_col, entry)
   -- expand lsp snippet and make sure indent is correct
   if entry:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
     local sp = snippet.parse(word)
-    local static_text = to_static_text(sp)
+    local static_text = sp:to_static_text()
     static_text[1] = trim_text(static_text[1])
 
     local virt_lines = {}
@@ -142,7 +142,7 @@ ghost_text_view.show = function(self, e)
   if not c then
     return
   end
-  local changed = e ~= entry
+  local changed = e ~= self.entry
   self.win = vim.api.nvim_get_current_win()
   self.entry = e
   if changed then
@@ -159,8 +159,12 @@ ghost_text_view.hide = function(self)
 end
 
 ghost_text_view.has_multi_line = function(self, e)
-  local _, col = unpack(vim.api.nvim_win_get_cursor(0))
+  local c = config.get().experimental.ghost_text
+  if not c then
+    return false
+  end
 
+  local _, col = unpack(vim.api.nvim_win_get_cursor(0))
   local line = vim.api.nvim_get_current_line()
 
   local virt_lines = self.text_gen(self, line, col, e)

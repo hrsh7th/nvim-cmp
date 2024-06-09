@@ -176,6 +176,7 @@ P.seq = function(...)
 end
 
 local Node = {}
+Node.__index = Node
 
 Node.Type = {
   SNIPPET = 0,
@@ -216,7 +217,7 @@ function Node:__tostring()
   return table.concat(insert_text, '')
 end
 
-function to_static_text(self)
+function Node:to_static_text()
   local snippet_text = {}
   local base_indent = vim.api.nvim_get_current_line():match('^%s*') or ''
 
