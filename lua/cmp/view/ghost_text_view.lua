@@ -102,7 +102,7 @@ ghost_text_view.text_gen = function(self, line, cursor_col, entry)
   local word = entry:get_insert_text()
   local c = config.get().experimental.ghost_text
 
-  -- expand lsp snippet and make sure indent is correct
+  -- Expand lsp snippet and make sure indent is correct
   if entry:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
     local sp = snippet.parse(word)
     local static_text = sp:to_static_text()
@@ -115,7 +115,7 @@ ghost_text_view.text_gen = function(self, line, cursor_col, entry)
     return virt_lines
   end
 
-  -- regular multiline_text
+  -- Regular multiline_text
   local text = trim_text(word)
   local virt_lines = {}
   if #text > 0 then

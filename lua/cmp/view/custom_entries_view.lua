@@ -176,7 +176,8 @@ custom_entries_view.open = function(self, offset, entries)
   local border_offset_col = border_info.left + border_info.right
 
   local entry = self:get_selected_entry()
-  local should_move_up = self.ghost_text_view:has_multi_line(entry) and row > self.entries_win:get_content_height()
+  local should_move_up = self.ghost_text_view:has_multi_line(entry) and row > self.entries_win:get_content_height() + border_offset_row
+
   if should_move_up or (math.floor(vim.o.lines * 0.5) <= row + border_offset_row and vim.o.lines - row - border_offset_row <= math.min(DEFAULT_HEIGHT, height)) then
     height = math.min(height, row - 1)
     row = row - height - border_offset_row - 1
@@ -430,39 +431,47 @@ custom_entries_view._select = function(self, cursor, option)
     0,
   })
 
-  local entry = self:get_selected_entry()
-  local distance = api.get_screen_cursor()[1]
-  local should_move_up = self.ghost_text_view:has_multi_line(entry) and distance > self.entries_win:get_content_height()
-
-  if not self.bottom_up and should_move_up then
-    self.bottom_up = true
+  if not self.bottom_up then
     local info = self.entries_win:info()
     local border_info = info.border_info
-    local height = info.height
-    local row = info.row
-    height = math.min(height, row - 1)
     local border_offset_row = border_info.top + border_info.bottom
-    row = row - height - border_offset_row - 1
-    if row < 0 then
-      height = height + row
-    end
-    local update_winconfig = {
-      relative = 'editor',
-      row = row,
-      height = height,
-      col = info.col,
-      width = info.width,
-    }
-    self.entries_win:open(update_winconfig)
+    local row = api.get_screen_cursor()[1]
 
-    if not self:is_direction_top_down() then
-      local n = #self.entries
-      for i = 1, math.floor(n / 2) do
-        self.entries[i], self.entries[n - i + 1] = self.entries[n - i + 1], self.entries[i]
+    local entry = self:get_selected_entry()
+    local should_move_up = self.ghost_text_view:has_multi_line(entry) and row > self.entries_win:get_content_height() + border_offset_row
+
+    if should_move_up then
+      self.bottom_up = true
+
+      -- This logic keeps the same as open()
+      local height = vim.api.nvim_get_option_value('pumheight', {})
+      height = height ~= 0 and height or #self.entries
+      height = math.min(height, #self.entries)
+      height = math.min(height, row - 1)
+
+      row = row - height - border_offset_row - 1
+      if row < 0 then
+        height = height + row
       end
-      self:_select(#self.entries - cursor + 1, option)
-    else
-      self:_select(cursor, option)
+
+      local new_position = {
+        relative = 'editor',
+        row = row,
+        height = height,
+        col = info.col,
+        width = info.width,
+      }
+      self.entries_win:open(new_position)
+
+      if not self:is_direction_top_down() then
+        local n = #self.entries
+        for i = 1, math.floor(n / 2) do
+          self.entries[i], self.entries[n - i + 1] = self.entries[n - i + 1], self.entries[i]
+        end
+        self:_select(#self.entries - cursor + 1, option)
+      else
+        self:_select(cursor, option)
+      end
     end
   end
 
