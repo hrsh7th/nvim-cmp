@@ -174,11 +174,7 @@ custom_entries_view.open = function(self, offset, entries)
   local border_info = window.get_border_info({ style = completion })
   local border_offset_row = border_info.top + border_info.bottom
   local border_offset_col = border_info.left + border_info.right
-
-  local entry = self:get_selected_entry()
-  local should_move_up = self.ghost_text_view:has_multi_line(entry) and row > self.entries_win:get_content_height() + border_offset_row
-
-  if should_move_up or (math.floor(vim.o.lines * 0.5) <= row + border_offset_row and vim.o.lines - row - border_offset_row <= math.min(DEFAULT_HEIGHT, height)) then
+  if math.floor(vim.o.lines * 0.5) <= row + border_offset_row and vim.o.lines - row - border_offset_row <= math.min(DEFAULT_HEIGHT, height) then
     height = math.min(height, row - 1)
     row = row - height - border_offset_row - 1
     if row < 0 then
