@@ -94,6 +94,24 @@ misc.merge = function(tbl1, tbl2)
   local is_dict2 = type(tbl2) == 'table' and (not islist(tbl2) or vim.tbl_isempty(tbl2))
   if is_dict1 and is_dict2 then
     local new_tbl = {}
+
+    -- Merge metatables
+    local mt1 = getmetatable(tbl1)
+    local mt2 = getmetatable(tbl2)
+    local new_mt = {}
+    if mt1 then
+      for k, v in pairs(mt1) do
+        new_mt[k] = v
+      end
+    end
+    if mt2 then
+      for k, v in pairs(mt2) do
+        new_mt[k] = v
+      end
+    end
+    setmetatable(new_tbl, new_mt)
+
+    -- Merge keys and values
     for k, v in pairs(tbl2) do
       if tbl1[k] ~= misc.none then
         new_tbl[k] = misc.merge(tbl1[k], v)
