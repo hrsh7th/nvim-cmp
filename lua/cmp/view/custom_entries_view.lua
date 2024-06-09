@@ -176,7 +176,7 @@ custom_entries_view.open = function(self, offset, entries)
   local border_offset_col = border_info.left + border_info.right
 
   local entry = self:get_selected_entry()
-  local should_move_up = self.ghost_text_view:has_multi_line(entry)
+  local should_move_up = self.ghost_text_view:has_multi_line(entry) and row > self.entries_win:get_content_height()
   if should_move_up or (math.floor(vim.o.lines * 0.5) <= row + border_offset_row and vim.o.lines - row - border_offset_row <= math.min(DEFAULT_HEIGHT, height)) then
     height = math.min(height, row - 1)
     row = row - height - border_offset_row - 1
@@ -431,7 +431,8 @@ custom_entries_view._select = function(self, cursor, option)
   })
 
   local entry = self:get_selected_entry()
-  local should_move_up = self.ghost_text_view:has_multi_line(entry)
+  local distance = api.get_screen_cursor()[1]
+  local should_move_up = self.ghost_text_view:has_multi_line(entry) and distance > self.entries_win:get_content_height()
 
   if not self.bottom_up and should_move_up then
     self.bottom_up = true
