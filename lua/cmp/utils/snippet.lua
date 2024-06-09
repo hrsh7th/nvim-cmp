@@ -189,6 +189,7 @@ Node.Type = {
   TEXT = 7,
 }
 
+--- See https://github.com/neovim/neovim/blob/9afa1fd35510c5fe485f4a1dfdabf94e5f051a1c/runtime/lua/vim/snippet.lua#L59
 --- Transforms the given text into an array of lines (so no line contains `\n`).
 ---
 --- @param text string|string[]
@@ -217,6 +218,7 @@ function Node:__tostring()
   return table.concat(insert_text, '')
 end
 
+--- See https://github.com/neovim/neovim/blob/9afa1fd35510c5fe485f4a1dfdabf94e5f051a1c/runtime/lua/vim/snippet.lua#L477
 function Node:to_static_text()
   local snippet_text = {}
   local base_indent = vim.api.nvim_get_current_line():match('^%s*') or ''
