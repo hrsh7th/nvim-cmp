@@ -433,7 +433,8 @@ custom_entries_view._select = function(self, cursor, option)
     local border_offset_row = border_info.top + border_info.bottom
     local row = api.get_screen_cursor()[1]
 
-    local entry = self:get_selected_entry()
+    -- If user specify 'noselect', select first entry
+    local entry = self:get_selected_entry() or self:get_first_entry()
     local should_move_up = self.ghost_text_view:has_multi_line(entry) and row > self.entries_win:get_content_height() + border_offset_row
 
     if should_move_up then

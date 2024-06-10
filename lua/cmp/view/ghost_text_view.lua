@@ -153,6 +153,9 @@ ghost_text_view.hide = function(self)
 end
 
 ghost_text_view.has_multi_line = function(self, e)
+  if not api.is_insert_mode() then
+    return false
+  end
   local c = config.get().experimental.ghost_text
   if not c then
     return false
