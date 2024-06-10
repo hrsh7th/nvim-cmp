@@ -84,6 +84,8 @@ ghost_text_view.text_gen = function(self, line, cursor_col, entry)
   if entry == nil then
     return { '' }
   end
+
+  -- Trim cursorline ghost text
   local function trim_text(word)
     local word_clen = vim.str_utfindex(word)
     local cword = string.sub(line, entry:get_offset(), cursor_col)
@@ -99,6 +101,7 @@ ghost_text_view.text_gen = function(self, line, cursor_col, entry)
     end
     return text
   end
+
   local word = entry:get_insert_text()
   local c = config.get().experimental.ghost_text
 
