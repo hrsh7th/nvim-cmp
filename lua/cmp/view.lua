@@ -295,6 +295,7 @@ view.on_entry_change = async.throttle(function(self)
   else
     self.docs_view:close()
   end
+
   e = e or self:get_selected_entry()
   if e then
     self.ghost_text_view:show(e)
