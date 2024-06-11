@@ -376,7 +376,6 @@ core.confirm = function(self, e, option, callback)
     local keys = {}
     table.insert(keys, keymap.backspace(ctx.cursor_before_line:sub(e:get_offset())))
     table.insert(keys, e:get_word())
-    table.insert(keys, keymap.undobreak())
     feedkeys.call(table.concat(keys, ''), 'in')
   end)
   feedkeys.call('', 'n', function()
