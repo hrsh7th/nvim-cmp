@@ -444,6 +444,10 @@ entry.get_documentation = function(self)
   local item = self:get_completion_item()
 
   local documents = {}
+  
+  if type(item.detail) == 'table' then
+    item.detail = item.detail[1]
+  end
 
   -- detail
   if item.detail and item.detail ~= '' then
