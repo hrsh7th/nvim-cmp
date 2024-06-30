@@ -70,13 +70,27 @@ custom_entries_view.new = function()
             if field == types.cmp.ItemField.Abbr then
               a = o
             end
-            vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, o, {
-              end_line = i,
-              end_col = o + v[field].bytes,
-              hl_group = v[field].hl_group,
-              hl_mode = 'combine',
-              ephemeral = true,
-            })
+
+            if type(v[field].hl_group) == 'table' then
+              for _, extmark in ipairs(v[field].hl_group) do
+                vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, o + extmark[1], {
+                  end_line = i,
+                  end_col = o + extmark[2],
+                  hl_group = extmark[3],
+                  hl_eol = false,
+                  ephemeral = true,
+                })
+              end
+            else
+              vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, o, {
+                end_line = i,
+                end_col = o + v[field].bytes,
+                hl_group = v[field].hl_group,
+                hl_mode = 'combine',
+                ephemeral = true,
+              })
+            end
+
             o = o + v[field].bytes + (self.column_width[field] - v[field].width) + 1
           end
 

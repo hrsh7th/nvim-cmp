@@ -7,9 +7,9 @@
 ---@field public empty 1|nil
 ---@field public dup 1|nil
 ---@field public id any
----@field public abbr_hl_group string|nil
----@field public kind_hl_group string|nil
----@field public menu_hl_group string|nil
+---@field public abbr_hl_group string|table|nil
+---@field public kind_hl_group string|table|nil
+---@field public menu_hl_group string|table|nil
 
 ---@class vim.Position 1-based index
 ---@field public row integer
