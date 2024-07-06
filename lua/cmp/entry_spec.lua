@@ -11,8 +11,8 @@ describe('entry', function()
     local e = entry.new(state.manual(), state.source(), {
       label = '@',
     })
-    assert.are.equal(e:get_offset(), 3)
-    assert.are.equal(e:get_vim_item(e:get_offset()).word, '@')
+    assert.are.equal(e.offset, 3)
+    assert.are.equal(e:get_vim_item(e.offset).word, '@')
   end)
 
   it('word length (no fix)', function()
@@ -21,8 +21,8 @@ describe('entry', function()
     local e = entry.new(state.manual(), state.source(), {
       label = 'b',
     })
-    assert.are.equal(e:get_offset(), 5)
-    assert.are.equal(e:get_vim_item(e:get_offset()).word, 'b')
+    assert.are.equal(e.offset, 5)
+    assert.are.equal(e:get_vim_item(e.offset).word, 'b')
   end)
 
   it('word length (fix)', function()
@@ -31,8 +31,8 @@ describe('entry', function()
     local e = entry.new(state.manual(), state.source(), {
       label = 'b.',
     })
-    assert.are.equal(e:get_offset(), 3)
-    assert.are.equal(e:get_vim_item(e:get_offset()).word, 'b.')
+    assert.are.equal(e.offset, 3)
+    assert.are.equal(e:get_vim_item(e.offset).word, 'b.')
   end)
 
   it('semantic index (no fix)', function()
@@ -41,8 +41,8 @@ describe('entry', function()
     local e = entry.new(state.manual(), state.source(), {
       label = 'c.',
     })
-    assert.are.equal(e:get_offset(), 6)
-    assert.are.equal(e:get_vim_item(e:get_offset()).word, 'c.')
+    assert.are.equal(e.offset, 6)
+    assert.are.equal(e:get_vim_item(e.offset).word, 'c.')
   end)
 
   it('semantic index (fix)', function()
@@ -51,8 +51,8 @@ describe('entry', function()
     local e = entry.new(state.manual(), state.source(), {
       label = 'bc.',
     })
-    assert.are.equal(e:get_offset(), 3)
-    assert.are.equal(e:get_vim_item(e:get_offset()).word, 'bc.')
+    assert.are.equal(e.offset, 3)
+    assert.are.equal(e:get_vim_item(e.offset).word, 'bc.')
   end)
 
   it('[vscode-html-language-server] 1', function()
@@ -74,8 +74,8 @@ describe('entry', function()
         newText = '  </div',
       },
     })
-    assert.are.equal(e:get_offset(), 5)
-    assert.are.equal(e:get_vim_item(e:get_offset()).word, '</div')
+    assert.are.equal(e.offset, 5)
+    assert.are.equal(e:get_vim_item(e.offset).word, '</div')
   end)
 
   it('[clangd] 1', function()
@@ -101,7 +101,7 @@ describe('entry', function()
       },
     })
     assert.are.equal(e:get_vim_item(4).word, '->foo')
-    assert.are.equal(e:get_filter_text(), 'foo')
+    assert.are.equal(e.filter_text, 'foo')
   end)
 
   it('[typescript-language-server] 1', function()
@@ -112,7 +112,7 @@ describe('entry', function()
     })
     -- The offset will be 18 in this situation because the server returns `[Symbol]` as candidate.
     assert.are.equal(e:get_vim_item(18).word, '.catch')
-    assert.are.equal(e:get_filter_text(), 'catch')
+    assert.are.equal(e.filter_text, 'catch')
   end)
 
   it('[typescript-language-server] 2', function()
@@ -136,7 +136,7 @@ describe('entry', function()
       },
     })
     assert.are.equal(e:get_vim_item(18).word, '[Symbol]')
-    assert.are.equal(e:get_filter_text(), '.Symbol')
+    assert.are.equal(e.filter_text, '.Symbol')
   end)
 
   it('[lua-language-server] 1', function()
@@ -163,7 +163,7 @@ describe('entry', function()
       },
     })
     assert.are.equal(e:get_vim_item(19).word, 'cmp.config')
-    assert.are.equal(e:get_filter_text(), 'cmp.config')
+    assert.are.equal(e.filter_text, 'cmp.config')
 
     -- press '
     state.input("'")
@@ -185,7 +185,7 @@ describe('entry', function()
       },
     })
     assert.are.equal(e:get_vim_item(19).word, 'cmp.config')
-    assert.are.equal(e:get_filter_text(), 'cmp.config')
+    assert.are.equal(e.filter_text, 'cmp.config')
   end)
 
   it('[lua-language-server] 2', function()
@@ -212,7 +212,7 @@ describe('entry', function()
       },
     })
     assert.are.equal(e:get_vim_item(19).word, 'lua.cmp.config')
-    assert.are.equal(e:get_filter_text(), 'lua.cmp.config')
+    assert.are.equal(e.filter_text, 'lua.cmp.config')
 
     -- press '
     state.input("'")
@@ -234,7 +234,7 @@ describe('entry', function()
       },
     })
     assert.are.equal(e:get_vim_item(19).word, 'lua.cmp.config')
-    assert.are.equal(e:get_filter_text(), 'lua.cmp.config')
+    assert.are.equal(e.filter_text, 'lua.cmp.config')
   end)
 
   it('[intelephense] 1', function()
@@ -260,8 +260,8 @@ describe('entry', function()
         },
       },
     })
-    assert.are.equal(e:get_vim_item(e:get_offset()).word, '$this')
-    assert.are.equal(e:get_filter_text(), '$this')
+    assert.are.equal(e:get_vim_item(e.offset).word, '$this')
+    assert.are.equal(e.filter_text, '$this')
   end)
 
   it('[odin-language-server] 1', function()
@@ -285,7 +285,7 @@ describe('entry', function()
       label = 'string',
       tags = {},
     })
-    assert.are.equal(e:get_vim_item(e:get_offset()).word, 'string')
+    assert.are.equal(e:get_vim_item(e.offset).word, 'string')
   end)
 
   it('[#47] word should not contain \\n character', function()
@@ -299,8 +299,8 @@ describe('entry', function()
       insertTextFormat = 1,
       insertText = '__init__(self) -> None:\n  pass',
     })
-    assert.are.equal(e:get_vim_item(e:get_offset()).word, '__init__(self) -> None:')
-    assert.are.equal(e:get_filter_text(), '__init__')
+    assert.are.equal(e:get_vim_item(e.offset).word, '__init__(self) -> None:')
+    assert.are.equal(e.filter_text, '__init__')
   end)
 
   -- I can't understand this test case...
@@ -360,7 +360,7 @@ describe('entry', function()
         },
       },
     })
-    assert.are.equal(e:get_offset(), 12)
-    assert.are.equal(e:get_vim_item(e:get_offset()).word, 'getPath()')
+    assert.are.equal(e.offset, 12)
+    assert.are.equal(e:get_vim_item(e.offset).word, 'getPath()')
   end)
 end)
