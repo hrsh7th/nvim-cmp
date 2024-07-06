@@ -30,6 +30,7 @@ local matcher = require('cmp.matcher')
 ---@field public offset integer
 ---@field public word string
 ---@field public filter_text string
+---@field private match_view_args_ret {input:string, word:string, option:cmp.MatchingConfig, matches:table[]}
 local entry = {}
 
 ---Create new entry
@@ -391,7 +392,18 @@ entry.match = function(self, input, matching_config)
   -- https://www.lua.org/pil/11.6.html
   -- do not use '..' to allocate multiple strings
   local cache_key = string.format('%s:%d:%d:%d:%d:%d:%d', input, self.resolved_completion_item and 1 or 0, matching_config.disallow_fuzzy_matching and 1 or 0, matching_config.disallow_partial_matching and 1 or 0, matching_config.disallow_prefix_unmatching and 1 or 0, matching_config.disallow_partial_fuzzy_matching and 1 or 0, matching_config.disallow_symbol_nonprefix_matching and 1 or 0)
-  return self.match_cache:ensure(cache_key, entry._match, self, input, matching_config)
+  local matched = self.match_cache:get(cache_key)
+  if matched then
+    if self.match_view_args_ret and self.match_view_args_ret.input ~= input then
+      self.match_view_args_ret.input = input
+      self.match_view_args_ret.word = matched._word
+      self.match_view_args_ret.matches = matched.matches
+    end
+    return matched
+  end
+  matched = self:_match(input, matching_config)
+  self.match_cache:set(cache_key, matched)
+  return matched
 end
 
 ---@package
@@ -409,7 +421,7 @@ entry._match = function(self, input, matching_config)
     },
   }
 
-  local score, matches, filter_text, _
+  local score, matches, filter_text
   local checked = {} ---@type table<string, boolean>
 
   filter_text = self.filter_text
@@ -438,15 +450,33 @@ entry._match = function(self, input, matching_config)
 
   -- Fix highlight if filterText is not the same to vim_item.abbr.
   if score > 0 then
-    local vim_item = self:get_vim_item(self.source_offset)
-    filter_text = vim_item.abbr or vim_item.word
-    if not checked[filter_text] then
-      local diff = self.source_offset - self.offset
-      _, matches = matcher.match(input:sub(1 + diff), filter_text, option)
-    end
+    self.match_view_args_ret = {
+      input = input,
+      word = filter_text,
+      option = option,
+      matches = matches,
+    }
   end
 
-  return { score = score, matches = matches }
+  return { score = score, matches = matches, _word = filter_text }
+end
+
+---@param view string
+entry.get_view_matches = function(self, view)
+  if self.match_view_args_ret then
+    if self.match_view_args_ret.word == view then
+      return self.match_view_args_ret.matches
+    end
+    self.match_view_args_ret.word = view
+    local input = self.match_view_args_ret.input
+    local diff = self.source_offset - self.offset
+    if diff > 0 then
+      input = input:sub(1 + diff)
+    end
+    local _, matches = matcher.match(input, view, self.match_view_args_ret.option)
+    self.match_view_args_ret.matches = matches
+    return matches
+  end
 end
 
 ---@deprecated use entry.completion_item instead
