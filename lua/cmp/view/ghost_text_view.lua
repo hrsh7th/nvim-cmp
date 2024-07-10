@@ -1,7 +1,7 @@
 local config = require('cmp.config')
 local misc = require('cmp.utils.misc')
 local snippet = require('cmp.utils.snippet')
-local str = require('cmp.utils.str')
+-- local str = require('cmp.utils.str')
 local api = require('cmp.utils.api')
 local types = require('cmp.types')
 
