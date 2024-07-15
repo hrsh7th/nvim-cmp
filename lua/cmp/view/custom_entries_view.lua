@@ -307,7 +307,7 @@ custom_entries_view.info = function(self)
 end
 
 custom_entries_view.get_selected_index = function(self)
-  if self:visible() and self.active then
+  if self:visible() and self.entries_win:option('cursorline') then
     return vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
   end
 end

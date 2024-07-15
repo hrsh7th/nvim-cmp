@@ -229,8 +229,9 @@ wildmenu_entries_view.get_first_entry = function(self)
 end
 
 wildmenu_entries_view.get_selected_entry = function(self)
-  if self:visible() and self.active then
-    return self.entries[self:get_selected_index()]
+  local idx = self:get_selected_index()
+  if idx then
+    return self.entries[idx]
   end
 end
 
