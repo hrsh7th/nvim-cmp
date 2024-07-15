@@ -211,6 +211,13 @@ view.scroll_docs = function(self, delta)
   self.docs_view:scroll(delta)
 end
 
+---Get what number candidates are currently selected.
+---If not selected, nil is returned.
+---@return integer|nil
+view.get_selected_index = function(self)
+  return self:_get_entries_view():get_selected_index()
+end
+
 ---Select prev menu item.
 ---@param option cmp.SelectOption
 view.select_next_item = function(self, option)
