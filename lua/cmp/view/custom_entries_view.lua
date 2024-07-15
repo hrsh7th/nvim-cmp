@@ -314,7 +314,7 @@ end
 
 custom_entries_view.select_next_item = function(self, option)
   if self:visible() then
-    local cursor = self:get_selected_index()
+    local cursor = svim.api.nvim_win_get_cursor(self.entries_win.win)[1]
     local is_top_down = self:is_direction_top_down()
     local last = #self.entries
 
@@ -351,7 +351,7 @@ end
 
 custom_entries_view.select_prev_item = function(self, option)
   if self:visible() then
-    local cursor = self:get_selected_index()
+    local cursor = vim.api.nvim_win_get_cursor(self.entries_win.win)[1]
     local is_top_down = self:is_direction_top_down()
     local last = #self.entries
 
