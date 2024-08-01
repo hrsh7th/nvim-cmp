@@ -16,6 +16,7 @@ local DEFAULT_HEIGHT = 10 -- @see https://github.com/vim/vim/blob/master/src/pop
 ---@field private active boolean
 ---@field private entries cmp.Entry[]
 ---@field private column_width any
+---@field private bottom_up boolean
 ---@field public event cmp.Event
 local custom_entries_view = {}
 
@@ -117,7 +118,8 @@ custom_entries_view.is_direction_top_down = function(self)
 end
 
 custom_entries_view.open = function(self, offset, entries)
-  local completion = config.get().window.completion
+  local c = config.get()
+  local completion = c.window.completion
   assert(completion, 'config.get() must resolve window.completion with defaults')
 
   self.offset = offset
@@ -172,12 +174,25 @@ custom_entries_view.open = function(self, offset, entries)
   local border_info = window.get_border_info({ style = completion })
   local border_offset_row = border_info.top + border_info.bottom
   local border_offset_col = border_info.left + border_info.right
-  if math.floor(vim.o.lines * 0.5) <= row + border_offset_row and vim.o.lines - row - border_offset_row <= math.min(DEFAULT_HEIGHT, height) then
+
+  local prefers_above = c.view.entries.vertical_positioning == 'above'
+  local prefers_auto = c.view.entries.vertical_positioning == 'auto'
+  local cant_fit_at_bottom = vim.o.lines - row - border_offset_row <= math.min(DEFAULT_HEIGHT, height)
+  local cant_fit_at_top = row - border_offset_row <= math.min(DEFAULT_HEIGHT, height)
+  local is_in_top_half = math.floor(vim.o.lines * 0.5) > row + border_offset_row
+  local should_position_above =
+    cant_fit_at_bottom or
+    (prefers_above and not cant_fit_at_top) or
+    (prefers_auto and is_in_top_half)
+  if should_position_above then
+    self.bottom_up = true
     height = math.min(height, row - 1)
     row = row - height - border_offset_row - 1
     if row < 0 then
       height = height + row
     end
+  else
+    self.bottom_up = false
   end
   if math.floor(vim.o.columns * 0.5) <= col + border_offset_col and vim.o.columns - col - border_offset_col <= width then
     width = math.min(width, vim.o.columns - 1)
@@ -185,12 +200,6 @@ custom_entries_view.open = function(self, offset, entries)
     if col < 0 then
       width = width + col
     end
-  end
-
-  if pos[1] > row then
-    self.bottom_up = true
-  else
-    self.bottom_up = false
   end
 
   if not self:is_direction_top_down() then
@@ -226,9 +235,9 @@ custom_entries_view.open = function(self, offset, entries)
 
   -- Always set cursor when starting. It will be adjusted on the call to _select
   vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
-  if preselect_index > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
+  if preselect_index > 0 and c.preselect == types.cmp.PreselectMode.Item then
     self:_select(preselect_index, { behavior = types.cmp.SelectBehavior.Select, active = false })
-  elseif not string.match(config.get().completion.completeopt, 'noselect') then
+  elseif not string.match(c.completion.completeopt, 'noselect') then
     if self:is_direction_top_down() then
       self:_select(1, { behavior = types.cmp.SelectBehavior.Select, active = false })
     else
