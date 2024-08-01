@@ -212,7 +212,9 @@ compare.scopes = setmetatable({
 
       -- Cursor scope.
       local cursor_scope = nil
-      for _, scope in ipairs(locals.get_scopes(buf)) do
+      -- Prioritize the older get_scopes method from nvim-treesitter `master` over get from `main`
+      local scopes = locals.get_scopes and locals.get_scopes(buf) or select(3, locals.get(buf))
+      for _, scope in ipairs(scopes) do
         if scope:start() <= cursor_row and cursor_row <= scope:end_() then
           if not cursor_scope then
             cursor_scope = scope
