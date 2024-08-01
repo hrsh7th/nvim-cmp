@@ -176,6 +176,7 @@ P.seq = function(...)
 end
 
 local Node = {}
+Node.__index = Node
 
 Node.Type = {
   SNIPPET = 0,
@@ -187,6 +188,18 @@ Node.Type = {
   FORMAT = 6,
   TEXT = 7,
 }
+
+--@see https://github.com/neovim/neovim/blob/9afa1fd35510c5fe485f4a1dfdabf94e5f051a1c/runtime/lua/vim/snippet.lua#L59
+
+--- Transforms the given text into an array of lines (so no line contains `\n`).
+---
+--- @param text string|string[]
+--- @return string[]
+local function text_to_lines(text)
+  text = type(text) == 'string' and { text } or text
+  --- @cast text string[]
+  return vim.split(table.concat(text), '\n', { plain = true })
+end
 
 function Node:__tostring()
   local insert_text = {}
@@ -204,6 +217,57 @@ function Node:__tostring()
     table.insert(insert_text, self.esc)
   end
   return table.concat(insert_text, '')
+end
+
+--@see https://github.com/neovim/neovim/blob/9afa1fd35510c5fe485f4a1dfdabf94e5f051a1c/runtime/lua/vim/snippet.lua#L477
+function Node:to_static_text()
+  local snippet_text = {}
+  local base_indent = vim.api.nvim_get_current_line():match('^%s*') or ''
+
+  --- Appends the given text to the snippet, taking care of indentation.
+  ---
+  --- @param text string|string[]
+  local function append_to_snippet(text)
+    local snippet_lines = text_to_lines(snippet_text)
+    -- Get the base indentation based on the current line and the last line of the snippet.
+    if #snippet_lines > 0 then
+      base_indent = base_indent .. (snippet_lines[#snippet_lines]:match('(^%s*)%S') or '') --- @type string
+    end
+
+    local shiftwidth = vim.fn.shiftwidth()
+    local curbuf = vim.api.nvim_get_current_buf()
+    local expandtab = vim.bo[curbuf].expandtab
+
+    local lines = {} --- @type string[]
+    for i, line in ipairs(text_to_lines(text)) do
+      -- Replace tabs by spaces.
+      if expandtab then
+        line = line:gsub('\t', (' '):rep(shiftwidth)) --- @type string
+      end
+      -- Add the base indentation.
+      if i > 1 then
+        line = base_indent .. line
+      end
+      lines[#lines + 1] = line
+    end
+
+    table.insert(snippet_text, table.concat(lines, '\n'))
+  end
+
+  for _, c in ipairs(self.children) do
+    if c.type == Node.Type.PLACEHOLDER then
+      for _, ic in ipairs(c.children or {}) do
+        if ic.type == Node.Type.TEXT then
+          append_to_snippet(ic.esc)
+        end
+      end
+    elseif c.type == Node.Type.TEXT then
+      append_to_snippet(c.esc)
+    end
+  end
+
+  snippet_text = text_to_lines(snippet_text)
+  return snippet_text
 end
 
 --@see https://code.visualstudio.com/docs/editor/userdefinedsnippets#_grammar

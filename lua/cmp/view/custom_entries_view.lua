@@ -12,6 +12,7 @@ local DEFAULT_HEIGHT = 10 -- @see https://github.com/vim/vim/blob/master/src/pop
 
 ---@class cmp.CustomEntriesView
 ---@field private entries_win cmp.Window
+---@field private ghost_text_view cmp.GhostTextView
 ---@field private offset integer
 ---@field private active boolean
 ---@field private entries cmp.Entry[]
@@ -21,7 +22,7 @@ local custom_entries_view = {}
 
 custom_entries_view.ns = vim.api.nvim_create_namespace('cmp.view.custom_entries_view')
 
-custom_entries_view.new = function()
+custom_entries_view.new = function(ghost_text_view)
   local self = setmetatable({}, { __index = custom_entries_view })
 
   self.entries_win = window.new()
@@ -43,6 +44,7 @@ custom_entries_view.new = function()
   self.active = false
   self.entries = {}
   self.bottom_up = false
+  self.ghost_text_view = ghost_text_view
 
   autocmd.subscribe(
     'CompleteChanged',
@@ -430,6 +432,55 @@ custom_entries_view._select = function(self, cursor, option)
     math.max(math.min(cursor, #self.entries), 1),
     0,
   })
+
+  if not self.bottom_up then
+    local info = self.entries_win:info()
+    local border_info = info.border_info
+    local border_offset_row = border_info.top + border_info.bottom
+    local row = api.get_screen_cursor()[1]
+
+    -- If user specify 'noselect', select first entry
+    local entry = self:get_selected_entry() or self:get_first_entry()
+    local should_move_up = self.ghost_text_view:has_multi_line(entry) and row > self.entries_win:get_content_height() + border_offset_row
+
+    if should_move_up then
+      self.bottom_up = true
+
+      -- This logic keeps the same as open()
+      local height = vim.api.nvim_get_option_value('pumheight', {})
+      height = height ~= 0 and height or #self.entries
+      height = math.min(height, #self.entries)
+      height = math.min(height, row - 1)
+
+      row = row - height - border_offset_row - 1
+      if row < 0 then
+        height = height + row
+      end
+
+      local completion = config.get().window.completion
+      local new_position = {
+        style = 'minimal',
+        relative = 'editor',
+        row = math.max(0, row),
+        height = height,
+        col = info.col,
+        width = info.width,
+        border = completion.border,
+        zindex = completion.zindex or 1001,
+      }
+      self.entries_win:open(new_position)
+
+      if not self:is_direction_top_down() then
+        local n = #self.entries
+        for i = 1, math.floor(n / 2) do
+          self.entries[i], self.entries[n - i + 1] = self.entries[n - i + 1], self.entries[i]
+        end
+        self:_select(#self.entries - cursor + 1, option)
+      else
+        self:_select(cursor, option)
+      end
+    end
+  end
 
   if is_insert then
     self:_insert(self.entries[cursor] and self.entries[cursor]:get_vim_item(self.offset).word or self.prefix)
