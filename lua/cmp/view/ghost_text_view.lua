@@ -89,7 +89,7 @@ ghost_text_view.text_gen = function(self, line, cursor_col)
     word = tostring(snippet.parse(word))
   end
   local word_clen = vim.str_utfindex(word)
-  local cword = string.sub(line, self.entry:get_offset(), cursor_col)
+  local cword = string.sub(line, self.entry.offset, cursor_col)
   local cword_clen = vim.str_utfindex(cword)
   -- Number of characters from entry text (word) to be displayed as ghost thext
   local nchars = word_clen - cword_clen

@@ -74,7 +74,7 @@ wildmenu_entries_view.new = function()
             })
           end
 
-          for _, m in ipairs(e.matches or {}) do
+          for _, m in ipairs(e:get_view_matches(view.abbr.text) or {}) do
             vim.api.nvim_buf_set_extmark(buf, wildmenu_entries_view.ns, 0, self.offsets[i] + m.word_match_start - 1, {
               end_line = 0,
               end_col = self.offsets[i] + m.word_match_end,

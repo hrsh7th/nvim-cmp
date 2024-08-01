@@ -80,7 +80,7 @@ custom_entries_view.new = function()
             o = o + v[field].bytes + (self.column_width[field] - v[field].width) + 1
           end
 
-          for _, m in ipairs(e.matches or {}) do
+          for _, m in ipairs(e:get_view_matches(v.abbr.text) or {}) do
             vim.api.nvim_buf_set_extmark(buf, custom_entries_view.ns, i, a + m.word_match_start - 1, {
               end_line = i,
               end_col = a + m.word_match_end,

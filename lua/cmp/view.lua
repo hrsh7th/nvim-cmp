@@ -99,7 +99,7 @@ view.open = function(self, ctx, sources)
           for _, e in ipairs(s:get_entries(ctx)) do
             e.score = e.score + priority
             table.insert(group_entries, e)
-            offset = math.min(offset, e:get_offset())
+            offset = math.min(offset, e.offset)
           end
         end
       end
