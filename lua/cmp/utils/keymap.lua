@@ -16,7 +16,9 @@ end
 ---Normalize key sequence.
 ---@param keys string
 ---@return string
-keymap.normalize = function(keys)
+keymap.normalize = vim.fn.has('nvim-0.8') == 1 and function(keys)
+  return vim.fn.keytrans(keymap.t(keys))
+end or function(keys)
   local normalize_buf = buffer.ensure('cmp.util.keymap.normalize')
   vim.api.nvim_buf_set_keymap(normalize_buf, 't', keys, '<Plug>(cmp.utils.keymap.normalize)', {})
   for _, map in ipairs(vim.api.nvim_buf_get_keymap(normalize_buf, 't')) do
