@@ -359,7 +359,7 @@ autocmd.subscribe('CursorMovedI', function()
 end)
 
 -- If make this asynchronous, the completion menu will not close when the command output is displayed.
-autocmd.subscribe({ 'InsertLeave', 'CmdlineLeave' }, function()
+autocmd.subscribe({ 'InsertLeave', 'CmdlineLeave', 'CmdwinEnter' }, function()
   cmp.core:reset()
   cmp.core.view:close()
 end)
