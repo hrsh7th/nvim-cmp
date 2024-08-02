@@ -199,6 +199,7 @@ compare.locality = setmetatable({
 ---@type cmp.ComparatorFunctor
 compare.scopes = setmetatable({
   scopes_map = {},
+  has_nvim_0_9_features = vim.fn.has('nvim-0.9') == 1,
   update = function(self)
     local config = require('cmp').get_config()
     if not vim.tbl_contains(config.sorting.comparators, compare.scopes) then
@@ -209,6 +210,9 @@ compare.scopes = setmetatable({
     if ok then
       local win, buf = vim.api.nvim_get_current_win(), vim.api.nvim_get_current_buf()
       local cursor_row = vim.api.nvim_win_get_cursor(win)[1] - 1
+      if self.has_nvim_0_9_features and not vim.b[buf].cmp_buf_has_treesitter then
+        return
+      end
 
       -- Cursor scope.
       local cursor_scope = nil
