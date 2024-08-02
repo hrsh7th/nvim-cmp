@@ -60,6 +60,11 @@ if vim.fn.has('nvim-0.9') then
       vim.b[details.buf].cmp_buf_has_treesitter = true
     end
   end)
+  autocmd.subscribe({ 'BufUnload' }, function(details)
+    if vim.treesitter.language.get_lang(details.match) then
+      vim.b[details.buf].cmp_buf_has_treesitter = false
+    end
+  end)
 end
 
 vim.api.nvim_create_user_command('CmpStatus', function()
