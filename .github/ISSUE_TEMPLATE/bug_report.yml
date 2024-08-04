@@ -20,17 +20,20 @@ body:
 
   - type: textarea
     attributes:
-      label: "Minimal reproducible full config"
+      label: "Steps to reproduce"
+      description: "Steps to reproduce using the minimal config provided below."
+      placeholder: |
+        1. `nvim -u minimal_init.lua`
+        2. ...
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Minimal config"
+      render: Lua
       description: |
-        You must provide a working config based on [this](https://github.com/hrsh7th/nvim-cmp/blob/main/utils/vimrc.vim). Not part of config.
-        1. Copy the base minimal config to the `~/cmp-repro.vim`
-        2. Edit `~/cmp-repro.vim` for reproducing the issue
-        3. Open `nvim -u ~/cmp-repro.vim`
-        4. Check reproduction step
-      value: |
-        ```vim
-        
-        ```
+        you can download a minimal_init.lua template via `curl -fLO https://raw.githubusercontent.com/hrsh7th/nvim-cmp/main/utils/minimal_init.lua`
     validations:
       required: true
 
