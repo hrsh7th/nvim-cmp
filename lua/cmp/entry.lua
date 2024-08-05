@@ -365,7 +365,7 @@ end
 ---@param input string
 ---@param matching_config cmp.MatchingConfig
 ---@return { score: integer, matches: table[] }
-entry.match = function(self, input, matching_config)
+entry.match = function(self, input, matching_config, keyword_pattern)
   return self.match_cache:ensure(input .. ':' .. (self.resolved_completion_item and '1' or '0' .. ':') .. (matching_config.disallow_fuzzy_matching and '1' or '0') .. ':' .. (matching_config.disallow_partial_fuzzy_matching and '1' or '0') .. ':' .. (matching_config.disallow_partial_matching and '1' or '0') .. ':' .. (matching_config.disallow_prefix_unmatching and '1' or '0') .. ':' .. (matching_config.disallow_symbol_nonprefix_matching and '1' or '0'), function()
     local option = {
       disallow_fuzzy_matching = matching_config.disallow_fuzzy_matching,
@@ -377,6 +377,7 @@ entry.match = function(self, input, matching_config)
         self:get_word(),
         self:get_completion_item().label,
       },
+      keyword_pattern = keyword_pattern,
     }
 
     local score, matches, filter_text, _
