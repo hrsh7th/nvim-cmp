@@ -209,8 +209,7 @@ compare.scopes = setmetatable({
     local ok, locals = pcall(require, 'nvim-treesitter.locals')
     if ok then
       self.definition_depths = {}
-      local win, buf = vim.api.nvim_get_current_win(), vim.api.nvim_get_current_buf()
-      local cursor_row = vim.api.nvim_win_get_cursor(win)[1] - 1
+      local buf = vim.api.nvim_get_current_buf()
       if self.has_nvim_0_9_features and not vim.b[buf].cmp_buf_has_ts_parser then
         return
       end
@@ -226,14 +225,15 @@ compare.scopes = setmetatable({
         depth = depth + 1
       end
 
-      -- Check definitions from smaller to larger scopes.
+      -- Map definitions based on their scope relative to the cursor.
       local definitions = locals.get_definitions_lookup_table(buf)
       local get_node_text = vim.treesitter.get_node_text or vim.treesitter.query.get_node_text
       for _, definition in pairs(definitions) do
         local definition_depth = scope_depths[locals.containing_scope(definition.node, buf):id()]
         local def_text = get_node_text(definition.node, buf) or ''
         if definition_depth then
-          if not self.definition_depths[def_text] or self.definition_depths[def_text] then
+          -- Prefer the closest scoped definitions.
+          if not self.definition_depths[def_text] or self.definition_depths[def_text] > definition_depth then
             self.definition_depths[def_text] = definition_depth
           end
         end
