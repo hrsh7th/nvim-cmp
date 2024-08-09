@@ -198,17 +198,17 @@ compare.locality = setmetatable({
 ---scopes: Entries defined in a closer scope will be ranked higher (e.g., prefer local variables to globals).
 ---@type cmp.ComparatorFunctor
 compare.scopes = setmetatable({
-  scopes_map = {},
+  definition_depths = {},
   has_nvim_0_9_features = vim.fn.has('nvim-0.9') == 1,
   update = function(self)
     local config = require('cmp').get_config()
-    self.definition_depths = {}
     if not vim.tbl_contains(config.sorting.comparators, compare.scopes) then
       return
     end
 
     local ok, locals = pcall(require, 'nvim-treesitter.locals')
     if ok then
+      self.definition_depths = {}
       local win, buf = vim.api.nvim_get_current_win(), vim.api.nvim_get_current_buf()
       local cursor_row = vim.api.nvim_win_get_cursor(win)[1] - 1
       if self.has_nvim_0_9_features and not vim.b[buf].cmp_buf_has_ts_parser then
