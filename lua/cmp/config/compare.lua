@@ -202,6 +202,7 @@ compare.scopes = setmetatable({
   has_nvim_0_9_features = vim.fn.has('nvim-0.9') == 1,
   update = function(self)
     local config = require('cmp').get_config()
+    self.definition_depths = {}
     if not vim.tbl_contains(config.sorting.comparators, compare.scopes) then
       return
     end
@@ -210,65 +211,48 @@ compare.scopes = setmetatable({
     if ok then
       local win, buf = vim.api.nvim_get_current_win(), vim.api.nvim_get_current_buf()
       local cursor_row = vim.api.nvim_win_get_cursor(win)[1] - 1
-      if self.has_nvim_0_9_features and not vim.b[buf].cmp_buf_has_treesitter then
+      if self.has_nvim_0_9_features and not vim.b[buf].cmp_buf_has_ts_parser then
         return
       end
 
-      -- Cursor scope.
-      local cursor_scope = nil
-      -- Prioritize the older get_scopes method from nvim-treesitter `master` over get from `main`
-      local scopes = locals.get_scopes and locals.get_scopes(buf) or select(3, locals.get(buf))
-      for _, scope in ipairs(scopes) do
-        if scope:start() <= cursor_row and cursor_row <= scope:end_() then
-          if not cursor_scope then
-            cursor_scope = scope
-          else
-            if cursor_scope:start() <= scope:start() and scope:end_() <= cursor_scope:end_() then
-              cursor_scope = scope
-            end
-          end
-        elseif cursor_scope and cursor_scope:end_() <= scope:start() then
-          break
-        end
+      local get_cursor_node = vim.treesitter.get_node or require('nvim-treesitter.ts_utils').get_node_at_cursor
+      local cursor_node = get_cursor_node()
+      local scope_depths = {}
+      local depth = 0
+      -- If there's no cursor node, no iterations are made.
+      ---@diagnostic disable-next-line: param-type-mismatch
+      for scope in locals.iter_scope_tree(cursor_node, buf) do
+        scope_depths[scope:id()] = depth
+        depth = depth + 1
       end
 
-      -- Definitions.
+      -- Check definitions from smaller to larger scopes.
       local definitions = locals.get_definitions_lookup_table(buf)
-
-      -- Narrow definitions.
-      local depth = 0
-      for scope in locals.iter_scope_tree(cursor_scope, buf) do
-        local s, e = scope:start(), scope:end_()
-
-        -- Check scope's direct child.
-        for _, definition in pairs(definitions) do
-          if s <= definition.node:start() and definition.node:end_() <= e then
-            if scope:id() == locals.containing_scope(definition.node, buf):id() then
-              local get_node_text = vim.treesitter.get_node_text or vim.treesitter.query.get_node_text
-              local text = get_node_text(definition.node, buf) or ''
-              if not self.scopes_map[text] then
-                self.scopes_map[text] = depth
-              end
-            end
+      local get_node_text = vim.treesitter.get_node_text or vim.treesitter.query.get_node_text
+      for _, definition in pairs(definitions) do
+        local definition_depth = scope_depths[locals.containing_scope(definition.node, buf):id()]
+        local def_text = get_node_text(definition.node, buf) or ''
+        if definition_depth then
+          if not self.definition_depths[def_text] or self.definition_depths[def_text] then
+            self.definition_depths[def_text] = definition_depth
           end
         end
-        depth = depth + 1
       end
     end
   end,
 }, {
   ---@type fun(self: table, entry1: cmp.Entry, entry2: cmp.Entry): boolean|nil
   __call = function(self, entry1, entry2)
-    local local1 = self.scopes_map[entry1.word]
-    local local2 = self.scopes_map[entry2.word]
-    if local1 ~= local2 then
-      if local1 == nil then
+    local def_depth1 = self.definition_depths[entry1.word]
+    local def_depth2 = self.definition_depths[entry2.word]
+    if def_depth1 ~= def_depth2 then
+      if def_depth1 == nil then
         return false
       end
-      if local2 == nil then
+      if def_depth2 == nil then
         return true
       end
-      return local1 < local2
+      return def_depth1 < def_depth2
     end
   end,
 })
