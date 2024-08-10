@@ -53,6 +53,19 @@ if vim.on_key then
   end, vim.api.nvim_create_namespace('cmp.plugin'))
 end
 
+-- see compare.scopes
+if vim.fn.has('nvim-0.9') then
+  autocmd.subscribe({ 'FileType' }, function(details)
+    if vim.treesitter.language.get_lang(details.match) then
+      vim.b[details.buf].cmp_buf_has_ts_parser = true
+    end
+  end)
+  autocmd.subscribe({ 'BufUnload' }, function(details)
+    if vim.treesitter.language.get_lang(details.match) then
+      vim.b[details.buf].cmp_buf_has_ts_parser = false
+    end
+  end)
+end
 
 vim.api.nvim_create_user_command('CmpStatus', function()
   require('cmp').status()
