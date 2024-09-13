@@ -44,7 +44,9 @@ end
 ---@param name string
 event.emit = function(self, name, ...)
   for _, callback in ipairs(self.events[name] or {}) do
-    callback(...)
+    if not type(callback) == "table" then
+      callback(...)
+    end
   end
 end
 
