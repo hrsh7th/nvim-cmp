@@ -32,7 +32,9 @@ ghost_text_view.new = function()
   vim.api.nvim_set_decoration_provider(ghost_text_view.ns, {
     on_win = function(_, win)
       if self.extmark_id then
-        vim.api.nvim_buf_del_extmark(self.extmark_buf, ghost_text_view.ns, self.extmark_id)
+        if vim.api.nvim_buf_is_loaded(self.extmark_buf) then
+          vim.api.nvim_buf_del_extmark(self.extmark_buf, ghost_text_view.ns, self.extmark_id)
+        end
         self.extmark_id = nil
       end
 
