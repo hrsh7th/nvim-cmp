@@ -107,7 +107,7 @@ source.get_entries = function(self, ctx)
   ---@type cmp.Entry[]
   local entries = {}
   local matching_config = self:get_matching_config()
-  for _, e in ipairs(target_entries) do
+  for i, e in ipairs(target_entries) do
     local o = e:get_offset()
     if not inputs[o] then
       inputs[o] = string.sub(ctx.cursor_before_line, o)
@@ -124,9 +124,14 @@ source.get_entries = function(self, ctx)
         entries[#entries + 1] = e
       end
     end
-    async.yield()
-    if ctx.aborted then
-      async.abort()
+
+    -- Yield to event loop once in a while to avoid UI freezes
+    -- But avoid yielding too often causing too many context switches
+    if i % 1000 == 999 then
+      async.yield()
+      if ctx.aborted then
+        async.abort()
+      end
     end
   end
 
