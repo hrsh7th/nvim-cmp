@@ -32,6 +32,7 @@ local matcher = require('cmp.matcher')
 ---@field public filter_text string
 ---@field private match_view_args_ret {input:string, word:string, option:cmp.MatchingConfig, matches:table[]}
 local entry = {}
+entry.__index = entry
 
 ---Create new entry
 ---@param ctx cmp.Context
@@ -40,7 +41,7 @@ local entry = {}
 ---@param item_defaults? lsp.internal.CompletionItemDefaults
 ---@return cmp.Entry
 entry.new = function(ctx, source, completion_item, item_defaults)
-  local self = setmetatable({}, { __index = entry })
+  local self = setmetatable({}, entry)
   self.id = misc.id('entry.new')
   self.cache = cache.new()
   self.match_cache = cache.new()
@@ -53,7 +54,6 @@ entry.new = function(ctx, source, completion_item, item_defaults)
   self.source_offset = source.request_offset
   self.source_insert_range = source.default_insert_range
   self.source_replace_range = source.default_replace_range
-  self.completion_item = self:fill_defaults(completion_item, item_defaults)
   self.item_defaults = item_defaults
   self.resolved_completion_item = nil
   self.resolved_callbacks = {}
@@ -75,7 +75,9 @@ entry._set_completion_item = function(self, completion_item)
       self.completion_item[k] = v or self.completion_item[k]
     end
   end
+
   local item = self.completion_item
+
   ---Create filter text
   self.filter_text = item.filterText or str.trim(item.label)
 
