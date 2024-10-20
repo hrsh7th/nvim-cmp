@@ -30,12 +30,12 @@ end
 ---Ensure value by callback
 ---@generic T
 ---@param key string|string[]
----@param callback fun(): T
+---@param callback fun(...): T
 ---@return T
-cache.ensure = function(self, key, callback)
+cache.ensure = function(self, key, callback, ...)
   local value = self:get(key)
   if value == nil then
-    local v = callback()
+    local v = callback(...)
     self:set(key, v)
     return v
   end
