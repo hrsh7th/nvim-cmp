@@ -61,7 +61,8 @@ source.reset = function(self)
   self.request_offset = -1
   self.completion_context = nil
   self.status = source.SourceStatus.WAITING
-  self.complete_dedup(function() end)
+  self.complete_dedup(function()
+  end)
 end
 
 ---Return source config
@@ -111,6 +112,9 @@ source.get_entries = function(self, ctx)
   ---@type cmp.Entry[]
   local entries = {}
   local matching_config = self:get_matching_config()
+  local filtering_context_budget = config.get().performance.filtering_context_budget / 1000
+
+  local s = os.clock()
   for _, e in ipairs(target_entries) do
     local o = e.offset
     if not inputs[o] then
@@ -128,9 +132,13 @@ source.get_entries = function(self, ctx)
         entries[#entries + 1] = e
       end
     end
-    async.yield()
-    if ctx.aborted then
-      async.abort()
+
+    if os.clock() - s > filtering_context_budget then
+      async.yield()
+      if ctx.aborted then
+        async.abort()
+      end
+      s = os.clock()
     end
   end
 
