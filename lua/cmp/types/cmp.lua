@@ -32,11 +32,12 @@ cmp.PreselectMode = {
   None = 'none',
 }
 
----@alias cmp.ItemField 'abbr' | 'kind' | 'menu'
+---@alias cmp.ItemField 'abbr' | 'kind' | 'menu' | 'num'
 cmp.ItemField = {
   Abbr = 'abbr',
   Kind = 'kind',
   Menu = 'menu',
+  Num = 'num',
 }
 
 ---@class cmp.ContextOption
@@ -153,8 +154,13 @@ cmp.ItemField = {
 
 ---@class cmp.FormattingConfig
 ---@field public fields cmp.ItemField[]
+---@field public number_options cmp.NumberOptions
 ---@field public expandable_indicator boolean
 ---@field public format fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem
+
+---@class cmp.NumberOptions
+---@field public start_index number
+---@field public end_index number
 
 ---@class cmp.SnippetConfig
 ---@field public expand fun(args: cmp.SnippetExpansionParams)
