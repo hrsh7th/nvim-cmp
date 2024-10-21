@@ -122,6 +122,7 @@ str.get_word = function(text, stop_char, min_length)
     local c = string.byte(text, i, i)
     if #word < min_length then
       table.insert(word, string.char(c))
+      has_alnum = has_alnum or char.is_alnum(c)
     elseif not INVALIDS[c] then
       add(c)
       has_alnum = has_alnum or char.is_alnum(c)
