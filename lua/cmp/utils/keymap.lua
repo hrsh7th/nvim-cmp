@@ -17,24 +17,24 @@ end
 ---@param keys string
 ---@return string
 keymap.normalize = vim.fn.has('nvim-0.8') == 1 and function(keys)
-  local t = string.gsub(keys, '<([A-Za-z0-9\\%-%[%]%^@]-)>', function(match)
-    -- Use the \<* notation, which distinguishes <C-J> from <NL>, etc.
-    return vim.api.nvim_eval(string.format([["\<*%s>"]], match))
-  end)
-  return vim.fn.keytrans(t)
-end or function(keys)
-  local normalize_buf = buffer.ensure('cmp.util.keymap.normalize')
-  vim.api.nvim_buf_set_keymap(normalize_buf, 't', keys, '<Plug>(cmp.utils.keymap.normalize)', {})
-  for _, map in ipairs(vim.api.nvim_buf_get_keymap(normalize_buf, 't')) do
-    if keymap.t(map.rhs) == keymap.t('<Plug>(cmp.utils.keymap.normalize)') then
-      vim.api.nvim_buf_del_keymap(normalize_buf, 't', keys)
-      return map.lhs
+    local t = string.gsub(keys, '<([A-Za-z0-9\\%-%[%]%^@]-)>', function(match)
+      -- Use the \<* notation, which distinguishes <C-J> from <NL>, etc.
+      return vim.api.nvim_eval(string.format([["\<*%s>"]], match))
+    end)
+    return vim.fn.keytrans(t)
+  end or function(keys)
+    local normalize_buf = buffer.ensure('cmp.util.keymap.normalize')
+    vim.api.nvim_buf_set_keymap(normalize_buf, 't', keys, '<Plug>(cmp.utils.keymap.normalize)', {})
+    for _, map in ipairs(vim.api.nvim_buf_get_keymap(normalize_buf, 't')) do
+      if keymap.t(map.rhs) == keymap.t('<Plug>(cmp.utils.keymap.normalize)') then
+        vim.api.nvim_buf_del_keymap(normalize_buf, 't', keys)
+        return map.lhs
+      end
     end
+    vim.api.nvim_buf_del_keymap(normalize_buf, 't', keys)
+    vim.api.nvim_buf_delete(normalize_buf, {})
+    return keys
   end
-  vim.api.nvim_buf_del_keymap(normalize_buf, 't', keys)
-  vim.api.nvim_buf_delete(normalize_buf, {})
-  return keys
-end
 
 ---Return vim notation keymapping (simple conversion).
 ---@param s string
