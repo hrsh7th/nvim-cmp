@@ -17,7 +17,11 @@ end
 ---@param keys string
 ---@return string
 keymap.normalize = vim.fn.has('nvim-0.8') == 1 and function(keys)
-  return vim.fn.keytrans(keymap.t(keys))
+  local t = string.gsub(keys, '<([A-Za-z0-9\\%-%[%]%^@]-)>', function(match)
+    -- Use the \<* notation, which distinguishes <C-J> from <NL>, etc.
+    return vim.api.nvim_eval(string.format([["\<*%s>"]], match))
+  end)
+  return vim.fn.keytrans(t)
 end or function(keys)
   local normalize_buf = buffer.ensure('cmp.util.keymap.normalize')
   vim.api.nvim_buf_set_keymap(normalize_buf, 't', keys, '<Plug>(cmp.utils.keymap.normalize)', {})
