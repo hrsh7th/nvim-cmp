@@ -243,8 +243,8 @@ compare.scopes = setmetatable({
 }, {
   ---@type fun(self: table, entry1: cmp.Entry, entry2: cmp.Entry): boolean|nil
   __call = function(self, entry1, entry2)
-    local def_depth1 = self.definition_depths[entry1:get_word()]
-    local def_depth2 = self.definition_depths[entry2:get_word()]
+    local def_depth1 = self.definition_depths[entry1.word]
+    local def_depth2 = self.definition_depths[entry2.word]
     if def_depth1 ~= def_depth2 then
       if def_depth1 == nil then
         return false
