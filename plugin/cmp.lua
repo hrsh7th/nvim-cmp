@@ -54,9 +54,18 @@ if vim.on_key then
 end
 
 -- see compare.scopes
-if vim.fn.has('nvim-0.9') then
+if vim.fn.has('nvim-0.9') == 1 then
+  local ts = vim.treesitter
+  local has_ts_parser = ts.language.get_lang
+  -- vim.treesitter.language.add is recommended for checking treesitter in 0.11 nightly
+  if vim.fn.has('nvim-0.11') then
+    has_ts_parser = function(filetype)
+      local lang = ts.language.get_lang(filetype)
+      return lang and ts.language.add(lang)
+    end
+  end
   autocmd.subscribe({ 'FileType' }, function(details)
-    if vim.treesitter.language.get_lang(details.match) then
+    if has_ts_parser(details.match) then
       vim.b[details.buf].cmp_buf_has_ts_parser = true
     else
       vim.b[details.buf].cmp_buf_has_ts_parser = false
