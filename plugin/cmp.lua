@@ -58,6 +58,8 @@ if vim.fn.has('nvim-0.9') then
   autocmd.subscribe({ 'FileType' }, function(details)
     if vim.treesitter.language.get_lang(details.match) then
       vim.b[details.buf].cmp_buf_has_ts_parser = true
+    else
+      vim.b[details.buf].cmp_buf_has_ts_parser = false
     end
   end)
   autocmd.subscribe({ 'BufUnload' }, function(details)
