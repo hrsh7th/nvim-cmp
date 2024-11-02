@@ -135,8 +135,8 @@ end
 window.update = function(self)
   local info = self:info()
   if info.scrollable and self.style.height > 0 then
-    local scrollbar_winhighlight = self.is_doc and config.get().window.completion.scrollbar_winhighlight or config.get().window.documentation.scrollbar_winhighlight
-    local scrollbar_thumb_winhighlight = self.is_doc and config.get().window.completion.scrollbar_thumb_winhighlight or config.get().window.documentation.scrollbar_thumb_winhighlight
+    local scrollbar_winhighlight = self.is_doc and config.get().window.documentation.scrollbar_winhighlight or config.get().window.completion.scrollbar_winhighlight
+    local scrollbar_thumb_winhighlight = self.is_doc and config.get().window.documentation.scrollbar_thumb_winhighlight or config.get().window.completion.scrollbar_thumb_winhighlight
     -- Draw the background of the scrollbar
 
     if not info.border_info.visible then
