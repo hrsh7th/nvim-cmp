@@ -156,28 +156,39 @@ misc.set = function(t, keys, v)
   c[keys[#keys]] = v
 end
 
----Copy table
----@generic T
----@param tbl T
----@return T
-misc.copy = function(tbl)
-  if type(tbl) ~= 'table' then
-    return tbl
-  end
+do
+  local function do_copy(tbl, seen)
+    if type(tbl) ~= 'table' then
+      return tbl
+    end
+    if seen[tbl] then
+      return seen[tbl]
+    end
 
-  if islist(tbl) then
+    if islist(tbl) then
+      local copy = {}
+      seen[tbl] = copy
+      for i, value in ipairs(tbl) do
+        copy[i] = do_copy(value, seen)
+      end
+      return copy
+    end
+
     local copy = {}
-    for i, value in ipairs(tbl) do
-      copy[i] = misc.copy(value)
+    seen[tbl] = copy
+    for key, value in pairs(tbl) do
+      copy[key] = do_copy(value, seen)
     end
     return copy
   end
 
-  local copy = {}
-  for key, value in pairs(tbl) do
-    copy[key] = misc.copy(value)
+  ---Copy table
+  ---@generic T
+  ---@param tbl T
+  ---@return T
+  misc.copy = function(tbl)
+    return do_copy(tbl, {})
   end
-  return copy
 end
 
 ---Safe version of vim.str_utfindex
