@@ -124,7 +124,7 @@ core.on_keymap = function(self, keys, fallback)
       commit_character = chars,
     }, function()
       local ctx = self:get_context()
-      local word = e:get_word()
+      local word = e.word
       if string.sub(ctx.cursor_before_line, -#word, ctx.cursor.col - 1) == word and is_printable then
         fallback()
       else
@@ -358,7 +358,7 @@ core.confirm = function(self, e, option, callback)
   end
   e.confirmed = true
 
-  debug.log('entry.confirm', e:get_completion_item())
+  debug.log('entry.confirm', e.completion_item)
 
   async.sync(function(done)
     e:resolve(done)
@@ -374,8 +374,8 @@ core.confirm = function(self, e, option, callback)
     -- Emulate `<C-y>` behavior to save `.` register.
     local ctx = context.new()
     local keys = {}
-    table.insert(keys, keymap.backspace(ctx.cursor_before_line:sub(e:get_offset())))
-    table.insert(keys, e:get_word())
+    table.insert(keys, keymap.backspace(ctx.cursor_before_line:sub(e.offset)))
+    table.insert(keys, e.word)
     table.insert(keys, keymap.undobreak())
     feedkeys.call(table.concat(keys, ''), 'in')
   end)
@@ -384,15 +384,15 @@ core.confirm = function(self, e, option, callback)
     local ctx = context.new()
     if api.is_cmdline_mode() then
       local keys = {}
-      table.insert(keys, keymap.backspace(ctx.cursor_before_line:sub(e:get_offset())))
-      table.insert(keys, string.sub(e.context.cursor_before_line, e:get_offset()))
+      table.insert(keys, keymap.backspace(ctx.cursor_before_line:sub(e.offset)))
+      table.insert(keys, string.sub(e.context.cursor_before_line, e.offset))
       feedkeys.call(table.concat(keys, ''), 'in')
     else
       vim.cmd([[silent! undojoin]])
       -- This logic must be used nvim_buf_set_text.
       -- If not used, the snippet engine's placeholder wil be broken.
-      vim.api.nvim_buf_set_text(0, e.context.cursor.row - 1, e:get_offset() - 1, ctx.cursor.row - 1, ctx.cursor.col - 1, {
-        e.context.cursor_before_line:sub(e:get_offset()),
+      vim.api.nvim_buf_set_text(0, e.context.cursor.row - 1, e.offset - 1, ctx.cursor.row - 1, ctx.cursor.col - 1, {
+        e.context.cursor_before_line:sub(e.offset),
       })
       vim.api.nvim_win_set_cursor(0, { e.context.cursor.row, e.context.cursor.col - 1 })
     end
@@ -400,10 +400,10 @@ core.confirm = function(self, e, option, callback)
   feedkeys.call('', 'n', function()
     -- Apply additionalTextEdits.
     local ctx = context.new()
-    if #(e:get_completion_item().additionalTextEdits or {}) == 0 then
+    if #(e.completion_item.additionalTextEdits or {}) == 0 then
       e:resolve(function()
         local new = context.new()
-        local text_edits = e:get_completion_item().additionalTextEdits or {}
+        local text_edits = e.completion_item.additionalTextEdits or {}
         if #text_edits == 0 then
           return
         end
@@ -428,12 +428,12 @@ core.confirm = function(self, e, option, callback)
       end)
     else
       vim.cmd([[silent! undojoin]])
-      vim.lsp.util.apply_text_edits(e:get_completion_item().additionalTextEdits, ctx.bufnr, e.source:get_position_encoding_kind())
+      vim.lsp.util.apply_text_edits(e.completion_item.additionalTextEdits, ctx.bufnr, e.source:get_position_encoding_kind())
     end
   end)
   feedkeys.call('', 'n', function()
     local ctx = context.new()
-    local completion_item = misc.copy(e:get_completion_item())
+    local completion_item = misc.copy(e.completion_item)
     if not completion_item.textEdit then
       completion_item.textEdit = {}
       local insertText = completion_item.insertText
@@ -444,9 +444,9 @@ core.confirm = function(self, e, option, callback)
     end
     local behavior = option.behavior or config.get().confirmation.default_behavior
     if behavior == types.cmp.ConfirmBehavior.Replace then
-      completion_item.textEdit.range = e:get_replace_range()
+      completion_item.textEdit.range = e.replace_range
     else
-      completion_item.textEdit.range = e:get_insert_range()
+      completion_item.textEdit.range = e.insert_range
     end
 
     local diff_before = math.max(0, e.context.cursor.col - (completion_item.textEdit.range.start.character + 1))
@@ -460,15 +460,15 @@ core.confirm = function(self, e, option, callback)
       if false then
         --To use complex expansion debug.
         vim.print({ -- luacheck: ignore
-          item = e:get_completion_item(),
+          item = e.completion_item,
           diff_before = diff_before,
           diff_after = diff_after,
           new_text = new_text,
           text_edit_new_text = completion_item.textEdit.newText,
           range_start = completion_item.textEdit.range.start.character,
           range_end = completion_item.textEdit.range['end'].character,
-          original_range_start = e:get_completion_item().textEdit.range.start.character,
-          original_range_end = e:get_completion_item().textEdit.range['end'].character,
+          original_range_start = e.completion_item.textEdit.range.start.character,
+          original_range_end = e.completion_item.textEdit.range['end'].character,
           cursor_line = ctx.cursor_line,
           cursor_col0 = ctx.cursor.col - 1,
         })

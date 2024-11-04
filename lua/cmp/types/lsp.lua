@@ -65,9 +65,7 @@ lsp.Position = {
       return position
     end
 
-    local ok, byteindex = pcall(function()
-      return vim.str_byteindex(text, position.character, from_encoding == lsp.PositionEncodingKind.UTF16)
-    end)
+    local ok, byteindex = pcall(vim.str_byteindex, text, position.character, from_encoding == lsp.PositionEncodingKind.UTF16)
     if not ok then
       return position
     end

@@ -309,6 +309,10 @@ window.get_content_height = function(self)
   local height = 0
   vim.api.nvim_buf_call(self:get_buffer(), function()
     for _, text in ipairs(vim.api.nvim_buf_get_lines(self:get_buffer(), 0, -1, false)) do
+      -- nvim_buf_get_lines sometimes returns a blob. see #2050
+      if vim.fn.type(text) == vim.v.t_blob then
+        text = vim.fn.string(text)
+      end
       height = height + math.max(1, math.ceil(vim.fn.strdisplaywidth(text) / self.style.width))
     end
   end)
