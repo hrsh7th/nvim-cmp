@@ -328,9 +328,13 @@ cmp.setup = setmetatable({
   end,
 })
 
+local cmp_prepared = false
+
 -- In InsertEnter autocmd, vim will detects mode=normal unexpectedly.
 local on_insert_enter = function()
-  if config.enabled() then
+  if not cmp_prepared or config.enabled() then
+    cmp_prepared = true
+
     cmp.config.compare.scopes:update()
     cmp.config.compare.locality:update()
     cmp.core:prepare()
