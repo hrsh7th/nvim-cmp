@@ -113,7 +113,7 @@ source.get_entries = function(self, ctx)
   local matching_config = self:get_matching_config()
   local filtering_context_budget = config.get().performance.filtering_context_budget / 1000
 
-  local stime = vim.uv.hrtime() / 1000000
+  local stime = (vim.uv or vim.loop).hrtime() / 1000000
   for _, e in ipairs(target_entries) do
     local o = e.offset
     if not inputs[o] then
@@ -132,7 +132,7 @@ source.get_entries = function(self, ctx)
       end
     end
 
-    local etime = vim.uv.hrtime() / 1000000
+    local etime = (vim.uv or vim.loop).hrtime() / 1000000
     if etime - stime > filtering_context_budget then
       async.yield()
       if ctx.aborted then
