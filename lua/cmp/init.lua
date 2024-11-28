@@ -334,10 +334,12 @@ local cmp_prepared = false
 local on_insert_enter = function()
   if not cmp_prepared or config.enabled() then
     cmp_prepared = true
-
     cmp.config.compare.scopes:update()
     cmp.config.compare.locality:update()
     cmp.core:prepare()
+  end
+
+  if config.enabled() then
     cmp.core:on_change('InsertEnter')
   end
 end
