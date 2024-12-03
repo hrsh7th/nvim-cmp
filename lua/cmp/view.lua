@@ -106,9 +106,9 @@ view.open = function(self, ctx, sources)
     end
 
     -- sort.
-    local comparetors = config.get().sorting.comparators
+    local comparators = config.get().sorting.comparators
     table.sort(group_entries, function(e1, e2)
-      for _, fn in ipairs(comparetors) do
+      for _, fn in ipairs(comparators) do
         local diff = fn(e1, e2)
         if diff ~= nil then
           return diff
