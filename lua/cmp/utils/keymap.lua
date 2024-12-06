@@ -8,7 +8,7 @@ local keymap = {}
 ---@param keys string
 ---@return string
 keymap.t = function(keys)
-  return (string.gsub(keys, "(<[A-Za-z0-9\\%-%[%]%^@;,:_'%./]->)", function(match)
+  return (string.gsub(keys, "(<[A-Za-z0-9\\%-%[%]%^@;,:_'`%./]->)", function(match)
     return vim.api.nvim_eval(string.format([["\%s"]], match))
   end))
 end
@@ -17,7 +17,7 @@ end
 ---@param keys string
 ---@return string
 keymap.normalize = vim.fn.has('nvim-0.8') == 1 and function(keys)
-    local t = string.gsub(keys, "<([A-Za-z0-9\\%-%[%]%^@;,:_'%./]-)>", function(match)
+    local t = string.gsub(keys, "<([A-Za-z0-9\\%-%[%]%^@;,:_'`%./]-)>", function(match)
       -- Use the \<* notation, which distinguishes <C-J> from <NL>, etc.
       return vim.api.nvim_eval(string.format([["\<*%s>"]], match))
     end)
