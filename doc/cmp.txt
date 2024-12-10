@@ -154,6 +154,9 @@ NOTE: `<Cmd>lua require('cmp').complete()<CR>` can be used to call these functio
   See |getcmdtype()|.
   NOTE: nvim-cmp does not support the `=` command type.
 
+*cmp.get_registered_sources* ()
+  Get all registered sources.
+
 *cmp.visible* ()
   Return a boolean showing whether the completion menu is visible or not.
 
@@ -426,6 +429,12 @@ autocommands for the User event with the following patterns:
 
 *CmpReady*
   Invoked when nvim-cmp gets sourced from `plugin/cmp.lua`.
+
+*CmpRegisterSource*
+  Invoke when source was registered.
+
+*CmpUnregisterSource*
+  Invoke when source was un-registered.
 
 ==============================================================================
 Config                                                              *cmp-config*
