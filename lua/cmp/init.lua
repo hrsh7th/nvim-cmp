@@ -57,8 +57,8 @@ cmp.register_source = function(name, s)
   vim.api.nvim_exec_autocmds('User', {
     pattern = 'CmpRegisterSource',
     data = {
-      source_id = src.id
-    }
+      source_id = src.id,
+    },
   })
   return src.id
 end
@@ -71,8 +71,8 @@ cmp.unregister_source = function(id)
     vim.api.nvim_exec_autocmds('User', {
       pattern = 'CmpUnregisterSource',
       data = {
-        source_id = id
-      }
+        source_id = id,
+      },
     })
   end
 end
