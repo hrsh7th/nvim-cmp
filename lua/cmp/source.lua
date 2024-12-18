@@ -15,6 +15,7 @@ local char = require('cmp.utils.char')
 ---@field public source any
 ---@field public cache cmp.Cache
 ---@field public revision integer
+---@field public response? lsp.CompletionResponse|nil
 ---@field public incomplete boolean
 ---@field public is_triggered_by_symbol boolean
 ---@field public entries cmp.Entry[]
@@ -350,6 +351,7 @@ source.complete = function(self, ctx, callback)
       end
       ---@type lsp.CompletionResponse
       response = response or {}
+      self.response = response
 
       self.incomplete = response.isIncomplete or false
 
