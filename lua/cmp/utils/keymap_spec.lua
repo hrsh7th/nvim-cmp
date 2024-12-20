@@ -23,6 +23,7 @@ describe('keymap', function()
       '<C-/>',
       '<C-_>',
       "<C-'>",
+      '<M-`>',
       '<Tab>',
       '<S-Tab>',
       '<Plug>(example)',
