@@ -112,6 +112,18 @@ matcher.match = function(input, word, option)
   local no_symbol_match = false
   while input_end_index <= #input and word_index <= #word do
     local m = matcher.find_match_region(input, input_start_index, input_end_index, word, word_index)
+    if input_start_index ~= 1 then
+      -- If we can find a bigger match later, add it to the list. Prefer
+      -- a larger, later match over a match spread over more small pieces.
+      local m2 = matcher.find_match_region(input, 1, 1, word, word_index)
+      if m and m2 then
+        if m2.input_match_end >= m.input_match_end then
+          m = m2
+        end
+      elseif m2 and not m then
+        m = m2
+      end
+    end
     if m and input_end_index <= m.input_match_end then
       m.index = word_bound_index
       input_start_index = m.input_match_start + 1
