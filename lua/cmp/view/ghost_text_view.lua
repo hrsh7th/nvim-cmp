@@ -104,11 +104,24 @@ ghost_text_view.text_gen = function(self, line, cursor_col, entry)
     return text
   end
 
-  local word = entry:get_insert_text()
   local c = config.get().experimental.ghost_text
 
-  -- Expand lsp snippet and make sure indent is correct
-  if entry:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
+  local completion_item = entry:get_completion_item()
+  -- Check if completion_kind indicates a snippet
+  -- Handle custom snippet
+  local word
+  if completion_item ~= nil and completion_item.kind == 15 and completion_item.documentation and completion_item.documentation.value then
+    local doc_value = completion_item.documentation.value
+    local pattern = '```(.-)\n(.-)\n```'
+    _, word = doc_value:match(pattern)
+    word = word or entry:get_insert_text()
+  else
+    -- Handle built-in snippet and non-snippet completion
+    word = entry:get_insert_text()
+  end
+
+  -- Expand snippet and make sure indent is correct
+  if completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet and word ~= nil then
     local sp = snippet.parse(word)
     local static_text = sp:to_static_text()
     static_text[1] = trim_text(static_text[1])
