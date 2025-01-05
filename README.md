@@ -29,7 +29,7 @@ Setup
 
 This example configuration uses `vim-plug` as the plugin manager and `vim-vsnip` as a snippet plugin.
 
-```lua
+```vim
 call plug#begin(s:plug_dir)
 Plug 'neovim/nvim-lspconfig'
 Plug 'hrsh7th/cmp-nvim-lsp'
