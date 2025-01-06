@@ -60,12 +60,8 @@ ghost_text_view.new = function()
         end
       end
 
-      local text = self.text_gen(self, line, col)
-      if #text > 0 then
-        local virt_lines = {}
-        for _, l in ipairs(vim.fn.split(text, '\n')) do
-          table.insert(virt_lines, { { l, type(c) == 'table' and c.hl_group or 'Comment' } })
-        end
+      local virt_lines = self.text_gen(self, line, col)
+      if #virt_lines > 0 then
         local first_line = table.remove(virt_lines, 1)
         self.extmark_buf = vim.api.nvim_get_current_buf()
         self.extmark_id = vim.api.nvim_buf_set_extmark(self.extmark_buf, ghost_text_view.ns, row - 1, col, {
@@ -85,24 +81,67 @@ end
 ---Generate the ghost text
 ---  This function calculates the bytes of the entry to display calculating the number
 ---  of character differences instead of just byte difference.
-ghost_text_view.text_gen = function(self, line, cursor_col)
-  local word = self.entry:get_insert_text()
-  if self.entry:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-    word = tostring(snippet.parse(word))
+ghost_text_view.text_gen = function(self, line, cursor_col, entry)
+  entry = entry or self.entry
+  if entry == nil then
+    return { '' }
   end
-  local word_clen = vim.str_utfindex(word)
-  local cword = string.sub(line, self.entry.offset, cursor_col)
-  local cword_clen = vim.str_utfindex(cword)
-  -- Number of characters from entry text (word) to be displayed as ghost thext
-  local nchars = word_clen - cword_clen
-  -- Missing characters to complete the entry text
-  local text
-  if nchars > 0 then
-    text = string.sub(word, vim.str_byteindex(word, word_clen - nchars) + 1)
+
+  -- Trim cursorline ghost text
+  local function trim_text(word)
+    local word_clen = vim.str_utfindex(word)
+    local cword = string.sub(line, entry.offset, cursor_col)
+    local cword_clen = vim.str_utfindex(cword)
+    -- Number of characters from entry text (word) to be displayed as ghost thext
+    local nchars = word_clen - cword_clen
+    -- Missing characters to complete the entry text
+    local text
+    if nchars > 0 then
+      text = string.sub(word, vim.str_byteindex(word, word_clen - nchars) + 1)
+    else
+      text = ''
+    end
+    return text
+  end
+
+  local c = config.get().experimental.ghost_text
+
+  local completion_item = entry:get_completion_item()
+  -- Check if completion_kind indicates a snippet
+  -- Handle custom snippet
+  local word
+  if completion_item ~= nil and completion_item.kind == 15 and completion_item.documentation and completion_item.documentation.value then
+    local doc_value = completion_item.documentation.value
+    local pattern = '```(.-)\n(.-)\n```'
+    _, word = doc_value:match(pattern)
+    word = word or entry:get_insert_text()
   else
-    text = ''
+    -- Handle built-in snippet and non-snippet completion
+    word = entry:get_insert_text()
   end
-  return text
+
+  -- Expand snippet and make sure indent is correct
+  if completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet and word ~= nil then
+    local sp = snippet.parse(word)
+    local static_text = sp:to_static_text()
+    static_text[1] = trim_text(static_text[1])
+
+    local virt_lines = {}
+    for _, l in ipairs(static_text) do
+      table.insert(virt_lines, { { l, type(c) == 'table' and c.hl_group or 'Comment' } })
+    end
+    return virt_lines
+  end
+
+  -- Regular multiline_text
+  local text = trim_text(word)
+  local virt_lines = {}
+  if #text > 0 then
+    for _, l in ipairs(vim.fn.split(text, '\n')) do
+      table.insert(virt_lines, { { l, type(c) == 'table' and c.hl_group or 'Comment' } })
+    end
+  end
+  return virt_lines
 end
 
 ---Show ghost text
@@ -129,6 +168,22 @@ ghost_text_view.hide = function(self)
     self.entry = nil
     misc.redraw(true) -- force invoke decoration provider.
   end
+end
+
+ghost_text_view.has_multi_line = function(self, e)
+  if not api.is_insert_mode() then
+    return false
+  end
+  local c = config.get().experimental.ghost_text
+  if not c then
+    return false
+  end
+
+  local _, col = unpack(vim.api.nvim_win_get_cursor(0))
+  local line = vim.api.nvim_get_current_line()
+
+  local virt_lines = self.text_gen(self, line, col, e)
+  return #virt_lines > 1
 end
 
 return ghost_text_view
