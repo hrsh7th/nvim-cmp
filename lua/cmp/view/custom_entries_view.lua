@@ -140,6 +140,7 @@ custom_entries_view.open = function(self, offset, entries)
   self.column_width = { abbr = 0, kind = 0, menu = 0 }
 
   local entries_buf = self.entries_win:get_buffer()
+  local fields = config.get().formatting.fields
   local lines = {}
   local dedup = {}
   local preselect_index = 0
@@ -147,9 +148,9 @@ custom_entries_view.open = function(self, offset, entries)
     local view = e:get_view(offset, entries_buf)
     if view.dup == 1 or not dedup[e.completion_item.label] then
       dedup[e.completion_item.label] = true
-      self.column_width.abbr = math.max(self.column_width.abbr, view.abbr.width)
-      self.column_width.kind = math.max(self.column_width.kind, view.kind.width)
-      self.column_width.menu = math.max(self.column_width.menu, view.menu.width)
+      for _, field in ipairs(fields) do
+        self.column_width[field] = math.max(self.column_width[field], view[field].width)
+      end
       table.insert(self.entries, e)
       table.insert(lines, ' ')
       if preselect_index == 0 and e.completion_item.preselect then
