@@ -366,7 +366,7 @@ local on_text_changed = function()
     cmp.core:on_change('TextChanged')
   end
 end
-autocmd.subscribe({ 'TextChangedI', 'TextChangedP' }, on_text_changed)
+autocmd.subscribe({ 'TextChangedI', 'TextChangedP' }, async.debounce_next_tick(on_text_changed))
 autocmd.subscribe('CmdlineChanged', async.debounce_next_tick(on_text_changed))
 
 autocmd.subscribe('CursorMovedI', function()
