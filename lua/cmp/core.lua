@@ -134,7 +134,7 @@ core.on_keymap = function(self, keys, fallback)
     }, function()
       local ctx = self:get_context()
       local word = e.word
-      if string.sub(ctx.cursor_before_line, -#word, ctx.cursor.col - 1) == word and is_printable then
+      if string.sub(ctx.cursor_before_line, - #word, ctx.cursor.col - 1) == word and is_printable then
         fallback()
       else
         self:reset()
@@ -516,6 +516,9 @@ core.confirm = function(self, e, option, callback)
           entry = e,
           commit_character = option.commit_character,
         })
+        if callback then
+          callback()
+        end
       end)
     end))
   end)
