@@ -510,14 +510,13 @@ core.confirm = function(self, e, option, callback)
   feedkeys.call(keymap.indentkeys(vim.bo.indentkeys), 'n')
   feedkeys.call('', 'n', function()
     e:execute(vim.schedule_wrap(function()
-      release()
-      self.event:emit('confirm_done', {
-        entry = e,
-        commit_character = option.commit_character,
-      })
-      if callback then
-        callback()
-      end
+      vim.schedule(function()
+        release()
+        self.event:emit('confirm_done', {
+          entry = e,
+          commit_character = option.commit_character,
+        })
+      end)
     end))
   end)
 end
