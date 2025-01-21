@@ -494,7 +494,6 @@ core.confirm = function(self, e, option, callback)
         (#texts == 1 and (completion_item.textEdit.range.start.character + #texts[1]) or #texts[#texts]),
       })
       if is_snippet then
-        config.set_onetime({ sources = {} })
         config.get().snippet.expand({
           body = new_text,
           insert_text_mode = completion_item.insertTextMode,
