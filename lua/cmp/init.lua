@@ -328,6 +328,12 @@ cmp.status = function()
   end
 end
 
+---Ensures that cmp is the last receiver of the events specified.
+---@param events string[]
+cmp.resubscribe = function(events)
+  autocmd.resubscribe(events)
+end
+
 ---@type cmp.Setup
 cmp.setup = setmetatable({
   global = function(c)
