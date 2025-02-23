@@ -44,7 +44,7 @@ end
 ---@param name string
 event.emit = function(self, name, ...)
   for _, callback in ipairs(self.events[name] or {}) do
-    if type(callback) == "function" then
+    if type(callback) == 'function' then
       callback(...)
     end
   end
