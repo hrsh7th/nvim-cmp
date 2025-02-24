@@ -86,7 +86,19 @@ end
 ---  This function calculates the bytes of the entry to display calculating the number
 ---  of character differences instead of just byte difference.
 ghost_text_view.text_gen = function(self, line, cursor_col)
-  local word = self.entry:get_insert_text()
+  local word
+  local completion_kind = self.entry:get_kind()
+  local completion_item = self.entry:get_completion_item()
+  -- Check if completion_kind indicates a snippet
+  -- Handle custom snippet
+  if completion_kind == 15 and completion_item and completion_item.documentation and completion_item.documentation.value then
+    local doc_value = completion_item.documentation.value
+    local pattern = '```(.-)\n(.-)\n```'
+    _, word = doc_value:match(pattern)
+  else
+    -- Handle built-in snippet and non-snippet completion
+    word = self.entry:get_insert_text()
+  end
   if self.entry:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
     word = tostring(snippet.parse(word))
   end
