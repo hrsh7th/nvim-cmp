@@ -19,6 +19,7 @@ local config = require('cmp.config')
 ---@field public thumb_win integer|nil
 ---@field public sbar_win integer|nil
 ---@field public style cmp.WindowStyle
+---@field public is_doc boolean|nil
 ---@field public opt table<string, any>
 ---@field public buffer_opt table<string, any>
 local window = {}
@@ -134,6 +135,8 @@ end
 window.update = function(self)
   local info = self:info()
   if info.scrollable and self.style.height > 0 then
+    local scrollbar_winhighlight = self.is_doc and config.get().window.documentation.scrollbar_winhighlight or config.get().window.completion.scrollbar_winhighlight
+    local scrollbar_thumb_winhighlight = self.is_doc and config.get().window.documentation.scrollbar_thumb_winhighlight or config.get().window.completion.scrollbar_thumb_winhighlight
     -- Draw the background of the scrollbar
 
     if not info.border_info.visible then
@@ -151,7 +154,7 @@ window.update = function(self)
       else
         style.noautocmd = true
         self.sbar_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'sbar_buf'), false, style)
-        opt.win_set_option(self.sbar_win, 'winhighlight', 'EndOfBuffer:PmenuSbar,NormalFloat:PmenuSbar')
+        opt.win_set_option(self.sbar_win, 'winhighlight', scrollbar_winhighlight)
       end
     end
 
@@ -182,7 +185,7 @@ window.update = function(self)
     else
       style.noautocmd = true
       self.thumb_win = vim.api.nvim_open_win(buffer.ensure(self.name .. 'thumb_buf'), false, style)
-      opt.win_set_option(self.thumb_win, 'winhighlight', 'EndOfBuffer:PmenuThumb,NormalFloat:PmenuThumb')
+      opt.win_set_option(self.thumb_win, 'winhighlight', scrollbar_thumb_winhighlight)
     end
   else
     if self.sbar_win and vim.api.nvim_win_is_valid(self.sbar_win) then
