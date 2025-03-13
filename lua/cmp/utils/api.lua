@@ -67,4 +67,15 @@ api.get_cursor_before_line = function()
   return string.sub(api.get_current_line(), 1, cursor[2])
 end
 
+--- Applies a list of text edits to a buffer. Preserves 'buflisted' state.
+---@param text_edits lsp.TextEdit[]
+---@param bufnr integer Buffer id
+---@param position_encoding 'utf-8'|'utf-16'|'utf-32'
+api.apply_text_edits = function(text_edits, bufnr, position_encoding)
+  -- preserve 'buflisted' state because vim.lsp.util.apply_text_edits forces it to true
+  local prev_buflisted = vim.bo[bufnr].buflisted
+  vim.lsp.util.apply_text_edits(text_edits, bufnr, position_encoding)
+  vim.bo[bufnr].buflisted = prev_buflisted
+end
+
 return api
