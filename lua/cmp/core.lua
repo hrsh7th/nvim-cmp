@@ -433,11 +433,11 @@ core.confirm = function(self, e, option, callback)
           return
         end
         vim.cmd([[silent! undojoin]])
-        vim.lsp.util.apply_text_edits(text_edits, ctx.bufnr, e.source:get_position_encoding_kind())
+        api.apply_text_edits(text_edits, ctx.bufnr, e.source:get_position_encoding_kind())
       end)
     else
       vim.cmd([[silent! undojoin]])
-      vim.lsp.util.apply_text_edits(e.completion_item.additionalTextEdits, ctx.bufnr, e.source:get_position_encoding_kind())
+      api.apply_text_edits(e.completion_item.additionalTextEdits, ctx.bufnr, e.source:get_position_encoding_kind())
     end
   end)
   feedkeys.call('', 'n', function()
@@ -486,7 +486,7 @@ core.confirm = function(self, e, option, callback)
       if is_snippet then
         completion_item.textEdit.newText = ''
       end
-      vim.lsp.util.apply_text_edits({ completion_item.textEdit }, ctx.bufnr, 'utf-8')
+      api.apply_text_edits({ completion_item.textEdit }, ctx.bufnr, 'utf-8')
 
       local texts = vim.split(completion_item.textEdit.newText, '\n')
       vim.api.nvim_win_set_cursor(0, {
