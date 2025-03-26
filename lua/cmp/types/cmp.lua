@@ -164,6 +164,7 @@ cmp.ItemField = {
 
 ---@class cmp.GhostTextConfig
 ---@field hl_group string
+---@field hl_group_selected string|nil
 
 ---@class cmp.SourceConfig
 ---@field public name string

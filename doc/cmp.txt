@@ -787,7 +787,7 @@ window.documentation.max_height~
 
                                             *cmp-config.experimental.ghost_text*
 experimental.ghost_text~
-  `boolean | { hl_group = string }`
+  `boolean | { hl_group = string, hl_group_selected = string | nil}`
   Whether to enable the ghost_text feature.
 
 ==============================================================================
