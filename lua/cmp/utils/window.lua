@@ -176,6 +176,8 @@ window.update = function(self)
       row = info.row + thumb_offset + (info.border_info.visible and info.border_info.top or 0),
       col = info.col + info.width - 1, -- info.col was already added scrollbar offset.
       zindex = (self.style.zindex and (self.style.zindex + 2) or 2),
+	  -- force thumb to not have borders, so `vim.o.winborder` can't have an effect on thumb
+	  border = 'none',
     }
     if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
       vim.api.nvim_win_set_config(self.thumb_win, style)
