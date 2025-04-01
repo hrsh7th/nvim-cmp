@@ -197,7 +197,7 @@ end
 ---@return integer
 misc.to_utfindex = function(text, vimindex)
   vimindex = vimindex or #text + 1
-  return vim.str_utfindex(text, math.max(0, math.min(vimindex - 1, #text)))
+  return vim.str_utfindex(text, 'utf-16', math.max(0, math.min(vimindex - 1, #text)))
 end
 
 ---Safe version of vim.str_byteindex
@@ -208,7 +208,7 @@ misc.to_vimindex = function(text, utfindex)
   utfindex = utfindex or #text
   for i = utfindex, 1, -1 do
     local s, v = pcall(function()
-      return vim.str_byteindex(text, i) + 1
+      return vim.str_byteindex(text, 'utf-16', i) + 1
     end)
     if s then
       return v
