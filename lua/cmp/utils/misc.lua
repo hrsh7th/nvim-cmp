@@ -197,7 +197,10 @@ end
 ---@return integer
 misc.to_utfindex = function(text, vimindex)
   vimindex = vimindex or #text + 1
-  return vim.str_utfindex(text, 'utf-16', math.max(0, math.min(vimindex - 1, #text)))
+  if vim.fn.has('nvim-0.11') then
+    return vim.str_utfindex(text, 'utf-16', math.max(0, math.min(vimindex - 1, #text)))
+  end
+  return vim.str_utfindex(text, math.max(0, math.min(vimindex - 1, #text)))
 end
 
 ---Safe version of vim.str_byteindex
