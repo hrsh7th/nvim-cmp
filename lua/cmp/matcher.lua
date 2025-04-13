@@ -81,7 +81,7 @@ end
 ---Match entry
 ---@param input string
 ---@param word string
----@param option { synonyms: string[], disallow_fullfuzzy_matching: boolean, disallow_fuzzy_matching: boolean, disallow_partial_fuzzy_matching: boolean, disallow_partial_matching: boolean, disallow_prefix_unmatching: boolean, disallow_symbol_nonprefix_matching: boolean }
+---@param option { synonyms: string[], disallow_fullfuzzy_matching: boolean, disallow_fuzzy_matching: boolean, disallow_partial_fuzzy_matching: boolean, disallow_partial_matching: boolean, disallow_prefix_unmatching: boolean, disallow_symbol_nonprefix_matching: boolean, disallow_case_insensetive_matching: boolean}
 ---@return integer, table
 matcher.match = function(input, word, option)
   option = option or {}
@@ -98,7 +98,7 @@ matcher.match = function(input, word, option)
 
   -- Check prefix matching.
   if option.disallow_prefix_unmatching then
-    if not char.match(string.byte(input, 1), string.byte(word, 1)) then
+    if not char.match(string.byte(input, 1), string.byte(word, 1), option.disallow_case_insensetive_matching) then
       return 0, {}
     end
   end
@@ -111,7 +111,7 @@ matcher.match = function(input, word, option)
   local word_bound_index = 1
   local no_symbol_match = false
   while input_end_index <= #input and word_index <= #word do
-    local m = matcher.find_match_region(input, input_start_index, input_end_index, word, word_index)
+    local m = matcher.find_match_region(input, input_start_index, input_end_index, word, word_index, option)
     if m and input_end_index <= m.input_match_end then
       m.index = word_bound_index
       input_start_index = m.input_match_start + 1
@@ -131,7 +131,9 @@ matcher.match = function(input, word, option)
   end
 
   if #matches == 0 then
-    if not option.disallow_fuzzy_matching and not option.disallow_prefix_unmatching and not option.disallow_partial_fuzzy_matching then
+    if not option.disallow_fuzzy_matching 
+        and not option.disallow_prefix_unmatching 
+        and not option.disallow_partial_fuzzy_matching then
       if matcher.fuzzy(input, word, matches, option) then
         return 1, matches
       end
@@ -150,7 +152,8 @@ matcher.match = function(input, word, option)
       prefix = true
       local o = 1
       for i = matches[1].input_match_start, matches[1].input_match_end do
-        if not char.match(string.byte(synonym, o), string.byte(input, i)) then
+        if not char.match(string.byte(synonym, o), string.byte(input, i),
+            option.disallow_case_insensetive_matching) then
           prefix = false
           break
         end
@@ -212,7 +215,9 @@ matcher.fuzzy = function(input, word, matches, option)
     local word_offset = 0
     local word_index = char.get_next_semantic_index(word, curr_match.word_match_end)
     while word_offset + word_index < next_match.word_match_start and input_index <= #input do
-      if char.match(string.byte(word, word_index + word_offset), string.byte(input, input_index)) then
+      if char.match(string.byte(word, word_index + word_offset),
+                    string.byte(input, input_index),
+                    option.disallow_case_insensetive_matching) then
         input_index = input_index + 1
         word_offset = word_offset + 1
       else
@@ -233,7 +238,7 @@ matcher.fuzzy = function(input, word, matches, option)
   local match_count = 0
   while word_offset + word_index <= #word and input_index <= #input do
     local c1, c2 = string.byte(word, word_index + word_offset), string.byte(input, input_index)
-    if char.match(c1, c2) then
+    if char.match(c1, c2, option.disallow_case_insensetive_matching ) then
       if not matched then
         input_match_start = input_index
         word_match_start = word_index + word_offset
@@ -277,10 +282,10 @@ matcher.fuzzy = function(input, word, matches, option)
 end
 
 --- find_match_region
-matcher.find_match_region = function(input, input_start_index, input_end_index, word, word_index)
+matcher.find_match_region = function(input, input_start_index, input_end_index, word, word_index, option)
   -- determine input position ( woroff -> word_offset )
   while input_start_index < input_end_index do
-    if char.match(string.byte(input, input_end_index), string.byte(word, word_index)) then
+    if char.match(string.byte(input, input_end_index), string.byte(word, word_index), option.disallow_case_insensetive_matching) then
       break
     end
     input_end_index = input_end_index - 1
@@ -300,7 +305,7 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
   while input_index <= #input and word_index + word_offset <= #word do
     local c1 = string.byte(input, input_index)
     local c2 = string.byte(word, word_index + word_offset)
-    if char.match(c1, c2) then
+    if char.match(c1, c2, option.disallow_case_insensetive_matching) then
       -- Match start.
       if input_match_start == -1 then
         input_match_start = input_index
