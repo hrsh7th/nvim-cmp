@@ -152,9 +152,9 @@ cmp.ItemField = {
 ---@field public comparators cmp.Comparator[]
 
 ---@class cmp.FormattingConfig
----@field public fields cmp.ItemField[]
----@field public expandable_indicator boolean
----@field public format fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem
+---@field public fields? cmp.ItemField[]
+---@field public expandable_indicator? boolean
+---@field public format? fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem
 
 ---@class cmp.SnippetConfig
 ---@field public expand fun(args: cmp.SnippetExpansionParams)
