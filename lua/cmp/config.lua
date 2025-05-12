@@ -39,7 +39,7 @@ end
 ---@param bufnr integer
 config.set_buffer = function(c, bufnr)
   local revision = (config.buffers[bufnr] or {}).revision or 1
-  config.buffers[bufnr] = c or {}
+  config.buffers[bufnr] = config.normalize(misc.merge(c or {}, buffers[bufnr] or {}))
   config.buffers[bufnr].revision = revision + 1
 end
 
@@ -49,7 +49,7 @@ end
 config.set_filetype = function(c, filetypes)
   for _, filetype in ipairs(type(filetypes) == 'table' and filetypes or { filetypes }) do
     local revision = (config.filetypes[filetype] or {}).revision or 1
-    config.filetypes[filetype] = c or {}
+    config.filetypes[filetype] = config.normalize(misc.merge(c or {}, filetypes[filetype] or {}))
     config.filetypes[filetype].revision = revision + 1
   end
 end
@@ -61,6 +61,7 @@ config.set_cmdline = function(c, cmdtypes)
   for _, cmdtype in ipairs(type(cmdtypes) == 'table' and cmdtypes or { cmdtypes }) do
     local revision = (config.cmdline[cmdtype] or {}).revision or 1
     config.cmdline[cmdtype] = c or {}
+    config.cmdline[cmdtype] = config.normalize(misc.merge(c or {}, cmdline[cmdtype] or {}))
     config.cmdline[cmdtype].revision = revision + 1
   end
 end
