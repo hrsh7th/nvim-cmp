@@ -47,8 +47,11 @@ end
 
 ---Unregister source
 ---@param source_id integer
+---@return cmp.Source?
 core.unregister_source = function(self, source_id)
+  local s = self.sources[source_id]
   self.sources[source_id] = nil
+  return s
 end
 
 ---Get new context
@@ -103,6 +106,12 @@ core.get_sources = function(self, filter)
     end
   end
   return sources
+end
+
+---Return registered sources.
+---@return cmp.Source[]
+core.get_registered_sources = function(self)
+  return self.sources
 end
 
 ---Keypress handler
@@ -390,7 +399,7 @@ core.confirm = function(self, e, option, callback)
     else
       vim.cmd([[silent! undojoin]])
       -- This logic must be used nvim_buf_set_text.
-      -- If not used, the snippet engine's placeholder wil be broken.
+      -- If not used, the snippet engine's placeholder will be broken.
       vim.api.nvim_buf_set_text(0, e.context.cursor.row - 1, e.offset - 1, ctx.cursor.row - 1, ctx.cursor.col - 1, {
         e.context.cursor_before_line:sub(e.offset),
       })
@@ -424,11 +433,11 @@ core.confirm = function(self, e, option, callback)
           return
         end
         vim.cmd([[silent! undojoin]])
-        vim.lsp.util.apply_text_edits(text_edits, ctx.bufnr, e.source:get_position_encoding_kind())
+        api.apply_text_edits(text_edits, ctx.bufnr, e.source:get_position_encoding_kind())
       end)
     else
       vim.cmd([[silent! undojoin]])
-      vim.lsp.util.apply_text_edits(e.completion_item.additionalTextEdits, ctx.bufnr, e.source:get_position_encoding_kind())
+      api.apply_text_edits(e.completion_item.additionalTextEdits, ctx.bufnr, e.source:get_position_encoding_kind())
     end
   end)
   feedkeys.call('', 'n', function()
@@ -477,7 +486,7 @@ core.confirm = function(self, e, option, callback)
       if is_snippet then
         completion_item.textEdit.newText = ''
       end
-      vim.lsp.util.apply_text_edits({ completion_item.textEdit }, ctx.bufnr, 'utf-8')
+      api.apply_text_edits({ completion_item.textEdit }, ctx.bufnr, 'utf-8')
 
       local texts = vim.split(completion_item.textEdit.newText, '\n')
       vim.api.nvim_win_set_cursor(0, {

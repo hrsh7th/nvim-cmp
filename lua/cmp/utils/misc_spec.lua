@@ -5,6 +5,33 @@ local misc = require('cmp.utils.misc')
 describe('misc', function()
   before_each(spec.before)
 
+  it('copy', function()
+    -- basic.
+    local tbl, copy
+    tbl = {
+      a = {
+        b = 1,
+      },
+    }
+    copy = misc.copy(tbl)
+    assert.are_not.equal(tbl, copy)
+    assert.are_not.equal(tbl.a, copy.a)
+    assert.are.same(tbl, copy)
+
+    -- self reference.
+    tbl = {
+      a = {
+        b = 1,
+      },
+    }
+    tbl.a.c = tbl.a
+    copy = misc.copy(tbl)
+    assert.are_not.equal(tbl, copy)
+    assert.are_not.equal(tbl.a, copy.a)
+    assert.are_not.equal(tbl.a.c, copy.a.c)
+    assert.are.same(tbl, copy)
+  end)
+
   it('merge', function()
     local merged
     merged = misc.merge({

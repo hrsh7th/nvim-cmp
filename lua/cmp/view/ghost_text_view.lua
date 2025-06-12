@@ -90,15 +90,15 @@ ghost_text_view.text_gen = function(self, line, cursor_col)
   if self.entry:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
     word = tostring(snippet.parse(word))
   end
-  local word_clen = vim.str_utfindex(word)
+  local word_clen = vim.fn.strchars(word, true)
   local cword = string.sub(line, self.entry.offset, cursor_col)
-  local cword_clen = vim.str_utfindex(cword)
+  local cword_clen = vim.fn.strchars(cword, true)
   -- Number of characters from entry text (word) to be displayed as ghost thext
   local nchars = word_clen - cword_clen
   -- Missing characters to complete the entry text
   local text
   if nchars > 0 then
-    text = string.sub(word, vim.str_byteindex(word, word_clen - nchars) + 1)
+    text = string.sub(word, misc.to_vimindex(word, word_clen - nchars))
   else
     text = ''
   end

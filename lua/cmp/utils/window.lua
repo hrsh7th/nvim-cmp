@@ -145,6 +145,7 @@ window.update = function(self)
         row = info.row,
         col = info.col + info.width - info.scrollbar_offset, -- info.col was already contained the scrollbar offset.
         zindex = (self.style.zindex and (self.style.zindex + 1) or 1),
+        border = 'none',
       }
       if self.sbar_win and vim.api.nvim_win_is_valid(self.sbar_win) then
         vim.api.nvim_win_set_config(self.sbar_win, style)
@@ -156,17 +157,27 @@ window.update = function(self)
     end
 
     -- Draw the scrollbar thumb
-    local thumb_height = math.floor(info.inner_height * (info.inner_height / self:get_content_height()) + 0.5)
-    local thumb_offset = math.floor(info.inner_height * (vim.fn.getwininfo(self.win)[1].topline / self:get_content_height()))
+    local thumb_height = math.floor(info.inner_height * (info.inner_height / self:get_content_height()))
+    thumb_height = math.max(1, thumb_height)
+    local topline = vim.fn.getwininfo(self.win)[1].topline
+    local scroll_ratio = topline / (self:get_content_height() - info.inner_height + 1)
+    -- row grid start from 0 on nvim-0.10
+    local thumb_offset_raw = (info.inner_height - thumb_height) * scroll_ratio
+    -- round half if topline > 1
+    local thumb_offset = math.floor(thumb_offset_raw)
+    if topline > 1 and thumb_offset_raw + 0.5 >= thumb_offset + 1 then
+      thumb_offset = thumb_offset + 1
+    end
 
     local style = {
       relative = 'editor',
       style = 'minimal',
       width = 1,
-      height = math.max(1, thumb_height),
+      height = thumb_height,
       row = info.row + thumb_offset + (info.border_info.visible and info.border_info.top or 0),
       col = info.col + info.width - 1, -- info.col was already added scrollbar offset.
       zindex = (self.style.zindex and (self.style.zindex + 2) or 2),
+      border = 'none',
     }
     if self.thumb_win and vim.api.nvim_win_is_valid(self.thumb_win) then
       vim.api.nvim_win_set_config(self.thumb_win, style)
