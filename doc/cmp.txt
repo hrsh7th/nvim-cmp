@@ -411,13 +411,26 @@ Highlight                                                        *cmp-highlight*
 *CmpItemKind*
   Highlight group for the kind of the field.
 
-NOTE: `kind` is a symbol after each completion option.
+  NOTE: `kind` is a symbol after each completion option.
+
+*CmpItemKindIcon
+  Highlight group for the icons used for each `lsp.CompletionItemKind`.
 
 *CmpItemKind%KIND_NAME%*
   Highlight group for the kind of the field for a specific `lsp.CompletionItemKind`.
   If you only want to overwrite the `method` kind's highlight group, you can do this:
 >vim
     highlight CmpItemKindMethod guibg=NONE guifg=Orange
+
+*CmpItemKind%KIND_NAME%Icon
+  Highlight group for the icon shown for a specific `lsp.CompletionItemKind`.
+  Can be overriden the same way as shown above OR with a custom function
+  in your format table (e.g.):
+    
+      local function set_colors(str)
+        local color = vim.api.nvim_get_hl(args...)
+        vim.api.nvim_set_hl(args...)
+      end
 <
 *CmpItemMenu*
   The menu field's highlight group.
@@ -561,7 +574,7 @@ formatting.format~
   The function used to customize the appearance of the completion menu. See
   |complete-items|. This value can also be used to modify the `dup` property.
   NOTE: The `vim.CompletedItem` can contain the special properties
-  `abbr_hl_group`, `kind_hl_group` and `menu_hl_group`.
+  `abbr_hl_group`, `icon_hl_group`, `kind_hl_group` and `menu_hl_group`.
 
                                    *cmp-config.matching.disallow_fuzzy_matching*
 matching.disallow_fuzzy_matching~
