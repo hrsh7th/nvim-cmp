@@ -46,8 +46,8 @@ EOF
 lua << EOF
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
-require'lspconfig'.cssls.setup {
+vim.lsp.config('cssls', {
   capabilities = capabilities,
-}
+})
 EOF
 

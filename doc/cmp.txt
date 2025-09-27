@@ -140,9 +140,9 @@ A recommended configuration can be found below.
 
     -- Setup lspconfig.
     local capabilities = require('cmp_nvim_lsp').default_capabilities()
-    require('lspconfig')[%YOUR_LSP_SERVER%].setup {
+    vim.lsp.config(%YOUR_LSP_SERVER%, {
       capabilities = capabilities
-    }
+    })
   EOF
 <
 ==============================================================================
