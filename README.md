@@ -139,6 +139,7 @@ lua <<EOF
   vim.lsp.config('<YOUR_LSP_SERVER>', {
     capabilities = capabilities
   })
+  vim.lsp.enable('<YOUR_LSP_SERVER>')
 EOF
 ```
 
