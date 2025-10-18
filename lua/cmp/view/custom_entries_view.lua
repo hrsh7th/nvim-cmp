@@ -168,10 +168,10 @@ custom_entries_view.open = function(self, offset, entries)
   vim.api.nvim_buf_set_option(entries_buf, 'modified', false)
 
   local width = 0
-  width = width + 1
+  width = width
   width = width + self.column_width.abbr + (self.column_width.kind > 0 and 1 or 0)
   width = width + self.column_width.kind + (self.column_width.menu > 0 and 1 or 0)
-  width = width + self.column_width.menu + 1
+  width = width + self.column_width.menu
 
   local height = vim.api.nvim_get_option_value('pumheight', {})
   height = height ~= 0 and height or #self.entries
