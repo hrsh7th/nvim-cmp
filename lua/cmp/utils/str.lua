@@ -47,6 +47,19 @@ str.get_common_string = function(text1, text2)
   local min = math.min(#text1, #text2)
   for i = 1, min do
     if not char.match(string.byte(text1, i), string.byte(text2, i)) then
+      if string.byte(text1, i) > 127 then
+        -- Differing byte is non-ASCII, use Unicode-safe path
+        local char_min_len = math.min(vim.fn.strchars(text1), vim.fn.strchars(text2))
+        for j = 0, char_min_len - 1 do
+          local char1 = vim.fn.strcharpart(text1, j, 1)
+          local char2 = vim.fn.strcharpart(text2, j, 1)
+          -- Use case-insensitive comparison for Unicode like char.match does for ASCII
+          if vim.fn.tolower(char1) ~= vim.fn.tolower(char2) then
+            return vim.fn.strcharpart(text1, 0, j)
+          end
+        end
+        return vim.fn.strcharpart(text1, 0, char_min_len)
+      end
       return string.sub(text1, 1, i - 1)
     end
   end
