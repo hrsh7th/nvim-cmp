@@ -6,11 +6,15 @@ local snippet = require('cmp.utils.snippet')
 local config = require('cmp.config')
 local types = require('cmp.types')
 local matcher = require('cmp.matcher')
-local lspkind = require('lspkind') or ''
+local ok, lspkind = pcall(require, 'lspkind')
 
 local function get_icon(kind)
+  if ok then
     local icon = lspkind.symbol_map[kind]
-    return icon or ""
+    return icon
+  end
+
+  return ''
 end
 
 ---@class cmp.Entry
@@ -285,7 +289,7 @@ entry._get_view = function(self, item, entries_buf)
     view.abbr.width = vim.fn.strdisplaywidth(view.abbr.text)
     view.abbr.hl_group = item.abbr_hl_group or (self:is_deprecated() and 'CmpItemAbbrDeprecated' or 'CmpItemAbbr')
     view.icon = {}
-    view.icon.text = item.icon or get_icon(types.lsp.CompletionItemKind[self:get_kind()]) or ''
+    view.icon.text = item.icon or get_icon(types.lsp.CompletionItemKind[self:get_kind()])
     view.icon.bytes = #view.icon.text
     view.icon.width = vim.fn.strdisplaywidth(view.icon.text)
     view.icon.hl_group = item.icon_hl_group or (('CmpItemKind' .. (types.lsp.CompletionItemKind[self:get_kind()] or '') .. 'Icon') or 'CmpItemKind')
