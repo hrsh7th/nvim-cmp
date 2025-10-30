@@ -35,7 +35,7 @@ cmp.PreselectMode = {
 ---@alias cmp.ItemField 'abbr' | 'icon' | 'kind' | 'menu'
 cmp.ItemField = {
   Abbr = 'abbr',
-  Icon = "icon",
+  Icon = 'icon',
   Kind = 'kind',
   Menu = 'menu',
 }
