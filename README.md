@@ -112,7 +112,7 @@ lua <<EOF
       { name = 'buffer' },
     })
  })
- require("cmp_git").setup() ]]-- 
+ require("cmp_git").setup() ]]--
 
   -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
   cmp.setup.cmdline({ '/', '?' }, {
@@ -136,9 +136,10 @@ lua <<EOF
   -- Set up lspconfig.
   local capabilities = require('cmp_nvim_lsp').default_capabilities()
   -- Replace <YOUR_LSP_SERVER> with each lsp server you've enabled.
-  require('lspconfig')['<YOUR_LSP_SERVER>'].setup {
+  vim.lsp.config('<YOUR_LSP_SERVER>', {
     capabilities = capabilities
-  }
+  })
+  vim.lsp.enable('<YOUR_LSP_SERVER>')
 EOF
 ```
 
