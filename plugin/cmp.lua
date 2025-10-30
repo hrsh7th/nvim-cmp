@@ -17,11 +17,14 @@ vim.api.nvim_set_hl(0, 'CmpItemAbbrDeprecated', { link = 'CmpItemAbbrDeprecatedD
 vim.api.nvim_set_hl(0, 'CmpItemAbbrMatch', { link = 'CmpItemAbbrMatchDefault', default = true })
 vim.api.nvim_set_hl(0, 'CmpItemAbbrMatchFuzzy', { link = 'CmpItemAbbrMatchFuzzyDefault', default = true })
 vim.api.nvim_set_hl(0, 'CmpItemKind', { link = 'CmpItemKindDefault', default = true })
+vim.api.nvim_set_hl(0, 'CmpItemKindIcon', { link = 'CmpItemKindIconDefault', default = true })
 vim.api.nvim_set_hl(0, 'CmpItemMenu', { link = 'CmpItemMenuDefault', default = true })
 for kind in pairs(types.lsp.CompletionItemKind) do
   if type(kind) == 'string' then
     local name = ('CmpItemKind%s'):format(kind)
+    local icon_hl = name .. "Icon"
     vim.api.nvim_set_hl(0, name, { link = ('%sDefault'):format(name), default = true })
+    vim.api.nvim_set_hl(0, icon_hl, { link = ('%sDefault'):format(icon_hl), default = true })
   end
 end
 
@@ -31,10 +34,12 @@ autocmd.subscribe({ 'ColorScheme', 'UIEnter' }, function()
   highlight.inherit('CmpItemAbbrMatchDefault', 'Pmenu', { bg = 'NONE', default = false })
   highlight.inherit('CmpItemAbbrMatchFuzzyDefault', 'Pmenu', { bg = 'NONE', default = false })
   highlight.inherit('CmpItemKindDefault', 'Special', { bg = 'NONE', default = false })
+  highlight.inherit('CmpItemKindIconDefault', 'Special', {bg = 'NONE', default = false })
   highlight.inherit('CmpItemMenuDefault', 'Pmenu', { bg = 'NONE', default = false })
   for name in pairs(types.lsp.CompletionItemKind) do
     if type(name) == 'string' then
       vim.api.nvim_set_hl(0, ('CmpItemKind%sDefault'):format(name), { link = 'CmpItemKind', default = false })
+      vim.api.nvim_set_hl(0, ('CmpItemKind%sIconDefault'):format(name), {link = 'CmpItemKindIcon', default = false })
     end
   end
 end)

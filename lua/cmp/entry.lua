@@ -6,6 +6,16 @@ local snippet = require('cmp.utils.snippet')
 local config = require('cmp.config')
 local types = require('cmp.types')
 local matcher = require('cmp.matcher')
+local ok, lspkind = pcall(require, 'lspkind')
+
+local function get_icon(kind)
+  if ok then
+    local icon = lspkind.symbol_map[kind]
+    return icon
+  end
+
+  return ''
+end
 
 ---@class cmp.Entry
 ---@field public id integer
@@ -260,7 +270,7 @@ end
 ---Return view information.
 ---@param suggest_offset integer
 ---@param entries_buf integer The buffer this entry will be rendered into.
----@return { abbr: { text: string, bytes: integer, width: integer, hl_group: string|table }, kind: { text: string, bytes: integer, width: integer, hl_group: string|table }, menu: { text: string, bytes: integer, width: integer, hl_group: string|table } }
+---@return { abbr: { text: string, bytes: integer, width: integer, hl_group: string|table }, icon: { text: string, bytes: integer, width: integer, hl_group: string|table }, kind: { text: string, bytes: integer, width: integer, hl_group: string|table }, menu: { text: string, bytes: integer, width: integer, hl_group: string|table } }
 entry.get_view = function(self, suggest_offset, entries_buf)
   local item = self:get_vim_item(suggest_offset)
   return self.cache:ensure('get_view:' .. tostring(entries_buf), entry._get_view, self, item, entries_buf)
@@ -278,6 +288,11 @@ entry._get_view = function(self, item, entries_buf)
     view.abbr.bytes = #view.abbr.text
     view.abbr.width = vim.fn.strdisplaywidth(view.abbr.text)
     view.abbr.hl_group = item.abbr_hl_group or (self:is_deprecated() and 'CmpItemAbbrDeprecated' or 'CmpItemAbbr')
+    view.icon = {}
+    view.icon.text = item.icon or get_icon(types.lsp.CompletionItemKind[self:get_kind()])
+    view.icon.bytes = #view.icon.text
+    view.icon.width = vim.fn.strdisplaywidth(view.icon.text)
+    view.icon.hl_group = item.icon_hl_group or (('CmpItemKind' .. (types.lsp.CompletionItemKind[self:get_kind()] or '') .. 'Icon') or 'CmpItemKind')
     view.kind = {}
     view.kind.text = item.kind or ''
     view.kind.bytes = #view.kind.text
@@ -352,6 +367,8 @@ entry._get_vim_item = function(self, suggest_offset)
   local vim_item = {
     word = word,
     abbr = abbr,
+    icon = cmp_opts.icon or get_icon(types.lsp.CompletionItemKind[self:get_kind()]),
+    icon_hl_group = cmp_opts.icon_hl_group,
     kind = cmp_opts.kind_text or types.lsp.CompletionItemKind[self:get_kind()] or types.lsp.CompletionItemKind[1],
     kind_hl_group = cmp_opts.kind_hl_group,
     menu = menu,
@@ -362,6 +379,7 @@ entry._get_vim_item = function(self, suggest_offset)
   end
   vim_item.word = str.oneline(vim_item.word or '')
   vim_item.abbr = str.oneline(vim_item.abbr or '')
+  vim_item.icon = str.oneline(vim_item.icon or '')
   vim_item.kind = str.oneline(vim_item.kind or '')
   vim_item.menu = str.oneline(vim_item.menu or '')
   vim_item.equal = 1
