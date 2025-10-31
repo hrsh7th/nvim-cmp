@@ -118,7 +118,7 @@ cmp.ItemField = {
 
 ---@class cmp.WindowConfig
 ---@field public completion? cmp.CompletionWindowOptions
----@field public documentation? cmp.DocumentationWindowOptions|nil
+---@field public documentation? cmp.DocumentationWindowOptions|vim.NIL
 
 ---@class cmp.WindowOptions
 ---@field public border? string|string[]
