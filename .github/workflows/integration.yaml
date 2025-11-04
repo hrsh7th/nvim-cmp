@@ -28,7 +28,7 @@ jobs:
         luaVersion: "luajit-openresty"
 
     - name: Setup luarocks
-      uses: leafo/gh-actions-luarocks@v4
+      uses: leafo/gh-actions-luarocks@v6
 
     - name: Setup tools
       shell: bash
