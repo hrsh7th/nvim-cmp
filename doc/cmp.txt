@@ -787,6 +787,13 @@ window.completion.scrollbar~
   `boolean`
   Whether the scrollbar should be enabled if there are more items that fit
 
+                                     *cmp-config.window.completion.max_height*
+window.completion.max_height~
+  `number | nil`
+  The completion window's max height, can be set to 0 to use all available
+  space. To use `vim.o.pumheight` set this to `nil`.
+  See |'pumheight'|.
+
                                      *cmp-config.window.documentation.max_width*
 window.documentation.max_width~
   `number`
