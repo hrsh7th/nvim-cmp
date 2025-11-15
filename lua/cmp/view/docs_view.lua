@@ -58,6 +58,7 @@ docs_view.open = function(self, e, view)
     local opts = {
       max_width = max_width - border_info.horiz,
     }
+    opts.wrap_at = opts.max_width
     if documentation.max_height > 0 then
       opts.max_height = documentation.max_height
     end
@@ -71,6 +72,7 @@ docs_view.open = function(self, e, view)
   local opts = {
     max_width = max_width - border_info.horiz,
   }
+  opts.wrap_at = opts.max_width
   if documentation.max_height > 0 then
     opts.max_height = documentation.max_height - border_info.vert
   end
