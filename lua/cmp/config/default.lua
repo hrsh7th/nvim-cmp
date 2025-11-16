@@ -123,6 +123,7 @@ return function()
         border = window.get_border(),
         winhighlight = 'FloatBorder:NormalFloat',
         winblend = vim.o.pumblend,
+        col_offset = 0,
       },
     },
   }
