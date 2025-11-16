@@ -197,10 +197,7 @@ custom_entries_view.open = function(self, offset, entries)
   local cant_fit_at_bottom = vim.o.lines - row - border_offset_row <= math.min(DEFAULT_HEIGHT, height)
   local cant_fit_at_top = row - border_offset_row <= math.min(DEFAULT_HEIGHT, height)
   local is_in_top_half = math.floor(vim.o.lines * 0.5) > row + border_offset_row
-  local should_position_above =
-    cant_fit_at_bottom or
-    (prefers_above and not cant_fit_at_top) or
-    (prefers_auto and is_in_top_half)
+  local should_position_above = cant_fit_at_bottom or (prefers_above and not cant_fit_at_top) or (prefers_auto and is_in_top_half)
   if should_position_above then
     self.bottom_up = true
     height = math.min(height, row - 1)
