@@ -35,6 +35,24 @@ mapping.preset = {}
 ---Mapping preset insert-mode configuration.
 mapping.preset.insert = function(override)
   return merge_keymaps(override or {}, {
+    ['<Tab>'] = {
+      i = function()
+        local cmp = require('cmp')
+        if cmp.visible() then
+          cmp.select_next_item()
+        else
+          vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-V><Tab>', true, false, true), 'n', false)
+        end
+      end,
+      s = function()
+        local cmp = require('cmp')
+        if cmp.visible() then
+          cmp.select_next_item()
+        else
+          vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-V><Tab>', true, false, true), 'n', false)
+        end
+      end,
+    },
     ['<Down>'] = {
       i = mapping.select_next_item({ behavior = types.cmp.SelectBehavior.Select }),
     },
@@ -83,16 +101,18 @@ mapping.preset.cmdline = function(override)
         end
       end,
     },
+
     ['<Tab>'] = {
       c = function()
         local cmp = require('cmp')
         if cmp.visible() then
           cmp.select_next_item()
         else
-          cmp.complete()
+          vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-V><Tab>', true, false, true), 'n', false)
         end
       end,
     },
+
     ['<S-Tab>'] = {
       c = function()
         local cmp = require('cmp')
