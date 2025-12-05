@@ -122,23 +122,19 @@ cmp.ItemField = {
 
 ---@class cmp.WindowOptions
 ---@field public border? string|string[]
----@field public winhighlight? string
+---@field public col_offset integer|nil
+---@field public max_height? integer|nil
 ---@field public winblend? number
+---@field public winhighlight? string
+---@field public scrollbar? boolean|true
+---@field public scrolloff integer|nil
 ---@field public zindex? integer|nil
 
 ---@class cmp.CompletionWindowOptions: cmp.WindowOptions
----@field public scrolloff? integer|nil
----@field public col_offset? integer|nil
 ---@field public side_padding? integer|nil
----@field public scrollbar? boolean|true
----@field public max_height? integer|nil
 
 ---@class cmp.DocumentationWindowOptions: cmp.WindowOptions
----@field public max_height? integer|nil
 ---@field public max_width? integer|nil
----@field public scrolloff integer|nil
----@field public scrollbar boolean|true
----@field public col_offset integer|nil
 
 ---@class cmp.ConfirmationConfig
 ---@field public default_behavior cmp.ConfirmBehavior
