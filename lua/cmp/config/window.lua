@@ -3,7 +3,7 @@ local window = {}
 window.bordered = function(opts)
   opts = opts or {}
   return {
-    border = opts.border or 'rounded',
+    border = opts.border or window.get_border(),
     winhighlight = opts.winhighlight or 'Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual,Search:None',
     zindex = opts.zindex or 1001,
     scrolloff = opts.scrolloff or 0,
