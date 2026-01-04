@@ -28,7 +28,7 @@ for kind in pairs(types.lsp.CompletionItemKind) do
   end
 end
 
-autocmd.subscribe({ 'ColorScheme', 'UIEnter' }, function()
+autocmd.subscribe({ 'ColorScheme' }, function()
   highlight.inherit('CmpItemAbbrDefault', 'Pmenu', { bg = 'NONE', default = false })
   highlight.inherit('CmpItemAbbrDeprecatedDefault', 'Comment', { bg = 'NONE', default = false })
   highlight.inherit('CmpItemAbbrMatchDefault', 'Pmenu', { bg = 'NONE', default = false })
