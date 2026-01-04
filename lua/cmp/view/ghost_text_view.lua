@@ -63,7 +63,7 @@ ghost_text_view.new = function()
       local text = self.text_gen(self, line, col)
       if #text > 0 then
         local virt_lines = {}
-        for _, l in ipairs(vim.fn.split(text, '\n')) do
+        for _, l in ipairs(vim.fn.split(text, '\n', true)) do
           table.insert(virt_lines, { { l, type(c) == 'table' and c.hl_group or 'Comment' } })
         end
         local first_line = table.remove(virt_lines, 1)
