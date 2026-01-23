@@ -52,6 +52,7 @@ describe('matcher', function()
       disallow_prefix_unmatching = false,
       disallow_partial_fuzzy_matching = false,
       disallow_symbol_nonprefix_matching = true,
+      disallow_case_insensetive_matching = false,
     })
     assert.is.truthy(score >= 1)
     assert.equals(matches[1].word_match_start, 5)
@@ -62,6 +63,7 @@ describe('matcher', function()
       disallow_prefix_unmatching = false,
       disallow_partial_fuzzy_matching = true,
       disallow_symbol_nonprefix_matching = true,
+      disallow_case_insensetive_matching = false,
     })
     assert.is.truthy(score == 0)
   end)
@@ -91,6 +93,11 @@ describe('matcher', function()
   it('disallow_symbol_nonprefix_matching', function()
     assert.is.truthy(matcher.match('foo_', 'b foo_bar', { disallow_symbol_nonprefix_matching = true }) == 0)
     assert.is.truthy(matcher.match('foo_', 'b foo_bar', { disallow_symbol_nonprefix_matching = false }) >= 1)
+  end)
+
+  it('disallow_case_insensetive_matching', function()
+    assert.is.truthy(matcher.match('Test', 'test', { disallow_case_insensetive_matching = true }) == 0)
+    assert.is.truthy(matcher.match('Test', 'test', { disallow_case_insensetive_matching = false}) >= 1)
   end)
 
   it('debug', function()
