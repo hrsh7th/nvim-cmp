@@ -159,7 +159,8 @@ compare.locality = setmetatable({
       local locality_map = self.lines_cache:ensure({ 'line', buffer }, function()
         local locality_map = {}
         local regexp = vim.regex(config.completion.keyword_pattern)
-        while buffer ~= '' do
+        -- the buffer length check is to avoid performance issues on very long lines, #1841
+        while buffer ~= '' and #buffer < 5000 do
           local s, e = regexp:match_str(buffer)
           if s and e then
             local w = string.sub(buffer, s + 1, e)
