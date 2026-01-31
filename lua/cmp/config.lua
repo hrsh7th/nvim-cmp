@@ -87,8 +87,8 @@ config.get = function()
       onetime_config.revision or 0,
     }, function()
       local c = {}
-      c = misc.merge(c, config.normalize(onetime_config))
       c = misc.merge(c, config.normalize(global_config))
+      c = misc.merge(c, config.normalize(onetime_config))
       return c
     end)
   elseif api.is_cmdline_mode() then
@@ -102,8 +102,8 @@ config.get = function()
       cmdline_config.revision or 0,
     }, function()
       local c = {}
-      c = misc.merge(c, config.normalize(cmdline_config))
       c = misc.merge(c, config.normalize(global_config))
+      c = misc.merge(c, config.normalize(cmdline_config))
       return c
     end)
   else
@@ -121,9 +121,9 @@ config.get = function()
       buffer_config.revision or 0,
     }, function()
       local c = {}
-      c = misc.merge(config.normalize(c), config.normalize(buffer_config))
-      c = misc.merge(config.normalize(c), config.normalize(filetype_config))
       c = misc.merge(config.normalize(c), config.normalize(global_config))
+      c = misc.merge(config.normalize(c), config.normalize(filetype_config))
+      c = misc.merge(config.normalize(c), config.normalize(buffer_config))
       return c
     end)
   end
