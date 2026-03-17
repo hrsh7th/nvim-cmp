@@ -379,7 +379,7 @@ autocmd.subscribe({ 'TextChangedI', 'TextChangedP' }, function(s)
   if
     s.buf ~= lp.buf -- same buf
     or not (lp[1] == pos[1] and lp[2] + 1 == pos[2]) -- same line
-    or not (lp[1] + 1 == pos[1] and lp[2] == 0) -- beginning of next line
+    -- or not (lp[1] + 1 == pos[1] and lp[2] == 0) -- beginning of next line
   then
     lp = pos
     return
