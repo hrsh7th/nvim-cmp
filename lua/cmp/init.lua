@@ -372,7 +372,22 @@ local on_text_changed = function()
     cmp.core:on_change('TextChanged')
   end
 end
-autocmd.subscribe({ 'TextChangedI', 'TextChangedP' }, on_text_changed)
+local lp = { 0, 0, buf = 0 }
+autocmd.subscribe({ 'TextChangedI', 'TextChangedP' }, function(s)
+  local pos = vim.api.nvim_win_get_cursor(0)
+  pos.buf = s.buf
+  if
+    s.buf ~= lp.buf -- same buf
+    or not (lp[1] == pos[1] and lp[2] + 1 == pos[2]) -- same line
+    or not (lp[1] + 1 == pos[1] and lp[2] == 0) -- beginning of next line
+  then
+    lp = pos
+    return
+  else
+    lp = pos
+    on_text_changed()
+  end
+end)
 autocmd.subscribe('CmdlineChanged', async.debounce_next_tick(on_text_changed))
 
 autocmd.subscribe('CursorMovedI', function()
