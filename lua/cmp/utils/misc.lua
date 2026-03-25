@@ -129,11 +129,11 @@ misc.ensure_nil = function(tbl)
   if is_dict then
     local new_tbl = {}
     for k, v in pairs(tbl) do
-        if v ~= misc.none then
-          new_tbl[k] = misc.ensure_nil(v)
-        else
-          new_tbl[k] = nil
-        end
+      if v ~= misc.none then
+        new_tbl[k] = misc.ensure_nil(v)
+      else
+        new_tbl[k] = nil
+      end
     end
     return new_tbl
   end

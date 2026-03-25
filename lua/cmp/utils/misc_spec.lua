@@ -105,12 +105,12 @@ describe('misc', function()
         b = nil,
         c = misc.none,
         d = false,
-        e = "",
+        e = '',
       },
     })
     assert.are.equal(ensured.a.a, 1)
     assert.are.equal(ensured.a.b, nil)
     assert.are.equal(ensured.a.c, nil)
-    assert.are.equal(ensured.a.e, "")
+    assert.are.equal(ensured.a.e, '')
   end)
 end)
