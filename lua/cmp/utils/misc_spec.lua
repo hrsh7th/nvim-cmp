@@ -87,4 +87,30 @@ describe('misc', function()
     })
     assert.are.equal(merged.a, nil)
   end)
+
+  it('ensure_nil', function()
+    local ensured
+    ensured = misc.ensure_nil({ a = {} })
+    assert.are.same(ensured, { a = {} })
+
+    ensured = misc.ensure_nil(nil)
+    assert.are.equal(ensured, nil)
+
+    ensured = misc.ensure_nil(1)
+    assert.are.equal(ensured, 1)
+
+    ensured = misc.ensure_nil({
+      a = {
+        a = 1,
+        b = nil,
+        c = misc.none,
+        d = false,
+        e = "",
+      },
+    })
+    assert.are.equal(ensured.a.a, 1)
+    assert.are.equal(ensured.a.b, nil)
+    assert.are.equal(ensured.a.c, nil)
+    assert.are.equal(ensured.a.e, "")
+  end)
 end)

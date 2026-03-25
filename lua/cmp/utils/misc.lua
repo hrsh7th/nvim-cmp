@@ -120,6 +120,31 @@ misc.merge = function(tbl1, tbl2)
   end
 end
 
+---Replaces all vim.NIL values with nil recursively
+---@generic T
+---@param tbl T
+---@return T
+misc.ensure_nil = function(tbl)
+  local is_dict = type(tbl) == 'table' and (not islist(tbl) or vim.tbl_isempty(tbl))
+  if is_dict then
+    local new_tbl = {}
+    for k, v in pairs(tbl) do
+        if v ~= misc.none then
+          new_tbl[k] = misc.ensure_nil(v)
+        else
+          new_tbl[k] = nil
+        end
+    end
+    return new_tbl
+  end
+
+  if tbl == misc.none then
+    return nil
+  else
+    return tbl
+  end
+end
+
 ---Generate id for group name
 misc.id = setmetatable({
   group = {},
