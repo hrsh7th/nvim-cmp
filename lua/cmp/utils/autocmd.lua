@@ -10,15 +10,15 @@ local function create_autocmd(event)
   vim.api.nvim_create_autocmd(event, {
     desc = ('nvim-cmp: autocmd: %s'):format(event),
     group = autocmd.group,
-    callback = function()
-      autocmd.emit(event)
+    callback = function(state)
+      autocmd.emit(event, state)
     end,
   })
 end
 
 ---Subscribe autocmd
 ---@param events string|string[]
----@param callback function
+---@param callback fun(state:vim.api.keyset.create_autocmd.callback_args)
 ---@return function
 autocmd.subscribe = function(events, callback)
   events = type(events) == 'string' and { events } or events
@@ -45,12 +45,13 @@ end
 
 ---Emit autocmd
 ---@param event string
-autocmd.emit = function(event)
+---@param state vim.api.keyset.create_autocmd.callback_args
+autocmd.emit = function(event, state)
   debug.log(' ')
   debug.log(string.format('>>> %s', event))
   autocmd.events[event] = autocmd.events[event] or {}
   for _, callback in ipairs(autocmd.events[event]) do
-    callback()
+    callback(state)
   end
 end
 
