@@ -363,7 +363,19 @@ local on_insert_enter = function()
     cmp.core:on_change('InsertEnter')
   end
 end
-autocmd.subscribe({ 'CmdlineEnter' }, async.debounce_next_tick(on_insert_enter))
+
+-- Separate handler for CmdlineEnter that doesn't debounce
+-- This ensures we register cmdline mappings immediately while still in cmdline mode
+local on_cmdline_enter = function()
+  if config.enabled() then
+    cmp.config.compare.scopes:update()
+    cmp.config.compare.locality:update()
+    cmp.core:prepare()
+    cmp.core:on_change('InsertEnter')
+  end
+end
+
+autocmd.subscribe({ 'CmdlineEnter' }, on_cmdline_enter)
 autocmd.subscribe({ 'InsertEnter' }, async.debounce_next_tick_by_keymap(on_insert_enter))
 
 -- async.throttle is needed for performance. The mapping `:<C-u>...<CR>` will fire `CmdlineChanged` for each character.
