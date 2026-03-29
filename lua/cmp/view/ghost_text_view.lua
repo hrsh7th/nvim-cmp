@@ -62,9 +62,13 @@ ghost_text_view.new = function()
 
       local text = self.text_gen(self, line, col)
       if #text > 0 then
+        local text_hl = 'Comment'
+        if type(c) == 'table' then
+          text_hl = require('cmp').core.view:get_selected_entry() and (c.hl_group_selected or c.hl_group) or c.hl_group
+        end
         local virt_lines = {}
         for _, l in ipairs(vim.fn.split(text, '\n')) do
-          table.insert(virt_lines, { { l, type(c) == 'table' and c.hl_group or 'Comment' } })
+          table.insert(virt_lines, { { l, text_hl} })
         end
         local first_line = table.remove(virt_lines, 1)
         self.extmark_buf = vim.api.nvim_get_current_buf()
@@ -87,7 +91,7 @@ end
 ---  of character differences instead of just byte difference.
 ghost_text_view.text_gen = function(self, line, cursor_col)
   local word = self.entry:get_insert_text()
-  if self.entry:get_completion_item().insertTextFormat == types.lsp.InsertTextFormat.Snippet then
+  if self.entry.completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
     word = tostring(snippet.parse(word))
   end
   local word_clen = vim.fn.strchars(word, true)
