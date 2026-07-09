@@ -270,4 +270,25 @@ compare.scopes = setmetatable({
   end,
 })
 
+---key_order: Return a comparator that orders entries by a fixed key list.
+---The key function maps an entry to a key, and the list defines the desired order.
+---@generic K
+---@param key_fn fun(entry: cmp.Entry): K|nil
+---@param keys K[]
+---@return cmp.ComparatorFunction
+compare.key_order = function(key_fn, keys)
+  local index = {}
+  for i, key in ipairs(keys) do
+    index[key] = i
+  end
+  return function(entry1, entry2)
+    local i1 = index[key_fn(entry1)]
+    local i2 = index[key_fn(entry2)]
+    if i1 ~= nil and i2 ~= nil and i1 ~= i2 then
+      return i1 < i2
+    end
+    return nil
+  end
+end
+
 return compare
