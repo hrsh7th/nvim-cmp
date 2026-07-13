@@ -606,6 +606,12 @@ matching.disallow_symbol_nonprefix_matching
   `boolean`
   Whether to allow symbols in matches if the match is not a prefix match.
 
+                                cmp-config.matching.disallow_case_insensetive_matching
+matching.disallow_case_insensetive_matching
+  `boolean`
+  Whether to perform a case sensetive matching and return 0 score if the cases
+  don't match.
+
                                             *cmp-config.sorting.priority_weight*
 sorting.priority_weight~
   `number`

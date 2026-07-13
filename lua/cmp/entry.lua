@@ -411,7 +411,17 @@ end
 entry.match = function(self, input, matching_config)
   -- https://www.lua.org/pil/11.6.html
   -- do not use '..' to allocate multiple strings
-  local cache_key = string.format('%s:%d:%d:%d:%d:%d:%d', input, self.resolved_completion_item and 1 or 0, matching_config.disallow_fuzzy_matching and 1 or 0, matching_config.disallow_partial_matching and 1 or 0, matching_config.disallow_prefix_unmatching and 1 or 0, matching_config.disallow_partial_fuzzy_matching and 1 or 0, matching_config.disallow_symbol_nonprefix_matching and 1 or 0)
+
+  local cache_key = string.format('%s:%d:%d:%d:%d:%d:%d:%d',
+    input,
+    self.resolved_completion_item and 1 or 0,
+    matching_config.disallow_fuzzy_matching and 1 or 0,
+    matching_config.disallow_partial_matching and 1 or 0,
+    matching_config.disallow_prefix_unmatching and 1 or 0,
+    matching_config.disallow_partial_fuzzy_matching and 1 or 0,
+    matching_config.disallow_symbol_nonprefix_matching and 1 or 0,
+    matching_config.disallow_case_insensetive_matching and 1 or 0)
+
   local matched = self.match_cache:get(cache_key)
   if matched then
     if self.match_view_args_ret and self.match_view_args_ret.input ~= input then
@@ -435,6 +445,7 @@ entry._match = function(self, input, matching_config)
     disallow_partial_matching = matching_config.disallow_partial_matching,
     disallow_prefix_unmatching = matching_config.disallow_prefix_unmatching,
     disallow_symbol_nonprefix_matching = matching_config.disallow_symbol_nonprefix_matching,
+    disallow_case_insensentive_matching = matching_config.disallow_case_insensetive_matching,
     synonyms = {
       self.word,
       self.completion_item.label,

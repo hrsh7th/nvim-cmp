@@ -62,6 +62,7 @@ return function()
       disallow_partial_matching = false,
       disallow_prefix_unmatching = false,
       disallow_symbol_nonprefix_matching = true,
+      disallow_case_insensetive_matching = false
     },
 
     sorting = {
