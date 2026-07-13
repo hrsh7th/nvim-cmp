@@ -170,7 +170,9 @@ end
 ---Wait and callback for consuming next keymap.
 async.debounce_next_tick_by_keymap = function(callback)
   return function()
-    feedkeys.call('', '', callback)
+    -- Use vim.schedule instead of feedkeys to prevent command text insertion
+    -- into buffers
+    vim.schedule(callback)
   end
 end
 
