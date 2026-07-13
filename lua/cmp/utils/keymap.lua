@@ -158,7 +158,7 @@ keymap.fallback = function(bufnr, mode, map)
         script = map.script,
         nowait = map.nowait,
         silent = map.silent and mode ~= 'c',
-        replace_keycodes = map.replace_keycodes,
+        replace_keycodes = map.replace_keycodes == 1,
       })
       vim.api.nvim_feedkeys(keymap.t(fallback_lhs), 'im', true)
     elseif map.callback then
@@ -193,7 +193,7 @@ keymap.solve = function(bufnr, mode, map)
       script = true,
       nowait = map.nowait,
       silent = map.silent and mode ~= 'c',
-      replace_keycodes = map.replace_keycodes,
+      replace_keycodes = map.replace_keycodes == 1,
     })
     return { keys = keymap.t(recursive) .. string.gsub(rhs, '^' .. vim.pesc(lhs), ''), mode = 'im' }
   end
