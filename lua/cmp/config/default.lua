@@ -111,6 +111,8 @@ return function()
       completion = {
         border = window.get_border(),
         winhighlight = 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None',
+        scrollbar_winhighlight = 'EndOfBuffer:PmenuSbar,NormalFloat:PmenuSbar',
+        scrollbar_thumb_winhighlight = 'EndOfBuffer:PmenuThumb,NormalFloat:PmenuThumb',
         winblend = vim.o.pumblend,
         scrolloff = 0,
         col_offset = 0,
@@ -122,6 +124,8 @@ return function()
         max_width = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
         border = window.get_border(),
         winhighlight = 'FloatBorder:NormalFloat',
+        scrollbar_winhighlight = 'EndOfBuffer:PmenuSbar,NormalFloat:PmenuSbar',
+        scrollbar_thumb_winhighlight = 'EndOfBuffer:PmenuThumb,NormalFloat:PmenuThumb',
         winblend = vim.o.pumblend,
         col_offset = 0,
       },

@@ -754,6 +754,18 @@ window.{completion,documentation}.winhighlight~
   Specify the window's winhighlight option.
   See |nvim_open_win|.
 
+                     *cmp-config.window.{completion,documentation}.scrollbar_winhighlight*
+window.{completion,documentation}.scrollbar_winhighlight~
+  `string | nil`
+  Specify the winhighlight option for the scrollbar background.
+  See |nvim_open_win|.
+
+                     *cmp-config.window.{completion,documentation}.scrollbar_thumb_winhighlight*
+window.{completion,documentation}.scrollbar_thumb_winhighlight~
+  `string | nil`
+  Specify the winhighlight option for the scrollbar thumb.
+  See |nvim_open_win|.
+
                      *cmp-config.window.{completion,documentation}.winblend*
 window.{completion,documentation}.winblend~
   `string | cmp.WinhighlightConfig`
