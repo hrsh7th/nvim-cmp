@@ -372,19 +372,20 @@ local on_text_changed = function()
     cmp.core:on_change('TextChanged')
   end
 end
-local lp = { 0, 0, buf = 0 }
+local lp = { 0, 0, buf = 0, text = '' }
 autocmd.subscribe({ 'TextChangedI', 'TextChangedP' }, function(s)
   local pos = vim.api.nvim_win_get_cursor(0)
   pos.buf = s.buf
-  if
-    s.buf ~= lp.buf -- same buf
-    or not (lp[1] == pos[1] and lp[2] + 1 == pos[2]) -- same line
-    -- or not (lp[1] + 1 == pos[1] and lp[2] == 0) -- beginning of next line
-  then
-    lp = pos
-    return
-  else
-    lp = pos
+  pos.text = vim.api.nvim_get_current_line()
+  local is_new_text = s.buf ~= lp.buf -- different buf (may show cmp for 1st delete, but better than hiding for 1st input)
+    or (lp[1] == pos[1] - 1 and lp[2] == 0) -- beginning of next line
+    or (
+      lp[1] == pos[1] -- same line
+      and lp.text:sub(1, pos[2]) ~= pos.text:sub(1, pos[2])
+    )
+
+  lp = pos
+  if is_new_text then
     on_text_changed()
   end
 end)
