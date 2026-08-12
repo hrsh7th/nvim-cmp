@@ -26,7 +26,7 @@ cmp.TriggerEvent = {
   TextChanged = 'TextChanged',
 }
 
----@alias cmp.PreselectMode 'item' | 'None'
+---@alias cmp.PreselectMode 'item' | 'none'
 cmp.PreselectMode = {
   Item = 'item',
   None = 'none',
