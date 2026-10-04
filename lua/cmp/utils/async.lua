@@ -1,4 +1,3 @@
-local feedkeys = require('cmp.utils.feedkeys')
 local config = require('cmp.config')
 
 local async = {}
@@ -6,7 +5,7 @@ local async = {}
 ---@class cmp.AsyncThrottle
 ---@field public running boolean
 ---@field public timeout integer
----@field public sync function(self: cmp.AsyncThrottle, timeout: integer|nil)
+---@field public sync fun(self: cmp.AsyncThrottle, timeout: integer|nil)
 ---@field public stop function
 ---@field public __call function
 
@@ -170,7 +169,9 @@ end
 ---Wait and callback for consuming next keymap.
 async.debounce_next_tick_by_keymap = function(callback)
   return function()
-    feedkeys.call('', '', callback)
+    -- Use vim.schedule instead of feedkeys to prevent the command text from
+    -- being inserted into the buffer.
+    vim.schedule(callback)
   end
 end
 

@@ -1,4 +1,5 @@
 local char = require('cmp.utils.char')
+local pattern = require('cmp.utils.pattern')
 
 local matcher = {}
 
@@ -81,7 +82,7 @@ end
 ---Match entry
 ---@param input string
 ---@param word string
----@param option { synonyms: string[], disallow_fullfuzzy_matching: boolean, disallow_fuzzy_matching: boolean, disallow_partial_fuzzy_matching: boolean, disallow_partial_matching: boolean, disallow_prefix_unmatching: boolean, disallow_symbol_nonprefix_matching: boolean }
+---@param option { synonyms: string[], disallow_fullfuzzy_matching: boolean, disallow_fuzzy_matching: boolean, disallow_partial_fuzzy_matching: boolean, disallow_partial_matching: boolean, disallow_prefix_unmatching: boolean, disallow_symbol_nonprefix_matching: boolean, disallow_case_insensitive_matching: boolean, keyword_pattern: string|nil }
 ---@return integer, table
 matcher.match = function(input, word, option)
   option = option or {}
@@ -98,8 +99,22 @@ matcher.match = function(input, word, option)
 
   -- Check prefix matching.
   if option.disallow_prefix_unmatching then
-    if not char.match(string.byte(input, 1), string.byte(word, 1)) then
+    if not char.match(string.byte(input, 1), string.byte(word, 1), option.disallow_case_insensitive_matching) then
       return 0, {}
+    end
+  end
+
+  -- The source keyword pattern decides which bytes are symbols, so symbol
+  -- matching follows the source instead of the built-in classification.
+  local is_symbol = char.is_symbol
+  if option.keyword_pattern then
+    -- Cache per byte: the regex then runs at most once per character.
+    local symbol_bytes = {}
+    is_symbol = function(byte)
+      if symbol_bytes[byte] == nil then
+        symbol_bytes[byte] = pattern.matchstr(option.keyword_pattern, string.char(byte)) == nil
+      end
+      return symbol_bytes[byte]
     end
   end
 
@@ -111,7 +126,7 @@ matcher.match = function(input, word, option)
   local word_bound_index = 1
   local no_symbol_match = false
   while input_end_index <= #input and word_index <= #word do
-    local m = matcher.find_match_region(input, input_start_index, input_end_index, word, word_index)
+    local m = matcher.find_match_region(input, input_start_index, input_end_index, word, word_index, option, is_symbol)
     if m and input_end_index <= m.input_match_end then
       m.index = word_bound_index
       input_start_index = m.input_match_start + 1
@@ -150,7 +165,7 @@ matcher.match = function(input, word, option)
       prefix = true
       local o = 1
       for i = matches[1].input_match_start, matches[1].input_match_end do
-        if not char.match(string.byte(synonym, o), string.byte(input, i)) then
+        if not char.match(string.byte(synonym, o), string.byte(input, i), option.disallow_case_insensitive_matching) then
           prefix = false
           break
         end
@@ -212,7 +227,7 @@ matcher.fuzzy = function(input, word, matches, option)
     local word_offset = 0
     local word_index = char.get_next_semantic_index(word, curr_match.word_match_end)
     while word_offset + word_index < next_match.word_match_start and input_index <= #input do
-      if char.match(string.byte(word, word_index + word_offset), string.byte(input, input_index)) then
+      if char.match(string.byte(word, word_index + word_offset), string.byte(input, input_index), option.disallow_case_insensitive_matching) then
         input_index = input_index + 1
         word_offset = word_offset + 1
       else
@@ -233,7 +248,7 @@ matcher.fuzzy = function(input, word, matches, option)
   local match_count = 0
   while word_offset + word_index <= #word and input_index <= #input do
     local c1, c2 = string.byte(word, word_index + word_offset), string.byte(input, input_index)
-    if char.match(c1, c2) then
+    if char.match(c1, c2, option.disallow_case_insensitive_matching) then
       if not matched then
         input_match_start = input_index
         word_match_start = word_index + word_offset
@@ -277,10 +292,10 @@ matcher.fuzzy = function(input, word, matches, option)
 end
 
 --- find_match_region
-matcher.find_match_region = function(input, input_start_index, input_end_index, word, word_index)
+matcher.find_match_region = function(input, input_start_index, input_end_index, word, word_index, option, is_symbol)
   -- determine input position ( woroff -> word_offset )
   while input_start_index < input_end_index do
-    if char.match(string.byte(input, input_end_index), string.byte(word, word_index)) then
+    if char.match(string.byte(input, input_end_index), string.byte(word, word_index), option.disallow_case_insensitive_matching) then
       break
     end
     input_end_index = input_end_index - 1
@@ -300,7 +315,7 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
   while input_index <= #input and word_index + word_offset <= #word do
     local c1 = string.byte(input, input_index)
     local c2 = string.byte(word, word_index + word_offset)
-    if char.match(c1, c2) then
+    if char.match(c1, c2, option.disallow_case_insensitive_matching) then
       -- Match start.
       if input_match_start == -1 then
         input_match_start = input_index
@@ -309,7 +324,7 @@ matcher.find_match_region = function(input, input_start_index, input_end_index, 
       strict_count = strict_count + (c1 == c2 and 1 or 0)
       match_count = match_count + 1
       word_offset = word_offset + 1
-      no_symbol_match = no_symbol_match or char.is_symbol(c1)
+      no_symbol_match = no_symbol_match or is_symbol(c1)
     else
       -- Match end (partial region)
       if input_match_start ~= -1 then

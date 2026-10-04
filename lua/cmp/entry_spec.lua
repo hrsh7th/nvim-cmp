@@ -1,4 +1,5 @@
 local spec = require('cmp.utils.spec')
+local default_config = require('cmp.config.default')
 
 local entry = require('cmp.entry')
 
@@ -362,5 +363,31 @@ describe('entry', function()
     })
     assert.are.equal(e.offset, 12)
     assert.are.equal(e:get_vim_item(e.offset).word, 'getPath()')
+  end)
+
+  it('[#1832] table detail does not break documentation', function()
+    local state = spec.state('foo', 1, 4)
+    local e = entry.new(state.manual(), state.source(), {
+      label = 'foo',
+      detail = { 'first line', 'second line' },
+    })
+    local docs = e:get_documentation()
+    assert.is.truthy(#docs > 0)
+    assert.is.truthy(table.concat(docs, '\n'):find('first line', 1, true))
+  end)
+
+  it('[#1975] keyword pattern controls symbol matching', function()
+    local state = spec.state('foo#b', 1, 6)
+    local e = entry.new(state.manual(), state.source(), {
+      label = 'foo#bar',
+    })
+    local matching = default_config().matching
+
+    -- '#' is a symbol for the built-in classification, so the match is rejected.
+    assert.are.equal(0, e:match('#b', matching).score)
+
+    -- '#' is a keyword character for this pattern, so the match is allowed.
+    -- The pattern is part of the match cache key, so this recomputes.
+    assert.is.truthy(e:match('#b', matching, '[0-9A-Za-z_#]\\+').score >= 1)
   end)
 end)

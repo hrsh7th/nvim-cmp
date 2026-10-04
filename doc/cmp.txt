@@ -601,10 +601,16 @@ matching.disallow_prefix_unmatching~
   `boolean`
   Whether to allow prefix unmatching.
 
-                                cmp-config.matching.disallow_symbol_nonprefix_matching
-matching.disallow_symbol_nonprefix_matching
+                                *cmp-config.matching.disallow_symbol_nonprefix_matching*
+matching.disallow_symbol_nonprefix_matching~
   `boolean`
   Whether to allow symbols in matches if the match is not a prefix match.
+
+                          *cmp-config.matching.disallow_case_insensitive_matching*
+matching.disallow_case_insensitive_matching~
+  `boolean`
+  Whether to reject matches that differ only by letter case.
+  When `true`, the input must match the entry's letter case exactly.
 
                                             *cmp-config.sorting.priority_weight*
 sorting.priority_weight~
@@ -662,6 +668,11 @@ sources[n].max_item_count~
   `number`
   The source-specific maximum item count option
   Note: This is applied before sorting, so items that aren't well-matched may be selected.
+
+                                                 *cmp-config.sources[n].enabled*
+sources[n].enabled~
+  `boolean | fun(ctx: cmp.Context): boolean`
+  Whether this source should be enabled.
 
                                              *cmp-config.sources[n].group_index*
 sources[n].group_index~
@@ -754,6 +765,18 @@ window.{completion,documentation}.winhighlight~
   Specify the window's winhighlight option.
   See |nvim_open_win|.
 
+           *cmp-config.window.{completion,documentation}.scrollbar_winhighlight*
+window.{completion,documentation}.scrollbar_winhighlight~
+  `string | nil`
+  Specify the winhighlight option for the scrollbar background.
+  See |nvim_open_win|.
+
+     *cmp-config.window.{completion,documentation}.scrollbar_thumb_winhighlight*
+window.{completion,documentation}.scrollbar_thumb_winhighlight~
+  `string | nil`
+  Specify the winhighlight option for the scrollbar thumb.
+  See |nvim_open_win|.
+
                      *cmp-config.window.{completion,documentation}.winblend*
 window.{completion,documentation}.winblend~
   `string | cmp.WinhighlightConfig`
@@ -809,8 +832,9 @@ window.documentation.max_height~
 
                                             *cmp-config.experimental.ghost_text*
 experimental.ghost_text~
-  `boolean | { hl_group = string }`
+  `boolean | { hl_group = string, hl_group_selected = string | nil }`
   Whether to enable the ghost_text feature.
+  When `hl_group_selected` is set, the ghost text uses it while an item is selected.
 
 ==============================================================================
 Config Helper                                                *cmp-config-helper*

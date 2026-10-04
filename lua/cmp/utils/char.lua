@@ -102,11 +102,15 @@ char.get_next_semantic_index = function(text, current_index)
   return #text + 1
 end
 
----Ignore case match
+---Match two bytes, ignoring case unless `case_sensitive` is set.
 ---@param byte1 integer
 ---@param byte2 integer
+---@param case_sensitive boolean|nil
 ---@return boolean
-char.match = function(byte1, byte2)
+char.match = function(byte1, byte2, case_sensitive)
+  if case_sensitive then
+    return byte1 == byte2
+  end
   if not char.is_alpha(byte1) or not char.is_alpha(byte2) then
     return byte1 == byte2
   end

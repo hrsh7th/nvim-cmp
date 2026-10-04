@@ -38,9 +38,9 @@ end
 ---@param c cmp.ConfigSchema
 ---@param bufnr integer
 config.set_buffer = function(c, bufnr)
-  local revision = (config.buffers[bufnr] or {}).revision or 1
-  config.buffers[bufnr] = c or {}
-  config.buffers[bufnr].revision = revision + 1
+  local prev = config.buffers[bufnr] or {}
+  config.buffers[bufnr] = misc.merge(c or {}, prev)
+  config.buffers[bufnr].revision = (prev.revision or 1) + 1
 end
 
 ---Set configuration for filetype
@@ -48,9 +48,9 @@ end
 ---@param filetypes string[]|string
 config.set_filetype = function(c, filetypes)
   for _, filetype in ipairs(type(filetypes) == 'table' and filetypes or { filetypes }) do
-    local revision = (config.filetypes[filetype] or {}).revision or 1
-    config.filetypes[filetype] = c or {}
-    config.filetypes[filetype].revision = revision + 1
+    local prev = config.filetypes[filetype] or {}
+    config.filetypes[filetype] = misc.merge(c or {}, prev)
+    config.filetypes[filetype].revision = (prev.revision or 1) + 1
   end
 end
 
@@ -59,9 +59,9 @@ end
 ---@param cmdtypes string|string[]
 config.set_cmdline = function(c, cmdtypes)
   for _, cmdtype in ipairs(type(cmdtypes) == 'table' and cmdtypes or { cmdtypes }) do
-    local revision = (config.cmdline[cmdtype] or {}).revision or 1
-    config.cmdline[cmdtype] = c or {}
-    config.cmdline[cmdtype].revision = revision + 1
+    local prev = config.cmdline[cmdtype] or {}
+    config.cmdline[cmdtype] = misc.merge(c or {}, prev)
+    config.cmdline[cmdtype].revision = (prev.revision or 1) + 1
   end
 end
 

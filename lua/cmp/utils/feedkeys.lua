@@ -46,7 +46,9 @@ feedkeys.run = function(id)
   if feedkeys.call.callbacks[id] then
     local ok, err = pcall(feedkeys.call.callbacks[id])
     if not ok then
-      vim.notify(err, vim.log.levels.ERROR)
+      -- Busted failures arrive as tables with a __tostring metamethod, but
+      -- notify() reports the message through :echoerr and needs a string.
+      vim.notify(tostring(err), vim.log.levels.ERROR)
     end
     feedkeys.call.callbacks[id] = nil
   end

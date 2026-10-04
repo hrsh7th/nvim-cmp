@@ -32,6 +32,24 @@ describe('feedkeys', function()
     })
   end)
 
+  it('callback error', function()
+    feedkeys.call('i', 'n', function()
+      error(setmetatable({}, {
+        __type = 'failure',
+        __tostring = function()
+          return 'callback failed'
+        end,
+      }))
+    end)
+    -- The notification raises through the flush; it must carry the error's
+    -- string form instead of dying inside nvim_echo on a non-string chunk.
+    local ok, err = pcall(vim.fn.feedkeys, '', 'x')
+    assert.is.falsy(ok)
+    local message = tostring(err)
+    assert.is.truthy(string.find(message, 'callback failed', 1, true))
+    assert.is.falsy(string.find(message, 'Invalid chunk', 1, true))
+  end)
+
   it('testability', function()
     feedkeys.call('i', 'n', function()
       feedkeys.call('', 'n', function()

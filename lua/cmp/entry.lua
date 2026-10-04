@@ -327,7 +327,7 @@ entry._get_vim_item = function(self, suggest_offset)
   if #(completion_item.additionalTextEdits or {}) > 0 then
     is_expandable = true
   elseif completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
-    is_expandable = self:get_insert_text() ~= word
+    is_expandable = true
   elseif completion_item.kind == types.lsp.CompletionItemKind.Snippet then
     is_expandable = true
   end
@@ -407,11 +407,12 @@ end
 ---Match line.
 ---@param input string
 ---@param matching_config cmp.MatchingConfig
+---@param keyword_pattern string|nil
 ---@return { score: integer, matches: table[] }
-entry.match = function(self, input, matching_config)
+entry.match = function(self, input, matching_config, keyword_pattern)
   -- https://www.lua.org/pil/11.6.html
   -- do not use '..' to allocate multiple strings
-  local cache_key = string.format('%s:%d:%d:%d:%d:%d:%d', input, self.resolved_completion_item and 1 or 0, matching_config.disallow_fuzzy_matching and 1 or 0, matching_config.disallow_partial_matching and 1 or 0, matching_config.disallow_prefix_unmatching and 1 or 0, matching_config.disallow_partial_fuzzy_matching and 1 or 0, matching_config.disallow_symbol_nonprefix_matching and 1 or 0)
+  local cache_key = string.format('%s:%d:%d:%d:%d:%d:%d:%d:%s', input, self.resolved_completion_item and 1 or 0, matching_config.disallow_fuzzy_matching and 1 or 0, matching_config.disallow_partial_matching and 1 or 0, matching_config.disallow_prefix_unmatching and 1 or 0, matching_config.disallow_partial_fuzzy_matching and 1 or 0, matching_config.disallow_symbol_nonprefix_matching and 1 or 0, matching_config.disallow_case_insensitive_matching and 1 or 0, keyword_pattern or '')
   local matched = self.match_cache:get(cache_key)
   if matched then
     if self.match_view_args_ret and self.match_view_args_ret.input ~= input then
@@ -421,13 +422,13 @@ entry.match = function(self, input, matching_config)
     end
     return matched
   end
-  matched = self:_match(input, matching_config)
+  matched = self:_match(input, matching_config, keyword_pattern)
   self.match_cache:set(cache_key, matched)
   return matched
 end
 
 ---@package
-entry._match = function(self, input, matching_config)
+entry._match = function(self, input, matching_config, keyword_pattern)
   local completion_item = self.completion_item
   local option = {
     disallow_fuzzy_matching = matching_config.disallow_fuzzy_matching,
@@ -435,6 +436,8 @@ entry._match = function(self, input, matching_config)
     disallow_partial_matching = matching_config.disallow_partial_matching,
     disallow_prefix_unmatching = matching_config.disallow_prefix_unmatching,
     disallow_symbol_nonprefix_matching = matching_config.disallow_symbol_nonprefix_matching,
+    disallow_case_insensitive_matching = matching_config.disallow_case_insensitive_matching,
+    keyword_pattern = keyword_pattern,
     synonyms = {
       self.word,
       self.completion_item.label,
@@ -512,7 +515,12 @@ entry.get_documentation = function(self)
   local documents = {}
 
   -- detail
-  if item.detail and item.detail ~= '' then
+  -- Some servers send `detail` as a table of lines instead of a string.
+  local detail = item.detail
+  if type(detail) == 'table' then
+    detail = detail[1]
+  end
+  if detail and detail ~= '' then
     local ft = self.context.filetype
     local dot_index = string.find(ft, '%.')
     if dot_index ~= nil then
@@ -520,7 +528,7 @@ entry.get_documentation = function(self)
     end
     table.insert(documents, {
       kind = types.lsp.MarkupKind.Markdown,
-      value = ('```%s\n%s\n```'):format(ft, str.trim(item.detail)),
+      value = ('```%s\n%s\n```'):format(ft, str.trim(detail)),
     })
   end
 

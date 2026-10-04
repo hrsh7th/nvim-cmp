@@ -62,9 +62,13 @@ ghost_text_view.new = function()
 
       local text = self.text_gen(self, line, col)
       if #text > 0 then
+        local hl_group = type(c) == 'table' and c.hl_group or 'Comment'
+        if type(c) == 'table' and c.hl_group_selected and require('cmp').core.view:get_selected_entry() then
+          hl_group = c.hl_group_selected
+        end
         local virt_lines = {}
-        for _, l in ipairs(vim.fn.split(text, '\n')) do
-          table.insert(virt_lines, { { l, type(c) == 'table' and c.hl_group or 'Comment' } })
+        for _, l in ipairs(vim.fn.split(text, '\n', true)) do
+          table.insert(virt_lines, { { l, hl_group } })
         end
         local first_line = table.remove(virt_lines, 1)
         self.extmark_buf = vim.api.nvim_get_current_buf()

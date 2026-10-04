@@ -26,7 +26,7 @@ cmp.TriggerEvent = {
   TextChanged = 'TextChanged',
 }
 
----@alias cmp.PreselectMode 'item' | 'None'
+---@alias cmp.PreselectMode 'item' | 'none'
 cmp.PreselectMode = {
   Item = 'item',
   None = 'none',
@@ -46,6 +46,8 @@ cmp.ItemField = {
 ---@class cmp.ConfirmOption
 ---@field public behavior cmp.ConfirmBehavior
 ---@field public commit_character? string
+---@field public select? boolean
+---@field public selectIfUnique? boolean
 
 ---@class cmp.SelectOption
 ---@field public behavior cmp.SelectBehavior
@@ -123,6 +125,8 @@ cmp.ItemField = {
 ---@class cmp.WindowOptions
 ---@field public border? string|string[]
 ---@field public winhighlight? string
+---@field public scrollbar_winhighlight? string
+---@field public scrollbar_thumb_winhighlight? string
 ---@field public winblend? number
 ---@field public zindex? integer|nil
 
@@ -151,6 +155,7 @@ cmp.ItemField = {
 ---@field public disallow_partial_matching boolean
 ---@field public disallow_prefix_unmatching boolean
 ---@field public disallow_symbol_nonprefix_matching boolean
+---@field public disallow_case_insensitive_matching boolean
 
 ---@class cmp.SortingConfig
 ---@field public priority_weight integer
@@ -163,15 +168,18 @@ cmp.ItemField = {
 
 ---@class cmp.SnippetConfig
 ---@field public expand fun(args: cmp.SnippetExpansionParams)
+---@field public hide_snippets boolean
 
 ---@class cmp.ExperimentalConfig
 ---@field public ghost_text cmp.GhostTextConfig|boolean
 
 ---@class cmp.GhostTextConfig
 ---@field hl_group string
+---@field hl_group_selected string|nil
 
 ---@class cmp.SourceConfig
 ---@field public name string
+---@field public enabled nil|boolean|fun(ctx: cmp.Context): boolean
 ---@field public option table|nil
 ---@field public priority integer|nil
 ---@field public trigger_characters string[]|nil
@@ -179,7 +187,7 @@ cmp.ItemField = {
 ---@field public keyword_length integer|nil
 ---@field public max_item_count integer|nil
 ---@field public group_index integer|nil
----@field public entry_filter nil|function(entry: cmp.Entry, ctx: cmp.Context): boolean
+---@field public entry_filter nil|fun(entry: cmp.Entry, ctx: cmp.Context): boolean
 
 ---@class cmp.ViewConfig
 ---@field public entries? cmp.EntriesViewConfig

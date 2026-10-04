@@ -93,6 +93,22 @@ describe('matcher', function()
     assert.is.truthy(matcher.match('foo_', 'b foo_bar', { disallow_symbol_nonprefix_matching = false }) >= 1)
   end)
 
+  it('keyword_pattern', function()
+    -- '#' is a symbol for the built-in classification, so the non-prefix match is rejected.
+    assert.is.truthy(matcher.match('#b', 'foo#bar', { disallow_symbol_nonprefix_matching = true }) == 0)
+
+    -- '#' is a keyword character for this pattern, so the match is allowed.
+    assert.is.truthy(matcher.match('#b', 'foo#bar', { disallow_symbol_nonprefix_matching = true, keyword_pattern = '[0-9A-Za-z_#]\\+' }) >= 1)
+  end)
+
+  it('disallow_case_insensitive_matching', function()
+    assert.is.truthy(matcher.match('Test', 'test', { disallow_case_insensitive_matching = true }) == 0)
+    assert.is.truthy(matcher.match('Test', 'test', { disallow_case_insensitive_matching = false }) >= 1)
+    assert.is.truthy(matcher.match('test', 'Test', { disallow_case_insensitive_matching = true }) == 0)
+    assert.is.truthy(matcher.match('test', 'Test', { disallow_case_insensitive_matching = false }) >= 1)
+    assert.is.truthy(matcher.match('Test', 'Test', { disallow_case_insensitive_matching = true }) >= 1)
+  end)
+
   it('debug', function()
     matcher.debug = function(...)
       print(vim.inspect({ ... }))

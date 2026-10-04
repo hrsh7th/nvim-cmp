@@ -234,16 +234,27 @@ cmp.close_docs = cmp.sync(function()
   end
 end)
 
+---Toggle the documentation window.
+cmp.toggle_docs = cmp.sync(function()
+  if not cmp.visible_docs() then
+    cmp.core.view:open_docs()
+  else
+    cmp.core.view:close_docs()
+  end
+  return true
+end)
+
 ---Confirm completion
 cmp.confirm = cmp.sync(function(option, callback)
   option = option or {}
   option.select = option.select or false
+  option.selectIfUnique = option.selectIfUnique or false
   option.behavior = option.behavior or cmp.get_config().confirmation.default_behavior or cmp.ConfirmBehavior.Insert
   callback = callback or function() end
 
   if cmp.core.view:visible() then
     local e = cmp.core.view:get_selected_entry()
-    if not e and option.select then
+    if not e and (option.select or (option.selectIfUnique and #cmp.core.view:get_entries() == 1)) then
       e = cmp.core.view:get_first_entry()
     end
     if e then
@@ -355,11 +366,17 @@ cmp.setup = setmetatable({
 })
 
 -- In InsertEnter autocmd, vim will detects mode=normal unexpectedly.
+local prepared = false
 local on_insert_enter = function()
+  -- Register the keymaps at least once, even when cmp is disabled, so they
+  -- exist if cmp becomes enabled without a new InsertEnter.
+  if not prepared or config.enabled() then
+    prepared = true
+    cmp.core:prepare()
+  end
   if config.enabled() then
     cmp.config.compare.scopes:update()
     cmp.config.compare.locality:update()
-    cmp.core:prepare()
     cmp.core:on_change('InsertEnter')
   end
 end
@@ -372,19 +389,20 @@ local on_text_changed = function()
     cmp.core:on_change('TextChanged')
   end
 end
-local lp = { 0, 0, buf = 0 }
+local lp = { 0, 0, buf = 0, text = '' }
 autocmd.subscribe({ 'TextChangedI', 'TextChangedP' }, function(s)
   local pos = vim.api.nvim_win_get_cursor(0)
   pos.buf = s.buf
-  if
-    s.buf ~= lp.buf -- same buf
-    or not (lp[1] == pos[1] and lp[2] + 1 == pos[2]) -- same line
-    -- or not (lp[1] + 1 == pos[1] and lp[2] == 0) -- beginning of next line
-  then
-    lp = pos
-    return
-  else
-    lp = pos
+  pos.text = vim.api.nvim_get_current_line()
+  local is_new_text = s.buf ~= lp.buf -- different buf (may show cmp for 1st delete, but better than hiding for 1st input)
+    or (lp[1] == pos[1] - 1 and lp[2] == 0) -- beginning of next line
+    or (
+      lp[1] == pos[1] -- same line
+      and lp.text:sub(1, pos[2]) ~= pos.text:sub(1, pos[2])
+    )
+
+  lp = pos
+  if is_new_text then
     on_text_changed()
   end
 end)

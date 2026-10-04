@@ -85,11 +85,27 @@ source.get_fetching_time = function(self)
   return 100 * 1000 -- return pseudo time if source isn't fetching.
 end
 
+---Return whether this source is enabled
+---@return boolean
+source.enabled = function(self)
+  local enabled = self:get_source_config().enabled
+  if type(enabled) == 'boolean' then
+    return enabled
+  elseif type(enabled) == 'function' then
+    return enabled(self.context)
+  end
+  return true
+end
+
 ---Return filtered entries
 ---@param ctx cmp.Context
 ---@return cmp.Entry[]
 source.get_entries = function(self, ctx)
   if self.offset == -1 then
+    return {}
+  end
+
+  if not self:enabled() then
     return {}
   end
 
@@ -112,6 +128,8 @@ source.get_entries = function(self, ctx)
   ---@type cmp.Entry[]
   local entries = {}
   local matching_config = self:get_matching_config()
+  local keyword_pattern = self:get_keyword_pattern()
+  local hide_snippets = config.get().snippet.hide_snippets
   local filtering_context_budget = config.get().performance.filtering_context_budget / 1000
 
   local stime = (vim.uv or vim.loop).hrtime() / 1000000
@@ -121,14 +139,15 @@ source.get_entries = function(self, ctx)
       inputs[o] = string.sub(ctx.cursor_before_line, o)
     end
 
-    local match = e:match(inputs[o], matching_config)
+    local match = e:match(inputs[o], matching_config, keyword_pattern)
     e.score = match.score
     e.exact = false
     if e.score >= 1 then
       e.matches = match.matches
       e.exact = e.filter_text == inputs[o] or e.word == inputs[o]
 
-      if entry_filter(e, ctx) then
+      local show_entry = not hide_snippets or e:get_kind() ~= types.lsp.CompletionItemKind.Snippet
+      if show_entry and entry_filter(e, ctx) then
         entries[#entries + 1] = e
       end
     end
