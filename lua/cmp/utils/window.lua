@@ -138,7 +138,8 @@ window.update = function(self)
 
     if not info.border_info.visible then
       local style = {
-        relative = 'editor',
+        relative = self.style.relative or 'editor',
+        win = self.style.win,
         style = 'minimal',
         width = 1,
         height = self.style.height,
@@ -170,7 +171,8 @@ window.update = function(self)
     end
 
     local style = {
-      relative = 'editor',
+      relative = self.style.relative or 'editor',
+      win = self.style.win,
       style = 'minimal',
       width = 1,
       height = thumb_height,
@@ -235,6 +237,7 @@ window.info = function(self)
   local info = {
     row = self.style.row,
     col = self.style.col,
+    win = self.style.win,
     width = self.style.width + border_info.left + border_info.right,
     height = self.style.height + border_info.top + border_info.bottom,
     inner_width = self.style.width,

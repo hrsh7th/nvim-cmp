@@ -37,7 +37,8 @@ docs_view.open = function(self, e, view, bottom_up)
   end
 
   local border_info = window.get_border_info({ style = documentation })
-  local right_space = vim.o.columns - (view.col + view.width) - 1
+  local columns = view.win and vim.api.nvim_win_get_width(view.win) or vim.o.columns
+  local right_space = columns - (view.col + view.width) - 1
   local left_space = view.col - 1
   local max_width = math.max(left_space, right_space)
   if documentation.max_width > 0 then
@@ -103,7 +104,8 @@ docs_view.open = function(self, e, view, bottom_up)
   self.window:option('winblend', documentation.winblend)
   self.window:option('winhighlight', documentation.winhighlight)
   local style = {
-    relative = 'editor',
+    relative = view.win and 'win' or 'editor',
+    win = view.win,
     style = 'minimal',
     width = width,
     height = height,

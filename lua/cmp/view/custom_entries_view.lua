@@ -187,6 +187,11 @@ custom_entries_view.open = function(self, offset, entries)
   end
   local pos = api.get_screen_cursor()
   local row, col = pos[1], pos[2] - delta - 1
+  -- A GUI's screen can be larger than the editor area: anchor to the window.
+  local win = vim.api.nvim_get_current_win()
+  if not api.is_cmdline_mode() then
+    row, col = vim.fn.winline(), vim.fn.wincol() - delta - 2
+  end
 
   local border_info = window.get_border_info({ style = completion })
   local border_offset_row = border_info.top + border_info.bottom
@@ -231,7 +236,8 @@ custom_entries_view.open = function(self, offset, entries)
   self.entries_win:option('winhighlight', completion.winhighlight)
   self.entries_win:option('scrolloff', completion.scrolloff)
   self.entries_win:open({
-    relative = 'editor',
+    relative = 'win',
+    win = win,
     style = 'minimal',
     row = math.max(0, row),
     col = math.max(0, col + completion.col_offset),
