@@ -123,8 +123,9 @@ end
 ---Replaces all vim.NIL values with nil recursively
 ---@generic T
 ---@param tbl T
+---@param skip_keys? table<any, boolean> Top-level keys to leave untouched.
 ---@return T
-misc.ensure_nil = function(tbl)
+misc.ensure_nil = function(tbl, skip_keys)
   if tbl == misc.none then
     return nil
   end
@@ -133,10 +134,12 @@ misc.ensure_nil = function(tbl)
     return tbl
   end
   for k, v in pairs(tbl) do
-    if v == misc.none then
-      tbl[k] = nil -- clearing an existing field during traversal is allowed
-    elseif type(v) == 'table' then
-      misc.ensure_nil(v)
+    if not (skip_keys and skip_keys[k]) then
+      if v == misc.none then
+        tbl[k] = nil -- clearing an existing field during traversal is allowed
+      elseif type(v) == 'table' then
+        misc.ensure_nil(v)
+      end
     end
   end
   return tbl
