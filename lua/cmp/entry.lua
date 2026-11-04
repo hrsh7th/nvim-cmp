@@ -19,7 +19,7 @@ end
 
 ---@class cmp.Entry
 ---@field public id integer
----@field public cache cmp.Cache
+---@field public cache? cmp.Cache Created lazily, most entries are never displayed.
 ---@field public match_cache cmp.Cache
 ---@field public score integer
 ---@field public exact boolean
@@ -32,7 +32,7 @@ end
 ---@field public completion_item lsp.CompletionItem
 ---@field public item_defaults? lsp.internal.CompletionItemDefaults
 ---@field public resolved_completion_item lsp.CompletionItem|nil
----@field public resolved_callbacks fun()[]
+---@field public resolved_callbacks? fun()[]
 ---@field public resolving boolean
 ---@field public confirmed boolean
 ---@field public insert_range lsp.Range
@@ -44,6 +44,17 @@ end
 local entry = {}
 entry.__index = entry
 
+---@param self cmp.Entry
+---@return cmp.Cache
+local function get_cache(self)
+  local c = self.cache
+  if not c then
+    c = cache.new()
+    self.cache = c
+  end
+  return c
+end
+
 ---Create new entry
 ---@param ctx cmp.Context
 ---@param source cmp.Source
@@ -53,7 +64,6 @@ entry.__index = entry
 entry.new = function(ctx, source, completion_item, item_defaults)
   local self = setmetatable({}, entry)
   self.id = misc.id('entry.new')
-  self.cache = cache.new()
   self.match_cache = cache.new()
   self.score = 0
   self.exact = false
@@ -66,7 +76,6 @@ entry.new = function(ctx, source, completion_item, item_defaults)
   self.source_replace_range = source.default_replace_range
   self.item_defaults = item_defaults
   self.resolved_completion_item = nil
-  self.resolved_callbacks = {}
   self.resolving = false
   self.confirmed = false
   self:_set_completion_item(completion_item)
@@ -194,7 +203,8 @@ entry._get_word = function(self)
     if completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
       word = tostring(snippet.parse(word))
     end
-    local overwrite = self:get_overwrite()
+    -- uncached: called while constructing the entry, keep the cache lazy.
+    local overwrite = entry._get_overwrite(self)
     if 0 < overwrite[2] or completion_item.insertTextFormat == types.lsp.InsertTextFormat.Snippet then
       word = str.get_word(word, string.byte(self.context.cursor_after_line, 1), overwrite[1] or 0)
     end
@@ -212,7 +222,7 @@ end
 ---Get overwrite information
 ---@return integer[]
 entry.get_overwrite = function(self)
-  return self.cache:ensure('get_overwrite', entry._get_overwrite, self)
+  return get_cache(self):ensure('get_overwrite', entry._get_overwrite, self)
 end
 
 ---@package
@@ -238,7 +248,7 @@ end
 ---Get LSP's insert text
 ---@return string
 entry.get_insert_text = function(self)
-  return self.cache:ensure('get_insert_text', entry._get_insert_text, self)
+  return get_cache(self):ensure('get_insert_text', entry._get_insert_text, self)
 end
 
 ---@package
@@ -273,7 +283,7 @@ end
 ---@return { abbr: { text: string, bytes: integer, width: integer, hl_group: string|table }, icon: { text: string, bytes: integer, width: integer, hl_group: string|table }, kind: { text: string, bytes: integer, width: integer, hl_group: string|table }, menu: { text: string, bytes: integer, width: integer, hl_group: string|table } }
 entry.get_view = function(self, suggest_offset, entries_buf)
   local item = self:get_vim_item(suggest_offset)
-  return self.cache:ensure('get_view:' .. tostring(entries_buf), entry._get_view, self, item, entries_buf)
+  return get_cache(self):ensure('get_view:' .. tostring(entries_buf), entry._get_view, self, item, entries_buf)
 end
 
 ---@package
@@ -312,7 +322,7 @@ end
 ---@param suggest_offset integer
 ---@return vim.CompletedItem
 entry.get_vim_item = function(self, suggest_offset)
-  return self.cache:ensure('get_vim_item:' .. tostring(suggest_offset), entry._get_vim_item, self, suggest_offset)
+  return get_cache(self):ensure('get_vim_item:' .. tostring(suggest_offset), entry._get_vim_item, self, suggest_offset)
 end
 
 ---@package
@@ -564,6 +574,7 @@ entry.resolve = function(self, callback)
   if self.resolved_completion_item then
     return callback()
   end
+  self.resolved_callbacks = self.resolved_callbacks or {}
   table.insert(self.resolved_callbacks, callback)
 
   if not self.resolving then
@@ -575,7 +586,7 @@ entry.resolve = function(self, callback)
       end
       self:_set_completion_item(completion_item)
       self.resolved_completion_item = self.completion_item
-      self.cache:clear()
+      self.cache = nil
       for _, c in ipairs(self.resolved_callbacks) do
         c()
       end
