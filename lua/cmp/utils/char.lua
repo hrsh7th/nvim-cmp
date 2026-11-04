@@ -72,19 +72,19 @@ char.is_semantic_index = function(text, index)
     return true
   end
 
-  local prev = string.byte(text, index - 1)
-  local curr = string.byte(text, index)
+  local prev, curr = string.byte(text, index - 1, index)
 
-  if not char.is_upper(prev) and char.is_upper(curr) then
+  if not ALPHA[prev] and ALPHA[curr] then
     return true
   end
-  if char.is_symbol(curr) or char.is_white(curr) then
+  -- symbol or white == not alnum
+  if not (alpha[curr] or ALPHA[curr] or digit[curr]) then
     return true
   end
-  if not char.is_alpha(prev) and char.is_alpha(curr) then
+  if not (alpha[prev] or ALPHA[prev]) and (alpha[curr] or ALPHA[curr]) then
     return true
   end
-  if not char.is_digit(prev) and char.is_digit(curr) then
+  if not digit[prev] and digit[curr] then
     return true
   end
   return false
@@ -102,16 +102,18 @@ char.get_next_semantic_index = function(text, current_index)
   return #text + 1
 end
 
+-- byte -> lowercased byte (identity for non A-Z).
+local LOWER = {}
+for b = 0, 255 do
+  LOWER[b] = ALPHA[b] and (b + 32) or b
+end
+
 ---Ignore case match
 ---@param byte1 integer
 ---@param byte2 integer
 ---@return boolean
 char.match = function(byte1, byte2)
-  if not char.is_alpha(byte1) or not char.is_alpha(byte2) then
-    return byte1 == byte2
-  end
-  local diff = byte1 - byte2
-  return diff == 0 or diff == 32 or diff == -32
+  return LOWER[byte1] == LOWER[byte2]
 end
 
 return char
