@@ -16,8 +16,6 @@ INVALIDS[string.byte('\t')] = true
 INVALIDS[string.byte('\n')] = true
 INVALIDS[string.byte('\r')] = true
 
-local NR_BYTE = string.byte('\n')
-
 local PAIRS = {}
 PAIRS[string.byte('<')] = string.byte('>')
 PAIRS[string.byte('[')] = string.byte(']')
@@ -159,10 +157,9 @@ end
 ---@param text string
 ---@return string
 str.oneline = function(text)
-  for i = 1, #text do
-    if string.byte(text, i) == NR_BYTE then
-      return string.sub(text, 1, i - 1)
-    end
+  local i = string.find(text, '\n', 1, true)
+  if i then
+    return string.sub(text, 1, i - 1)
   end
   return text
 end
