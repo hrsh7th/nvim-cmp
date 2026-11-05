@@ -2,8 +2,10 @@
 ---@field public entries any
 local cache = {}
 
+local mt = { __index = cache }
+
 cache.new = function()
-  local self = setmetatable({}, { __index = cache })
+  local self = setmetatable({}, mt)
   self.entries = {}
   return self
 end
