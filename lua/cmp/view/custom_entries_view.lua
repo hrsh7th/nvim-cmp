@@ -208,7 +208,9 @@ custom_entries_view.open = function(self, offset, entries)
   else
     self.bottom_up = false
   end
-  if math.floor(vim.o.columns * 0.5) <= col + border_offset_col and vim.o.columns - col - border_offset_col <= width then
+  -- Check the fit at the column the menu is opened at, col_offset included.
+  col = col + completion.col_offset
+  if vim.o.columns - col - border_offset_col <= width then
     width = math.min(width, vim.o.columns - 1)
     col = vim.o.columns - width - border_offset_col - 1
     if col < 0 then
@@ -234,7 +236,7 @@ custom_entries_view.open = function(self, offset, entries)
     relative = 'editor',
     style = 'minimal',
     row = math.max(0, row),
-    col = math.max(0, col + completion.col_offset),
+    col = math.max(0, col),
     width = width,
     height = height,
     border = completion.border,
