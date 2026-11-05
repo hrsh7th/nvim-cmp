@@ -123,26 +123,26 @@ end
 ---Replaces all vim.NIL values with nil recursively
 ---@generic T
 ---@param tbl T
+---@param skip_keys? table<any, boolean> Top-level keys to leave untouched.
 ---@return T
-misc.ensure_nil = function(tbl)
-  local is_dict = type(tbl) == 'table' and (not islist(tbl) or vim.tbl_isempty(tbl))
-  if is_dict then
-    local new_tbl = {}
-    for k, v in pairs(tbl) do
-      if v ~= misc.none then
-        new_tbl[k] = misc.ensure_nil(v)
-      else
-        new_tbl[k] = nil
-      end
-    end
-    return new_tbl
-  end
-
+misc.ensure_nil = function(tbl, skip_keys)
   if tbl == misc.none then
     return nil
-  else
+  end
+  -- Lists are left untouched. In-place to avoid deep-copying every completion item.
+  if type(tbl) ~= 'table' or rawget(tbl, 1) ~= nil then
     return tbl
   end
+  for k, v in pairs(tbl) do
+    if not (skip_keys and skip_keys[k]) then
+      if v == misc.none then
+        tbl[k] = nil -- clearing an existing field during traversal is allowed
+      elseif type(v) == 'table' then
+        misc.ensure_nil(v)
+      end
+    end
+  end
+  return tbl
 end
 
 ---Generate id for group name

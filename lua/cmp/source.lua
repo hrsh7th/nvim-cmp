@@ -9,6 +9,9 @@ local async = require('cmp.utils.async')
 local pattern = require('cmp.utils.pattern')
 local char = require('cmp.utils.char')
 
+-- `data` is opaque to cmp and must be sent back to the server unchanged on completionItem/resolve.
+local OPAQUE_ITEM_FIELDS = { data = true }
+
 ---@class cmp.Source
 ---@field public id integer
 ---@field public name string
@@ -360,12 +363,12 @@ source.complete = function(self, ctx, callback)
         local old_offset = self.offset
         local old_entries = self.entries
 
-        response.itemDefaults = misc.ensure_nil(response.itemDefaults)
+        response.itemDefaults = misc.ensure_nil(response.itemDefaults, OPAQUE_ITEM_FIELDS)
 
         self.status = source.SourceStatus.COMPLETED
         self.entries = {}
         for _, item in ipairs(response.items or response) do
-          item = misc.ensure_nil(item)
+          item = misc.ensure_nil(item, OPAQUE_ITEM_FIELDS)
 
           if item.label then
             local e = entry.new(ctx, self, item, response.itemDefaults)
