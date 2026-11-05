@@ -468,11 +468,14 @@ You can use the following options via `cmp.setup { ... }` .
                                                             *cmp-config.enabled*
 enabled~
   `boolean | fun(): boolean`
+  Default: a function returning `true`, except in `prompt` buffers and
+  while a register is being recorded or executed.
   Toggles the plugin on and off.
 
                                                 *cmp-config.performance.debounce*
 performance.debounce~
   `number`
+  Default: `60`
   Sets debounce time
   This is the interval used to group up completions from different sources
   for filtering and displaying.
@@ -480,40 +483,47 @@ performance.debounce~
                                                 *cmp-config.performance.throttle*
 performance.throttle~
   `number`
+  Default: `30`
   Sets throttle time
   This is used to delay filtering and displaying completions.
 
                                         *cmp-config.performance.fetching_timeout*
 performance.fetching_timeout~
     `number`
+  Default: `500`
     Sets the timeout of candidate fetching process.
     The nvim-cmp will wait to display the most prioritized source.
 
                                 *cmp-config.performance.filtering_context_budget*
 performance.filtering_context_budget~
     `number`
+  Default: `3`
     Sets the filtering context budget in ms.
     If filtering takes longer than this, it will be deferred.
 
                                  *cmp-config.performance.confirm_resolve_timeout*
 performance.confirm_resolve_timeout~
     `number`
+  Default: `80`
     Sets the timeout for resolving item before confirmation.
 
                                             *cmp-config.performance.async_budget*
 performance.async_budget~
     `number`
+  Default: `1`
     Maximum time (in ms) an async function is allowed to run during
     one step of the event loop.
 
                                         *cmp-config.performance.max_view_entries*
 performance.max_view_entries~
     `number`
+  Default: `200`
     Maximum number of items to show in the entries list.
 
                                                           *cmp-config.preselect*
 preselect~
   `cmp.PreselectMode`
+  Default: `cmp.PreselectMode.Item`
 
   1. `cmp.PreselectMode.Item`
     nvim-cmp will preselect the item that the source specified.
@@ -523,55 +533,66 @@ preselect~
                                                             *cmp-config.mapping*
 mapping~
   `table<string, fun(fallback: function)`
+  Default: `{}`
   See |cmp-mapping| section.
 
                                                      *cmp-config.snippet.expand*
 snippet.expand~
   `fun(option: cmp.SnippetExpansionParams)`
+  Default: `vim.snippet.expand` on Neovim 0.10+, or a function that
+  raises an error if no snippet engine is configured.
   The snippet expansion function. That's how nvim-cmp interacts with a
   particular snippet engine.
 
                                           *cmp-config.completion.keyword_length*
 completion.keyword_length~
   `number`
+  Default: `1`
   The number of characters needed to trigger auto-completion.
 
                                          *cmp-config.completion.keyword_pattern*
 completion.keyword_pattern~
   `string`
+  Default: [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\w*\%(-\w*\)*\)]]
   The default keyword pattern.
 
                                             *cmp-config.completion.autocomplete*
 completion.autocomplete~
   `cmp.TriggerEvent[] | false`
+  Default: `{ cmp.TriggerEvent.TextChanged }`
   The event to trigger autocompletion. If set to `false`, then completion is
   only invoked manually (e.g. by calling `cmp.complete`).
 
                                              *cmp-config.completion.completeopt*
 completion.completeopt~
   `string`
+  Default: `'menu,menuone,noselect'`
   Like vim's completeopt setting. See 'completeopt'.
   In general, you don't need to change this.
 
                                  *cmp-config.confirmation.get_commit_characters*
 confirmation.get_commit_characters~
   `fun(commit_characters:string[]):string[]`
+  Default: a function that returns the commit characters unchanged.
   You can append or exclude commitCharacters via this configuration option
   function. The commitCharacters are defined by the LSP spec.
 
                                     *cmp-config.formatting.expandable_indicator*
 formatting.expandable_indicator~
   `cmp.expandable_indicator`
+  Default: `true`
   Boolean to show the `~` expandable indicator in cmp's floating window.
 
                                                   *cmp-config.formatting.fields*
 formatting.fields~
   `cmp.ItemField[]`
+  Default: `{ 'abbr', 'icon', 'kind', 'menu' }`
   An array of completion fields to specify their order.
 
                                                   *cmp-config.formatting.format*
 formatting.format~
   `fun(entry: cmp.Entry, vim_item: vim.CompletedItem): vim.CompletedItem`
+  Default: a function that returns the `vim_item` unchanged.
   The function used to customize the appearance of the completion menu. See
   |complete-items|. This value can also be used to modify the `dup` property.
   NOTE: The `vim.CompletedItem` can contain the special properties
@@ -580,35 +601,42 @@ formatting.format~
                                    *cmp-config.matching.disallow_fuzzy_matching*
 matching.disallow_fuzzy_matching~
   `boolean`
+  Default: `false`
   Whether to allow fuzzy matching.
 
                                *cmp-config.matching.disallow_fullfuzzy_matching*
 matching.disallow_fullfuzzy_matching~
   `boolean`
+  Default: `false`
   Whether to allow full-fuzzy matching.
 
                            *cmp-config.matching.disallow_partial_fuzzy_matching*
 matching.disallow_partial_fuzzy_matching~
   `boolean`
+  Default: `true`
   Whether to allow fuzzy matching without prefix matching.
                                  *cmp-config.matching.disallow_partial_matching*
 matching.disallow_partial_matching~
   `boolean`
+  Default: `false`
   Whether to allow partial matching.
 
                                 *cmp-config.matching.disallow_prefix_unmatching*
 matching.disallow_prefix_unmatching~
   `boolean`
+  Default: `false`
   Whether to allow prefix unmatching.
 
                                 cmp-config.matching.disallow_symbol_nonprefix_matching
 matching.disallow_symbol_nonprefix_matching
   `boolean`
+  Default: `true`
   Whether to allow symbols in matches if the match is not a prefix match.
 
                                             *cmp-config.sorting.priority_weight*
 sorting.priority_weight~
   `number`
+  Default: `2`
   Each item's original priority (given by its corresponding source) will be
   increased by `#sources - (source_index - 1)` and multiplied by `priority_weight`.
   That is, the final priority is calculated by the following formula:
@@ -618,12 +646,23 @@ sorting.priority_weight~
                                                 *cmp-config.sorting.comparators*
 sorting.comparators~
   `(fun(entry1: cmp.Entry, entry2: cmp.Entry): boolean | nil)[]`
+  Default:
+  1. `offset`
+  2. `exact`
+  3. `score`
+  4. `recently_used`
+  5. `locality`
+  6. `kind`
+  7. `sort_text`
+  8. `length`
+  9. `order`
   The function to customize the sorting behavior.
   You can use built-in comparators via `cmp.config.compare.*`.
 
                                                             *cmp-config.sources*
 sources~
   `cmp.SourceConfig[]`
+  Default: `{}`
   List of the sources and their configurations to use.
   The order of the sources determines their order in the completion results.
 
@@ -723,74 +762,87 @@ view~
                                                 *cmp-config.view.docs.auto_open*
 view.docs.auto_open~
   `boolean`
+  Default: `true`
 
   Specify whether to show the docs_view when selecting an item.
 
                                                 *cmp-config.view.entries.selection_order*
 view.entries.selection_order~
   `string`
+  Default: `'top_down'`
 
   Specify whether to select the option in the pmenu that is at
   the top (`top_down`) or nearest to the cursor (`near_cursor`).
   Useful if pmenu is above cursor and you want to change default
-  selection direction. Custom view only. `top_down` by default.
+  selection direction. Custom view only.
 
                                                  *cmp-config.view.entries.follow_cursor*
 view.entries.follow_cursor~
   `boolean`
+  Default: `false`
 
   Specify whether the pmenu should follow the current position of the cursor
-  as the user types. Custom view only. `false` by default.
+  as the user types. Custom view only.
 
                            *cmp-config.window.{completion,documentation}.border*
 window.{completion,documentation}.border~
   `string | string[] | nil`
+  Default: `none`. On Neovim 0.11+ this follows `vim.o.winborder`.
   Border characters used for the completion popup menu when |experimental.native_menu| is disabled.
   See |nvim_open_win|.
 
                      *cmp-config.window.{completion,documentation}.winhighlight*
 window.{completion,documentation}.winhighlight~
   `string | cmp.WinhighlightConfig`
+  Default: completion uses `'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None'`
+  and documentation uses `'FloatBorder:NormalFloat'`.
   Specify the window's winhighlight option.
   See |nvim_open_win|.
 
                      *cmp-config.window.{completion,documentation}.winblend*
 window.{completion,documentation}.winblend~
   `string | cmp.WinhighlightConfig`
+  Default: `vim.o.pumblend`
   Specify the window's winblend option.
   See |nvim_open_win|.
 
                            *cmp-config.window.{completion,documentation}.zindex*
 window.{completion,documentation}.zindex~
   `number`
+  Default: `1001` for completion and `50` for documentation.
   The completion window's zindex.
   See |nvim_open_win|.
 
                         *cmp-config.window.{completion,documentation}.scrolloff*
 window.completion.scrolloff~
   `number`
+  Default: `0`
   Specify the window's scrolloff option.
   See |'scrolloff'|.
 
                        *cmp-config.window.{completion,documentation}.col_offset*
 window.completion.col_offset~
   `number`
+  Default: `0`
   Offsets the completion window relative to the cursor.
   Offsets the documentation window relative to the completion window.
 
                                      *cmp-config.window.completion.side_padding*
 window.completion.side_padding~
   `number`
+  Default: `1`
   The amount of padding to add on the completion window's sides
 
                                      *cmp-config.window.completion.scrollbar*
 window.completion.scrollbar~
   `boolean`
+  Default: `true`
   Whether the scrollbar should be enabled if there are more items that fit
 
                                      *cmp-config.window.completion.max_height*
 window.completion.max_height~
   `number | nil`
+  Default: `nil`, which uses `vim.o.pumheight`.
   The completion window's max height, can be set to 0 to use all available
   space. To use `vim.o.pumheight` set this to `nil`.
   See |'pumheight'|.
@@ -798,18 +850,21 @@ window.completion.max_height~
                                      *cmp-config.window.documentation.max_width*
 window.documentation.max_width~
   `number`
+  Default: `floor(80 * ('columns' / (80 * 16 / 9)))`.
   The documentation window's max width, can be set to 0 to use all available
   space.
 
                                     *cmp-config.window.documentation.max_height*
 window.documentation.max_height~
   `number`
+  Default: `floor(40 * (40 / 'lines'))`.
   The documentation window's max height, can be set to 0 to use all available
   space.
 
                                             *cmp-config.experimental.ghost_text*
 experimental.ghost_text~
   `boolean | { hl_group = string }`
+  Default: `false`
   Whether to enable the ghost_text feature.
 
 ==============================================================================
